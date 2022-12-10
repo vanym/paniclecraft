@@ -27,3 +27,10 @@ e61d93a30d2a76ba3b07dc15d4757d1a  Panicle_Craft-v1.0.0.4a.zip
 14cb7ffc8f20ad5524467d7a9ef403e0  Panicle_Craft-v1.0.0.4c.zip
 e042fe277c8558919c9ada3ae48f1905  Panicle_Craft-v1.0.0.4dPre1.zip
 a5cb382c064d98a844ef43770be60323  Panicle_Craft-v1.0.0.4d.zip
+3b769cf4fc00a4a806e95a2fbba47af5  PanicleCraft-1.7.10-1.5.0.0beta0.1.jar
+ad6c29e5ecb83fc27a955f8fdcfdaa9b  PanicleCraft-1.7.10-1.5.0.0beta0.2e.jar
+93da080c3d87c33822a6be3dd49881ec  PanicleCraft-1.7.10-1.5.0.0beta1.5.jar
+d555f0d52d203cbb2d48fb1fbac66478  PanicleCraft-1.7.10-1.5.0.0beta1.6.jar
+bd49ae021200f6276b4e3861ed473328  PanicleCraft-1.7.10-1.5.0.0beta1.7.jar
+ecac8fe486b5eaa6473f3d01f37799ce  PanicleCraft-1.7.10-1.5.0.0beta1.8.jar
+4f2165ee6cfa5892a3f6f8e4888debce  PanicleCraft-1.7.10-1.5.0.0beta1.9.jar
