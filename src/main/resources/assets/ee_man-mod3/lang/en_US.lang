@@ -1,0 +1,29 @@
+item.broom.name=Broom
+
+item.advSign.name=Advanced Sign
+text.pressShiftToSeeText=Press <shift> to see text
+
+item.painting.name=Canvas
+tile.paintingFrame.name=Canvas Frame
+text.paintingHaveSave=Have picture inside
+item.paintBrush0.name=Paint Brush
+item.paintBrush1.name=Small Paint Brush
+item.paintBrush2.name=Paint Filler
+item.palette.name=Palette
+item.palette.inv.name=Palette
+
+item.cannon.name=Cannon
+tile.cannon.inv.name=Cannon
+gui.cannon.direction=Direction:
+gui.cannon.height=Height:
+gui.cannon.strength=Strength:
+
+item.chessDesk.name=Chess board
+gui.chess.newGame=New game
+gui.chess.aboutGame=About game
+gui.chess.whitePlayer=White Player
+gui.chess.blackPlayer=Black Player
+gui.chess.startGame=Start Game
+text.chessGameHaveSave=Have saved game
+
+item.portableWorkbench.name=Portable Workbench
