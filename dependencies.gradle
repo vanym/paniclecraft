@@ -1,5 +1,56 @@
-// Add your dependencies here
+
+task downloadCodeChickenLibJar(type: Download) {
+    src 'https://github.com/Bogdan-G/BiomesOPlenty/raw/5e8c37384846438db0ea60b79b0fa9c4cfc27e0f/libs/CodeChickenLib-1.7.10-1.1.3.140-dev.jar'
+    dest 'libs/CodeChickenLib-1.7.10-1.1.3.140-dev.jar'
+    overwrite false
+}
+task verifyCodeChickenLibJar(type: Verify, dependsOn: downloadCodeChickenLibJar) {
+    src downloadCodeChickenLibJar.dest
+    algorithm 'MD5'
+    checksum '0c7102bb8a04baf62e545fc38a3c1a89'
+}
+
+task downloadCodeChickenCoreJar(type: Download) {
+    src 'https://github.com/Bogdan-G/BiomesOPlenty/raw/1f8f6f3a68df0658d0db3b92f05dc22c4a293a20/libs/CodeChickenCore-1.7.10-1.0.4.29-dev.jar'
+    dest 'libs/CodeChickenCore-1.7.10-1.0.4.29-dev.jar'
+    overwrite false
+}
+task verifyCodeChickenCoreJar(type: Verify, dependsOn: downloadCodeChickenCoreJar) {
+    src downloadCodeChickenCoreJar.dest
+    algorithm 'MD5'
+    checksum 'c98e7c99c7cca902f0ba5926548e20ad'
+}
+
+task downloadNotEnoughItemsJar(type: Download) {
+    src 'https://github.com/SpitefulFox/Avaritia/raw/6f07e4064e81e02e5798c0645e6cc168db2fb6db/lib/NotEnoughItems-1.7.10-1.0.3.74-dev.jar'
+    dest 'libs/NotEnoughItems-1.7.10-1.0.3.74-dev.jar'
+    overwrite false
+}
+task verifyNotEnoughItemsJar(type: Verify, dependsOn: downloadNotEnoughItemsJar) {
+    src downloadNotEnoughItemsJar.dest
+    algorithm 'MD5'
+    checksum 'f5edb45772cf743e833368bf09ee5fb2'
+}
+
+task downloadComputerCraftJar(type: Download) {
+    src 'https://mediafilez.forgecdn.net/files/2269/339/ComputerCraft1.75.jar'
+    dest 'libs/ComputerCraft1.75.jar'
+    overwrite false
+}
+task verifyComputerCraftJar(type: Verify, dependsOn: downloadComputerCraftJar) {
+    src downloadComputerCraftJar.dest
+    algorithm 'MD5'
+    checksum '3d4ab469b955a3def59e260da660927c'
+}
+
+task downloadJarsToLibs {
+	dependsOn(verifyCodeChickenLibJar)
+    dependsOn(verifyCodeChickenCoreJar)
+    dependsOn(verifyNotEnoughItemsJar)
+    dependsOn(verifyComputerCraftJar)
+}
+
+tasks.compileJava.dependsOn downloadJarsToLibs
 
 dependencies {
-
 }
