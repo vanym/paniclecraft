@@ -1,35 +1,35 @@
 
 task downloadCodeChickenLibJar(type: Download) {
-    src 'https://github.com/Bogdan-G/BiomesOPlenty/raw/5e8c37384846438db0ea60b79b0fa9c4cfc27e0f/libs/CodeChickenLib-1.7.10-1.1.3.140-dev.jar'
-    dest 'libs/CodeChickenLib-1.7.10-1.1.3.140-dev.jar'
+    src 'https://chickenbones.net/maven/codechicken/CodeChickenLib/1.7.10-1.1.3.141/CodeChickenLib-1.7.10-1.1.3.141-dev.jar'
+    dest 'libs/CodeChickenLib-1.7.10-1.1.3.141-dev.jar'
     overwrite false
 }
 task verifyCodeChickenLibJar(type: Verify, dependsOn: downloadCodeChickenLibJar) {
     src downloadCodeChickenLibJar.dest
     algorithm 'MD5'
-    checksum '0c7102bb8a04baf62e545fc38a3c1a89'
+    checksum '0217fdc23e8ef7916a4cf88012ad8a68'
 }
 
 task downloadCodeChickenCoreJar(type: Download) {
-    src 'https://github.com/Bogdan-G/BiomesOPlenty/raw/1f8f6f3a68df0658d0db3b92f05dc22c4a293a20/libs/CodeChickenCore-1.7.10-1.0.4.29-dev.jar'
-    dest 'libs/CodeChickenCore-1.7.10-1.0.4.29-dev.jar'
+    src 'https://chickenbones.net/maven/codechicken/CodeChickenCore/1.7.10-1.0.7.48/CodeChickenCore-1.7.10-1.0.7.48-dev.jar'
+    dest 'libs/CodeChickenCore-1.7.10-1.0.7.48-dev.jar'
     overwrite false
 }
 task verifyCodeChickenCoreJar(type: Verify, dependsOn: downloadCodeChickenCoreJar) {
     src downloadCodeChickenCoreJar.dest
     algorithm 'MD5'
-    checksum 'c98e7c99c7cca902f0ba5926548e20ad'
+    checksum '7b130c10f70c79b4bd79d63ece99e6dc'
 }
 
 task downloadNotEnoughItemsJar(type: Download) {
-    src 'https://github.com/SpitefulFox/Avaritia/raw/6f07e4064e81e02e5798c0645e6cc168db2fb6db/lib/NotEnoughItems-1.7.10-1.0.3.74-dev.jar'
-    dest 'libs/NotEnoughItems-1.7.10-1.0.3.74-dev.jar'
+    src 'https://chickenbones.net/maven/codechicken/NotEnoughItems/1.7.10-1.0.5.120/NotEnoughItems-1.7.10-1.0.5.120-dev.jar'
+    dest 'libs/NotEnoughItems-1.7.10-1.0.5.120-dev.jar'
     overwrite false
 }
 task verifyNotEnoughItemsJar(type: Verify, dependsOn: downloadNotEnoughItemsJar) {
     src downloadNotEnoughItemsJar.dest
     algorithm 'MD5'
-    checksum 'f5edb45772cf743e833368bf09ee5fb2'
+    checksum 'df45d2e6357b06abedb68e77e133f07f'
 }
 
 task downloadComputerCraftJar(type: Download) {
