@@ -134,19 +134,19 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer{
 		tessellator.draw();
 		this.bindTexture(Texture);
 		tessellator.startDrawingQuads();
-		// Зад
+		// Р—Р°Рґ
 		tessellator.setNormal(0.0F, 0.0F, 1.0F);
 		tessellator.addVertexWithUV(f4, f6, f3, f12, f14);
 		tessellator.addVertexWithUV(f5, f6, f3, f13, f14);
 		tessellator.addVertexWithUV(f5, f7, f3, f13, f15);
 		tessellator.addVertexWithUV(f4, f7, f3, f12, f15);
-		// Верх
+		// Р’РµСЂС…
 		tessellator.setNormal(0.0F, 1.0F, 0.0F);
 		tessellator.addVertexWithUV(f4, f6, f2, f16, f18);
 		tessellator.addVertexWithUV(f5, f6, f2, f17, f18);
 		tessellator.addVertexWithUV(f5, f6, f3, f17, f19);
 		tessellator.addVertexWithUV(f4, f6, f3, f16, f19);
-		// Низ
+		// РќРёР·
 		tessellator.setNormal(0.0F, -1F, 0.0F);
 		tessellator.addVertexWithUV(f4, f7, f3, f16, f18);
 		tessellator.addVertexWithUV(f5, f7, f3, f17, f18);
