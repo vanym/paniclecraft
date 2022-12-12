@@ -9,7 +9,8 @@ import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import com.vanym.paniclecraft.proxy.ClientProxy;
+
+import com.vanym.paniclecraft.client.ClientProxy;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 @SideOnly(Side.CLIENT)

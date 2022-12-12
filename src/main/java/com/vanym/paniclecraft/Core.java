@@ -13,9 +13,9 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import com.vanym.paniclecraft.core.GuiHandler;
+import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.network.PacketHandler;
-import com.vanym.paniclecraft.proxy.IProxy;
 
 @Mod(modid = DEF.MOD_ID, name = DEF.MOD_NAME, version = DEF.VERSION)
 public class Core{
@@ -23,7 +23,7 @@ public class Core{
 	@Instance(DEF.MOD_ID)
 	public static Core instance;
 	
-	@SidedProxy(clientSide = "com.vanym.paniclecraft.proxy.ClientProxy", serverSide = "com.vanym.paniclecraft.proxy.ServerProxy", modId = DEF.MOD_ID)
+	@SidedProxy(clientSide = "com.vanym.paniclecraft.client.ClientProxy", serverSide = "com.vanym.paniclecraft.server.ServerProxy", modId = DEF.MOD_ID)
 	public static IProxy proxy;
 	
 	@EventHandler

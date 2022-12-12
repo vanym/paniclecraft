@@ -14,9 +14,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
+import com.vanym.paniclecraft.client.ClientProxy;
 import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
-import com.vanym.paniclecraft.proxy.ClientProxy;
 
 public class Painting{
 	

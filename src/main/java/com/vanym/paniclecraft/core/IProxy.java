@@ -1,4 +1,4 @@
-package com.vanym.paniclecraft.proxy;
+package com.vanym.paniclecraft.core;
 
 import net.minecraftforge.common.config.Configuration;
 

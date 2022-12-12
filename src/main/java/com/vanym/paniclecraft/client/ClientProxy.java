@@ -1,4 +1,4 @@
-package com.vanym.paniclecraft.proxy;
+package com.vanym.paniclecraft.client;
 
 import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -8,9 +8,10 @@ import net.minecraftforge.common.config.Configuration;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
-import com.vanym.paniclecraft.client.ClientEventHandler;
+
 import com.vanym.paniclecraft.client.renderer.item.*;
 import com.vanym.paniclecraft.client.renderer.tileentity.*;
+import com.vanym.paniclecraft.core.CommonProxy;
 import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
