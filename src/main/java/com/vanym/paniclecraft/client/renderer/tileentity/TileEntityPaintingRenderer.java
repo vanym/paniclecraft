@@ -4,178 +4,221 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
+import com.vanym.paniclecraft.block.BlockPainting;
+import com.vanym.paniclecraft.client.utils.IconFlippedBugFixed;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.IIcon;
+import net.minecraft.world.World;
 
 @SideOnly(Side.CLIENT)
 public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     
-    private static final ResourceLocation Texture =
-            new ResourceLocation("textures/painting/paintings_kristoffer_zetterstrand.png");
+    protected RenderBlocksWorldless renderBlocksWorldless = new RenderBlocksWorldless();
     
-    // private static int texId = 0;
+    protected RenderBlocks renderBlocks;
     
-    public void renderTileEntityAt(
-            TileEntityPainting par1,
-            double par2,
-            double par4,
-            double par6,
-            float par8) {
-        GL11.glPushMatrix();
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        // GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-        float var10 = 0.6666667F;
-        int md = par1.getBlockMetadata();
-        float var12 = 0.0F;
-        float var13 = 0.0F;
+    @Override
+    public void func_147496_a(World world) {
+        this.renderBlocks = new RenderBlocks(world);
+    }
+    
+    @Override
+    public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
+        this.renderTileEntityAt((TileEntityPainting)tile, x, y, z, f);
+    }
+    
+    public void renderTileEntityAt(TileEntityPainting tile, double x, double y, double z, float f) {
+        this.renderTileEntityAtWorld(tile, x, y, z, f);
+    }
+    
+    public void renderTileEntityAtItem(TileEntityPainting tile) {
+        this.renderTileEntity(tile, 0, 0, 0, 0);
+    }
+    
+    public void renderTileEntityAtWorld(
+            TileEntityPainting tile,
+            double x,
+            double y,
+            double z,
+            float f) {
+        // based on TileEntityRendererPiston
+        RenderHelper.disableStandardItemLighting();
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_CULL_FACE);
         
-        switch (md) {
-            case 0:
-                var13 = -90.0F;
-            break;
-            case 1:
-                var13 = 90.0F;
-            break;
-            case 2:
-                var12 = 0.0F;
-            break;
-            case 3:
-                var12 = 180.0F;
-            break;
-            case 4:
-                var12 = 90.0F;
-            break;
-            case 5:
-                var12 = -90.0F;
-            break;
+        if (Minecraft.isAmbientOcclusionEnabled()) {
+            GL11.glShadeModel(GL11.GL_SMOOTH);
+        } else {
+            GL11.glShadeModel(GL11.GL_FLAT);
         }
-        
-        GL11.glTranslatef((float)par2 + 0.5F, (float)par4 + 0.75F * var10, (float)par6 + 0.5F);
-        GL11.glRotatef(var12, 0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(var13, 1.0F, 0.0F, 0.0F);
-        GL11.glTranslatef(0.0F, 0.0F, 0.46875F);
-        GL11.glPushMatrix();
-        float var11 = 0.0625F;
-        GL11.glScalef(var11, var11, var11);
-        
-        Painting picture = par1.getPainting(md);
+        this.renderTileEntity(tile, x, y, z, f);
+        RenderHelper.enableStandardItemLighting();
+    }
+    
+    protected void renderTileEntity(
+            TileEntityPainting tile,
+            double x,
+            double y,
+            double z,
+            float f) {
+        boolean worldless = (tile.getWorldObj() == null);
+        int meta = tile.getBlockMetadata();
+        RenderBlocks render;
+        if (worldless) {
+            this.renderBlocksWorldless.setMeta(meta);
+            render = this.renderBlocksWorldless;
+        } else {
+            render = this.renderBlocks;
+        }
+        this.bindTexture(TextureMap.locationBlocksTexture);
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+        render.setRenderAllFaces(false);
+        tessellator.setTranslation(x - tile.xCoord, y - tile.yCoord, z - tile.zCoord);
+        tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
+        BlockPainting block = (BlockPainting)tile.getBlockType();
+        block.setRendererPhase(BlockPainting.SpecialRendererPhase.FRAME);
+        block.setBlockBoundsBasedOnState(meta);
+        render.setRenderBoundsFromBlock(block);
+        render.renderStandardBlock(tile.getBlockType(), tile.xCoord, tile.yCoord, tile.zCoord);
+        tessellator.draw();
+        tessellator.startDrawingQuads();
+        {
+            Painting picture = tile.getPainting(meta);
+            IIcon icon = bindTexture(picture, meta);
+            render.setOverrideBlockTexture(icon);
+            block.setRendererPhase(BlockPainting.SpecialRendererPhase.PAINTING);
+            render.renderStandardBlock(tile.getBlockType(), tile.xCoord, tile.yCoord, tile.zCoord);
+            block.setRendererPhase(BlockPainting.SpecialRendererPhase.NONE);
+            render.clearOverrideBlockTexture();
+        }
+        tessellator.draw();
+        tessellator.setTranslation(0, 0, 0);
+    }
+    
+    public static IIcon bindTexture(Painting picture, int side) {
         if (picture.texID <= 0) {
             picture.texID = GL11.glGenTextures();
             picture.getPic();
         }
         if (picture.hasPic()) {
             ByteBuffer textureBuffer =
-                    ByteBuffer.allocateDirect(par1.getPainting(md).getPic().length);
+                    ByteBuffer.allocateDirect(picture.getPic().length);
             textureBuffer.order(ByteOrder.nativeOrder());
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texID);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
+                                 GL11.GL_NEAREST);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
+                                 GL11.GL_NEAREST);
             textureBuffer.clear();
             textureBuffer.put(picture.getPic());
             textureBuffer.flip();
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, par1.getPainting(md).getRow(),
-                              par1.getPainting(md).getRow(), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE,
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB,
+                              picture.getRow(),
+                              picture.getRow(), 0, GL11.GL_RGB,
+                              GL11.GL_UNSIGNED_BYTE,
                               textureBuffer);
             picture.delPic();
         } else {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texID);
         }
-        this.draw();
-        GL11.glPopMatrix();
-        GL11.glPopMatrix();
+        IIcon icon = new FullTextureIcon(1, 1);
+        switch (side) {
+            case 0:
+                icon = new IconFlippedBugFixed(icon, true, false);
+            break;
+            case 1:
+                icon = new IconFlippedBugFixed(icon, true, true);
+            break;
+        }
+        return icon;
     }
     
-    @Override
-    public void renderTileEntityAt(
-            TileEntity par1,
-            double par2,
-            double par4,
-            double par6,
-            float par8) {
-        this.renderTileEntityAt((TileEntityPainting)par1, par2, par4, par6, par8);
+    protected static class FullTextureIcon implements IIcon {
+        // @formatter:off
+        protected int width, height;
+        public FullTextureIcon(int width, int heigh) { this.width = width; this.height = heigh; }
+        public FullTextureIcon() { this(1, 1); }
+        @Override public int getIconWidth() { return this.width; }
+        @Override public int getIconHeight() { return this.height; }
+        @Override public float getMinU() { return 0; }
+        @Override public float getMaxU() { return 1; }
+        @Override public float getInterpolatedU(double u) { return (float)u / 16; }
+        @Override public float getMinV() { return 0; }
+        @Override public float getMaxV() { return 1; }
+        @Override public float getInterpolatedV(double v) { return (float)v / 16; }
+        @Override public String getIconName() { return "fulltextureicon"; }
+        // @formatter:on
     }
     
-    public void draw() {
-        int i = 16;
-        int j = 16;
-        int k = 0;
-        int l = 0;
-        float f = (float)(-i) / 2.0F;
-        float f1 = (float)(-j) / 2.0F;
-        float f2 = -0.5F;
-        float f3 = 0.5F;
-        int i1 = 0;
-        int j1 = 0;
+    protected static class RenderBlocksWorldless extends RenderBlocks {
         
-        float f4 = f + (float)((i1 + 1) * 16);
-        float f5 = f + (float)(i1 * 16);
-        float f6 = f1 + (float)((j1 + 1) * 16);
-        float f7 = f1 + (float)(j1 * 16);
+        protected int meta;
         
-        float f8 = (float)((k + i) - i1 * 16) / 16F;
-        float f9 = (float)((k + i) - (i1 + 1) * 16) / 16F;
-        float f10 = (float)((l + j) - j1 * 16) / 16F;
-        float f11 = (float)((l + j) - (j1 + 1) * 16) / 16F;
+        public RenderBlocksWorldless() {
+            super(null);
+        }
         
-        float f12 = 0.75F;
-        float f13 = 0.8125F;
-        float f14 = 0.0F;
-        float f15 = 0.0625F;
-        float f16 = 0.75F;
-        float f17 = 0.8125F;
-        float f18 = 0.001953125F;
-        float f19 = 0.001953125F;
-        float f20 = 0.7519531F;
-        float f21 = 0.7519531F;
-        float f22 = 0.0F;
-        float f23 = 0.0625F;
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.setNormal(0.0F, 0.0F, -1F);
-        tessellator.addVertexWithUV(f4, f7, f2, f9, f10);
-        tessellator.addVertexWithUV(f5, f7, f2, f8, f10);
-        tessellator.addVertexWithUV(f5, f6, f2, f8, f11);
-        tessellator.addVertexWithUV(f4, f6, f2, f9, f11);
-        tessellator.draw();
-        this.bindTexture(Texture);
-        tessellator.startDrawingQuads();
-        // Зад
-        tessellator.setNormal(0.0F, 0.0F, 1.0F);
-        tessellator.addVertexWithUV(f4, f6, f3, f12, f14);
-        tessellator.addVertexWithUV(f5, f6, f3, f13, f14);
-        tessellator.addVertexWithUV(f5, f7, f3, f13, f15);
-        tessellator.addVertexWithUV(f4, f7, f3, f12, f15);
-        // Верх
-        tessellator.setNormal(0.0F, 1.0F, 0.0F);
-        tessellator.addVertexWithUV(f4, f6, f2, f16, f18);
-        tessellator.addVertexWithUV(f5, f6, f2, f17, f18);
-        tessellator.addVertexWithUV(f5, f6, f3, f17, f19);
-        tessellator.addVertexWithUV(f4, f6, f3, f16, f19);
-        // Низ
-        tessellator.setNormal(0.0F, -1F, 0.0F);
-        tessellator.addVertexWithUV(f4, f7, f3, f16, f18);
-        tessellator.addVertexWithUV(f5, f7, f3, f17, f18);
-        tessellator.addVertexWithUV(f5, f7, f2, f17, f19);
-        tessellator.addVertexWithUV(f4, f7, f2, f16, f19);
-        tessellator.setNormal(-1F, 0.0F, 0.0F);
-        tessellator.addVertexWithUV(f4, f6, f3, f21, f22);
-        tessellator.addVertexWithUV(f4, f7, f3, f21, f23);
-        tessellator.addVertexWithUV(f4, f7, f2, f20, f23);
-        tessellator.addVertexWithUV(f4, f6, f2, f20, f22);
-        tessellator.setNormal(1.0F, 0.0F, 0.0F);
-        tessellator.addVertexWithUV(f5, f6, f2, f21, f22);
-        tessellator.addVertexWithUV(f5, f7, f2, f21, f23);
-        tessellator.addVertexWithUV(f5, f7, f3, f20, f23);
-        tessellator.addVertexWithUV(f5, f6, f3, f20, f22);
-        tessellator.draw();
+        public void setMeta(int meta) {
+            this.meta = meta;
+        }
+        
+        @Override
+        public boolean renderStandardBlock(Block block, int x, int y, int z) {
+            BlockPainting blockPainting = (BlockPainting)block;
+            this.enableAO = false;
+            Tessellator tessellator = Tessellator.instance;
+            int side = 0;
+            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+                tessellator.setNormal(0.0F, -1.0F, 0.0F);
+                this.renderFaceYNeg(block, (double)x, (double)y, (double)z,
+                                    block.getIcon(side, this.meta));
+            }
+            side = 1;
+            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+                tessellator.setNormal(0.0F, 1.0F, 0.0F);
+                this.renderFaceYPos(block, (double)x, (double)y, (double)z,
+                                    block.getIcon(side, this.meta));
+            }
+            side = 2;
+            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+                tessellator.setNormal(0.0F, 0.0F, -1.0F);
+                this.renderFaceZNeg(block, (double)x, (double)y, (double)z,
+                                    block.getIcon(side, this.meta));
+            }
+            side = 3;
+            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+                tessellator.setNormal(0.0F, 0.0F, 1.0F);
+                this.renderFaceZPos(block, (double)x, (double)y, (double)z,
+                                    block.getIcon(side, this.meta));
+            }
+            side = 4;
+            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+                tessellator.setNormal(-1.0F, 0.0F, 0.0F);
+                this.renderFaceXNeg(block, (double)x, (double)y, (double)z,
+                                    block.getIcon(side, this.meta));
+            }
+            side = 5;
+            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+                tessellator.setNormal(1.0F, 0.0F, 0.0F);
+                this.renderFaceXPos(block, (double)x, (double)y, (double)z,
+                                    block.getIcon(side, this.meta));
+            }
+            return true;
+        }
     }
 }

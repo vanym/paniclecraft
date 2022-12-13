@@ -1,7 +1,6 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import com.vanym.paniclecraft.client.ClientProxy;
 import com.vanym.paniclecraft.init.ModItems;
@@ -59,12 +58,11 @@ public class ItemRendererPainting implements IItemRenderer {
         } else if (type.equals(ItemRenderType.FIRST_PERSON_MAP)) {
             
         }
-        ClientProxy.tilePaintingRenderer.renderTileEntityAt(tilePainting, 0, 0, 0, 0);
+        ClientProxy.tilePaintingRenderer.renderTileEntityAtItem(tilePainting);
         if (tilePainting.getPainting(tilePainting.getBlockMetadata()).texID >= 0) {
             ClientProxy.deleteTexture(tilePainting.getPainting(tilePainting.getBlockMetadata()).texID);
             tilePainting.getPainting(tilePainting.getBlockMetadata()).texID = -1;
         }
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
     }
     
 }

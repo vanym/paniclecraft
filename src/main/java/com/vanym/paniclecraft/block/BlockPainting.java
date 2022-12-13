@@ -27,10 +27,27 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 public class BlockPainting extends BlockContainerMod3 {
     
+    @SideOnly(Side.CLIENT)
+    public static enum SpecialRendererPhase {
+        NONE, FRAME, PAINTING;
+        
+        public boolean isNone() {
+            return (this == NONE);
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected SpecialRendererPhase specialRendererPhase = SpecialRendererPhase.NONE;
+    
     public BlockPainting() {
         super(Material.wood);
         this.setBlockName("painting");
         this.setHardness(0.4F);
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public void setRendererPhase(SpecialRendererPhase sRP) {
+        this.specialRendererPhase = sRP;
     }
     
     @Override
@@ -41,6 +58,32 @@ public class BlockPainting extends BlockContainerMod3 {
     @Override
     public int getRenderType() {
         return -1;
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
+        if (!this.specialRendererPhase.isNone()) {
+            ForgeDirection dir = ForgeDirection.getOrientation(side);
+            int meta = world.getBlockMetadata(x - dir.offsetX, y - dir.offsetY, z - dir.offsetZ);
+            boolean flag = this.shouldSideBeRendered(side, meta);
+            if (!flag) {
+                return false;
+            }
+        }
+        return super.shouldSideBeRendered(world, x, y, z, side);
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(int side, int meta) {
+        boolean contains = (side == meta);
+        switch (this.specialRendererPhase) {
+            default:
+            case FRAME:
+                return !contains;
+            case PAINTING:
+                return contains;
+        }
     }
     
     @Override
@@ -138,12 +181,12 @@ public class BlockPainting extends BlockContainerMod3 {
     }
     
     @Override
-    public void setBlockBoundsBasedOnState(
-            IBlockAccess par1IBlockAccess,
-            int par2,
-            int par3,
-            int par4) {
-        int var5 = par1IBlockAccess.getBlockMetadata(par2, par3, par4);
+    public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
+        int meta = world.getBlockMetadata(x, y, z);
+        this.setBlockBoundsBasedOnState(meta);
+    }
+    
+    public void setBlockBoundsBasedOnState(int meta) {
         float var6 = 0.0F;
         float var7 = 1.0F;
         float var8 = 0.0F;
@@ -151,7 +194,7 @@ public class BlockPainting extends BlockContainerMod3 {
         float var10 = 0.0625F;
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
         
-        switch (var5) {
+        switch (meta) {
             case 0:
                 this.setBlockBounds(var8, 1.0F - var10, var6, var9, var7, 1.0F);
                 return;
