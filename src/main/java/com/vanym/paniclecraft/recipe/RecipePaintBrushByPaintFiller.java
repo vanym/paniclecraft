@@ -21,7 +21,7 @@ public class RecipePaintBrushByPaintFiller implements IRecipe {
     public boolean matches(IInventory par1InventoryCrafting, World world) {
         int filler = 0;
         int brush = 0;
-        for(int i = 0; i < par1InventoryCrafting.getSizeInventory(); ++i) {
+        for (int i = 0; i < par1InventoryCrafting.getSizeInventory(); ++i) {
             ItemStack itemstack1 = par1InventoryCrafting.getStackInSlot(i);
             
             if (itemstack1 != null) {
@@ -43,7 +43,7 @@ public class RecipePaintBrushByPaintFiller implements IRecipe {
     public ItemStack getCraftingResult(InventoryCrafting par1InventoryCrafting) {
         ItemStack filler = null;
         ItemStack brush = null;
-        for(int i = 0; i < par1InventoryCrafting.getSizeInventory(); ++i) {
+        for (int i = 0; i < par1InventoryCrafting.getSizeInventory(); ++i) {
             ItemStack itemstack1 = par1InventoryCrafting.getStackInSlot(i);
             
             if (itemstack1 != null) {
@@ -76,7 +76,7 @@ public class RecipePaintBrushByPaintFiller implements IRecipe {
     @SubscribeEvent
     public void itemCraftedEvent(ItemCraftedEvent event) {
         if (this.matches(event.craftMatrix, event.player.worldObj)) {
-            for(int i = 0; i < event.craftMatrix.getSizeInventory(); ++i) {
+            for (int i = 0; i < event.craftMatrix.getSizeInventory(); ++i) {
                 ItemStack itemstack1 = event.craftMatrix.getStackInSlot(i);
                 if (itemstack1 != null) {
                     if (itemstack1.getItem() instanceof ItemPaintBrush) {

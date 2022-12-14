@@ -55,8 +55,8 @@ public class TileEntityChessDeskRenderer extends TileEntitySpecialRenderer {
         this.desk.render(var11);
         GL11.glTranslatef(0.5F - 0.0625F, -0.25F + 0.05F, 0.5F - 0.0625F);
         float var9 = .25F;
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 if (par1.desk.desk[i * 8 + j] < 0) {
                     GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
                 }

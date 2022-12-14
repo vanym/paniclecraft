@@ -134,7 +134,7 @@ public class MainUtils {
             Object from,
             Object to) {
         Field[] fields = objectClass.getDeclaredFields();
-        for(Field f : fields) {
+        for (Field f : fields) {
             int mods = f.getModifiers();
             f.setAccessible(true);
             try {
@@ -161,8 +161,8 @@ public class MainUtils {
         
         byte[] tempByte = new byte[img.getHeight() * img.getWidth() * 3];
         
-        for(int y = 0; y < img.getHeight(); y++) {
-            for(int x = 0; x < img.getWidth(); x++) {
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
                 Object pixelIm = img.getRaster().getDataElements(x, y, null);
                 int i = (y * img.getHeight() + x) * 3;
                 tempByte[i + 0] = (byte)img.getColorModel().getRed(pixelIm);

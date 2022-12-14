@@ -32,7 +32,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void texruteUnload(WorldEvent.Unload event) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            for(Object tileE : event.world.loadedTileEntityList) {
+            for (Object tileE : event.world.loadedTileEntityList) {
                 if (tileE instanceof ISidePaintingProvider) {
                     ((ISidePaintingProvider)tileE).onWorldUnload();
                 }

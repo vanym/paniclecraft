@@ -19,7 +19,7 @@ public class TileEntityPaintingFrame extends TileEntity implements ISidePainting
     @Override
     public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
         super.writeToNBT(par1NBTTagCompound);
-        for(int i = 0; i < this.paintings.length; i++) {
+        for (int i = 0; i < this.paintings.length; i++) {
             if (this.getPainting(i) != null) {
                 NBTTagCompound paintingTag = new NBTTagCompound();
                 this.getPainting(i).writeToNBT(paintingTag);
@@ -31,7 +31,7 @@ public class TileEntityPaintingFrame extends TileEntity implements ISidePainting
     @Override
     public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
         super.readFromNBT(par1NBTTagCompound);
-        for(int i = 0; i < this.paintings.length; i++) {
+        for (int i = 0; i < this.paintings.length; i++) {
             if (par1NBTTagCompound.hasKey("PictureData[" + i + "]")) {
                 if (this.getPainting(i) == null) {
                     this.paintings[i] = new Painting(this);
@@ -118,7 +118,7 @@ public class TileEntityPaintingFrame extends TileEntity implements ISidePainting
     
     @Override
     public int getPictureSide(Painting picture) {
-        for(int i = 0; i < this.paintings.length; i++) {
+        for (int i = 0; i < this.paintings.length; i++) {
             if (picture.equals(this.paintings[i])) {
                 return i;
             }
@@ -150,7 +150,7 @@ public class TileEntityPaintingFrame extends TileEntity implements ISidePainting
     public void invalidate() {
         super.invalidate();
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            for(int i = 0; i < this.paintings.length; i++) {
+            for (int i = 0; i < this.paintings.length; i++) {
                 if (this.paintings[i] != null) {
                     this.paintings[i].deleteTexrure();
                 }
@@ -163,7 +163,7 @@ public class TileEntityPaintingFrame extends TileEntity implements ISidePainting
     public void onChunkUnload() {
         super.onChunkUnload();
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            for(int i = 0; i < this.paintings.length; i++) {
+            for (int i = 0; i < this.paintings.length; i++) {
                 if (this.paintings[i] != null) {
                     this.paintings[i].deleteTexrure();
                 }
@@ -175,7 +175,7 @@ public class TileEntityPaintingFrame extends TileEntity implements ISidePainting
     @SideOnly(Side.CLIENT)
     public void onWorldUnload() {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            for(int i = 0; i < this.paintings.length; i++) {
+            for (int i = 0; i < this.paintings.length; i++) {
                 if (this.paintings[i] != null) {
                     this.paintings[i].deleteTexrure();
                 }

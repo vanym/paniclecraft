@@ -103,7 +103,7 @@ public class ChessDesk {
         bufDesk.make(from, to);
         int king;
         if (this.isWhiteTurn) {
-            for(king = 0; king < bufDesk.desk.length; king++) {
+            for (king = 0; king < bufDesk.desk.length; king++) {
                 if (bufDesk.desk[king] == 6) {
                     break;
                 }
@@ -113,7 +113,7 @@ public class ChessDesk {
                 }
             }
         } else {
-            for(king = 0; king < bufDesk.desk.length; king++) {
+            for (king = 0; king < bufDesk.desk.length; king++) {
                 if (bufDesk.desk[king] == -6) {
                     break;
                 }
@@ -131,7 +131,7 @@ public class ChessDesk {
     }
     
     public boolean canColorGoTo(int to, boolean color) {
-        for(int i = 0; i < this.desk.length; i++) {
+        for (int i = 0; i < this.desk.length; i++) {
             if (this.canGoTo_a(i, to) && this.isColor(i, color)) {
                 return true;
             }
@@ -451,7 +451,7 @@ public class ChessDesk {
     }
     
     public int needChoose() {
-        for(int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) {
             if (this.desk[getFromXY(i, 7)] == 1) {
                 return (i + 1);
             }

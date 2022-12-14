@@ -83,10 +83,10 @@ public class Painting {
     }
     
     public void setPixelsColor(Color color, int x, int y, ArrayList<Painting> updateList) {
-        for(int i = -this.brushRadiusSquare; i <= this.brushRadiusSquare; i++) {
-            for(int j = -this.brushRadiusSquare; j <= this.brushRadiusSquare; j++) {
+        for (int i = -this.brushRadiusSquare; i <= this.brushRadiusSquare; i++) {
+            for (int j = -this.brushRadiusSquare; j <= this.brushRadiusSquare; j++) {
                 boolean var3 = true;
-                for(int k = 0; k < this.noDrawPixels[0].length; k++) {
+                for (int k = 0; k < this.noDrawPixels[0].length; k++) {
                     if (Math.abs(i) == this.noDrawPixels[0][k]
                         && Math.abs(j) == this.noDrawPixels[1][k]) {
                         var3 = false;
@@ -163,7 +163,7 @@ public class Painting {
     public void fillOne(Color color) {
         byte[] col =
                 new byte[]{(byte)color.getRed(), (byte)color.getGreen(), (byte)color.getBlue()};
-        for(int i = 0; i < this.getPic().length; i++) {
+        for (int i = 0; i < this.getPic().length; i++) {
             this.getPic()[i] = col[i % 3];
         }
     }
@@ -193,7 +193,7 @@ public class Painting {
         }
         if (this.pic == null) {
             this.pic = new byte[this.row * this.row * 3];
-            for(int i = 0; i < this.pic.length; i++) {
+            for (int i = 0; i < this.pic.length; i++) {
                 this.pic[i] = (byte)ItemPaintBrush.DEFAULT_COLOR_RGB;
             }
         }
@@ -202,9 +202,9 @@ public class Painting {
     
     public void rotatePicLeft() {
         byte[] newpic = new byte[this.pic.length];
-        for(int x = 0; x < this.row; x++) {
-            for(int y = 0; y < this.row; y++) {
-                for(int i = 0; i < 3; i++) {
+        for (int x = 0; x < this.row; x++) {
+            for (int y = 0; y < this.row; y++) {
+                for (int i = 0; i < 3; i++) {
                     newpic[(((this.row - 1 - y) * this.row + x) * 3) + i] =
                             this.getPic()[((x * this.row + y) * 3) + i];
                 }
@@ -215,9 +215,9 @@ public class Painting {
     
     public void rotatePicRight() {
         byte[] newpic = new byte[this.pic.length];
-        for(int x = 0; x < this.row; x++) {
-            for(int y = 0; y < this.row; y++) {
-                for(int i = 0; i < 3; i++) {
+        for (int x = 0; x < this.row; x++) {
+            for (int y = 0; y < this.row; y++) {
+                for (int i = 0; i < 3; i++) {
                     newpic[((y * this.row + (this.row - 1 - x)) * 3) + i] =
                             this.getPic()[((x * this.row + y) * 3) + i];
                 }
@@ -228,9 +228,9 @@ public class Painting {
     
     public void rotatePic180() {
         byte[] newpic = new byte[this.pic.length];
-        for(int x = 0; x < this.row; x++) {
-            for(int y = 0; y < this.row; y++) {
-                for(int i = 0; i < 3; i++) {
+        for (int x = 0; x < this.row; x++) {
+            for (int y = 0; y < this.row; y++) {
+                for (int i = 0; i < 3; i++) {
                     newpic[(((this.row - 1 - x) * this.row + (this.row - 1 - y)) * 3) + i] =
                             this.getPic()[((x * this.row + y) * 3) + i];
                 }

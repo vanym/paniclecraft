@@ -250,7 +250,7 @@ public class ItemPaintBrush extends ItemMod3 {
         if (!par1.isEmpty()) {
             String[] var1 = par1.split(",");
             int[][] var3 = new int[2][var1.length];
-            for(int i = 0; i < var1.length; i++) {
+            for (int i = 0; i < var1.length; i++) {
                 try {
                     String[] var2 = var1[i].split(";");
                     var3[0][i] = Integer.parseInt(var2[0]);

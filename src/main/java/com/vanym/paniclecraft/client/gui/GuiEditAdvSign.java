@@ -158,10 +158,10 @@ public class GuiEditAdvSign extends GuiScreen {
                     if (this.editLine > this.entitySign.getLines() - 2) {
                         this.editLine = this.entitySign.getLines() - 2;
                     }
-                    for(int var3 = 0; var3 < this.entitySign.getLines() - 1; ++var3) {
+                    for (int var3 = 0; var3 < this.entitySign.getLines() - 1; ++var3) {
                         char[] var4 = var1[var3].toCharArray();
                         String var5 = "";
-                        for(int var6 = 0; var6 < var4.length; var6++) {
+                        for (int var6 = 0; var6 < var4.length; var6++) {
                             if (this.canAddChar(var5, this.entitySign.getLines() - 1, var4[var6])) {
                                 var5 = var5 + var4[var6];
                             }
@@ -411,7 +411,7 @@ public class GuiEditAdvSign extends GuiScreen {
     private void addText(String par1) {
         String var1 = this.entitySign.getLine(this.editLine);
         char[] var2 = par1.toCharArray();
-        for(int var3 = 0; var3 < var2.length; var3++) {
+        for (int var3 = 0; var3 < var2.length; var3++) {
             if ((this.canAddChar(var1, this.entitySign.getLines(), var2[var3]))
                 && ((ChatAllowedCharacters.isAllowedCharacter(var2[var3])
                     && var2[var3] != TileEntityAdvSign.separatorChar) || (var2[var3] == 167))) {
@@ -428,7 +428,7 @@ public class GuiEditAdvSign extends GuiScreen {
     private void addText(String par1, int par2) {
         String var1 = this.entitySign.getLine(par2);
         char[] var2 = par1.toCharArray();
-        for(int var3 = 0; var3 < var2.length; var3++) {
+        for (int var3 = 0; var3 < var2.length; var3++) {
             if ((this.canAddChar(var1, this.entitySign.getLines(), var2[var3]))
                 && ((ChatAllowedCharacters.isAllowedCharacter(var2[var3])
                     && var2[var3] != TileEntityAdvSign.separatorChar) || (var2[var3] == 167))) {
@@ -465,12 +465,12 @@ public class GuiEditAdvSign extends GuiScreen {
         String[] var1 = par1.split(TileEntityAdvSign.separator,
                                    (par1 + '\u0000').split(TileEntityAdvSign.separator).length);
         String var2 = "";
-        for(int var3 = 1; var3 < var1.length && var3 < 32; var3++) {
+        for (int var3 = 1; var3 < var1.length && var3 < 32; var3++) {
             var2 = var2 + TileEntityAdvSign.separator;
         }
         this.entitySign.signText = var2;
         int var5 = this.entitySign.getLines();
-        for(int var4 = 0; var4 < var5; var4++) {
+        for (int var4 = 0; var4 < var5; var4++) {
             this.addText(var1[var4], var4);
         }
         if (var5 == 1) {

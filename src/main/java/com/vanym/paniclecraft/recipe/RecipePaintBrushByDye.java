@@ -17,7 +17,7 @@ public class RecipePaintBrushByDye implements IRecipe {
         int var3 = 0;
         boolean var4 = false;
         
-        for(int i = 0; i < par1InventoryCrafting.getSizeInventory(); ++i) {
+        for (int i = 0; i < par1InventoryCrafting.getSizeInventory(); ++i) {
             ItemStack itemstack1 = par1InventoryCrafting.getStackInSlot(i);
             
             if (itemstack1 != null) {
@@ -49,7 +49,7 @@ public class RecipePaintBrushByDye implements IRecipe {
         float f1;
         int l1;
         
-        for(k = 0; k < par1InventoryCrafting.getSizeInventory(); ++k) {
+        for (k = 0; k < par1InventoryCrafting.getSizeInventory(); ++k) {
             ItemStack itemstack1 = par1InventoryCrafting.getStackInSlot(k);
             
             if (itemstack1 != null) {

@@ -49,7 +49,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAME);
         block.setRendererSide(-1);
         List<AxisAlignedBB> frameBoxes = block.getFrameBoxes();
-        for(AxisAlignedBB box : frameBoxes) {
+        for (AxisAlignedBB box : frameBoxes) {
             render.overrideBlockBounds(box.minX, box.minY, box.minZ,
                                        box.maxX, box.maxY, box.maxZ);
             block.setRendererBox(box);
@@ -57,7 +57,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         }
         block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAMEINSIDE);
         final double paintingWidth = block.getPaintingWidth();
-        for(int side = 0; side < 6; ++side) {
+        for (int side = 0; side < 6; ++side) {
             Painting picture = tile.getPainting(side);
             if (picture == null) {
                 continue;
@@ -71,7 +71,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         }
         tessellator.draw();
         block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
-        for(int side = 0; side < 6; ++side) {
+        for (int side = 0; side < 6; ++side) {
             Painting picture = tile.getPainting(side);
             if (picture == null) {
                 continue;

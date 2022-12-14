@@ -79,7 +79,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
             String[] var20 = par1TileEntitySign.signText.split(TileEntityAdvSign.separator,
                                                                par1TileEntitySign.getLines());
             
-            for(int var14 = 0; var14 < par1TileEntitySign.getLines(); ++var14) {
+            for (int var14 = 0; var14 < par1TileEntitySign.getLines(); ++var14) {
                 String var15 = var20[var14];
                 
                 if (var14 == par1TileEntitySign.lineBeingEdited) {

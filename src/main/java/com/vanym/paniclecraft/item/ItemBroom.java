@@ -52,7 +52,7 @@ public class ItemBroom extends ItemMod3 {
                                                                              par3.posY + (dis + 2),
                                                                              par3.posZ + (dis +
                                                                                           2)));
-        for(int g = 0; g < list.size(); g++) {
+        for (int g = 0; g < list.size(); g++) {
             EntityItem itemEntity = (EntityItem)list.get(g);
             if (par3.getDistance(itemEntity.posX, itemEntity.posY, itemEntity.posZ) <= dis
                 && par3.canEntityBeSeen(itemEntity)) {

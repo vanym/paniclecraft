@@ -199,7 +199,7 @@ public class PeripheralPaintBrush implements IPeripheral {
             }
             case 7: {
                 IInventory ti = this.turtle.getInventory();
-                for(int i = 0; i < ti.getSizeInventory(); i++) {
+                for (int i = 0; i < ti.getSizeInventory(); i++) {
                     ItemStack ps = ti.getStackInSlot(i);
                     if (ps != null && ps.getItem() instanceof ItemPalette) {
                         ItemStack is = ti.getStackInSlot(this.turtle.getSelectedSlot());

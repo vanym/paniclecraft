@@ -294,7 +294,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             Entity entity) {
         TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
         Builder<AxisAlignedBB> facades = Stream.builder();
-        for(int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 6; ++i) {
             if (tile.getPainting(i) != null) {
                 AxisAlignedBB box = MainUtils.getBoundsBySide(i, this.getPaintingWidth());
                 facades.add(box);
@@ -313,7 +313,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     public void breakBlock(World world, int x, int y, int z, Block p_149749_5_, int p_149749_6_) {
         TileEntityPaintingFrame trpf = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
         Painting[] pics = trpf.getPaintings();
-        for(int i = 0; i < pics.length; i++) {
+        for (int i = 0; i < pics.length; i++) {
             if (pics[i] != null) {
                 this.dropBlockAsItem(world, x, y, z, new ItemStack(ModItems.itemPainting));
             }
@@ -334,7 +334,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     public static List<AxisAlignedBB> getFrameBoxes(final double frameWidth) {
         List<AxisAlignedBB> list = new ArrayList<>();
-        for(int i = 0; i < 12; ++i) {
+        for (int i = 0; i < 12; ++i) {
             int stage = i / 4;
             int i2d = i % 4;
             int i2dx = i2d / 2;

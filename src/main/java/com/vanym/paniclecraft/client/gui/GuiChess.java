@@ -56,8 +56,8 @@ public class GuiChess extends GuiScreen {
         this.whitePlayer = null;
         this.blackPlayer = null;
         Keyboard.enableRepeatEvents(false);
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 this.Buttons[i * 8 + j] = new GuiButtonForChess1(
                         i * 8 + j,
                         var3 + 20 * j,
@@ -138,7 +138,7 @@ public class GuiChess extends GuiScreen {
         int var2 = this.height / 2;
         int var3 = var1 - 130 + par1 * 20;
         int var4 = var2 - 100;
-        for(int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             this.buttonList.add(new GuiButtonForChess2(100 + i, var3 + 20 * i, var4));
         }
     }
@@ -149,7 +149,7 @@ public class GuiChess extends GuiScreen {
         int var2 = this.height / 2;
         int var3 = var1 - 130 + par1 * 20;
         int var4 = var2 + 80;
-        for(int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             this.buttonList.add(new GuiButtonForChess2(-(100 + i), var3 + 20 * i, var4));
         }
     }
@@ -280,7 +280,7 @@ public class GuiChess extends GuiScreen {
     }
     
     public void reDraw() {
-        for(int i = 0; i < 64; i++) {
+        for (int i = 0; i < 64; i++) {
             this.reDrawButton(i);
         }
     }

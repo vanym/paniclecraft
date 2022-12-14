@@ -106,11 +106,11 @@ public class ItemPainting extends ItemMod3 {
         int sy = y;
         int sz = z;
         int i = 0;
-        for(i = 0;
-            (i < paintingPlaceStack) && par3World.getBlock(x, y, z) == ModItems.blockPainting
-                && par3World.getBlockMetadata(x, y, z) == side
-                && !par2EntityPlayer.isSneaking();
-            i++) {
+        for (i = 0;
+             (i < paintingPlaceStack) && par3World.getBlock(x, y, z) == ModItems.blockPainting
+                 && par3World.getBlockMetadata(x, y, z) == side
+                 && !par2EntityPlayer.isSneaking();
+             i++) {
             switch (side) {
                 case 0: {
                     float rotF = par2EntityPlayer.rotationYaw + 45.0F;

@@ -101,7 +101,7 @@ public class TileEntityAdvSign extends TileEntity {
         String[] var1 = this.signText.split(separator, this.getLines());
         var1[par1] = par2;
         String var3 = "";
-        for(int var2 = 0; var2 < this.getLines(); ++var2) {
+        for (int var2 = 0; var2 < this.getLines(); ++var2) {
             var3 = var3 + var1[var2];
             if (var2 != this.getLines() - 1) {
                 var3 = var3 + separator;

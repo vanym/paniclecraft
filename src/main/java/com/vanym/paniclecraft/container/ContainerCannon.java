@@ -19,8 +19,8 @@ public class ContainerCannon extends Container {
         int j;
         int k;
         this.addSlotToContainer(new Slot(par2TileEntityCannon, 0, 8, 18));
-        for(j = 0; j < 3; ++j) {
-            for(k = 0; k < 9; ++k) {
+        for (j = 0; j < 3; ++j) {
+            for (k = 0; k < 9; ++k) {
                 this.addSlotToContainer(new Slot(
                         par1IInventory,
                         k + j * 9 + 9,
@@ -29,7 +29,7 @@ public class ContainerCannon extends Container {
             }
         }
         
-        for(j = 0; j < 9; ++j) {
+        for (j = 0; j < 9; ++j) {
             this.addSlotToContainer(new Slot(par1IInventory, j, 8 + j * 18, 161 + i));
         }
     }
