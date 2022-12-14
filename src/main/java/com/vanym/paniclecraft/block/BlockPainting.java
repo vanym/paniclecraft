@@ -175,7 +175,7 @@ public class BlockPainting extends BlockPaintingContainer {
     
     public AxisAlignedBB getBlockBoundsBasedOnState(int meta) {
         int side = ForgeDirection.getOrientation(meta).getOpposite().ordinal();
-        return MainUtils.getBoundsBySize(side, this.getPaintingWidth());
+        return MainUtils.getBoundsBySide(side, this.getPaintingWidth());
     }
     
     public static ItemStack getSavedPic(Painting pic) {

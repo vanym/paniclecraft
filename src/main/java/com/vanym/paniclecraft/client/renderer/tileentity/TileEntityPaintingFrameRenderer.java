@@ -62,7 +62,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
             if (picture == null) {
                 continue;
             }
-            AxisAlignedBB box = MainUtils.getBoundsBySize(side, paintingWidth);
+            AxisAlignedBB box = MainUtils.getBoundsBySide(side, paintingWidth);
             render.overrideBlockBounds(box.minX, box.minY, box.minZ,
                                        box.maxX, box.maxY, box.maxZ);
             block.setRendererBox(box);
@@ -76,7 +76,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
             if (picture == null) {
                 continue;
             }
-            AxisAlignedBB box = MainUtils.getBoundsBySize(side, paintingWidth);
+            AxisAlignedBB box = MainUtils.getBoundsBySide(side, paintingWidth);
             render.overrideBlockBounds(box.minX, box.minY, box.minZ,
                                        box.maxX, box.maxY, box.maxZ);
             block.setRendererBox(box);

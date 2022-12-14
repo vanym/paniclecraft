@@ -16,7 +16,7 @@ import net.minecraft.util.AxisAlignedBB;
 
 public class MainUtils {
     
-    public static AxisAlignedBB getBoundsBySize(int side, double width) {
+    public static AxisAlignedBB getBoundsBySide(int side, double width) {
         double minX = 0.0D, maxX = 1.0D, minY = 0.0D, maxY = 1.0D, minZ = 0.0D, maxZ = 1.0D;
         switch (side) {
             case 0:
