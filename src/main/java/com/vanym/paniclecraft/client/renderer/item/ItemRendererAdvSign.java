@@ -2,8 +2,7 @@ package com.vanym.paniclecraft.client.renderer.item;
 
 import org.lwjgl.opengl.GL11;
 
-import com.vanym.paniclecraft.client.ClientProxy;
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.relauncher.Side;
@@ -32,7 +31,7 @@ public class ItemRendererAdvSign implements IItemRenderer {
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         TileEntityAdvSign tileAdvSign = new TileEntityAdvSign();
-        tileAdvSign.blockType = ModItems.blockAdvSignPost;
+        tileAdvSign.blockType = Core.instance.advSign.blockAdvSignPost;
         tileAdvSign.blockMetadata = 12;
         tileAdvSign.signText = null;
         if (item.hasTagCompound()) {
@@ -66,7 +65,7 @@ public class ItemRendererAdvSign implements IItemRenderer {
         } else if (type.equals(ItemRenderType.FIRST_PERSON_MAP)) {
             
         }
-        ClientProxy.tileAdvSignRenderer.renderTileEntityAt(tileAdvSign, 0, 0, 0, 0);
+        Core.instance.advSign.tileAdvSignRenderer.renderTileEntityAt(tileAdvSign, 0, 0, 0, 0);
     }
     
 }

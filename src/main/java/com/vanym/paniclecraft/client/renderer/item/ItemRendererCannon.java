@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.client.renderer.item;
 
 import org.lwjgl.opengl.GL11;
 
-import com.vanym.paniclecraft.client.ClientProxy;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import cpw.mods.fml.relauncher.Side;
@@ -57,7 +57,7 @@ public class ItemRendererCannon implements IItemRenderer {
         } else if (type.equals(ItemRenderType.FIRST_PERSON_MAP)) {
             
         }
-        ClientProxy.tileCannonRenderer.renderTileEntityAt(tileCannon, 0, 0, 0, 0);
+        Core.instance.cannon.tileCannonRenderer.renderTileEntityAt(tileCannon, 0, 0, 0, 0);
     }
     
 }

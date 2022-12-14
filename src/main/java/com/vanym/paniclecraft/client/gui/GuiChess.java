@@ -2,8 +2,8 @@ package com.vanym.paniclecraft.client.gui;
 
 import org.lwjgl.input.Keyboard;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.network.PacketHandler;
 import com.vanym.paniclecraft.network.message.MessageChessChoose;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
 import com.vanym.paniclecraft.network.message.MessageChessNewGame;
@@ -169,7 +169,7 @@ public class GuiChess extends GuiScreen {
                 this.tileChess.desk.make((byte)this.select, (byte)var1.id);
                 int var2 = this.select;
                 this.select = -1;
-                PacketHandler.INSTANCE.sendToServer(new MessageChessMove(
+                Core.instance.network.sendToServer(new MessageChessMove(
                         this.tileChess.xCoord,
                         (short)this.tileChess.yCoord,
                         this.tileChess.zCoord,
@@ -187,7 +187,7 @@ public class GuiChess extends GuiScreen {
             int var1 = this.tileChess.desk.needChoose();
             this.tileChess.desk.desk[ChessDesk.getFromXY(Math.abs(var1) - 1, (var1 > 0 ? 7 : 0))] =
                     (byte)(var1 > 0 ? (Math.abs(par1.id) - 98) : -(Math.abs(par1.id) - 98));
-            PacketHandler.INSTANCE.sendToServer(new MessageChessChoose(
+            Core.instance.network.sendToServer(new MessageChessChoose(
                     this.tileChess.xCoord,
                     (short)this.tileChess.yCoord,
                     this.tileChess.zCoord,
@@ -207,7 +207,7 @@ public class GuiChess extends GuiScreen {
                 this.tileChess.desk = new ChessDesk();
                 this.tileChess.whitePlayer = this.whitePlayer.getText();
                 this.tileChess.blackPlayer = this.blackPlayer.getText();
-                PacketHandler.INSTANCE.sendToServer(new MessageChessNewGame(
+                Core.instance.network.sendToServer(new MessageChessNewGame(
                         this.tileChess.xCoord,
                         (short)this.tileChess.yCoord,
                         this.tileChess.zCoord,

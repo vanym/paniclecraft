@@ -2,8 +2,8 @@ package com.vanym.paniclecraft.inventory;
 
 import java.awt.Color;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.container.ContainerPalette;
-import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -108,7 +108,7 @@ public class InventoryPalette implements IInventory {
     
     public int getRGB() {
         return this.item == null ? 0
-                                 : ((ItemPaintBrush)ModItems.itemPaintBrush).getColor(this.item);
+                                 : ((ItemPaintBrush)Core.instance.painting.itemPaintBrush).getColor(this.item);
     }
     
     public void setRed(byte red) {
@@ -128,7 +128,9 @@ public class InventoryPalette implements IInventory {
     
     public void setColor(int red, int green, int blue) {
         if (this.item != null) {
-            ModItems.itemPaintBrush.setColor(this.item, MainUtils.getIntFromRGB(red, green, blue));
+            Core.instance.painting.itemPaintBrush.setColor(this.item,
+                                                           MainUtils.getIntFromRGB(red, green,
+                                                                                   blue));
         }
     }
 }

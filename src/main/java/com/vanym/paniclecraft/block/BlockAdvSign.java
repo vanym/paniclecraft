@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.block;
 
 import java.util.Random;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.relauncher.Side;
@@ -24,20 +24,20 @@ public class BlockAdvSign extends BlockSign {
     
     @Override
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return ModItems.itemAdvSign;
+        return Core.instance.advSign.itemAdvSign;
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_) {
-        return ModItems.itemAdvSign;
+        return Core.instance.advSign.itemAdvSign;
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         TileEntityAdvSign tile = (TileEntityAdvSign)world.getTileEntity(x, y, z);
-        ItemStack itemS = new ItemStack(ModItems.itemAdvSign);
+        ItemStack itemS = new ItemStack(Core.instance.advSign.itemAdvSign);
         if (tile == null) {
             return itemS;
         }

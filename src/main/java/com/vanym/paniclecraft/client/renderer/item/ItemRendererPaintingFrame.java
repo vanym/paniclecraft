@@ -3,8 +3,7 @@ package com.vanym.paniclecraft.client.renderer.item;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import com.vanym.paniclecraft.client.ClientProxy;
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import cpw.mods.fml.relauncher.Side;
@@ -31,7 +30,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         TileEntityPaintingFrame tile = new TileEntityPaintingFrame();
-        tile.blockType = ModItems.blockPaintingFrame;
+        tile.blockType = Core.instance.painting.blockPaintingFrame;
         switch (type) {
             case ENTITY:
                 GL11.glTranslatef(-0.5F, -0.2F, -0.5F);
@@ -48,7 +47,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             default:
             break;
         }
-        ClientProxy.tilePaintingFrameRenderer.renderTileEntityAtItem(tile);
+        Core.instance.painting.tilePaintingFrameRenderer.renderTileEntityAtItem(tile);
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
     }
     

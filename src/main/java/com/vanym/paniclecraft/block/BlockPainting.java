@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.block;
 
 import java.util.Random;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -99,7 +99,7 @@ public class BlockPainting extends BlockPaintingContainer {
     
     @Override
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return ModItems.itemPainting;
+        return Core.instance.painting.itemPainting;
     }
     
     @Override
@@ -179,7 +179,7 @@ public class BlockPainting extends BlockPaintingContainer {
     }
     
     public static ItemStack getSavedPic(Painting pic) {
-        ItemStack itemS = new ItemStack(ModItems.itemPainting);
+        ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
         if (pic == null) {
             return itemS;
         }

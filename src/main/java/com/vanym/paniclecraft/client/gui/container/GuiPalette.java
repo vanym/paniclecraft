@@ -4,9 +4,9 @@ import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.container.ContainerPalette;
-import com.vanym.paniclecraft.network.PacketHandler;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -73,7 +73,7 @@ public class GuiPalette extends GuiContainer {
             } else if (GuiScreen.isShiftKeyDown()) {
                 bt += 6;
             }
-            PacketHandler.INSTANCE.sendToServer(new MessagePaletteChange(bt));
+            Core.instance.network.sendToServer(new MessagePaletteChange(bt));
         }
     }
     

@@ -10,8 +10,8 @@ import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.ClientProxy;
-import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 
 import cpw.mods.fml.relauncher.Side;
@@ -47,7 +47,7 @@ public class Painting {
         if (par1ItemStack == null || !(par1ItemStack.getItem() instanceof ItemPaintBrush)) {
             return;
         }
-        int var3 = ModItems.itemPaintBrush.getColorFromItemStack(par1ItemStack, 0);
+        int var3 = Core.instance.painting.itemPaintBrush.getColorFromItemStack(par1ItemStack, 0);
         Color color = MainUtils.getColorFromInt(var3);
         this.usePaintBrush(par1ItemStack.getItemDamage(), color, x, y, updateNow);
     }

@@ -2,8 +2,8 @@ package com.vanym.paniclecraft.client.renderer.item;
 
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.ClientProxy;
-import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
 import cpw.mods.fml.relauncher.Side;
@@ -31,7 +31,7 @@ public class ItemRendererPainting implements IItemRenderer {
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         TileEntityPainting tilePainting = new TileEntityPainting();
-        tilePainting.blockType = ModItems.blockPainting;
+        tilePainting.blockType = Core.instance.painting.blockPainting;
         tilePainting.blockMetadata = 3;
         tilePainting.getPainting(3).setRow(1);
         if (item.hasTagCompound()) {
@@ -58,7 +58,7 @@ public class ItemRendererPainting implements IItemRenderer {
         } else if (type.equals(ItemRenderType.FIRST_PERSON_MAP)) {
             
         }
-        ClientProxy.tilePaintingRenderer.renderTileEntityAtItem(tilePainting);
+        Core.instance.painting.tilePaintingRenderer.renderTileEntityAtItem(tilePainting);
         if (tilePainting.getPainting(tilePainting.getBlockMetadata()).texID >= 0) {
             ClientProxy.deleteTexture(tilePainting.getPainting(tilePainting.getBlockMetadata()).texID);
             tilePainting.getPainting(tilePainting.getBlockMetadata()).texID = -1;

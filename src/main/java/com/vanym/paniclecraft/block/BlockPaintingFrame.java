@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -315,7 +315,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         Painting[] pics = trpf.getPaintings();
         for (int i = 0; i < pics.length; i++) {
             if (pics[i] != null) {
-                this.dropBlockAsItem(world, x, y, z, new ItemStack(ModItems.itemPainting));
+                this.dropBlockAsItem(world, x, y, z,
+                                     new ItemStack(Core.instance.painting.itemPainting));
             }
         }
         super.breakBlock(world, x, y, z, p_149749_5_, p_149749_6_);
@@ -329,7 +330,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int par1, int md) {
-        return ModItems.blockPainting.getIcon(par1, md);
+        return Core.instance.painting.blockPainting.getIcon(par1, md);
     }
     
     public static List<AxisAlignedBB> getFrameBoxes(final double frameWidth) {

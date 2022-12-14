@@ -2,9 +2,9 @@ package com.vanym.paniclecraft.client.gui.container;
 
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.container.ContainerCannon;
-import com.vanym.paniclecraft.network.PacketHandler;
 import com.vanym.paniclecraft.network.message.MessageCannonChange;
 import com.vanym.paniclecraft.network.message.MessageCannonSet;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
@@ -81,7 +81,7 @@ public class GuiCannon extends GuiContainer {
             } else if (GuiScreen.isShiftKeyDown()) {
                 bt += 6;
             }
-            PacketHandler.INSTANCE.sendToServer(new MessageCannonChange(bt));
+            Core.instance.network.sendToServer(new MessageCannonChange(bt));
             // this.checkHeight();
         }
     }
@@ -176,7 +176,7 @@ public class GuiCannon extends GuiContainer {
                     amount = Double.parseDouble(text);
                 } catch (NumberFormatException e) {
                 } finally {
-                    PacketHandler.INSTANCE.sendToServer(new MessageCannonSet(bt, amount));
+                    Core.instance.network.sendToServer(new MessageCannonSet(bt, amount));
                 }
             }
         }

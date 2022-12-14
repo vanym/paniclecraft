@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
-import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import cpw.mods.fml.relauncher.Side;
@@ -46,7 +45,7 @@ public class BlockCannon extends BlockContainerMod3 {
     
     @Override
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return ModItems.itemCannon;
+        return Core.instance.cannon.itemCannon;
     }
     
     @Override

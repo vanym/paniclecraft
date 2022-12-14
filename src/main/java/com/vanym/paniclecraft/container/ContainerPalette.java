@@ -1,8 +1,8 @@
 package com.vanym.paniclecraft.container;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.container.slot.SlotCanBeSelected;
 import com.vanym.paniclecraft.container.slot.SlotWithValidCheck;
-import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.inventory.InventoryPalette;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 
@@ -92,6 +92,7 @@ public class ContainerPalette extends Container {
     }
     
     public static boolean canBePalette(ItemStack par1) {
-        return par1 == null ? false : par1.getItem() == ModItems.itemPalette && par1.stackSize > 0;
+        return par1 == null ? false : par1.getItem() == Core.instance.painting.itemPalette
+            && par1.stackSize > 0;
     }
 }

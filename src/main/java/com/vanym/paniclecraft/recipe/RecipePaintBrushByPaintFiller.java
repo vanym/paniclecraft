@@ -1,6 +1,6 @@
 package com.vanym.paniclecraft.recipe;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -57,7 +57,8 @@ public class RecipePaintBrushByPaintFiller implements IRecipe {
             }
         }
         if (filler != null && brush != null) {
-            ModItems.itemPaintBrush.setColor(brush, ModItems.itemPaintBrush.getColor(filler));
+            Core.instance.painting.itemPaintBrush.setColor(brush,
+                                                           Core.instance.painting.itemPaintBrush.getColor(filler));
             return brush;
         }
         return null;

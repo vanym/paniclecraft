@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.plugins.computercraft.t.p;
 
 import java.awt.Color;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.utils.ISidePaintingProvider;
@@ -194,7 +194,8 @@ public class PeripheralPaintBrush implements IPeripheral {
                 if (is == null || !(is.getItem() instanceof ItemPaintBrush)) {
                     throw new LuaException("cat\'t find brush");
                 }
-                Color colors = MainUtils.getColorFromInt(ModItems.itemPaintBrush.getColor(is));
+                Color colors =
+                        MainUtils.getColorFromInt(Core.instance.painting.itemPaintBrush.getColor(is));
                 return new Object[]{colors.getRed(), colors.getGreen(), colors.getBlue()};
             }
             case 7: {
@@ -225,8 +226,10 @@ public class PeripheralPaintBrush implements IPeripheral {
                         if (blue < 0 || blue >= 256) {
                             throw new LuaException("number must be from 0 to 255");
                         }
-                        ModItems.itemPaintBrush.setColor(is,
-                                                         MainUtils.getIntFromRGB(red, green, blue));
+                        Core.instance.painting.itemPaintBrush.setColor(is,
+                                                                       MainUtils.getIntFromRGB(red,
+                                                                                               green,
+                                                                                               blue));
                         return new Object[]{true};
                     }
                 }

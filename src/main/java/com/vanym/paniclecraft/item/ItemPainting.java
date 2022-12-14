@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.item;
 
 import java.util.List;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.Painting;
@@ -107,7 +107,8 @@ public class ItemPainting extends ItemMod3 {
         int sz = z;
         int i = 0;
         for (i = 0;
-             (i < paintingPlaceStack) && par3World.getBlock(x, y, z) == ModItems.blockPainting
+             (i < paintingPlaceStack)
+                 && par3World.getBlock(x, y, z) == Core.instance.painting.blockPainting
                  && par3World.getBlockMetadata(x, y, z) == side
                  && !par2EntityPlayer.isSneaking();
              i++) {
@@ -282,10 +283,10 @@ public class ItemPainting extends ItemMod3 {
             }
         }
         if (!par2EntityPlayer.canPlayerEdit(x, y, z, side, par1ItemStack)
-            || !ModItems.blockPainting.canPlaceBlockAt(par3World, x, y, z)) {
+            || !Core.instance.painting.blockPainting.canPlaceBlockAt(par3World, x, y, z)) {
             return false;
         } else {
-            par3World.setBlock(x, y, z, ModItems.blockPainting, side, 3);
+            par3World.setBlock(x, y, z, Core.instance.painting.blockPainting, side, 3);
             if (par1ItemStack.hasTagCompound()) {
                 NBTTagCompound tag = par1ItemStack.getTagCompound();
                 if (tag.hasKey("PaintingData")) {

@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.client.renderer.item;
 
 import org.lwjgl.opengl.GL11;
 
-import com.vanym.paniclecraft.client.ClientProxy;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import cpw.mods.fml.relauncher.Side;
@@ -53,6 +53,6 @@ public class ItemRendererChessDesk implements IItemRenderer {
                 tileChessDesk.readFromNBT(tag.getCompoundTag("ChessData"));
             }
         }
-        ClientProxy.tileChessDeskRenderer.renderTileEntityAt(tileChessDesk, 0, 0, 0, 0);
+        Core.instance.deskgame.tileChessDeskRenderer.renderTileEntityAt(tileChessDesk, 0, 0, 0, 0);
     }
 }

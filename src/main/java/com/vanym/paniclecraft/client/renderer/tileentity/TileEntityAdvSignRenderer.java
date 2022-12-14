@@ -2,8 +2,8 @@ package com.vanym.paniclecraft.client.renderer.tileentity;
 
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockAdvSign;
-import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.relauncher.Side;
@@ -32,7 +32,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
         float var10 = 0.6666667F;
         float var12;
         
-        if (var9 == ModItems.blockAdvSignPost) {
+        if (var9 == Core.instance.advSign.blockAdvSignPost) {
             GL11.glTranslatef((float)par2 + 0.5F, (float)par4 + 0.75F * var10, (float)par6 + 0.5F);
             float var11 = (float)(par1TileEntitySign.getBlockMetadata() * 360) / 16.0F;
             GL11.glRotatef(-var11, 0.0F, 1.0F, 0.0F);

@@ -3,10 +3,8 @@ package com.vanym.paniclecraft.client.gui;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockAdvSign;
-import com.vanym.paniclecraft.client.ClientProxy;
-import com.vanym.paniclecraft.init.ModItems;
-import com.vanym.paniclecraft.network.PacketHandler;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
@@ -126,7 +124,7 @@ public class GuiEditAdvSign extends GuiScreen {
     @Override
     public void onGuiClosed() {
         Keyboard.enableRepeatEvents(false);
-        PacketHandler.INSTANCE.sendToServer(new MessageAdvSignChange(this.entitySign));
+        Core.instance.network.sendToServer(new MessageAdvSignChange(this.entitySign));
         this.entitySign.setEditable(true);
     }
     
@@ -369,7 +367,7 @@ public class GuiEditAdvSign extends GuiScreen {
         GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
         BlockAdvSign var5 = (BlockAdvSign)this.entitySign.getBlockType();
         
-        if (var5 == ModItems.blockAdvSignPost) {
+        if (var5 == Core.instance.advSign.blockAdvSignPost) {
             float var6 = (float)(this.entitySign.getBlockMetadata() * 360) / 16.0F;
             GL11.glRotatef(var6, 0.0F, 1.0F, 0.0F);
             GL11.glTranslatef(0.0F, -1.0625F, 0.0F);
@@ -397,8 +395,9 @@ public class GuiEditAdvSign extends GuiScreen {
             this.entitySign.lineBeingEdited = this.editLine;
         }
         
-        ClientProxy.tileAdvSignRenderer.renderTileEntityAt(this.entitySign, -0.5D, -0.75D, -0.5D,
-                                                           0.0F);
+        Core.instance.advSign.tileAdvSignRenderer.renderTileEntityAt(this.entitySign, -0.5D, -0.75D,
+                                                                     -0.5D,
+                                                                     0.0F);
         this.entitySign.lineBeingEdited = -1;
         GL11.glPopMatrix();
         super.drawScreen(par1, par2, par3);

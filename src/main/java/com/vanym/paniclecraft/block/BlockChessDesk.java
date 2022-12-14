@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
-import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import cpw.mods.fml.relauncher.Side;
@@ -76,7 +75,7 @@ public class BlockChessDesk extends BlockContainerMod3 {
     }
     
     public static ItemStack getSavedDesk(TileEntityChessDesk tileCD) {
-        ItemStack itemS = new ItemStack(ModItems.itemChessDesk);
+        ItemStack itemS = new ItemStack(Core.instance.deskgame.itemChessDesk);
         if (tileCD == null) {
             return itemS;
         }

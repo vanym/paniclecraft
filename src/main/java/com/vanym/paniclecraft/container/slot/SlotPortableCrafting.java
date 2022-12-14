@@ -1,6 +1,6 @@
 package com.vanym.paniclecraft.container.slot;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.item.ItemWorkbench;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,7 +23,7 @@ public class SlotPortableCrafting extends SlotCrafting {
     public void onPickupFromSlot(EntityPlayer par1EntityPlayer, ItemStack par2ItemStack) {
         ItemStack heldItem = par1EntityPlayer.getHeldItem();
         if (heldItem != null && heldItem.getItem() instanceof ItemWorkbench
-            && ModItems.itemWorkbench.getMaxDamage() > 0) {
+            && Core.instance.portableworkbench.itemWorkbench.getMaxDamage() > 0) {
             heldItem.damageItem(1, par1EntityPlayer);
         }
         super.onPickupFromSlot(par1EntityPlayer, par2ItemStack);

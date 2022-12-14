@@ -1,6 +1,6 @@
 package com.vanym.paniclecraft.item;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -60,12 +60,13 @@ public class ItemCannon extends ItemMod3 {
         if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack)) {
             return false;
         } else {
-            if (ModItems.blockCannon.canPlaceBlockAt(par3World, par4, par5, par6)
-                && par3World.canPlaceEntityOnSide(ModItems.blockCannon, par4, par5, par6, false,
+            if (Core.instance.cannon.blockCannon.canPlaceBlockAt(par3World, par4, par5, par6)
+                && par3World.canPlaceEntityOnSide(Core.instance.cannon.blockCannon, par4, par5,
+                                                  par6, false,
                                                   par7, par2EntityPlayer, par1ItemStack)) {
                 --par1ItemStack.stackSize;
-                // par3World.setBlock(par4, par5, par6, ModItems.blockCannon, par7, 3);
-                par3World.setBlock(par4, par5, par6, ModItems.blockCannon, 1, 3);
+                // par3World.setBlock(par4, par5, par6, Core.instance.cannon.blockCannon, par7, 3);
+                par3World.setBlock(par4, par5, par6, Core.instance.cannon.blockCannon, 1, 3);
                 TileEntity tile = par3World.getTileEntity(par4, par5, par6);
                 if (tile instanceof TileEntityCannon) {
                     TileEntityCannon tileCannon = (TileEntityCannon)tile;

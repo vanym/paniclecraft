@@ -1,6 +1,6 @@
 package com.vanym.paniclecraft.plugins.computercraft.t;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.plugins.computercraft.t.p.PeripheralPaintBrush;
 
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -35,7 +35,7 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     
     @Override
     public ItemStack getCraftingItem() {
-        return new ItemStack(ModItems.itemPaintBrush);
+        return new ItemStack(Core.instance.painting.itemPaintBrush);
     }
     
     @Override

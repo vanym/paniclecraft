@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.item;
 
 import java.util.List;
 
-import com.vanym.paniclecraft.init.ModItems;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import cpw.mods.fml.relauncher.Side;
@@ -56,7 +56,8 @@ public class ItemChessDesk extends ItemMod3 {
             break;
         }
         if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack)
-            || !ModItems.blockChessDesk.canPlaceBlockAt(par3World, par4, par5, par6)) {
+            || !Core.instance.deskgame.blockChessDesk.canPlaceBlockAt(par3World, par4, par5,
+                                                                      par6)) {
             return false;
         } else {
             --par1ItemStack.stackSize;
@@ -64,7 +65,7 @@ public class ItemChessDesk extends ItemMod3 {
                     MathHelper.floor_double((double)(par2EntityPlayer.rotationYaw * 4.0F / 360.0F) +
                                             0.5D)
                         & 3;
-            par3World.setBlock(par4, par5, par6, ModItems.blockChessDesk, var11, 3);
+            par3World.setBlock(par4, par5, par6, Core.instance.deskgame.blockChessDesk, var11, 3);
             TileEntityChessDesk tile =
                     (TileEntityChessDesk)par3World.getTileEntity(par4, par5, par6);
             if (par1ItemStack.hasTagCompound()) {

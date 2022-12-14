@@ -3,8 +3,8 @@ package com.vanym.paniclecraft.item;
 import java.awt.Color;
 import java.util.List;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.network.PacketHandler;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.utils.ISidePaintingProvider;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -83,7 +83,7 @@ public class ItemPaintBrush extends ItemMod3 {
                     float f2 = (float)vec.zCoord - (float)z;
                     int px = getXuse(tileP.getPainting(s).getRow(), s, f, f1, f2);
                     int py = getYuse(tileP.getPainting(s).getRow(), s, f, f1, f2);
-                    PacketHandler.INSTANCE.sendToServer(new MessagePaintBrushUse(
+                    Core.instance.network.sendToServer(new MessagePaintBrushUse(
                             x,
                             y,
                             z,
