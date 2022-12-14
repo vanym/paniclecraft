@@ -62,6 +62,11 @@ public class MainUtils {
         return false;
     }
     
+    public static AxisAlignedBB absolutizeBox(double x, double y, double z, AxisAlignedBB box) {
+        return AxisAlignedBB.getBoundingBox(x + box.minX, y + box.minY, z + box.minZ,
+                                            x + box.maxX, y + box.maxY, z + box.maxZ);
+    }
+    
     // public static int[] getRGBFromInt(int par1){
     // return new int[]{((par1 >> 16) & 0xFF), ((par1 >> 8) & 0xFF), (par1 & 0xFF)};
     // }

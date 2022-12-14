@@ -3,6 +3,8 @@ package com.vanym.paniclecraft.block;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
 
 import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
@@ -16,6 +18,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -277,6 +280,33 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             }
         }
         return super.getSelectedBoundingBoxFromPool(par1World, par2, par3, par4);
+    }
+    
+    @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void addCollisionBoxesToList(
+            World world,
+            int x,
+            int y,
+            int z,
+            AxisAlignedBB mask,
+            List list,
+            Entity entity) {
+        TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+        Builder<AxisAlignedBB> facades = Stream.builder();
+        for(int i = 0; i < 6; ++i) {
+            if (tile.getPainting(i) != null) {
+                AxisAlignedBB box = MainUtils.getBoundsBySide(i, this.getPaintingWidth());
+                facades.add(box);
+            }
+        }
+        List<AxisAlignedBB> boxes = this.getFrameBoxes();
+        Stream.concat(boxes.stream(), facades.build()).forEach(box-> {
+            AxisAlignedBB absoluteBox = MainUtils.absolutizeBox(x, y, z, box);
+            if (mask.intersectsWith(absoluteBox)) {
+                list.add(absoluteBox);
+            }
+        });
     }
     
     @Override
