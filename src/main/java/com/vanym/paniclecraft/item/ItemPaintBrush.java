@@ -43,7 +43,7 @@ public class ItemPaintBrush extends ItemMod3 {
     public IIcon fill;
     @SideOnly(Side.CLIENT)
     public IIcon fill_overlay;
-    public static int[][] noDrawPixels;
+    
     public static int brushRadiusSquare = 3;
     public static double brushRadiusRound = 3.5D;
     
@@ -244,25 +244,6 @@ public class ItemPaintBrush extends ItemMod3 {
     @Override
     public boolean isFull3D() {
         return true;
-    }
-    
-    public static void setNoDrawPixels(String par1) {
-        if (!par1.isEmpty()) {
-            String[] var1 = par1.split(",");
-            int[][] var3 = new int[2][var1.length];
-            for (int i = 0; i < var1.length; i++) {
-                try {
-                    String[] var2 = var1[i].split(";");
-                    var3[0][i] = Integer.parseInt(var2[0]);
-                    var3[1][i] = Integer.parseInt(var2[1]);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-            noDrawPixels = var3;
-        } else {
-            noDrawPixels = new int[2][0];
-        }
     }
     
     public static int getXuse(int row, int par1, float par2, float par3, float par4) {

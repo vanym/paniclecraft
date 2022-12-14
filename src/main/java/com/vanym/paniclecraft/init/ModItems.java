@@ -106,9 +106,6 @@ public class ModItems {
             itemPainting = new ItemPainting();
             itemPaintBrush = new ItemPaintBrush();
             itemPalette = new ItemPalette();
-            ItemPaintBrush.setNoDrawPixels(config.get("Painting", "BrushNoDrawPixels", "",
-                                                      "|x|;|y|,|x|;|y|,|x|;|y|... example:\"3;3,2;3,3;2\"")
-                                                 .getString());
             Painting.defPaintRow = config.getInt("PaintingRow", "Painting", 16, 1, 32,
                                                  "(recommend to degree 2 like 8,16,32)");
             ItemPaintBrush.brushRadiusSquare =

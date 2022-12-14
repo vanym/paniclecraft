@@ -30,8 +30,6 @@ public class Painting {
     public int brushRadiusSquare = ItemPaintBrush.brushRadiusSquare;
     public double brushRadiusRound = ItemPaintBrush.brushRadiusRound;
     
-    public int[][] noDrawPixels = ItemPaintBrush.noDrawPixels.clone();
-    
     public boolean canBeEdited = true;
     
     public int texID = -1;
@@ -85,19 +83,10 @@ public class Painting {
     public void setPixelsColor(Color color, int x, int y, ArrayList<Painting> updateList) {
         for (int i = -this.brushRadiusSquare; i <= this.brushRadiusSquare; i++) {
             for (int j = -this.brushRadiusSquare; j <= this.brushRadiusSquare; j++) {
-                boolean var3 = true;
-                for (int k = 0; k < this.noDrawPixels[0].length; k++) {
-                    if (Math.abs(i) == this.noDrawPixels[0][k]
-                        && Math.abs(j) == this.noDrawPixels[1][k]) {
-                        var3 = false;
-                    }
-                }
                 if (i * i + j * j > this.brushRadiusRound * this.brushRadiusRound) {
                     continue;
                 }
-                if (var3) {
-                    this.setPixelColor_a(color, x + i, y + j, updateList);
-                }
+                this.setPixelColor_a(color, x + i, y + j, updateList);
             }
         }
     }
@@ -258,8 +247,6 @@ public class Painting {
     }
     
     public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
-        par1NBTTagCompound.setIntArray("NoDrawPixels[0]", this.noDrawPixels[0]);
-        par1NBTTagCompound.setIntArray("NoDrawPixels[1]", this.noDrawPixels[1]);
         par1NBTTagCompound.setInteger("BrushRadiusSquare", this.brushRadiusSquare);
         par1NBTTagCompound.setDouble("BrushRadiusRound", this.brushRadiusRound);
         par1NBTTagCompound.setBoolean("CanBeEdited", this.canBeEdited);
@@ -281,12 +268,6 @@ public class Painting {
     }
     
     public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
-        if (par1NBTTagCompound.hasKey("NoDrawPixels[0]")) {
-            this.noDrawPixels[0] = par1NBTTagCompound.getIntArray("NoDrawPixels[0]");
-        }
-        if (par1NBTTagCompound.hasKey("NoDrawPixels[1]")) {
-            this.noDrawPixels[1] = par1NBTTagCompound.getIntArray("NoDrawPixels[1]");
-        }
         if (par1NBTTagCompound.hasKey("BrushRadiusSquare")) {
             this.brushRadiusSquare = par1NBTTagCompound.getInteger("BrushRadiusSquare");
         }
