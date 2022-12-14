@@ -5,6 +5,7 @@ import java.util.Random;
 import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
+import com.vanym.paniclecraft.utils.MainUtils;
 import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
@@ -25,29 +26,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class BlockPainting extends BlockContainerMod3 {
-    
-    @SideOnly(Side.CLIENT)
-    public static enum SpecialRendererPhase {
-        NONE, FRAME, PAINTING;
-        
-        public boolean isNone() {
-            return (this == NONE);
-        }
-    }
-    
-    @SideOnly(Side.CLIENT)
-    protected SpecialRendererPhase specialRendererPhase = SpecialRendererPhase.NONE;
+public class BlockPainting extends BlockPaintingContainer {
     
     public BlockPainting() {
         super(Material.wood);
         this.setBlockName("painting");
         this.setHardness(0.4F);
-    }
-    
-    @SideOnly(Side.CLIENT)
-    public void setRendererPhase(SpecialRendererPhase sRP) {
-        this.specialRendererPhase = sRP;
     }
     
     @Override
@@ -66,7 +50,7 @@ public class BlockPainting extends BlockContainerMod3 {
         if (!this.specialRendererPhase.isNone()) {
             ForgeDirection dir = ForgeDirection.getOrientation(side);
             int meta = world.getBlockMetadata(x - dir.offsetX, y - dir.offsetY, z - dir.offsetZ);
-            boolean flag = this.shouldSideBeRendered(side, meta);
+            boolean flag = this.shouldSideBeRendered(side, meta, null);
             if (!flag) {
                 return false;
             }
@@ -74,8 +58,9 @@ public class BlockPainting extends BlockContainerMod3 {
         return super.shouldSideBeRendered(world, x, y, z, side);
     }
     
+    @Override
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(int side, int meta) {
+    public boolean shouldSideBeRendered(int side, int meta, TileEntity tile) {
         boolean contains = (side == meta);
         switch (this.specialRendererPhase) {
             default:
@@ -183,37 +168,14 @@ public class BlockPainting extends BlockContainerMod3 {
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
         int meta = world.getBlockMetadata(x, y, z);
-        this.setBlockBoundsBasedOnState(meta);
+        AxisAlignedBB box = this.getBlockBoundsBasedOnState(meta);
+        this.setBlockBounds((float)box.minX, (float)box.minY, (float)box.minZ,
+                            (float)box.maxX, (float)box.maxY, (float)box.maxZ);
     }
     
-    public void setBlockBoundsBasedOnState(int meta) {
-        float var6 = 0.0F;
-        float var7 = 1.0F;
-        float var8 = 0.0F;
-        float var9 = 1.0F;
-        float var10 = 0.0625F;
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-        
-        switch (meta) {
-            case 0:
-                this.setBlockBounds(var8, 1.0F - var10, var6, var9, var7, 1.0F);
-                return;
-            case 1:
-                this.setBlockBounds(var8, var6, 0.0F, var9, var10, 1.0F);
-                return;
-            case 2:
-                this.setBlockBounds(var8, var6, 1.0F - var10, var9, var7, 1.0F);
-                return;
-            case 3:
-                this.setBlockBounds(var8, var6, 0.0F, var9, var7, var10);
-                return;
-            case 4:
-                this.setBlockBounds(1.0F - var10, var6, var8, 1.0F, var7, var9);
-                return;
-            case 5:
-                this.setBlockBounds(0.0F, var6, var8, var10, var7, var9);
-                return;
-        }
+    public AxisAlignedBB getBlockBoundsBasedOnState(int meta) {
+        int side = ForgeDirection.getOrientation(meta).getOpposite().ordinal();
+        return MainUtils.getBoundsBySize(side, this.getPaintingWidth());
     }
     
     public static ItemStack getSavedPic(Painting pic) {

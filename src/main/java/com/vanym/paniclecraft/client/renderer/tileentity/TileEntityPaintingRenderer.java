@@ -6,6 +6,7 @@ import java.nio.ByteOrder;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.block.BlockPainting;
+import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.client.utils.IconFlippedBugFixed;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.Painting;
@@ -20,13 +21,14 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
 @SideOnly(Side.CLIENT)
 public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     
-    protected RenderBlocksWorldless renderBlocksWorldless = new RenderBlocksWorldless();
+    protected final RenderBlocksWorldless renderBlocksWorldless = new RenderBlocksWorldless();
     
     protected RenderBlocks renderBlocks;
     
@@ -37,23 +39,14 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     
     @Override
     public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
-        this.renderTileEntityAt((TileEntityPainting)tile, x, y, z, f);
-    }
-    
-    public void renderTileEntityAt(TileEntityPainting tile, double x, double y, double z, float f) {
         this.renderTileEntityAtWorld(tile, x, y, z, f);
     }
     
-    public void renderTileEntityAtItem(TileEntityPainting tile) {
+    public void renderTileEntityAtItem(TileEntity tile) {
         this.renderTileEntity(tile, 0, 0, 0, 0);
     }
     
-    public void renderTileEntityAtWorld(
-            TileEntityPainting tile,
-            double x,
-            double y,
-            double z,
-            float f) {
+    public void renderTileEntityAtWorld(TileEntity tile, double x, double y, double z, float f) {
         // based on TileEntityRendererPiston
         RenderHelper.disableStandardItemLighting();
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -67,6 +60,10 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         }
         this.renderTileEntity(tile, x, y, z, f);
         RenderHelper.enableStandardItemLighting();
+    }
+    
+    protected void renderTileEntity(TileEntity tile, double x, double y, double z, float f) {
+        this.renderTileEntity((TileEntityPainting)tile, x, y, z, f);
     }
     
     protected void renderTileEntity(
@@ -91,26 +88,28 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         tessellator.setTranslation(x - tile.xCoord, y - tile.yCoord, z - tile.zCoord);
         tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
         BlockPainting block = (BlockPainting)tile.getBlockType();
-        block.setRendererPhase(BlockPainting.SpecialRendererPhase.FRAME);
-        block.setBlockBoundsBasedOnState(meta);
-        render.setRenderBoundsFromBlock(block);
-        render.renderStandardBlock(tile.getBlockType(), tile.xCoord, tile.yCoord, tile.zCoord);
+        block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAME);
+        AxisAlignedBB box = block.getBlockBoundsBasedOnState(meta);
+        render.overrideBlockBounds(box.minX, box.minY, box.minZ,
+                                   box.maxX, box.maxY, box.maxZ);
+        block.setRendererBox(box);
+        render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
         tessellator.draw();
         tessellator.startDrawingQuads();
         {
             Painting picture = tile.getPainting(meta);
             IIcon icon = bindTexture(picture, meta);
             render.setOverrideBlockTexture(icon);
-            block.setRendererPhase(BlockPainting.SpecialRendererPhase.PAINTING);
-            render.renderStandardBlock(tile.getBlockType(), tile.xCoord, tile.yCoord, tile.zCoord);
-            block.setRendererPhase(BlockPainting.SpecialRendererPhase.NONE);
+            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
+            render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
+            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.NONE);
             render.clearOverrideBlockTexture();
         }
         tessellator.draw();
         tessellator.setTranslation(0, 0, 0);
     }
     
-    public static IIcon bindTexture(Painting picture, int side) {
+    protected static IIcon bindTexture(Painting picture, int side) {
         if (picture.texID <= 0) {
             picture.texID = GL11.glGenTextures();
             picture.getPic();
@@ -168,6 +167,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     protected static class RenderBlocksWorldless extends RenderBlocks {
         
         protected int meta;
+        protected TileEntity tile;
         
         public RenderBlocksWorldless() {
             super(null);
@@ -177,43 +177,47 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             this.meta = meta;
         }
         
+        public void setTile(TileEntity tile) {
+            this.tile = tile;
+        }
+        
         @Override
         public boolean renderStandardBlock(Block block, int x, int y, int z) {
-            BlockPainting blockPainting = (BlockPainting)block;
+            BlockPaintingContainer blockPC = (BlockPaintingContainer)block;
             this.enableAO = false;
             Tessellator tessellator = Tessellator.instance;
             int side = 0;
-            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+            if (blockPC.shouldSideBeRendered(side, this.meta, this.tile)) {
                 tessellator.setNormal(0.0F, -1.0F, 0.0F);
                 this.renderFaceYNeg(block, (double)x, (double)y, (double)z,
                                     block.getIcon(side, this.meta));
             }
             side = 1;
-            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+            if (blockPC.shouldSideBeRendered(side, this.meta, this.tile)) {
                 tessellator.setNormal(0.0F, 1.0F, 0.0F);
                 this.renderFaceYPos(block, (double)x, (double)y, (double)z,
                                     block.getIcon(side, this.meta));
             }
             side = 2;
-            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+            if (blockPC.shouldSideBeRendered(side, this.meta, this.tile)) {
                 tessellator.setNormal(0.0F, 0.0F, -1.0F);
                 this.renderFaceZNeg(block, (double)x, (double)y, (double)z,
                                     block.getIcon(side, this.meta));
             }
             side = 3;
-            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+            if (blockPC.shouldSideBeRendered(side, this.meta, this.tile)) {
                 tessellator.setNormal(0.0F, 0.0F, 1.0F);
                 this.renderFaceZPos(block, (double)x, (double)y, (double)z,
                                     block.getIcon(side, this.meta));
             }
             side = 4;
-            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+            if (blockPC.shouldSideBeRendered(side, this.meta, this.tile)) {
                 tessellator.setNormal(-1.0F, 0.0F, 0.0F);
                 this.renderFaceXNeg(block, (double)x, (double)y, (double)z,
                                     block.getIcon(side, this.meta));
             }
             side = 5;
-            if (blockPainting.shouldSideBeRendered(side, this.meta)) {
+            if (blockPC.shouldSideBeRendered(side, this.meta, this.tile)) {
                 tessellator.setNormal(1.0F, 0.0F, 0.0F);
                 this.renderFaceXPos(block, (double)x, (double)y, (double)z,
                                     block.getIcon(side, this.meta));

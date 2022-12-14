@@ -1,8 +1,13 @@
 package com.vanym.paniclecraft.block;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.vanym.paniclecraft.init.ModItems;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.MainUtils;
 import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
@@ -19,15 +24,30 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class BlockPaintingFrame extends BlockContainerMod3 {
+public class BlockPaintingFrame extends BlockPaintingContainer {
+    
+    @SideOnly(Side.CLIENT)
+    protected int specialRendererSide = -1;
+    
+    protected final double frameWidth;
+    
+    protected final List<AxisAlignedBB> frameBoxes;
     
     public BlockPaintingFrame() {
         super(Material.wood);
         this.setBlockName("paintingFrame");
         this.setHardness(0.6F);
+        this.frameWidth = (1.0D / 16D) * 2.0D;
+        this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameWidth));
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public void setRendererSide(int sRS) {
+        this.specialRendererSide = sRS;
     }
     
     @Override
@@ -107,6 +127,42 @@ public class BlockPaintingFrame extends BlockContainerMod3 {
     @Override
     public int getRenderType() {
         return -1;
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
+        if (!this.specialRendererPhase.isNone()) {
+            ForgeDirection dir = ForgeDirection.getOrientation(side);
+            TileEntity tile =
+                    world.getTileEntity(x - dir.offsetX, y - dir.offsetY, z - dir.offsetZ);
+            if (tile != null) {
+                boolean flag = this.shouldSideBeRendered(side, tile.getBlockMetadata(), tile);
+                if (!flag) {
+                    return false;
+                }
+            }
+        }
+        return super.shouldSideBeRendered(world, x, y, z, side);
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(int side, int meta, TileEntity tile) {
+        TileEntityPaintingFrame tileFrame = (TileEntityPaintingFrame)tile;
+        boolean contains = (tileFrame.getPainting(side) != null);
+        if (this.specialRendererPhase == SpecialRendererPhase.PAINTING) {
+            return contains && side == this.specialRendererSide;
+        } else if (this.specialRendererPhase == SpecialRendererPhase.FRAME && contains) {
+            return !MainUtils.isTouchingSide(side, this.specialRendererBox);
+        } else if (this.specialRendererPhase == SpecialRendererPhase.FRAMEINSIDE) {
+            return ForgeDirection.OPPOSITES[side] == this.specialRendererSide;
+        }
+        return true;
+    }
+    
+    public List<AxisAlignedBB> getFrameBoxes() {
+        return this.frameBoxes;
     }
     
     @Override
@@ -244,5 +300,50 @@ public class BlockPaintingFrame extends BlockContainerMod3 {
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int par1, int md) {
         return ModItems.blockPainting.getIcon(par1, md);
+    }
+    
+    public static List<AxisAlignedBB> getFrameBoxes(final double frameWidth) {
+        List<AxisAlignedBB> list = new ArrayList<>();
+        for(int i = 0; i < 12; ++i) {
+            int stage = i / 4;
+            int i2d = i % 4;
+            int i2dx = i2d / 2;
+            int i2dy = i2d % 2;
+            double minX2d = (i2dx == 1) ? 0.0D : (1.0D - frameWidth);
+            double maxX2d = (i2dx == 1) ? frameWidth : 1.0D;
+            double minY2d = (i2dy == 1) ? 0.0D : (1.0D - frameWidth);
+            double maxY2d = (i2dy == 1) ? frameWidth : 1.0D;
+            double minX = 0.0D, maxX = 1.0D, minY = 0.0D, maxY = 1.0D, minZ = 0.0D, maxZ = 1.0D;
+            switch (stage) {
+                case 0: {
+                    minX = minX2d;
+                    maxX = maxX2d;
+                    minY = minY2d;
+                    maxY = maxY2d;
+                    minZ = frameWidth;
+                    maxZ = 1.0D - frameWidth;
+                }
+                break;
+                case 1: {
+                    minX = minX2d;
+                    maxX = maxX2d;
+                    minZ = minY2d;
+                    maxZ = maxY2d;
+                }
+                break;
+                case 2: {
+                    minX = frameWidth;
+                    maxX = 1.0D - frameWidth;
+                    minY = minX2d;
+                    maxY = maxX2d;
+                    minZ = minY2d;
+                    maxZ = maxY2d;
+                }
+                break;
+            }
+            AxisAlignedBB box = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+            list.add(box);
+        }
+        return list;
     }
 }

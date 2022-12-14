@@ -12,7 +12,56 @@ import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
+import net.minecraft.util.AxisAlignedBB;
+
 public class MainUtils {
+    
+    public static AxisAlignedBB getBoundsBySize(int side, double width) {
+        double minX = 0.0D, maxX = 1.0D, minY = 0.0D, maxY = 1.0D, minZ = 0.0D, maxZ = 1.0D;
+        switch (side) {
+            case 0:
+                maxY = width;
+            break;
+            case 1:
+                minY = 1.0D - width;
+            break;
+            case 2:
+                maxZ = width;
+            break;
+            case 3:
+                minZ = 1.0D - width;
+            break;
+            case 4:
+                maxX = width;
+            break;
+            case 5:
+                minX = 1.0D - width;
+            break;
+        }
+        return AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+    
+    public static boolean isTouchingSide(int side, AxisAlignedBB box) {
+        if (box == null) {
+            return false;
+        }
+        switch (side) {
+            case 0:
+                return box.minY <= 0.0D;
+            case 1:
+                return box.maxY >= 1.0D;
+            case 2:
+                return box.minZ <= 0.0D;
+            case 3:
+                return box.maxZ >= 1.0D;
+            case 4:
+                return box.minX <= 0.0D;
+            case 5:
+                return box.maxX >= 1.0D;
+        }
+        return false;
+    }
+    
     // public static int[] getRGBFromInt(int par1){
     // return new int[]{((par1 >> 16) & 0xFF), ((par1 >> 8) & 0xFF), (par1 & 0xFF)};
     // }
