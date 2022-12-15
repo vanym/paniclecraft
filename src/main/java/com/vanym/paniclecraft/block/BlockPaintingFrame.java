@@ -174,6 +174,16 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
+    public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
+        TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+        if (tile.getPainting(side.ordinal()) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
     public boolean renderAsNormalBlock() {
         return false;
     }
