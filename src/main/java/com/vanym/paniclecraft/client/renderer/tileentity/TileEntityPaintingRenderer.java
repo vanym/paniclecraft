@@ -119,28 +119,16 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             final byte[] data = image.getData();
             final int width = image.getWidth();
             final int height = image.getHeight();
-            final int line = width * 3;
-            int alignment = (4 - (line % 4)) % 4;
-            ByteBuffer textureBuffer =
-                    ByteBuffer.allocateDirect(data.length + (alignment * height));
+            ByteBuffer textureBuffer = ByteBuffer.allocateDirect(data.length);
             textureBuffer.order(ByteOrder.nativeOrder());
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texture);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
                                  GL11.GL_NEAREST);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
                                  GL11.GL_NEAREST);
+            GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
             textureBuffer.clear();
-            if (alignment > 0) {
-                for (int y = 0; y < height; y++) {
-                    int offset = y * line;
-                    textureBuffer.put(data, offset, line);
-                    for (int i = 0; i < alignment; i++) {
-                        textureBuffer.put((byte)0);
-                    }
-                }
-            } else {
-                textureBuffer.put(data);
-            }
+            textureBuffer.put(data);
             textureBuffer.flip();
             GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB,
                               width, height, 0, GL11.GL_RGB,
