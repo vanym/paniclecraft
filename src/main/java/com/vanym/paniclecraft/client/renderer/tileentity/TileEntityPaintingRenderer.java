@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.client.utils.IconFlippedBugFixed;
+import com.vanym.paniclecraft.core.component.painting.Image;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
@@ -114,9 +115,14 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             picture.texture = GL11.glGenTextures();
         }
         if (!picture.imageChangeProcessed) {
-            byte[] data = picture.getImage().getData();
+            Image image = picture.getImage();
+            final byte[] data = image.getData();
+            final int width = image.getWidth();
+            final int height = image.getHeight();
+            final int line = width * 3;
+            int alignment = (4 - (line % 4)) % 4;
             ByteBuffer textureBuffer =
-                    ByteBuffer.allocateDirect(data.length);
+                    ByteBuffer.allocateDirect(data.length + (alignment * height));
             textureBuffer.order(ByteOrder.nativeOrder());
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texture);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
@@ -124,11 +130,20 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
                                  GL11.GL_NEAREST);
             textureBuffer.clear();
-            textureBuffer.put(data);
+            if (alignment > 0) {
+                for (int y = 0; y < height; y++) {
+                    int offset = y * line;
+                    textureBuffer.put(data, offset, line);
+                    for (int i = 0; i < alignment; i++) {
+                        textureBuffer.put((byte)0);
+                    }
+                }
+            } else {
+                textureBuffer.put(data);
+            }
             textureBuffer.flip();
             GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB,
-                              picture.getImage().getWidth(),
-                              picture.getImage().getHeight(), 0, GL11.GL_RGB,
+                              width, height, 0, GL11.GL_RGB,
                               GL11.GL_UNSIGNED_BYTE,
                               textureBuffer);
             picture.imageChangeProcessed = true;
