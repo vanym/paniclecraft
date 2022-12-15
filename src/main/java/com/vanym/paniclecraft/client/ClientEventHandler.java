@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.client;
 
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin;
-import com.vanym.paniclecraft.utils.ISidePaintingProvider;
+import com.vanym.paniclecraft.tileentity.TileEntityPaintingContainer;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
@@ -33,8 +33,8 @@ public class ClientEventHandler {
     public void texruteUnload(WorldEvent.Unload event) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             for (Object tileE : event.world.loadedTileEntityList) {
-                if (tileE instanceof ISidePaintingProvider) {
-                    ((ISidePaintingProvider)tileE).onWorldUnload();
+                if (tileE instanceof TileEntityPaintingContainer) {
+                    ((TileEntityPaintingContainer)tileE).onWorldUnload();
                 }
             }
         }

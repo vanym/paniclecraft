@@ -5,7 +5,6 @@ import org.lwjgl.opengl.GL11;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.CommonProxy;
 import com.vanym.paniclecraft.core.component.ModComponent;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -17,8 +16,6 @@ public class ClientProxy extends CommonProxy {
     
     @Override
     public void preInit(Configuration config) {
-        Painting.specialBoundingBox =
-                config.getBoolean("Painting_SpecialBoundingBox", "Client_Render", true, "");
         MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
         for (ModComponent component : Core.instance.getComponents()) {
             component.preInitClient(config);

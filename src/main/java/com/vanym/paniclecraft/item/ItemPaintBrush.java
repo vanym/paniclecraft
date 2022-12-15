@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
-import com.vanym.paniclecraft.utils.ISidePaintingProvider;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -26,7 +28,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-public class ItemPaintBrush extends ItemMod3 {
+public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     public static final int DEFAULT_COLOR_RGB = 200;
     public static final int DEFAULT_COLOR =
             MainUtils.getIntFromRGB(DEFAULT_COLOR_RGB, DEFAULT_COLOR_RGB, DEFAULT_COLOR_RGB);
@@ -44,7 +46,6 @@ public class ItemPaintBrush extends ItemMod3 {
     @SideOnly(Side.CLIENT)
     public IIcon fill_overlay;
     
-    public static int brushRadiusSquare = 3;
     public static double brushRadiusRound = 3.5D;
     
     public ItemPaintBrush() {
@@ -75,22 +76,23 @@ public class ItemPaintBrush extends ItemMod3 {
                 int s = mc.objectMouseOver.sideHit;
                 Vec3 vec = mc.objectMouseOver.hitVec;
                 TileEntity tile = mc.theWorld.getTileEntity(x, y, z);
-                if (tile != null && tile instanceof ISidePaintingProvider
-                    && ((ISidePaintingProvider)tile).getPainting(s) != null) {
-                    ISidePaintingProvider tileP = (ISidePaintingProvider)tile;
-                    float f = (float)vec.xCoord - (float)x;
-                    float f1 = (float)vec.yCoord - (float)y;
-                    float f2 = (float)vec.zCoord - (float)z;
-                    int px = getXuse(tileP.getPainting(s).getRow(), s, f, f1, f2);
-                    int py = getYuse(tileP.getPainting(s).getRow(), s, f, f1, f2);
-                    Core.instance.network.sendToServer(new MessagePaintBrushUse(
-                            x,
-                            y,
-                            z,
-                            px,
-                            py,
-                            (byte)s));
-                    return;
+                if (tile != null && tile instanceof ISidePictureProvider) {
+                    ISidePictureProvider tileP = (ISidePictureProvider)tile;
+                    Picture picture = tileP.getPainting(s);
+                    if (picture != null) {
+                        float f = (float)vec.xCoord - (float)x;
+                        float f1 = (float)vec.yCoord - (float)y;
+                        float f2 = (float)vec.zCoord - (float)z;
+                        int px = getXuse(picture.getImage().getWidth(), s, f, f1, f2);
+                        int py = getYuse(picture.getImage().getHeight(), s, f, f1, f2);
+                        Core.instance.network.sendToServer(new MessagePaintBrushUse(
+                                x,
+                                y,
+                                z,
+                                px,
+                                py,
+                                (byte)s));
+                    }
                 }
             }
         }
@@ -114,15 +116,13 @@ public class ItemPaintBrush extends ItemMod3 {
             float par9,
             float par10) {
         TileEntity tile = par3World.getTileEntity(par4, par5, par6);
-        if (tile != null && tile instanceof ISidePaintingProvider
-            && ((ISidePaintingProvider)tile).getPainting(par7) != null) {
-            par2EntityPlayer.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
-            // TileEntityPainting tileP = (TileEntityPainting)tile;
-            // int px = getXuse(tileP.getRow(), par7, par8, par9, par10);
-            // int py = getYuse(tileP.getRow(), par7, par8, par9, par10);
-            // if(!par3World.isRemote){
-            // this.usePaintBrush(par1ItemStack, tileP, px, py);
-            // }
+        if (tile != null && tile instanceof ISidePictureProvider) {
+            ISidePictureProvider tileP = (ISidePictureProvider)tile;
+            Picture picture = tileP.getPainting(par7);
+            if (picture != null) {
+                par2EntityPlayer.setItemInUse(par1ItemStack,
+                                              this.getMaxItemUseDuration(par1ItemStack));
+            }
         }
         return false;
     }
@@ -289,5 +289,30 @@ public class ItemPaintBrush extends ItemMod3 {
             default:
                 return -1;
         }
+    }
+    
+    @Override
+    public PaintingToolType getPaintingToolType(ItemStack itemStack) {
+        switch (itemStack.getItemDamage()) {
+            case 0:
+            case 1:
+                return PaintingToolType.BRUSH;
+            case 2:
+                return PaintingToolType.FILLER;
+        }
+        return PaintingToolType.NONE;
+    }
+    
+    @Override
+    public Color getPaintingToolColor(ItemStack itemStack) {
+        return new Color(this.getColor(itemStack));
+    }
+    
+    @Override
+    public double getPaintingToolRadius(ItemStack itemStack, Picture picture) {
+        if (itemStack.getItemDamage() == 0) {
+            return brushRadiusRound;
+        }
+        return 0.1D;
     }
 }

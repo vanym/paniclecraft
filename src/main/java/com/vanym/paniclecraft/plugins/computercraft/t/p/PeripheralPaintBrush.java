@@ -3,11 +3,11 @@ package com.vanym.paniclecraft.plugins.computercraft.t.p;
 import java.awt.Color;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPalette;
-import com.vanym.paniclecraft.utils.ISidePaintingProvider;
 import com.vanym.paniclecraft.utils.MainUtils;
-import com.vanym.paniclecraft.utils.Painting;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
@@ -45,30 +45,31 @@ public class PeripheralPaintBrush implements IPeripheral {
             ILuaContext context,
             int method,
             Object[] arguments) throws LuaException, InterruptedException {
+        // TODO WIP refactor it
         switch (method) {
             case 0: {
-                Painting tileP = this.findPainting(-1);
+                Picture tileP = this.findPainting(-1);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
-                return new Object[]{tileP.getRow()};
+                return new Object[]{tileP.getImage().getWidth()};
             }
             case 1: {
-                Painting tileP = this.findPainting(1);
+                Picture tileP = this.findPainting(1);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
-                return new Object[]{tileP.getRow()};
+                return new Object[]{tileP.getImage().getWidth()};
             }
             case 2: {
-                Painting tileP = this.findPainting(0);
+                Picture tileP = this.findPainting(0);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
-                return new Object[]{tileP.getRow()};
+                return new Object[]{tileP.getImage().getWidth()};
             }
             case 3: {
-                Painting tileP = this.findPainting(-1);
+                Picture tileP = this.findPainting(-1);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
@@ -88,14 +89,16 @@ public class PeripheralPaintBrush implements IPeripheral {
                 }
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
-                if (px < 0 || px > tileP.getRow() || py < 0 || py > tileP.getRow()) {
+                if (px < 0 || px > tileP.getImage().getWidth()
+                    || py < 0
+                    || py > tileP.getImage().getHeight()) {
                     throw new LuaException("number must be from 0 to row");
                 }
-                tileP.usePaintBrush(is, px, py, false);
+                tileP.usePaintingTool(is, px, py);
                 return new Object[]{true};
             }
             case 4: {
-                Painting tileP = this.findPainting(1);
+                Picture tileP = this.findPainting(1);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
@@ -115,13 +118,15 @@ public class PeripheralPaintBrush implements IPeripheral {
                 }
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
-                if (px < 0 || px > tileP.getRow() || py < 0 || py > tileP.getRow()) {
+                if (px < 0 || px > tileP.getImage().getWidth()
+                    || py < 0
+                    || py > tileP.getImage().getHeight()) {
                     throw new LuaException("number must be from 0 to row");
                 }
                 switch (this.turtle.getDirection()) {
                     case 2:
-                        px = tileP.getRow() - 1 - px;
-                        py = tileP.getRow() - 1 - py;
+                        px = tileP.getImage().getWidth() - 1 - px;
+                        py = tileP.getImage().getHeight() - 1 - py;
                     break;
                     case 3:
                     break;
@@ -129,20 +134,20 @@ public class PeripheralPaintBrush implements IPeripheral {
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        py = tileP.getRow() - 1 - py;
+                        py = tileP.getImage().getHeight() - 1 - py;
                     break;
                     case 5:
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        px = tileP.getRow() - 1 - px;
+                        px = tileP.getImage().getWidth() - 1 - px;
                     break;
                 }
-                tileP.usePaintBrush(is, px, py, false);
+                tileP.usePaintingTool(is, px, py);
                 return new Object[]{true};
             }
             case 5: {
-                Painting tileP = this.findPainting(0);
+                Picture tileP = this.findPainting(0);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
@@ -162,13 +167,15 @@ public class PeripheralPaintBrush implements IPeripheral {
                 }
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
-                if (px < 0 || px > tileP.getRow() || py < 0 || py > tileP.getRow()) {
+                if (px < 0 || px > tileP.getImage().getWidth()
+                    || py < 0
+                    || py > tileP.getImage().getHeight()) {
                     throw new LuaException("number must be from 0 to row");
                 }
                 switch (this.turtle.getDirection()) {
                     case 2:
-                        px = tileP.getRow() - 1 - px;
-                        py = tileP.getRow() - 1 - py;
+                        px = tileP.getImage().getWidth() - 1 - px;
+                        py = tileP.getImage().getHeight() - 1 - py;
                     break;
                     case 3:
                     break;
@@ -176,16 +183,16 @@ public class PeripheralPaintBrush implements IPeripheral {
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        px = tileP.getRow() - 1 - px;
+                        px = tileP.getImage().getWidth() - 1 - px;
                     break;
                     case 5:
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        py = tileP.getRow() - 1 - py;
+                        py = tileP.getImage().getHeight() - 1 - py;
                     break;
                 }
-                tileP.usePaintBrush(is, px, py, false);
+                tileP.usePaintingTool(is, px, py);
                 return new Object[]{true};
             }
             case 6: {
@@ -239,7 +246,7 @@ public class PeripheralPaintBrush implements IPeripheral {
         return null;
     }
     
-    public Painting findPainting(int side) {
+    public Picture findPainting(int side) {
         if (side < 0) {
             side = this.turtle.getDirection();
         }
@@ -248,10 +255,10 @@ public class PeripheralPaintBrush implements IPeripheral {
         TileEntity tile = this.turtle.getWorld()
                                      .getTileEntity(pos.posX + dir.offsetX, pos.posY + dir.offsetY,
                                                     pos.posZ + dir.offsetZ);
-        if (tile == null || !(tile instanceof ISidePaintingProvider)) {
+        if (tile == null || !(tile instanceof ISidePictureProvider)) {
             return null;
         }
-        ISidePaintingProvider tileP = (ISidePaintingProvider)tile;
+        ISidePictureProvider tileP = (ISidePictureProvider)tile;
         return tileP.getPainting(dir.getOpposite().ordinal());
     }
     

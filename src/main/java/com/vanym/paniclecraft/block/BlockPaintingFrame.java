@@ -7,10 +7,10 @@ import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.MainUtils;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -80,6 +80,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             if (world.isRemote) {
                 return true;
             }
+            Picture picture = tileP.getPainting(side);
             if (side == 0) {
                 int rot = (int)((entityPlayer.rotationYaw + 45.0F) / 90.0F);
                 while (rot >= 4) {
@@ -87,13 +88,13 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                 }
                 switch (rot) {
                     case 1:
-                        tileP.getPainting(side).rotatePicRight();
+                        picture.getImage().rotate90();
                     break;
                     case 2:
-                        tileP.getPainting(side).rotatePic180();
+                        picture.getImage().rotate180();
                     break;
                     case 3:
-                        tileP.getPainting(side).rotatePicLeft();
+                        picture.getImage().rotate270();
                     break;
                 }
             }
@@ -104,13 +105,13 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                 }
                 switch (rot) {
                     case 1:
-                        tileP.getPainting(side).rotatePicLeft();
+                        picture.getImage().rotate270();
                     break;
                     case 2:
-                        tileP.getPainting(side).rotatePic180();
+                        picture.getImage().rotate180();
                     break;
                     case 3:
-                        tileP.getPainting(side).rotatePicRight();
+                        picture.getImage().rotate90();
                     break;
                 }
             }
@@ -120,9 +121,10 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                     x + 0.5D + (dir.offsetX * 0.6),
                     y + 0.5D + (dir.offsetY * 0.6),
                     z + 0.5D + (dir.offsetZ * 0.6),
-                    BlockPainting.getSavedPic(tileP.getPainting(side)));
+                    BlockPainting.getSavedPic(picture));
             world.spawnEntityInWorld(entityItem);
-            tileP.setPainting(side, null);
+            tileP.clearPicture(side);
+            tileP.markForUpdate();
         }
         return false;
     }
@@ -196,7 +198,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             int par3,
             int par4) {
         this.setBlockBoundsBasedOnState(par1World, par2, par3, par4);
-        if (Painting.specialBoundingBox) {
+        if (Core.instance.painting.specialBoundingBox) {
             Minecraft mc = Minecraft.getMinecraft();
             ItemStack is = mc.thePlayer.inventory.getCurrentItem();
             if (is != null) {
@@ -213,18 +215,19 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                                 float f2 = (float)vec.zCoord - (float)par4;
                                 int side = mc.objectMouseOver.sideHit;
                                 TileEntityPaintingFrame tileP = (TileEntityPaintingFrame)tile;
-                                int px = ItemPaintBrush.getXuse(tileP.getPainting(side).getRow(),
-                                                                side, f, f1, f2);
-                                int py = ItemPaintBrush.getYuse(tileP.getPainting(side).getRow(),
-                                                                side, f, f1, f2);
-                                double mxdx = (1.0D / tileP.getPainting(side).getRow()) * px;
-                                double mxdy = (1.0D / tileP.getPainting(side).getRow()) * py;
-                                double mndx = (1.0D / tileP.getPainting(side).getRow()) *
-                                              (tileP.getPainting(side).getRow() - px) -
-                                              (1.0D / tileP.getPainting(side).getRow());
-                                double mndy = (1.0D / tileP.getPainting(side).getRow()) *
-                                              (tileP.getPainting(side).getRow() - py) -
-                                              (1.0D / tileP.getPainting(side).getRow());
+                                Picture picture = tileP.getPainting(side);
+                                int width = picture.getImage().getWidth();
+                                int height = picture.getImage().getHeight();
+                                int px = ItemPaintBrush.getXuse(width, side, f, f1, f2);
+                                int py = ItemPaintBrush.getYuse(height, side, f, f1, f2);
+                                double mxdx = (1.0D / width) * px;
+                                double mxdy = (1.0D / height) * py;
+                                double mndx = (1.0D / width) *
+                                              (width - px) -
+                                              (1.0D / width);
+                                double mndy = (1.0D / height) *
+                                              (height - py) -
+                                              (1.0D / height);
                                 switch (side) {
                                     case 0:
                                         return AxisAlignedBB.getBoundingBox((double)par2 +
@@ -321,10 +324,10 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     @Override
     public void breakBlock(World world, int x, int y, int z, Block p_149749_5_, int p_149749_6_) {
-        TileEntityPaintingFrame trpf = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
-        Painting[] pics = trpf.getPaintings();
-        for (int i = 0; i < pics.length; i++) {
-            if (pics[i] != null) {
+        TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+        for (int side = 0; side < 6; side++) {
+            Picture picture = tile.getPainting(side);
+            if (picture != null) {
                 this.dropBlockAsItem(world, x, y, z,
                                      new ItemStack(Core.instance.painting.itemPainting));
             }

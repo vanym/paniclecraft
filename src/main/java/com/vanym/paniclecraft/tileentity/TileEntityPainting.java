@@ -1,7 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
-import com.vanym.paniclecraft.utils.ISidePaintingProvider;
-import com.vanym.paniclecraft.utils.Painting;
+import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -12,11 +12,11 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 
-public class TileEntityPainting extends TileEntity implements ISidePaintingProvider {
+public class TileEntityPainting extends TileEntityPaintingContainer {
     
-    private boolean need_to_update = false;
+    protected final Picture picture = new Picture(new PictureHolder());
     
-    private Painting picture;
+    public static final String TAG_PICTURE = "PictureData";
     
     @Override
     public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
@@ -31,8 +31,6 @@ public class TileEntityPainting extends TileEntity implements ISidePaintingProvi
         super.readFromNBT(par1NBTTagCompound);
         if (par1NBTTagCompound.hasKey("PictureData")) {
             this.getPicture().readFromNBT(par1NBTTagCompound.getCompoundTag("PictureData"));
-        } else {
-            this.picture = null;
         }
     }
     
@@ -49,21 +47,12 @@ public class TileEntityPainting extends TileEntity implements ISidePaintingProvi
         this.readFromNBT(nbtData);
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public double getMaxRenderDistanceSquared() {
-        return 16384.0D;
-    }
-    
-    private Painting getPicture() {
-        if (this.picture == null) {
-            this.picture = new Painting(this);
-        }
+    protected Picture getPicture() {
         return this.picture;
     }
     
     @Override
-    public Painting getPainting(int side) {
+    public Picture getPainting(int side) {
         if (side == this.getBlockMetadata()) {
             return this.getPicture();
         } else {
@@ -71,72 +60,41 @@ public class TileEntityPainting extends TileEntity implements ISidePaintingProvi
         }
     }
     
-    @Override
-    public Painting getPainting(int side, int xO, int yO) {
-        int x = this.xCoord;
-        int y = this.yCoord;
-        int z = this.zCoord;
-        switch (side) {
-            case 0:
-                x -= xO;
-                z += yO;
-            break;
-            case 1:
-                x -= xO;
-                z -= yO;
-            break;
-            case 2:
-                x -= xO;
-                y -= yO;
-            break;
-            case 3:
-                x += xO;
-                y -= yO;
-            break;
-            case 4:
-                z += xO;
-                y -= yO;
-            break;
-            case 5:
-                z -= xO;
-                y -= yO;
-            break;
+    protected Picture getPainting(int side, int xO, int yO) {
+        if (side != this.getBlockMetadata()) {
+            return null;
         }
-        TileEntity var1 = this.getWorldObj().getTileEntity(x, y, z);
-        if (var1 instanceof TileEntityPainting
-            && ((TileEntityPainting)var1).getPicture().getRow() == this.getPicture().getRow()
-            && var1.getBlockMetadata() == this.getBlockMetadata()) {
-            return ((TileEntityPainting)var1).getPainting(side);
+        TileEntity tile = this.getNeighborTile(side, xO, yO);
+        if (tile != null && tile instanceof TileEntityPainting) {
+            TileEntityPainting tilePainting = (TileEntityPainting)tile;
+            return tilePainting.getPainting(side);
         }
         return null;
     }
     
     @Override
-    public void needUpdate() {
-        this.need_to_update = true;
-    }
-    
-    @Override
     public void updateEntity() {
         super.updateEntity();
-        if (this.need_to_update) {
-            this.markForUpdate();
+    }
+    
+    protected class PictureHolder implements IPictureHolder {
+        
+        @Override
+        public Picture getNeighborPicture(int offsetX, int offsetY) {
+            return TileEntityPainting.this.getPainting(TileEntityPainting.this.getBlockMetadata(),
+                                                       offsetX, offsetY);
+        }
+        
+        @Override
+        public void update() {
+            TileEntityPainting.this.markForUpdate();
         }
     }
     
     @Override
-    public void markForUpdate() {
-        this.getWorldObj().markBlockForUpdate(this.xCoord, this.yCoord, this.zCoord);
-        this.need_to_update = false;
-    }
-    
-    @Override
-    public int getPictureSide(Painting picture) {
-        if (this.getPicture().equals(picture)) {
-            return this.getBlockMetadata();
-        } else {
-            return -1;
-        }
+    @SideOnly(Side.CLIENT)
+    public double getMaxRenderDistanceSquared() {
+        return 16384.0D; // 128 * 128
     }
     
     @Override
@@ -144,7 +102,7 @@ public class TileEntityPainting extends TileEntity implements ISidePaintingProvi
     public void invalidate() {
         super.invalidate();
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.getPicture().deleteTexrure();
+            this.getPicture().invalidate();
         }
     }
     
@@ -153,7 +111,7 @@ public class TileEntityPainting extends TileEntity implements ISidePaintingProvi
     public void onChunkUnload() {
         super.onChunkUnload();
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.getPicture().deleteTexrure();
+            this.getPicture().invalidate();
         }
     }
     
@@ -161,7 +119,7 @@ public class TileEntityPainting extends TileEntity implements ISidePaintingProvi
     @SideOnly(Side.CLIENT)
     public void onWorldUnload() {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.getPicture().deleteTexrure();
+            this.getPicture().invalidate();
         }
     }
 }

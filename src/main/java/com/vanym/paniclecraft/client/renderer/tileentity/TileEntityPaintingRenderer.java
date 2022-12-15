@@ -8,8 +8,8 @@ import org.lwjgl.opengl.GL11;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.client.utils.IconFlippedBugFixed;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -97,7 +97,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         tessellator.draw();
         tessellator.startDrawingQuads();
         {
-            Painting picture = tile.getPainting(meta);
+            Picture picture = tile.getPainting(meta);
             IIcon icon = bindTexture(picture, meta);
             render.setOverrideBlockTexture(icon);
             block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
@@ -109,31 +109,31 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         tessellator.setTranslation(0, 0, 0);
     }
     
-    protected static IIcon bindTexture(Painting picture, int side) {
-        if (picture.texID <= 0) {
-            picture.texID = GL11.glGenTextures();
-            picture.getPic();
+    protected static IIcon bindTexture(Picture picture, int side) {
+        if (picture.texture < 0) {
+            picture.texture = GL11.glGenTextures();
         }
-        if (picture.hasPic()) {
+        if (!picture.imageChangeProcessed) {
+            byte[] data = picture.getImage().getData();
             ByteBuffer textureBuffer =
-                    ByteBuffer.allocateDirect(picture.getPic().length);
+                    ByteBuffer.allocateDirect(data.length);
             textureBuffer.order(ByteOrder.nativeOrder());
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texID);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texture);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
                                  GL11.GL_NEAREST);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
                                  GL11.GL_NEAREST);
             textureBuffer.clear();
-            textureBuffer.put(picture.getPic());
+            textureBuffer.put(data);
             textureBuffer.flip();
             GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB,
-                              picture.getRow(),
-                              picture.getRow(), 0, GL11.GL_RGB,
+                              picture.getImage().getWidth(),
+                              picture.getImage().getHeight(), 0, GL11.GL_RGB,
                               GL11.GL_UNSIGNED_BYTE,
                               textureBuffer);
-            picture.delPic();
+            picture.imageChangeProcessed = true;
         } else {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texID);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texture);
         }
         IIcon icon = new FullTextureIcon(1, 1);
         switch (side) {

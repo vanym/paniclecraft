@@ -3,10 +3,10 @@ package com.vanym.paniclecraft.block;
 import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -119,6 +119,7 @@ public class BlockPainting extends BlockPaintingContainer {
         if (!world.isRemote) {
             TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
             int md = world.getBlockMetadata(x, y, z);
+            Picture picture = tileP.getPainting(md);
             if (md == 0) {
                 int rot = (int)((entityPlayer.rotationYaw + 45.0F) / 90.0F);
                 while (rot >= 4) {
@@ -126,13 +127,13 @@ public class BlockPainting extends BlockPaintingContainer {
                 }
                 switch (rot) {
                     case 1:
-                        tileP.getPainting(md).rotatePicRight();
+                        picture.getImage().rotate90();
                     break;
                     case 2:
-                        tileP.getPainting(md).rotatePic180();
+                        picture.getImage().rotate180();
                     break;
                     case 3:
-                        tileP.getPainting(md).rotatePicLeft();
+                        picture.getImage().rotate270();
                     break;
                 }
             }
@@ -143,13 +144,13 @@ public class BlockPainting extends BlockPaintingContainer {
                 }
                 switch (rot) {
                     case 1:
-                        tileP.getPainting(md).rotatePicLeft();
+                        picture.getImage().rotate270();
                     break;
                     case 2:
-                        tileP.getPainting(md).rotatePic180();
+                        picture.getImage().rotate180();
                     break;
                     case 3:
-                        tileP.getPainting(md).rotatePicRight();
+                        picture.getImage().rotate90();
                     break;
                 }
             }
@@ -158,7 +159,7 @@ public class BlockPainting extends BlockPaintingContainer {
                     x + 0.5D,
                     y + 0.5D,
                     z + 0.5D,
-                    getSavedPic(tileP.getPainting(md)));
+                    getSavedPic(picture));
             world.spawnEntityInWorld(entityItem);
             world.setBlockToAir(x, y, z);
         }
@@ -178,14 +179,14 @@ public class BlockPainting extends BlockPaintingContainer {
         return MainUtils.getBoundsBySide(side, this.getPaintingWidth());
     }
     
-    public static ItemStack getSavedPic(Painting pic) {
+    public static ItemStack getSavedPic(Picture picture) {
         ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
-        if (pic == null) {
+        if (picture == null) {
             return itemS;
         }
         NBTTagCompound var1 = new NBTTagCompound();
         NBTTagCompound var2 = new NBTTagCompound();
-        pic.writeToNBT(var2);
+        picture.writeToNBT(var2);
         itemS.setTagCompound(var1);
         var1.setTag("PaintingData", var2);
         return itemS;
@@ -205,7 +206,7 @@ public class BlockPainting extends BlockPaintingContainer {
             int par3,
             int par4) {
         this.setBlockBoundsBasedOnState(par1World, par2, par3, par4);
-        if (Painting.specialBoundingBox) {
+        if (Core.instance.painting.specialBoundingBox) {
             Minecraft mc = Minecraft.getMinecraft();
             ItemStack is = mc.thePlayer.inventory.getCurrentItem();
             if (is != null) {
@@ -222,20 +223,18 @@ public class BlockPainting extends BlockPaintingContainer {
                                 float f2 = (float)vec.zCoord - (float)par4;
                                 int side = mc.objectMouseOver.sideHit;
                                 TileEntityPainting tileP = (TileEntityPainting)tile;
-                                int px = ItemPaintBrush.getXuse(tileP.getPainting(side).getRow(),
-                                                                mc.objectMouseOver.sideHit, f, f1,
-                                                                f2);
-                                int py = ItemPaintBrush.getYuse(tileP.getPainting(side).getRow(),
-                                                                mc.objectMouseOver.sideHit, f, f1,
-                                                                f2);
-                                double mxdx = (1.0D / tileP.getPainting(side).getRow()) * px;
-                                double mxdy = (1.0D / tileP.getPainting(side).getRow()) * py;
-                                double mndx = (1.0D / tileP.getPainting(side).getRow()) *
-                                              (tileP.getPainting(side).getRow() - px) -
-                                              (1.0D / tileP.getPainting(side).getRow());
-                                double mndy = (1.0D / tileP.getPainting(side).getRow()) *
-                                              (tileP.getPainting(side).getRow() - py) -
-                                              (1.0D / tileP.getPainting(side).getRow());
+                                Picture picture = tileP.getPainting(side);
+                                int width = picture.getImage().getWidth();
+                                int height = picture.getImage().getHeight();
+                                int px = ItemPaintBrush.getXuse(width, mc.objectMouseOver.sideHit,
+                                                                f, f1, f2);
+                                int py = ItemPaintBrush.getYuse(height, mc.objectMouseOver.sideHit,
+                                                                f, f1, f2);
+                                double mxdx = (1.0D / width) * px;
+                                double mxdy = (1.0D / height) * py;
+                                double mndx = (1.0D / width) * (width - px) - (1.0D / width);
+                                double mndy = (1.0D / height) * (height - py) -
+                                              (1.0D / height);
                                 switch (tileP.getBlockMetadata()) {
                                     case 0:
                                         return AxisAlignedBB.getBoundingBox((double)par2 +

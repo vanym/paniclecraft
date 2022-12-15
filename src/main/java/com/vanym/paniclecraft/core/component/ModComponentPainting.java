@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.core.component;
 
+import java.awt.Color;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
@@ -17,7 +19,6 @@ import com.vanym.paniclecraft.recipe.RecipePaintBrushByDye;
 import com.vanym.paniclecraft.recipe.RecipePaintBrushByPaintFiller;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -36,6 +37,8 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class ModComponentPainting implements ModComponent {
     
+    public final Color DEFAULT_COLOR = new Color(200, 200, 200);
+    
     public ItemPainting itemPainting;
     public ItemPaintBrush itemPaintBrush;
     public ItemPalette itemPalette;
@@ -47,6 +50,8 @@ public class ModComponentPainting implements ModComponent {
     @SideOnly(Side.CLIENT)
     public TileEntityPaintingFrameRenderer tilePaintingFrameRenderer =
             new TileEntityPaintingFrameRenderer();
+    @SideOnly(Side.CLIENT)
+    public boolean specialBoundingBox = true;
     
     protected boolean enabled = false;
     
@@ -59,17 +64,14 @@ public class ModComponentPainting implements ModComponent {
         this.itemPainting = new ItemPainting();
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPalette = new ItemPalette();
-        Painting.defPaintRow = config.getInt("PaintingRow", this.getName(), 16, 1, 32,
-                                             "(recommend to degree 2 like 8,16,32)");
-        ItemPaintBrush.brushRadiusSquare =
-                config.getInt("BrushRadiusSquare", this.getName(), 3, 1, 1024, "");
+        config.getInt("PaintingRow", this.getName(), 16, 1, 32, // TODO
+                      "(recommend to degree 2 like 8,16,32)");
         ItemPaintBrush.brushRadiusRound =
-                config.get(this.getName(), "BrushRadiusRound", 3.5D,
+                config.get(this.getName(), "brushRadius", 3.5D,
                            "[range: 1 ~ 2048, default: 3.5]", 1.0D, 2048.0D)
                       .getDouble(3.5D);
         ItemPainting.paintingPlaceStack =
                 config.getInt("PaintingPlaceStack", this.getName(), 2, 0, 256, "");
-        Painting.pngPaintingSave = config.getBoolean("PaintingPngSave", this.getName(), true, "");
         Core.instance.registerItem(this.itemPainting);
         Core.instance.registerItem(this.itemPaintBrush);
         Core.instance.registerItem(this.itemPalette);

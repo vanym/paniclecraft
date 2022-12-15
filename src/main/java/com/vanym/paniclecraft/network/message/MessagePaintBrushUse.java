@@ -1,8 +1,8 @@
 package com.vanym.paniclecraft.network.message;
 
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
-import com.vanym.paniclecraft.utils.ISidePaintingProvider;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -62,14 +62,13 @@ public class MessagePaintBrushUse
             if (playerEntity.getHeldItem().getItem() instanceof ItemPaintBrush) {
                 TileEntity tileEntity =
                         playerEntity.worldObj.getTileEntity(message.x, message.y, message.z);
-                if (tileEntity instanceof ISidePaintingProvider
+                if (tileEntity instanceof ISidePictureProvider
                     && playerEntity.canPlayerEdit(message.x, message.y, message.z, message.side,
                                                   playerEntity.getHeldItem())) {
-                    Painting picture =
-                            ((ISidePaintingProvider)tileEntity).getPainting(message.side);
+                    Picture picture =
+                            ((ISidePictureProvider)tileEntity).getPainting(message.side);
                     if (picture != null) {
-                        picture.usePaintBrush(playerEntity.getHeldItem(), message.px, message.py,
-                                              true);
+                        picture.usePaintingTool(playerEntity.getHeldItem(), message.px, message.py);
                     }
                 }
             }

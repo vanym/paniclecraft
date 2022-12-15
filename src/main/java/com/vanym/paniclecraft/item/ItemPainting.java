@@ -3,9 +3,9 @@ package com.vanym.paniclecraft.item;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -43,13 +43,14 @@ public class ItemPainting extends ItemMod3 {
             if (tile != null && tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
                 if (tilePF.getPainting(side) == null) {
-                    Painting pic = new Painting(tilePF);
+                    Picture picture = tilePF.createPicture(side);
                     if (par1ItemStack.hasTagCompound()) {
                         NBTTagCompound tag = par1ItemStack.getTagCompound();
                         if (tag.hasKey("PaintingData")) {
-                            NBTTagCompound tagData = tag.getCompoundTag("PaintingData");
+                            NBTTagCompound tagData =
+                                    tag.getCompoundTag("PaintingData");
                             if (!tagData.hasNoTags()) {
-                                pic.readFromNBT(tagData);
+                                picture.readFromNBT(tagData);
                                 if (side == 0) {
                                     float rotF = par2EntityPlayer.rotationYaw + 45.0F;
                                     while (rotF >= 360.0F) {
@@ -61,13 +62,13 @@ public class ItemPainting extends ItemMod3 {
                                     int rot = (int)(rotF / 90.0F);
                                     switch (rot) {
                                         case 1:
-                                            pic.rotatePicLeft();
+                                            picture.getImage().rotate270();
                                         break;
                                         case 2:
-                                            pic.rotatePic180();
+                                            picture.getImage().rotate180();
                                         break;
                                         case 3:
-                                            pic.rotatePicRight();
+                                            picture.getImage().rotate90();
                                         break;
                                     }
                                 }
@@ -82,20 +83,20 @@ public class ItemPainting extends ItemMod3 {
                                     int rot = (int)(rotF / 90.0F);
                                     switch (rot) {
                                         case 1:
-                                            pic.rotatePicRight();
+                                            picture.getImage().rotate90();
                                         break;
                                         case 2:
-                                            pic.rotatePic180();
+                                            picture.getImage().rotate180();
                                         break;
                                         case 3:
-                                            pic.rotatePicLeft();
+                                            picture.getImage().rotate270();
                                         break;
                                     }
                                 }
                             }
                         }
                     }
-                    tilePF.setPainting(side, pic);
+                    tilePF.markForUpdate();
                     --par1ItemStack.stackSize;
                     return true;
                 }
@@ -294,7 +295,8 @@ public class ItemPainting extends ItemMod3 {
                     if (!tagData.hasNoTags()) {
                         TileEntityPainting tileP =
                                 (TileEntityPainting)par3World.getTileEntity(x, y, z);
-                        tileP.getPainting(side).readFromNBT(tagData);
+                        Picture picture = tileP.getPainting(side);
+                        picture.readFromNBT(tagData);
                         if (side == 0) {
                             float rotF = par2EntityPlayer.rotationYaw + 45.0F;
                             while (rotF >= 360.0F) {
@@ -306,13 +308,13 @@ public class ItemPainting extends ItemMod3 {
                             int rot = (int)(rotF / 90.0F);
                             switch (rot) {
                                 case 1:
-                                    tileP.getPainting(side).rotatePicLeft();
+                                    picture.getImage().rotate270();
                                 break;
                                 case 2:
-                                    tileP.getPainting(side).rotatePic180();
+                                    picture.getImage().rotate180();
                                 break;
                                 case 3:
-                                    tileP.getPainting(side).rotatePicRight();
+                                    picture.getImage().rotate90();
                                 break;
                             }
                         }
@@ -327,13 +329,13 @@ public class ItemPainting extends ItemMod3 {
                             int rot = (int)(rotF / 90.0F);
                             switch (rot) {
                                 case 1:
-                                    tileP.getPainting(side).rotatePicRight();
+                                    picture.getImage().rotate90();
                                 break;
                                 case 2:
-                                    tileP.getPainting(side).rotatePic180();
+                                    picture.getImage().rotate180();
                                 break;
                                 case 3:
-                                    tileP.getPainting(side).rotatePicLeft();
+                                    picture.getImage().rotate270();
                                 break;
                             }
                         }

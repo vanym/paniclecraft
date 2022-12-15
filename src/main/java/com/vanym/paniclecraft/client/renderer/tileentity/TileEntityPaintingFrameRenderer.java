@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.MainUtils;
-import com.vanym.paniclecraft.utils.Painting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -58,7 +58,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAMEINSIDE);
         final double paintingWidth = block.getPaintingWidth();
         for (int side = 0; side < 6; ++side) {
-            Painting picture = tile.getPainting(side);
+            Picture picture = tile.getPainting(side);
             if (picture == null) {
                 continue;
             }
@@ -72,7 +72,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         tessellator.draw();
         block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
         for (int side = 0; side < 6; ++side) {
-            Painting picture = tile.getPainting(side);
+            Picture picture = tile.getPainting(side);
             if (picture == null) {
                 continue;
             }
