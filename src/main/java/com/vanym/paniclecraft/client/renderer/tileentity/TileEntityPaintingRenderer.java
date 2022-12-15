@@ -111,10 +111,12 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     }
     
     protected static IIcon bindTexture(Picture picture, int side) {
+        boolean newtexture = false;
         if (picture.texture < 0) {
             picture.texture = GL11.glGenTextures();
+            newtexture = true;
         }
-        if (!picture.imageChangeProcessed) {
+        if (newtexture || !picture.imageChangeProcessed) {
             Image image = picture.getImage();
             final byte[] data = image.getData();
             final int width = image.getWidth();
