@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.client.renderer.item;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
 import cpw.mods.fml.relauncher.Side;
@@ -35,8 +36,8 @@ public class ItemRendererPainting implements IItemRenderer {
         tilePainting.getPainting(3).setSize(1, 1);
         if (item.hasTagCompound()) {
             NBTTagCompound tag = item.getTagCompound();
-            if (tag.hasKey("PaintingData")) {
-                NBTTagCompound tagData = tag.getCompoundTag("PaintingData");
+            if (tag.hasKey(ItemPainting.TAG_PICTURE)) {
+                NBTTagCompound tagData = tag.getCompoundTag(ItemPainting.TAG_PICTURE);
                 if (!tagData.hasNoTags()) {
                     tilePainting.getPainting(3).readFromNBT(tagData);
                 }

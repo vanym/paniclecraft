@@ -175,7 +175,6 @@ public class Picture {
         // TODO remove migrate hack
         if (nbtTag.hasKey("PicPng")) {
             nbtTag.setTag(TAG_IMAGE, nbtTag.getTag("PicPng"));
-            nbtTag.removeTag("PicPng");
         }
         if (nbtTag.hasKey(TAG_IMAGE)) {
             NBTBase nbtImage = nbtTag.getTag(TAG_IMAGE);

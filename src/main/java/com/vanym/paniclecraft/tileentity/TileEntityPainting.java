@@ -16,21 +16,24 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     protected final Picture picture = new Picture(new PictureHolder());
     
-    public static final String TAG_PICTURE = "PictureData";
+    public static final String TAG_PICTURE = "Picture";
     
     @Override
-    public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
-        super.writeToNBT(par1NBTTagCompound);
+    public void writeToNBT(NBTTagCompound nbtTag) {
+        super.writeToNBT(nbtTag);
         NBTTagCompound paintingTag = new NBTTagCompound();
         this.getPicture().writeToNBT(paintingTag);
-        par1NBTTagCompound.setTag("PictureData", paintingTag);
+        nbtTag.setTag(TAG_PICTURE, paintingTag);
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
-        super.readFromNBT(par1NBTTagCompound);
-        if (par1NBTTagCompound.hasKey("PictureData")) {
-            this.getPicture().readFromNBT(par1NBTTagCompound.getCompoundTag("PictureData"));
+    public void readFromNBT(NBTTagCompound nbtTag) {
+        super.readFromNBT(nbtTag);
+        if (nbtTag.hasKey("PictureData")) {
+            nbtTag.setTag(TAG_PICTURE, nbtTag.getTag("PictureData"));
+        }
+        if (nbtTag.hasKey(TAG_PICTURE)) {
+            this.getPicture().readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE));
         }
     }
     

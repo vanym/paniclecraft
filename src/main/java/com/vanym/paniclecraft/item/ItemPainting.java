@@ -19,6 +19,8 @@ import net.minecraft.world.World;
 
 public class ItemPainting extends ItemMod3 {
     
+    public static final String TAG_PICTURE = "PaintingData"; // TileEntityPainting.TAG_PICTURE;
+    
     public static int paintingPlaceStack = 2;
     
     public ItemPainting() {
@@ -46,9 +48,8 @@ public class ItemPainting extends ItemMod3 {
                     Picture picture = tilePF.createPicture(side);
                     if (par1ItemStack.hasTagCompound()) {
                         NBTTagCompound tag = par1ItemStack.getTagCompound();
-                        if (tag.hasKey("PaintingData")) {
-                            NBTTagCompound tagData =
-                                    tag.getCompoundTag("PaintingData");
+                        if (tag.hasKey(TAG_PICTURE)) {
+                            NBTTagCompound tagData = tag.getCompoundTag(TAG_PICTURE);
                             if (!tagData.hasNoTags()) {
                                 picture.readFromNBT(tagData);
                                 if (side == 0) {
@@ -290,8 +291,8 @@ public class ItemPainting extends ItemMod3 {
             par3World.setBlock(x, y, z, Core.instance.painting.blockPainting, side, 3);
             if (par1ItemStack.hasTagCompound()) {
                 NBTTagCompound tag = par1ItemStack.getTagCompound();
-                if (tag.hasKey("PaintingData")) {
-                    NBTTagCompound tagData = tag.getCompoundTag("PaintingData");
+                if (tag.hasKey(TAG_PICTURE)) {
+                    NBTTagCompound tagData = tag.getCompoundTag(TAG_PICTURE);
                     if (!tagData.hasNoTags()) {
                         TileEntityPainting tileP =
                                 (TileEntityPainting)par3World.getTileEntity(x, y, z);
@@ -361,7 +362,7 @@ public class ItemPainting extends ItemMod3 {
         if (GuiScreen.isShiftKeyDown()) {
             if (par1ItemStack.hasTagCompound()) {
                 NBTTagCompound tag = par1ItemStack.getTagCompound();
-                if (tag.hasKey("PaintingData")) {
+                if (tag.hasKey(TAG_PICTURE)) {
                     par3List.add(StatCollector.translateToLocal("text.paintingHaveSave").trim());
                 }
             }

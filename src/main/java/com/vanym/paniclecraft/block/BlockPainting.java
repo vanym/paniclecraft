@@ -5,6 +5,7 @@ import java.util.Random;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
+import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -188,7 +189,7 @@ public class BlockPainting extends BlockPaintingContainer {
         NBTTagCompound var2 = new NBTTagCompound();
         picture.writeToNBT(var2);
         itemS.setTagCompound(var1);
-        var1.setTag("PaintingData", var2);
+        var1.setTag(ItemPainting.TAG_PICTURE, var2);
         return itemS;
     }
     
