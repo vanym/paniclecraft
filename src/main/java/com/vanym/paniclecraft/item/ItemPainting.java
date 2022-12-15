@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 
 public class ItemPainting extends ItemMod3 {
     
-    public static final String TAG_PICTURE = "PaintingData"; // TileEntityPainting.TAG_PICTURE;
+    public static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public static int paintingPlaceStack = 2;
     
