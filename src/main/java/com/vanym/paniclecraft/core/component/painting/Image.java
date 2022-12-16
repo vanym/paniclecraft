@@ -5,8 +5,10 @@ import java.util.Arrays;
 
 public class Image {
     
-    protected final int width;
-    protected final int height;
+    protected final static int PIXEL_SIZE = 3;
+    
+    protected int width;
+    protected int height;
     protected final byte[] data;
     
     public Image(int width, int height) {
@@ -26,7 +28,7 @@ public class Image {
     }
     
     protected int getSize() {
-        return this.width * this.height * 3;
+        return this.width * this.height * PIXEL_SIZE;
     }
     
     public boolean isSameSize(Image image) {
@@ -42,7 +44,7 @@ public class Image {
     }
     
     public byte[] getData() {
-        int size = this.width * this.height * 3;
+        int size = this.getSize();
         if (this.data != null && this.data.length != size) {
             return null;
         }
@@ -50,7 +52,7 @@ public class Image {
     }
     
     public boolean setPixelColor(int px, int py, Color color) {
-        int offset = (py * this.width + px) * 3;
+        int offset = (py * this.width + px) * PIXEL_SIZE;
         int offsetR = offset;
         int offsetG = offset + 1;
         int offsetB = offset + 2;
@@ -74,7 +76,7 @@ public class Image {
     }
     
     public Color getPixelColor(int px, int py) {
-        int offset = (py * this.width + px) * 3;
+        int offset = (py * this.width + px) * PIXEL_SIZE;
         int offsetR = offset;
         int offsetG = offset + 1;
         int offsetB = offset + 2;
@@ -89,7 +91,7 @@ public class Image {
         byte g = (byte)color.getGreen();
         byte b = (byte)color.getBlue();
         boolean changed = false;
-        for (int i = 0; i < this.data.length; i += 3) {
+        for (int i = 0; i < this.data.length; i += PIXEL_SIZE) {
             int iR = i;
             int iG = i + 1;
             int iB = i + 2;
@@ -109,15 +111,34 @@ public class Image {
         return changed;
     }
     
+    protected void transpose() {
+        MatrixUtils.transpose(this.data, this.width, PIXEL_SIZE);
+        int t = this.width;
+        this.width = this.height;
+        this.height = t;
+    }
+    
+    protected void flipH() {
+        MatrixUtils.flipH(this.data, this.width, PIXEL_SIZE);
+    }
+    
+    protected void flipV() {
+        MatrixUtils.flipV(this.data, this.width, PIXEL_SIZE);
+    }
+    
     public void rotate90() {
-        // TODO
+        // Clockwise
+        this.transpose();
+        this.flipH();
     }
     
     public void rotate180() {
-        // TODO
+        MatrixUtils.rotate180(data, PIXEL_SIZE);
     }
     
     public void rotate270() {
-        // TODO
+        // Clockwise
+        this.transpose();
+        this.flipV();
     }
 }
