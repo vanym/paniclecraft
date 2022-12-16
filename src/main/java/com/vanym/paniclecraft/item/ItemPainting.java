@@ -63,13 +63,13 @@ public class ItemPainting extends ItemMod3 {
                                     int rot = (int)(rotF / 90.0F);
                                     switch (rot) {
                                         case 1:
-                                            picture.getImage().rotate270();
+                                            picture.rotate270();
                                         break;
                                         case 2:
-                                            picture.getImage().rotate180();
+                                            picture.rotate180();
                                         break;
                                         case 3:
-                                            picture.getImage().rotate90();
+                                            picture.rotate90();
                                         break;
                                     }
                                 }
@@ -84,13 +84,13 @@ public class ItemPainting extends ItemMod3 {
                                     int rot = (int)(rotF / 90.0F);
                                     switch (rot) {
                                         case 1:
-                                            picture.getImage().rotate90();
+                                            picture.rotate90();
                                         break;
                                         case 2:
-                                            picture.getImage().rotate180();
+                                            picture.rotate180();
                                         break;
                                         case 3:
-                                            picture.getImage().rotate270();
+                                            picture.rotate270();
                                         break;
                                     }
                                 }
@@ -309,13 +309,13 @@ public class ItemPainting extends ItemMod3 {
                             int rot = (int)(rotF / 90.0F);
                             switch (rot) {
                                 case 1:
-                                    picture.getImage().rotate270();
+                                    picture.rotate270();
                                 break;
                                 case 2:
-                                    picture.getImage().rotate180();
+                                    picture.rotate180();
                                 break;
                                 case 3:
-                                    picture.getImage().rotate90();
+                                    picture.rotate90();
                                 break;
                             }
                         }
@@ -330,13 +330,13 @@ public class ItemPainting extends ItemMod3 {
                             int rot = (int)(rotF / 90.0F);
                             switch (rot) {
                                 case 1:
-                                    picture.getImage().rotate90();
+                                    picture.rotate90();
                                 break;
                                 case 2:
-                                    picture.getImage().rotate180();
+                                    picture.rotate180();
                                 break;
                                 case 3:
-                                    picture.getImage().rotate270();
+                                    picture.rotate270();
                                 break;
                             }
                         }

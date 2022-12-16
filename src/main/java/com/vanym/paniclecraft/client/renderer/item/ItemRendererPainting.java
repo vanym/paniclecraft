@@ -33,7 +33,6 @@ public class ItemRendererPainting implements IItemRenderer {
         TileEntityPainting tilePainting = new TileEntityPainting();
         tilePainting.blockType = Core.instance.painting.blockPainting;
         tilePainting.blockMetadata = 3;
-        tilePainting.getPainting(3).setSize(1, 1);
         if (item.hasTagCompound()) {
             NBTTagCompound tag = item.getTagCompound();
             if (tag.hasKey(ItemPainting.TAG_PICTURE)) {

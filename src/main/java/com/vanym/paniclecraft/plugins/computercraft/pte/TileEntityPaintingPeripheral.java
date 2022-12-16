@@ -39,7 +39,6 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
         switch (method) {
             case 0: {
                 return new Object[]{this.tileP.getPainting(this.tileP.getBlockMetadata())
-                                              .getImage()
                                               .getWidth()};
             }
             case 1: {
@@ -56,17 +55,14 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
                 int py = ((Double)arguments[1]).intValue();
                 if (px < 0
                     || px > this.tileP.getPainting(this.tileP.getBlockMetadata())
-                                      .getImage()
                                       .getWidth()
                     || py < 0
                     || py > this.tileP.getPainting(this.tileP.getBlockMetadata())
-                                      .getImage()
                                       .getWidth()) {
                     throw new LuaException("number must be from 0 to row");
                 }
                 Color color =
                         this.tileP.getPainting(this.tileP.getBlockMetadata())
-                                  .getImage()
                                   .getPixelColor(px, py);
                 return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
             }
@@ -87,11 +83,9 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
                 int py = ((Double)arguments[1]).intValue();
                 if (px < 0
                     || px > this.tileP.getPainting(this.tileP.getBlockMetadata())
-                                      .getImage()
                                       .getWidth()
                     || py < 0
                     || py > this.tileP.getPainting(this.tileP.getBlockMetadata())
-                                      .getImage()
                                       .getWidth()) {
                     throw new LuaException("number must be from 0 to row");
                 }
@@ -131,7 +125,11 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
                 } catch (IllegalArgumentException e) {
                     throw new LuaException(e.getMessage());
                 } finally {
-                    this.tileP.getPainting(this.tileP.getBlockMetadata()).getImage().fill(color);
+                    ItemStack itemStack = new ItemStack(Core.instance.painting.itemPaintBrush);
+                    itemStack.setItemDamage(2);
+                    Core.instance.painting.itemPaintBrush.setColor(itemStack, color.getRGB());
+                    this.tileP.getPainting(this.tileP.getBlockMetadata())
+                              .usePaintingTool(itemStack, 0, 0);
                 }
                 return new Object[]{true};
             }

@@ -83,8 +83,8 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
                         float f = (float)vec.xCoord - (float)x;
                         float f1 = (float)vec.yCoord - (float)y;
                         float f2 = (float)vec.zCoord - (float)z;
-                        int px = getXuse(picture.getImage().getWidth(), s, f, f1, f2);
-                        int py = getYuse(picture.getImage().getHeight(), s, f, f1, f2);
+                        int px = getXuse(picture.getWidth(), s, f, f1, f2);
+                        int py = getYuse(picture.getHeight(), s, f, f1, f2);
                         Core.instance.network.sendToServer(new MessagePaintBrushUse(
                                 x,
                                 y,

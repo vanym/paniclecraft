@@ -52,21 +52,21 @@ public class PeripheralPaintBrush implements IPeripheral {
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
-                return new Object[]{tileP.getImage().getWidth()};
+                return new Object[]{tileP.getWidth()};
             }
             case 1: {
                 Picture tileP = this.findPainting(1);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
-                return new Object[]{tileP.getImage().getWidth()};
+                return new Object[]{tileP.getWidth()};
             }
             case 2: {
                 Picture tileP = this.findPainting(0);
                 if (tileP == null) {
                     throw new LuaException("cat\'t find painting");
                 }
-                return new Object[]{tileP.getImage().getWidth()};
+                return new Object[]{tileP.getWidth()};
             }
             case 3: {
                 Picture tileP = this.findPainting(-1);
@@ -89,9 +89,9 @@ public class PeripheralPaintBrush implements IPeripheral {
                 }
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
-                if (px < 0 || px > tileP.getImage().getWidth()
+                if (px < 0 || px > tileP.getWidth()
                     || py < 0
-                    || py > tileP.getImage().getHeight()) {
+                    || py > tileP.getHeight()) {
                     throw new LuaException("number must be from 0 to row");
                 }
                 tileP.usePaintingTool(is, px, py);
@@ -118,15 +118,15 @@ public class PeripheralPaintBrush implements IPeripheral {
                 }
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
-                if (px < 0 || px > tileP.getImage().getWidth()
+                if (px < 0 || px > tileP.getWidth()
                     || py < 0
-                    || py > tileP.getImage().getHeight()) {
+                    || py > tileP.getHeight()) {
                     throw new LuaException("number must be from 0 to row");
                 }
                 switch (this.turtle.getDirection()) {
                     case 2:
-                        px = tileP.getImage().getWidth() - 1 - px;
-                        py = tileP.getImage().getHeight() - 1 - py;
+                        px = tileP.getWidth() - 1 - px;
+                        py = tileP.getHeight() - 1 - py;
                     break;
                     case 3:
                     break;
@@ -134,13 +134,13 @@ public class PeripheralPaintBrush implements IPeripheral {
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        py = tileP.getImage().getHeight() - 1 - py;
+                        py = tileP.getHeight() - 1 - py;
                     break;
                     case 5:
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        px = tileP.getImage().getWidth() - 1 - px;
+                        px = tileP.getWidth() - 1 - px;
                     break;
                 }
                 tileP.usePaintingTool(is, px, py);
@@ -167,15 +167,15 @@ public class PeripheralPaintBrush implements IPeripheral {
                 }
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
-                if (px < 0 || px > tileP.getImage().getWidth()
+                if (px < 0 || px > tileP.getWidth()
                     || py < 0
-                    || py > tileP.getImage().getHeight()) {
+                    || py > tileP.getHeight()) {
                     throw new LuaException("number must be from 0 to row");
                 }
                 switch (this.turtle.getDirection()) {
                     case 2:
-                        px = tileP.getImage().getWidth() - 1 - px;
-                        py = tileP.getImage().getHeight() - 1 - py;
+                        px = tileP.getWidth() - 1 - px;
+                        py = tileP.getHeight() - 1 - py;
                     break;
                     case 3:
                     break;
@@ -183,13 +183,13 @@ public class PeripheralPaintBrush implements IPeripheral {
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        px = tileP.getImage().getWidth() - 1 - px;
+                        px = tileP.getWidth() - 1 - px;
                     break;
                     case 5:
                         px = px + py;
                         py = px - py;
                         px = px - py;
-                        py = tileP.getImage().getHeight() - 1 - py;
+                        py = tileP.getHeight() - 1 - py;
                     break;
                 }
                 tileP.usePaintingTool(is, px, py);

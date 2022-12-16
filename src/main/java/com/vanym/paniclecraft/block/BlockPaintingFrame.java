@@ -88,13 +88,13 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                 }
                 switch (rot) {
                     case 1:
-                        picture.getImage().rotate90();
+                        picture.rotate90();
                     break;
                     case 2:
-                        picture.getImage().rotate180();
+                        picture.rotate180();
                     break;
                     case 3:
-                        picture.getImage().rotate270();
+                        picture.rotate270();
                     break;
                 }
             }
@@ -105,13 +105,13 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                 }
                 switch (rot) {
                     case 1:
-                        picture.getImage().rotate270();
+                        picture.rotate270();
                     break;
                     case 2:
-                        picture.getImage().rotate180();
+                        picture.rotate180();
                     break;
                     case 3:
-                        picture.getImage().rotate90();
+                        picture.rotate90();
                     break;
                 }
             }
@@ -216,8 +216,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                                 int side = mc.objectMouseOver.sideHit;
                                 TileEntityPaintingFrame tileP = (TileEntityPaintingFrame)tile;
                                 Picture picture = tileP.getPainting(side);
-                                int width = picture.getImage().getWidth();
-                                int height = picture.getImage().getHeight();
+                                int width = picture.getWidth();
+                                int height = picture.getHeight();
                                 int px = ItemPaintBrush.getXuse(width, side, f, f1, f2);
                                 int py = ItemPaintBrush.getYuse(height, side, f, f1, f2);
                                 double mxdx = (1.0D / width) * px;
