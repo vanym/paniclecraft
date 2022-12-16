@@ -64,7 +64,6 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     }
     
     @Override
-    public void update(ITurtleAccess turtle, TurtleSide side) {
-    }
+    public void update(ITurtleAccess turtle, TurtleSide side) {}
     
 }

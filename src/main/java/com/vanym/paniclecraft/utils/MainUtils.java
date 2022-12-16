@@ -179,8 +179,7 @@ public class MainUtils {
         public int row;
         public String name;
         
-        public PicData() {
-        }
+        public PicData() {}
         
         public PicData(byte[] par1, int par2) {
             this.row = par2;

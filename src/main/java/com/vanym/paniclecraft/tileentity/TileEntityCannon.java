@@ -243,11 +243,9 @@ public class TileEntityCannon extends TileEntity implements IInventory {
                                           (double)this.zCoord + 0.5D) <= 64.0D;
     }
     
-    public void openChest() {
-    }
+    public void openChest() {}
     
-    public void closeChest() {
-    }
+    public void closeChest() {}
     
     public boolean isInvNameLocalized() {
         return false;
@@ -264,8 +262,7 @@ public class TileEntityCannon extends TileEntity implements IInventory {
     }
     
     @Override
-    public void openInventory() {
-    }
+    public void openInventory() {}
     
     @Override
     public void closeInventory() {

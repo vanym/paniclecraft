@@ -22,8 +22,7 @@ public class MessageChessNewGame
     String whitePlayer;
     String blackPlayer;
     
-    public MessageChessNewGame() {
-    }
+    public MessageChessNewGame() {}
     
     public MessageChessNewGame(int parX,
             short parY,

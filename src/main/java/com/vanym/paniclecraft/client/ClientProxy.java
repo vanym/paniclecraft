@@ -30,8 +30,7 @@ public class ClientProxy extends CommonProxy {
     }
     
     @Override
-    public void postInit(Configuration config) {
-    }
+    public void postInit(Configuration config) {}
     
     public static void deleteTexture(int texID) {
         GL11.glDeleteTextures(texID);

@@ -16,8 +16,7 @@ public class MessageCannonChange
     
     byte bt;
     
-    public MessageCannonChange() {
-    }
+    public MessageCannonChange() {}
     
     public MessageCannonChange(byte parBt) {
         this.bt = parBt;

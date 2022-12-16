@@ -14,8 +14,7 @@ public class MessageCannonSet implements IMessage, IMessageHandler<MessageCannon
     byte bt;
     double to;
     
-    public MessageCannonSet() {
-    }
+    public MessageCannonSet() {}
     
     public MessageCannonSet(byte parBt, double parTo) {
         this.bt = parBt;

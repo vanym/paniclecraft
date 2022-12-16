@@ -17,8 +17,7 @@ public class MessageChessMove implements IMessage, IMessageHandler<MessageChessM
     byte from;
     byte to;
     
-    public MessageChessMove() {
-    }
+    public MessageChessMove() {}
     
     public MessageChessMove(int parX, short parY, int parZ, byte parFrom, byte parTo) {
         this.x = parX;

@@ -153,8 +153,7 @@ public class ModComponentPainting implements ModComponent {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void preInitClient(Configuration config) {
-    }
+    public void preInitClient(Configuration config) {}
     
     @Override
     @SideOnly(Side.CLIENT)

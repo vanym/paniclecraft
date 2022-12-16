@@ -17,8 +17,7 @@ public class MessageChessChoose implements IMessage, IMessageHandler<MessageChes
     int z;
     byte choose;
     
-    public MessageChessChoose() {
-    }
+    public MessageChessChoose() {}
     
     public MessageChessChoose(int parX, short parY, int parZ, byte parChoose) {
         this.x = parX;

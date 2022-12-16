@@ -133,7 +133,7 @@ public class Image {
     }
     
     public void rotate180() {
-        MatrixUtils.rotate180(data, PIXEL_SIZE);
+        MatrixUtils.rotate180(this.data, PIXEL_SIZE);
     }
     
     public void rotate270() {

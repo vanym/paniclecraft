@@ -17,8 +17,7 @@ public class MessageAdvSignChange
     byte red, green, blue;
     String text;
     
-    public MessageAdvSignChange() {
-    }
+    public MessageAdvSignChange() {}
     
     public MessageAdvSignChange(int par1x,
             int par2y,

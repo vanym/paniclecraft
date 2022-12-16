@@ -337,8 +337,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerBlockIcons(IIconRegister iconRegister) {
-    }
+    public void registerBlockIcons(IIconRegister iconRegister) {}
     
     @Override
     @SideOnly(Side.CLIENT)

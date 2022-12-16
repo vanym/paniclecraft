@@ -18,8 +18,7 @@ public class MessagePaintBrushUse
     int x, y, z, px, py;
     byte side;
     
-    public MessagePaintBrushUse() {
-    }
+    public MessagePaintBrushUse() {}
     
     public MessagePaintBrushUse(int par1x,
             int par2y,

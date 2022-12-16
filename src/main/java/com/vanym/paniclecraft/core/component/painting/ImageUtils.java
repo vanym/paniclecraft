@@ -68,8 +68,7 @@ public class ImageUtils {
         DataBuffer dataBuf = wrapByteBuffer(buffer);
         SampleModel sampleModel =
                 COLOR_MODEL.createCompatibleSampleModel(inImg.getWidth(), inImg.getHeight());
-        WritableRaster raster = new WritableRaster(sampleModel, dataBuf, new java.awt.Point()) {
-        };
+        WritableRaster raster = new WritableRaster(sampleModel, dataBuf, new java.awt.Point()) {};
         BufferedImage myImg = new BufferedImage(COLOR_MODEL, raster, false, null);
         ColorConvertOp colorConvert = new ColorConvertOp(null);
         colorConvert.filter(inImg, myImg);

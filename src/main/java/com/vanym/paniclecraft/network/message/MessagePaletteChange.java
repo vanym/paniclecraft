@@ -18,8 +18,7 @@ public class MessagePaletteChange
     
     byte bt;
     
-    public MessagePaletteChange() {
-    }
+    public MessagePaletteChange() {}
     
     public MessagePaletteChange(byte parBt) {
         this.bt = parBt;

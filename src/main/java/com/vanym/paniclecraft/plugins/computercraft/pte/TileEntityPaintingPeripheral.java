@@ -138,12 +138,10 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
     }
     
     @Override
-    public void attach(IComputerAccess computer) {
-    }
+    public void attach(IComputerAccess computer) {}
     
     @Override
-    public void detach(IComputerAccess computer) {
-    }
+    public void detach(IComputerAccess computer) {}
     
     @Override
     public boolean equals(IPeripheral other) {
