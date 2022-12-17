@@ -300,12 +300,12 @@ public class Picture {
         return this.rotate(270);
     }
     
-    protected static final String TAG_EDITABLE = "Editable";
-    protected static final String TAG_IMAGE = "Image";
-    protected static final String TAG_IMAGE_WIDTH = "Width";
-    protected static final String TAG_IMAGE_HEIGHT = "Height";
-    protected static final String TAG_IMAGE_RAWDATA = "Raw";
-    protected static final String TAG_IMAGE_PACKED = "Packed";
+    public static final String TAG_EDITABLE = "Editable";
+    public static final String TAG_IMAGE = "Image";
+    public static final String TAG_IMAGE_WIDTH = "Width";
+    public static final String TAG_IMAGE_HEIGHT = "Height";
+    public static final String TAG_IMAGE_RAWDATA = "Raw";
+    public static final String TAG_IMAGE_PACKED = "Packed";
     
     public void writeToNBT(NBTTagCompound nbtTag) {
         nbtTag.setBoolean(TAG_EDITABLE, this.editable);

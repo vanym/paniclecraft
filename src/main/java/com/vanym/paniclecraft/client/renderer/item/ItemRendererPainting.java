@@ -3,17 +3,26 @@ package com.vanym.paniclecraft.client.renderer.item;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.IItemRenderer;
 
 @SideOnly(Side.CLIENT)
 public class ItemRendererPainting implements IItemRenderer {
+    
+    protected PictureTextureCache textureCache;
+    
+    public ItemRendererPainting(PictureTextureCache textureCache) {
+        this.textureCache = textureCache;
+    }
     
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
@@ -33,14 +42,24 @@ public class ItemRendererPainting implements IItemRenderer {
         TileEntityPainting tilePainting = new TileEntityPainting();
         tilePainting.blockType = Core.instance.painting.blockPainting;
         tilePainting.blockMetadata = 3;
+        Picture picture = tilePainting.getPainting(3);
+        NBTTagCompound nbtPictureTag = null;
         if (item.hasTagCompound()) {
-            NBTTagCompound tag = item.getTagCompound();
-            if (tag.hasKey(ItemPainting.TAG_PICTURE)) {
-                NBTTagCompound tagData = tag.getCompoundTag(ItemPainting.TAG_PICTURE);
-                if (!tagData.hasNoTags()) {
-                    tilePainting.getPainting(3).readFromNBT(tagData);
-                }
+            NBTTagCompound itemTag = item.getTagCompound();
+            if (itemTag.hasKey(ItemPainting.TAG_PICTURE)) {
+                nbtPictureTag = itemTag.getCompoundTag(ItemPainting.TAG_PICTURE);
             }
+        }
+        NBTBase nbtImageTag = null;
+        if (nbtPictureTag != null && !nbtPictureTag.hasNoTags()) {
+            nbtImageTag = nbtPictureTag.getTag(Picture.TAG_IMAGE);
+        }
+        int obtainedTexture = this.textureCache.obtainTexture(nbtImageTag);
+        if (obtainedTexture >= 0) {
+            picture.texture = obtainedTexture;
+            picture.imageChangeProcessed = true;
+        } else if (nbtPictureTag != null) {
+            picture.readFromNBT(nbtPictureTag);
         }
         if (type.equals(ItemRenderType.ENTITY)) {
             GL11.glTranslatef(-0.25F, -0.18F, 0.0F);
@@ -58,7 +77,9 @@ public class ItemRendererPainting implements IItemRenderer {
             
         }
         Core.instance.painting.tilePaintingRenderer.renderTileEntityAtItem(tilePainting);
-        tilePainting.getPainting(tilePainting.getBlockMetadata()).invalidate();
+        if (obtainedTexture < 0) {
+            this.textureCache.putTexture(nbtImageTag, picture.texture);
+        }
     }
     
 }

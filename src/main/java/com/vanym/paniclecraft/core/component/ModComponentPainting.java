@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
+import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
@@ -30,6 +31,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -161,6 +163,7 @@ public class ModComponentPainting implements ModComponent {
         if (!this.isEnabled()) {
             return;
         }
+        PictureTextureCache textureCache = null;
         boolean paintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
         if (paintingTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPainting.class,
@@ -168,8 +171,11 @@ public class ModComponentPainting implements ModComponent {
         }
         boolean paintingItem = config.getBoolean("paintingItem", CLIENT_RENDER, true, "");
         if (paintingItem) {
-            MinecraftForgeClient.registerItemRenderer(this.itemPainting,
-                                                      new ItemRendererPainting());
+            if (textureCache == null) {
+                textureCache = new PictureTextureCache();
+            }
+            ItemRendererPainting paintingItemRenderer = new ItemRendererPainting(textureCache);
+            MinecraftForgeClient.registerItemRenderer(this.itemPainting, paintingItemRenderer);
         }
         boolean paintingFrameTile = config.getBoolean("paintingFrameTile", CLIENT_RENDER, true, "");
         if (paintingFrameTile) {
@@ -180,6 +186,9 @@ public class ModComponentPainting implements ModComponent {
         if (paintingFrameItem) {
             MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
                                                       new ItemRendererPaintingFrame());
+        }
+        if (textureCache != null) {
+            MinecraftForge.EVENT_BUS.register(textureCache);
         }
     }
     
