@@ -33,20 +33,9 @@ public enum PaintingSide {
     }
     
     protected static double getCoord(Vec3 vec, ForgeDirection dir) {
-        if (dir.offsetX > 0) {
-            return vec.xCoord;
-        } else if (dir.offsetX < 0) {
-            return 1.0D - vec.xCoord;
-        } else if (dir.offsetY > 0) {
-            return vec.yCoord;
-        } else if (dir.offsetY < 0) {
-            return 1.0D - vec.yCoord;
-        } else if (dir.offsetZ > 0) {
-            return vec.zCoord;
-        } else if (dir.offsetZ < 0) {
-            return 1.0D - vec.zCoord;
-        }
-        return 0.0D;
+        return (0.5D * Math.abs(dir.offsetX) + (-0.5D + vec.xCoord) * dir.offsetX) +
+               (0.5D * Math.abs(dir.offsetY) + (-0.5D + vec.yCoord) * dir.offsetY) +
+               (0.5D * Math.abs(dir.offsetZ) + (-0.5D + vec.zCoord) * dir.offsetZ);
     }
     
     public Vec3 fromPaintingVec(Vec3 vec) {
@@ -58,18 +47,8 @@ public enum PaintingSide {
     }
     
     protected static void putCoord(Vec3 vec, double coord, ForgeDirection dir) {
-        if (dir.offsetX > 0) {
-            vec.xCoord = coord;
-        } else if (dir.offsetX < 0) {
-            vec.xCoord = 1.0D - coord;
-        } else if (dir.offsetY > 0) {
-            vec.yCoord = coord;
-        } else if (dir.offsetY < 0) {
-            vec.yCoord = 1.0D - coord;
-        } else if (dir.offsetZ > 0) {
-            vec.zCoord = coord;
-        } else if (dir.offsetZ < 0) {
-            vec.zCoord = 1.0D - coord;
-        }
+        vec.xCoord += 0.5D * Math.abs(dir.offsetX) + (-0.5D + coord) * dir.offsetX;
+        vec.yCoord += 0.5D * Math.abs(dir.offsetY) + (-0.5D + coord) * dir.offsetY;
+        vec.zCoord += 0.5D * Math.abs(dir.offsetZ) + (-0.5D + coord) * dir.offsetZ;
     }
 }
