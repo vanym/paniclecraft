@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
+import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 
 import net.minecraft.tileentity.TileEntity;
 
@@ -9,35 +10,10 @@ public abstract class TileEntityPaintingContainer extends TileEntity
             ISidePictureProvider {
     
     public TileEntity getNeighborTile(int side, int xOffset, int yOffset) {
-        int x = this.xCoord;
-        int y = this.yCoord;
-        int z = this.zCoord;
-        switch (side) {
-            case 0:
-                x -= xOffset;
-                z += yOffset;
-            break;
-            case 1:
-                x -= xOffset;
-                z -= yOffset;
-            break;
-            case 2:
-                x -= xOffset;
-                y -= yOffset;
-            break;
-            case 3:
-                x += xOffset;
-                y -= yOffset;
-            break;
-            case 4:
-                z += xOffset;
-                y -= yOffset;
-            break;
-            case 5:
-                z -= xOffset;
-                y -= yOffset;
-            break;
-        }
+        PaintingSide pside = PaintingSide.getSize(side);
+        int x = this.xCoord + pside.xDir.offsetX * xOffset + pside.yDir.offsetX * yOffset;
+        int y = this.yCoord + pside.xDir.offsetY * xOffset + pside.yDir.offsetY * yOffset;
+        int z = this.zCoord + pside.xDir.offsetZ * xOffset + pside.yDir.offsetZ * yOffset;
         TileEntity tile = this.getWorldObj().getTileEntity(x, y, z);
         return tile;
     }

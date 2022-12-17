@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
+import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -74,27 +74,24 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
                 int x = mc.objectMouseOver.blockX;
                 int y = mc.objectMouseOver.blockY;
                 int z = mc.objectMouseOver.blockZ;
-                int s = mc.objectMouseOver.sideHit;
-                Vec3 vec = mc.objectMouseOver.hitVec;
+                int side = mc.objectMouseOver.sideHit;
                 TileEntity tile = mc.theWorld.getTileEntity(x, y, z);
                 if (tile != null && tile instanceof ISidePictureProvider) {
                     ISidePictureProvider tileP = (ISidePictureProvider)tile;
-                    Picture picture = tileP.getPainting(s);
+                    Picture picture = tileP.getPainting(side);
                     if (picture != null) {
-                        float f = (float)vec.xCoord - (float)x;
-                        float f1 = (float)vec.yCoord - (float)y;
-                        float f2 = (float)vec.zCoord - (float)z;
-                        int px = BlockPaintingContainer.getPictureX(picture.getWidth(), s, f, f1,
-                                                                    f2);
-                        int py = BlockPaintingContainer.getPictureY(picture.getHeight(), s, f, f1,
-                                                                    f2);
+                        PaintingSide pside = PaintingSide.getSize(side);
+                        Vec3 inBlock = MainUtils.getInBlockVec(mc.objectMouseOver);
+                        Vec3 inPainting = pside.toPaintingVec(inBlock);
+                        int px = (int)(inPainting.xCoord * picture.getWidth());
+                        int py = (int)(inPainting.yCoord * picture.getHeight());
                         Core.instance.network.sendToServer(new MessagePaintBrushUse(
                                 x,
                                 y,
                                 z,
                                 px,
                                 py,
-                                (byte)s));
+                                (byte)side));
                     }
                 }
             }

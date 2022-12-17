@@ -13,6 +13,8 @@ import java.util.Properties;
 import javax.imageio.ImageIO;
 
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 
 public class MainUtils {
     
@@ -60,6 +62,11 @@ public class MainUtils {
                 return box.maxX >= 1.0D;
         }
         return false;
+    }
+    
+    public static Vec3 getInBlockVec(MovingObjectPosition target) {
+        return Vec3.createVectorHelper(target.blockX, target.blockY, target.blockZ)
+                   .subtract(target.hitVec);
     }
     
     // public static int[] getRGBFromInt(int par1){
