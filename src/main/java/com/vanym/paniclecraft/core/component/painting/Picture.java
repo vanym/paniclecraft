@@ -67,7 +67,7 @@ public class Picture {
             }
         } else if (toolType == PaintingToolType.FILLER) {
             if (color != null && this.isEditableBy(this)) {
-                if (this.image.fill(color)) {
+                if (this.unpack() && this.image.fill(color)) {
                     this.packed = null;
                     this.imageChanged();
                     this.update();
