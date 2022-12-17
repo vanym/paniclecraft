@@ -316,7 +316,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         }
         List<AxisAlignedBB> boxes = this.getFrameBoxes();
         Stream.concat(boxes.stream(), facades.build()).forEach(box-> {
-            AxisAlignedBB absoluteBox = MainUtils.absolutizeBox(x, y, z, box);
+            AxisAlignedBB absoluteBox = box.getOffsetBoundingBox(x, y, z);
             if (mask.intersectsWith(absoluteBox)) {
                 list.add(absoluteBox);
             }
