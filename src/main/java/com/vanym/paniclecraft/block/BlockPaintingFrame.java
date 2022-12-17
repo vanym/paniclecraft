@@ -218,8 +218,9 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                                 Picture picture = tileP.getPainting(side);
                                 int width = picture.getWidth();
                                 int height = picture.getHeight();
-                                int px = ItemPaintBrush.getXuse(width, side, f, f1, f2);
-                                int py = ItemPaintBrush.getYuse(height, side, f, f1, f2);
+                                int px = BlockPaintingContainer.getPictureX(width, side, f, f1, f2);
+                                int py = BlockPaintingContainer.getPictureY(height, side, f, f1,
+                                                                            f2);
                                 double mxdx = (1.0D / width) * px;
                                 double mxdy = (1.0D / height) * py;
                                 double mndx = (1.0D / width) *

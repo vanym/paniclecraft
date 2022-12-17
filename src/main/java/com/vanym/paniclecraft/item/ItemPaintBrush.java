@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -83,8 +84,10 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
                         float f = (float)vec.xCoord - (float)x;
                         float f1 = (float)vec.yCoord - (float)y;
                         float f2 = (float)vec.zCoord - (float)z;
-                        int px = getXuse(picture.getWidth(), s, f, f1, f2);
-                        int py = getYuse(picture.getHeight(), s, f, f1, f2);
+                        int px = BlockPaintingContainer.getPictureX(picture.getWidth(), s, f, f1,
+                                                                    f2);
+                        int py = BlockPaintingContainer.getPictureY(picture.getHeight(), s, f, f1,
+                                                                    f2);
                         Core.instance.network.sendToServer(new MessagePaintBrushUse(
                                 x,
                                 y,
@@ -244,51 +247,6 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     @Override
     public boolean isFull3D() {
         return true;
-    }
-    
-    public static int getXuse(int row, int par1, float par2, float par3, float par4) {
-        int var1 = (int)(par2 * row);
-        // int var2 = (int)(par3 * row);
-        int var3 = (int)(par4 * row);
-        
-        switch (par1) {
-            case 0:
-                return (row - 1) - var1;
-            case 1:
-                return (row - 1) - var1;
-            case 2:
-                return (row - 1) - var1;
-            case 3:
-                return var1;
-            case 4:
-                return var3;
-            case 5:
-                return (row - 1) - var3;
-            default:
-                return -1;
-        }
-    }
-    
-    public static int getYuse(int row, int par1, float par2, float par3, float par4) {
-        // int var1 = (int)(par2 * row);
-        int var2 = (int)(par3 * row);
-        int var3 = (int)(par4 * row);
-        switch (par1) {
-            case 0:
-                return var3;
-            case 1:
-                return (row - 1) - var3;
-            case 2:
-                return (row - 1) - var2;
-            case 3:
-                return (row - 1) - var2;
-            case 4:
-                return (row - 1) - var2;
-            case 5:
-                return (row - 1) - var2;
-            default:
-                return -1;
-        }
     }
     
     @Override
