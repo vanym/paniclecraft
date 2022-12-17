@@ -36,7 +36,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     protected int specialRendererSide = -1;
     
-    protected final double frameWidth;
+    protected final double frameOutlineSize;
     
     protected final List<AxisAlignedBB> frameBoxes;
     
@@ -44,8 +44,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         super(Material.wood);
         this.setBlockName("paintingFrame");
         this.setHardness(0.6F);
-        this.frameWidth = (1.0D / 16D) * 2.0D;
-        this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameWidth));
+        this.frameOutlineSize = (1.0D / 16D) * 2.0D;
+        this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameOutlineSize));
     }
     
     @SideOnly(Side.CLIENT)
@@ -310,7 +310,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         Builder<AxisAlignedBB> facades = Stream.builder();
         for (int i = 0; i < 6; ++i) {
             if (tile.getPainting(i) != null) {
-                AxisAlignedBB box = MainUtils.getBoundsBySide(i, this.getPaintingWidth());
+                AxisAlignedBB box = MainUtils.getBoundsBySide(i, this.getPaintingOutlineSize());
                 facades.add(box);
             }
         }

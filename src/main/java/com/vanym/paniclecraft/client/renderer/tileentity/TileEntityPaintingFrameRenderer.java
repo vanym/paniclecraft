@@ -56,7 +56,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
             render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
         }
         block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAMEINSIDE);
-        final double paintingWidth = block.getPaintingWidth();
+        final double paintingWidth = block.getPaintingOutlineSize();
         for (int side = 0; side < 6; ++side) {
             Picture picture = tile.getPainting(side);
             if (picture == null) {

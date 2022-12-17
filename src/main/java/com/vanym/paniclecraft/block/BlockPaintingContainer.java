@@ -26,15 +26,15 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     @SideOnly(Side.CLIENT)
     protected AxisAlignedBB specialRendererBox;
     
-    protected final double paintingWidth;
+    protected final double paintingOutlineSize;
     
     public BlockPaintingContainer(Material material) {
         super(material);
-        this.paintingWidth = (1.0D / 16D);
+        this.paintingOutlineSize = (1.0D / 16D);
     }
     
-    public double getPaintingWidth() {
-        return this.paintingWidth;
+    public double getPaintingOutlineSize() {
+        return this.paintingOutlineSize;
     }
     
     @SideOnly(Side.CLIENT)
