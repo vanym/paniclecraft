@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.network.message;
 
+import java.util.Objects;
+
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
@@ -20,18 +22,33 @@ public class MessagePaintBrushUse
     
     public MessagePaintBrushUse() {}
     
-    public MessagePaintBrushUse(int par1x,
-            int par2y,
-            int par3z,
-            int par4px,
-            int par5py,
-            byte par6side) {
-        this.x = par1x;
-        this.y = par2y;
-        this.z = par3z;
-        this.px = par4px;
-        this.py = par5py;
-        this.side = par6side;
+    public MessagePaintBrushUse(int x, int y, int z, int px, int py, byte side) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.px = px;
+        this.py = py;
+        this.side = side;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.x, this.y, this.z, this.px, this.py, this.side);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof MessagePaintBrushUse) && this.equals((MessagePaintBrushUse)obj);
+    }
+    
+    public boolean equals(MessagePaintBrushUse mes) {
+        return mes != null
+            && this.x == mes.x
+            && this.y == mes.y
+            && this.z == mes.z
+            && this.px == mes.px
+            && this.py == mes.py
+            && this.side == mes.side;
     }
     
     @Override

@@ -1,19 +1,21 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
-import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -24,7 +26,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -47,6 +48,9 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     @SideOnly(Side.CLIENT)
     public IIcon fill_overlay;
     
+    @SideOnly(Side.CLIENT)
+    protected Set<MessagePaintBrushUse> brushUseMessages = new HashSet<>();
+    
     public static double brushRadiusRound = 3.5D;
     
     public ItemPaintBrush() {
@@ -63,15 +67,56 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide() != Side.CLIENT) {
+        if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
+        MessagePaintBrushUse mes = makeBrushUseMessage();
+        if (mes != null) {
+            this.brushUseMessages.add(mes);
+        }
+        this.flashBrushUseMessages();
+    }
+    
+    @Override
+    public void onPlayerStoppedUsing(
+            ItemStack itemStack,
+            World world,
+            EntityPlayer player,
+            int count) {
+        if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            return;
+        }
+        this.flashBrushUseMessages();
+    }
+    
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void renderWorldLast(net.minecraftforge.client.event.RenderWorldLastEvent event) {
+        Minecraft mc = Minecraft.getMinecraft();
+        ItemStack itemStack = mc.thePlayer.getItemInUse();
+        if (itemStack != null && itemStack.getItem() instanceof ItemPaintBrush) {
+            MessagePaintBrushUse mes = makeBrushUseMessage();
+            if (mes != null) {
+                this.brushUseMessages.add(mes);
+            }
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public void flashBrushUseMessages() {
+        for (MessagePaintBrushUse mes : this.brushUseMessages) {
+            Core.instance.network.sendToServer(mes);
+        }
+        this.brushUseMessages.clear();
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public static MessagePaintBrushUse makeBrushUseMessage() {
         Minecraft mc = Minecraft.getMinecraft();
         Picture picture = BlockPaintingContainer.getPicture(mc.theWorld, mc.objectMouseOver);
         if (picture == null) {
-            return;
+            return null;
         }
         int x = mc.objectMouseOver.blockX;
         int y = mc.objectMouseOver.blockY;
@@ -83,7 +128,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
         int py = (int)(inPainting.yCoord * picture.getHeight());
         MessagePaintBrushUse message =
                 new MessagePaintBrushUse(x, y, z, px, py, (byte)pside.ordinal());
-        Core.instance.network.sendToServer(message);
+        return message;
     }
     
     @Override
@@ -93,23 +138,21 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     
     @Override
     public boolean onItemUse(
-            ItemStack par1ItemStack,
-            EntityPlayer par2EntityPlayer,
-            World par3World,
-            int par4,
-            int par5,
-            int par6,
-            int par7,
-            float par8,
-            float par9,
-            float par10) {
-        TileEntity tile = par3World.getTileEntity(par4, par5, par6);
-        if (tile != null && tile instanceof ISidePictureProvider) {
-            ISidePictureProvider tileP = (ISidePictureProvider)tile;
-            Picture picture = tileP.getPainting(par7);
-            if (picture != null) {
-                par2EntityPlayer.setItemInUse(par1ItemStack,
-                                              this.getMaxItemUseDuration(par1ItemStack));
+            ItemStack itemStack,
+            EntityPlayer entityPlayer,
+            World world,
+            int x,
+            int y,
+            int z,
+            int side,
+            float ibx,
+            float iby,
+            float ibz) {
+        Picture picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
+        if (picture != null) {
+            entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
+            if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+                this.brushUseMessages.clear();
             }
         }
         return false;

@@ -164,6 +164,12 @@ public class ModComponentPainting implements ModComponent {
         if (!this.isEnabled()) {
             return;
         }
+        
+        boolean perFrameBrushUse = config.getBoolean("perFrameBrushUse", this.getName(), true, "");
+        if (perFrameBrushUse && this.itemPaintBrush != null) {
+            MinecraftForge.EVENT_BUS.register(this.itemPaintBrush);
+        }
+        
         PictureTextureCache textureCache = null;
         boolean paintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
         if (paintingTile) {
