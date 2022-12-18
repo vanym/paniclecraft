@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.core.component.painting;
 
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -26,10 +27,19 @@ public enum PaintingSide {
         return values()[id % values().length];
     }
     
-    public Vec3 toPaintingVec(Vec3 vec) {
+    public Vec3 toPaintingCoords(Vec3 vec) {
         return Vec3.createVectorHelper(getCoord(vec, this.xDir),
                                        getCoord(vec, this.yDir),
                                        getCoord(vec, this.zDir));
+    }
+    
+    public AxisAlignedBB toPaintingCoords(AxisAlignedBB box) {
+        Vec3 min = Vec3.createVectorHelper(box.minX, box.minY, box.minZ);
+        Vec3 max = Vec3.createVectorHelper(box.maxX, box.maxY, box.maxZ);
+        Vec3 picmin = this.toPaintingCoords(min);
+        Vec3 picmax = this.toPaintingCoords(max);
+        return AxisAlignedBB.getBoundingBox(picmin.xCoord, picmin.yCoord, picmin.zCoord,
+                                            picmax.xCoord, picmax.yCoord, picmax.zCoord);
     }
     
     protected static double getCoord(Vec3 vec, ForgeDirection dir) {
@@ -38,12 +48,21 @@ public enum PaintingSide {
                (0.5D * Math.abs(dir.offsetZ) + (-0.5D + vec.zCoord) * dir.offsetZ);
     }
     
-    public Vec3 fromPaintingVec(Vec3 vec) {
+    public Vec3 fromPaintingCoords(Vec3 vec) {
         Vec3 ret = Vec3.createVectorHelper(0, 0, 0);
         putCoord(ret, vec.xCoord, this.xDir);
         putCoord(ret, vec.yCoord, this.yDir);
         putCoord(ret, vec.zCoord, this.zDir);
         return ret;
+    }
+    
+    public AxisAlignedBB fromPaintingCoords(AxisAlignedBB box) {
+        Vec3 picmin = Vec3.createVectorHelper(box.minX, box.minY, box.minZ);
+        Vec3 picmax = Vec3.createVectorHelper(box.maxX, box.maxY, box.maxZ);
+        Vec3 min = this.fromPaintingCoords(picmin);
+        Vec3 max = this.fromPaintingCoords(picmax);
+        return AxisAlignedBB.getBoundingBox(min.xCoord, min.yCoord, min.zCoord,
+                                            max.xCoord, max.yCoord, max.zCoord);
     }
     
     protected static void putCoord(Vec3 vec, double coord, ForgeDirection dir) {

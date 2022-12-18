@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
+import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
@@ -189,6 +190,24 @@ public class ModComponentPainting implements ModComponent {
         }
         if (textureCache != null) {
             MinecraftForge.EVENT_BUS.register(textureCache);
+        }
+        boolean paintingSpecialSelectionBox =
+                config.getBoolean("paintingSpecialSelectionBox", CLIENT_RENDER, true, "");
+        String paintingSpecialSelectionBoxColorString =
+                config.getString("paintingSpecialSelectionBoxColor", CLIENT_RENDER, "",
+                                 "Color of selection box. Example: #ff0000");
+        Color paintingSpecialSelectionBoxColor;
+        try {
+            paintingSpecialSelectionBoxColor = Color.decode(paintingSpecialSelectionBoxColorString);
+        } catch (NumberFormatException e) {
+            paintingSpecialSelectionBoxColor = null;
+        }
+        boolean paintingNoneSelectionBox =
+                config.getBoolean("paintingNoneSelectionBox", CLIENT_RENDER, false, "");
+        if (paintingSpecialSelectionBox || paintingNoneSelectionBox) {
+            MinecraftForge.EVENT_BUS.register(new PaintingSpecialSelectionBox(
+                    paintingNoneSelectionBox,
+                    paintingSpecialSelectionBoxColor));
         }
     }
     

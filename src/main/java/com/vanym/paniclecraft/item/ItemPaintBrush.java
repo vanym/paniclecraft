@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
@@ -25,7 +26,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -69,33 +69,21 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
             return;
         }
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.objectMouseOver != null) {
-            if (mc.objectMouseOver.typeOfHit == MovingObjectType.BLOCK) {
-                int x = mc.objectMouseOver.blockX;
-                int y = mc.objectMouseOver.blockY;
-                int z = mc.objectMouseOver.blockZ;
-                int side = mc.objectMouseOver.sideHit;
-                TileEntity tile = mc.theWorld.getTileEntity(x, y, z);
-                if (tile != null && tile instanceof ISidePictureProvider) {
-                    ISidePictureProvider tileP = (ISidePictureProvider)tile;
-                    Picture picture = tileP.getPainting(side);
-                    if (picture != null) {
-                        PaintingSide pside = PaintingSide.getSize(side);
-                        Vec3 inBlock = MainUtils.getInBlockVec(mc.objectMouseOver);
-                        Vec3 inPainting = pside.toPaintingVec(inBlock);
-                        int px = (int)(inPainting.xCoord * picture.getWidth());
-                        int py = (int)(inPainting.yCoord * picture.getHeight());
-                        Core.instance.network.sendToServer(new MessagePaintBrushUse(
-                                x,
-                                y,
-                                z,
-                                px,
-                                py,
-                                (byte)side));
-                    }
-                }
-            }
+        Picture picture = BlockPaintingContainer.getPicture(mc.theWorld, mc.objectMouseOver);
+        if (picture == null) {
+            return;
         }
+        int x = mc.objectMouseOver.blockX;
+        int y = mc.objectMouseOver.blockY;
+        int z = mc.objectMouseOver.blockZ;
+        PaintingSide pside = PaintingSide.getSize(mc.objectMouseOver.sideHit);
+        Vec3 inBlock = MainUtils.getInBlockVec(mc.objectMouseOver);
+        Vec3 inPainting = pside.toPaintingCoords(inBlock);
+        int px = (int)(inPainting.xCoord * picture.getWidth());
+        int py = (int)(inPainting.yCoord * picture.getHeight());
+        MessagePaintBrushUse message =
+                new MessagePaintBrushUse(x, y, z, px, py, (byte)pside.ordinal());
+        Core.instance.network.sendToServer(message);
     }
     
     @Override

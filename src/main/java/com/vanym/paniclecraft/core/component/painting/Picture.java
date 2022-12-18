@@ -123,8 +123,8 @@ public class Picture {
             sy = height + sy;
             --ny;
         }
-        Picture picture = this.holder.getNeighborPicture(nx, ny);
-        if (picture == null || !picture.isEditableBy(this)) {
+        Picture picture = this.getNeighborPicture(nx, ny);
+        if (!this.canEdit(picture)) {
             return false;
         }
         if (picture.setMyPixelColor(sx, sy, color)) {
@@ -146,12 +146,23 @@ public class Picture {
         return false;
     }
     
+    public Picture getNeighborPicture(int offsetX, int offsetY) {
+        if (offsetX == 0 && offsetY == 0) {
+            return this;
+        }
+        return this.holder.getNeighborPicture(offsetX, offsetY);
+    }
+    
     public boolean isEditableBy(Picture picture) {
         if (!this.editable || !this.isSameSize(picture)) {
             return false;
         }
         // TODO brush check
         return true;
+    }
+    
+    public boolean canEdit(Picture picture) {
+        return picture != null && picture.isEditableBy(this);
     }
     
     public boolean isSameSize(Picture picture) {

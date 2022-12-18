@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -12,7 +11,6 @@ import com.vanym.paniclecraft.utils.MainUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -21,8 +19,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -196,112 +192,6 @@ public class BlockPainting extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(World par1World, int par2, int par3, int par4) {
         this.setBlockBoundsBasedOnState(par1World, par2, par3, par4);
-        return super.getSelectedBoundingBoxFromPool(par1World, par2, par3, par4);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getSelectedBoundingBoxFromPool(
-            World par1World,
-            int par2,
-            int par3,
-            int par4) {
-        this.setBlockBoundsBasedOnState(par1World, par2, par3, par4);
-        if (Core.instance.painting.specialBoundingBox) {
-            Minecraft mc = Minecraft.getMinecraft();
-            ItemStack is = mc.thePlayer.inventory.getCurrentItem();
-            if (is != null) {
-                if (is.getItem() instanceof ItemPaintBrush
-                    && (is.getItemDamage() == 0 || is.getItemDamage() == 1)) {
-                    if (mc.objectMouseOver != null) {
-                        if (mc.objectMouseOver.typeOfHit == MovingObjectType.BLOCK) {
-                            TileEntity tile = par1World.getTileEntity(par2, par3, par4);
-                            if (tile instanceof TileEntityPainting
-                                && mc.objectMouseOver.sideHit == tile.getBlockMetadata()) {
-                                Vec3 vec = mc.objectMouseOver.hitVec;
-                                float f = (float)vec.xCoord - (float)par2;
-                                float f1 = (float)vec.yCoord - (float)par3;
-                                float f2 = (float)vec.zCoord - (float)par4;
-                                int side = mc.objectMouseOver.sideHit;
-                                TileEntityPainting tileP = (TileEntityPainting)tile;
-                                Picture picture = tileP.getPainting(side);
-                                int width = picture.getWidth();
-                                int height = picture.getHeight();
-                                int px = BlockPaintingContainer.getPictureX(width,
-                                                                            mc.objectMouseOver.sideHit,
-                                                                            f, f1, f2);
-                                int py = BlockPaintingContainer.getPictureY(height,
-                                                                            mc.objectMouseOver.sideHit,
-                                                                            f, f1, f2);
-                                double mxdx = (1.0D / width) * px;
-                                double mxdy = (1.0D / height) * py;
-                                double mndx = (1.0D / width) * (width - px) - (1.0D / width);
-                                double mndy = (1.0D / height) * (height - py) -
-                                              (1.0D / height);
-                                switch (tileP.getBlockMetadata()) {
-                                    case 0:
-                                        return AxisAlignedBB.getBoundingBox((double)par2 +
-                                                                            this.minX + mndx,
-                                                                            (double)par3 + this.minY,
-                                                                            (double)par4 + this.minZ + mxdy,
-                                                                            (double)par2 + this.maxX - mxdx,
-                                                                            (double)par3 + this.maxY,
-                                                                            (double)par4 + this.maxZ - mndy);
-                                    case 1:
-                                        return AxisAlignedBB.getBoundingBox((double)par2 +
-                                                                            this.minX + mndx,
-                                                                            (double)par3 + this.minY,
-                                                                            (double)par4 + this.minZ + mndy,
-                                                                            (double)par2 + this.maxX - mxdx,
-                                                                            (double)par3 + this.maxY,
-                                                                            (double)par4 + this.maxZ - mxdy);
-                                    case 2:
-                                        return AxisAlignedBB.getBoundingBox((double)par2 +
-                                                                            this.minX + mndx,
-                                                                            (double)par3 + this.minY +
-                                                                                              mndy,
-                                                                            (double)par4 + this.minZ,
-                                                                            (double)par2 + this.maxX - mxdx,
-                                                                            (double)par3 + this.maxY - mxdy,
-                                                                            (double)par4 + this.maxZ);
-                                    case 3:
-                                        return AxisAlignedBB.getBoundingBox((double)par2 +
-                                                                            this.minX + mxdx,
-                                                                            (double)par3 + this.minY +
-                                                                                              mndy,
-                                                                            (double)par4 + this.minZ,
-                                                                            (double)par2 + this.maxX - mndx,
-                                                                            (double)par3 + this.maxY - mxdy,
-                                                                            (double)par4 + this.maxZ);
-                                    case 4:
-                                        return AxisAlignedBB.getBoundingBox((double)par2 +
-                                                                            this.minX,
-                                                                            (double)par3 +
-                                                                                       this.minY +
-                                                                                       mndy,
-                                                                            (double)par4 + this.minZ +
-                                                                                             mxdx,
-                                                                            (double)par2 + this.maxX,
-                                                                            (double)par3 + this.maxY - mxdy,
-                                                                            (double)par4 + this.maxZ - mndx);
-                                    case 5:
-                                        return AxisAlignedBB.getBoundingBox((double)par2 +
-                                                                            this.minX,
-                                                                            (double)par3 +
-                                                                                       this.minY +
-                                                                                       mndy,
-                                                                            (double)par4 + this.minZ +
-                                                                                             mndx,
-                                                                            (double)par2 + this.maxX,
-                                                                            (double)par3 + this.maxY - mxdy,
-                                                                            (double)par4 + this.maxZ - mxdx);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         return super.getSelectedBoundingBoxFromPool(par1World, par2, par3, par4);
     }
     

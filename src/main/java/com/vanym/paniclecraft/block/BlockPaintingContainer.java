@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.block;
 
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -7,6 +9,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.IBlockAccess;
 
 public abstract class BlockPaintingContainer extends BlockContainerMod3 {
@@ -65,41 +69,19 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     @SideOnly(Side.CLIENT)
     public abstract boolean shouldSideBeRendered(int side, int meta, TileEntity tile);
     
-    public static int getPictureX(int width, int side, float x, float y, float z) {
-        int dx = (int)(x * width);
-        int dy = (int)(z * width);
-        
-        switch (side) {
-            case 0:
-            case 1:
-            case 2:
-                return width - 1 - dx;
-            case 3:
-                return dx;
-            case 4:
-                return dy;
-            case 5:
-                return width - 1 - dy;
-            default:
-                return -1;
+    public static Picture getPicture(IBlockAccess world, int x, int y, int z, int side) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile == null || !(tile instanceof ISidePictureProvider)) {
+            return null;
         }
+        ISidePictureProvider tileP = (ISidePictureProvider)tile;
+        return tileP.getPainting(side);
     }
     
-    public static int getPictureY(int height, int side, float x, float y, float z) {
-        int dy = (int)(y * height);
-        int dz = (int)(z * height);
-        switch (side) {
-            case 0:
-                return dz;
-            case 1:
-                return height - 1 - dz;
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                return height - 1 - dy;
-            default:
-                return -1;
+    public static Picture getPicture(IBlockAccess world, MovingObjectPosition target) {
+        if (target.typeOfHit != MovingObjectType.BLOCK) {
+            return null;
         }
+        return getPicture(world, target.blockX, target.blockY, target.blockZ, target.sideHit);
     }
 }
