@@ -9,6 +9,7 @@ text.paintingHaveSave=Have picture inside
 item.paintBrush0.name=Paint Brush
 item.paintBrush1.name=Small Paint Brush
 item.paintBrush2.name=Paint Filler
+item.paintBrush.radius=Radius
 item.palette.name=Palette
 item.palette.inv.name=Palette
 

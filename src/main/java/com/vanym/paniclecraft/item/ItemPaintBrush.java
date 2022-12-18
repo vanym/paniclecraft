@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -36,6 +38,11 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     public static final int DEFAULT_COLOR_RGB = 200;
     public static final int DEFAULT_COLOR =
             MainUtils.getIntFromRGB(DEFAULT_COLOR_RGB, DEFAULT_COLOR_RGB, DEFAULT_COLOR_RGB);
+    
+    public static final String TAG_RADIUS = "Radius";
+    
+    protected static final double MAX_RADIUS = 256.0D;
+    protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
     
     @SideOnly(Side.CLIENT)
     public IIcon big;
@@ -172,15 +179,26 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
-            ItemStack par1ItemStack,
-            EntityPlayer par2EntityPlayer,
-            List par3List,
-            boolean par4) {
+            ItemStack itemStack,
+            EntityPlayer entityPlayer,
+            List list,
+            boolean advancedItemTooltips) {
+        if (itemStack.hasTagCompound()) {
+            NBTTagCompound itemTag = itemStack.getTagCompound();
+            if (itemTag.hasKey(TAG_RADIUS)) {
+                double radius = this.getPaintingToolRadius(itemStack, null);
+                StringBuilder sb = new StringBuilder();
+                sb.append(StatCollector.translateToLocal(this.getUnlocalizedName() + ".radius"));
+                sb.append(": ");
+                sb.append(NUMBER_FORMATTER.format(radius));
+                list.add(sb.toString());
+            }
+        }
         if (GuiScreen.isShiftKeyDown()) {
-            Color rgbColor = MainUtils.getColorFromInt(this.getColor(par1ItemStack));
-            par3List.add("R: \u00a7c" + rgbColor.getRed());
-            par3List.add("G: \u00a7a" + rgbColor.getGreen());
-            par3List.add("B: \u00a79" + rgbColor.getBlue());
+            Color rgbColor = MainUtils.getColorFromInt(this.getColor(itemStack));
+            list.add("R: \u00a7c" + rgbColor.getRed());
+            list.add("G: \u00a7a" + rgbColor.getGreen());
+            list.add("B: \u00a79" + rgbColor.getBlue());
         }
     }
     
@@ -300,6 +318,13 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     
     @Override
     public double getPaintingToolRadius(ItemStack itemStack, Picture picture) {
+        if (itemStack.hasTagCompound()) {
+            NBTTagCompound itemTag = itemStack.getTagCompound();
+            if (itemTag.hasKey(TAG_RADIUS)) {
+                double radius = itemTag.getDouble(TAG_RADIUS);
+                return Math.min(MAX_RADIUS, radius);
+            }
+        }
         if (itemStack.getItemDamage() == 0) {
             return brushRadiusRound;
         }
