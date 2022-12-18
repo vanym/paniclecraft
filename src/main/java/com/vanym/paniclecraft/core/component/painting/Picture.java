@@ -187,7 +187,7 @@ public class Picture {
         } else if (this.packed != null) {
             return this.packedWidth;
         } else {
-            return 0;
+            return 1;
         }
     }
     
@@ -197,8 +197,12 @@ public class Picture {
         } else if (this.packed != null) {
             return this.packedHeight;
         } else {
-            return 0;
+            return 1;
         }
+    }
+    
+    protected int getSize() {
+        return this.getWidth() * this.getHeight() * Image.PIXEL_SIZE;
     }
     
     @SideOnly(Side.CLIENT)
@@ -217,7 +221,11 @@ public class Picture {
         }
         ByteArrayInputStream in = new ByteArrayInputStream(this.packed);
         try {
-            return ImageUtils.readImageToDirectByteBuffer(in);
+            ByteBuffer buffer = ImageUtils.readImageToDirectByteBuffer(in);
+            if (buffer.capacity() != this.getSize()) {
+                return null;
+            }
+            return buffer;
         } catch (IOException e) {
             e.printStackTrace();
         }

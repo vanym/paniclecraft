@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class Image {
     
-    protected final static int PIXEL_SIZE = 3;
+    public final static int PIXEL_SIZE = 3;
     
     protected int width;
     protected int height;
