@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
@@ -51,8 +52,9 @@ public class PaintingSpecialSelectionBox {
     
     @SubscribeEvent
     public void drawSelectionBox(DrawBlockHighlightEvent event) {
-        if (event.currentItem == null || event.target == null
-            || event.target.typeOfHit != MovingObjectType.BLOCK) {
+        final MovingObjectPosition target = event.target;
+        if (event.currentItem == null || target == null
+            || target.typeOfHit != MovingObjectType.BLOCK) {
             return;
         }
         Item item = event.currentItem.getItem();
@@ -63,7 +65,7 @@ public class PaintingSpecialSelectionBox {
         if (tool.getPaintingToolType(event.currentItem) != PaintingToolType.BRUSH) {
             return;
         }
-        Picture picture = BlockPaintingContainer.getPicture(event.player.worldObj, event.target);
+        Picture picture = BlockPaintingContainer.getPicture(event.player.worldObj, target);
         if (picture == null) {
             return;
         }
@@ -71,11 +73,11 @@ public class PaintingSpecialSelectionBox {
         if (this.onlyCancel) {
             return;
         }
-        PaintingSide pside = PaintingSide.getSize(event.target.sideHit);
+        PaintingSide pside = PaintingSide.getSize(target.sideHit);
         double radius = tool.getPaintingToolRadius(event.currentItem, picture);
         int width = picture.getWidth();
         int height = picture.getHeight();
-        Vec3 inBlockVec = MainUtils.getInBlockVec(event.target);
+        Vec3 inBlockVec = MainUtils.getInBlockVec(target);
         Vec3 inPictureVec = pside.toPaintingCoords(inBlockVec);
         double outline = 0.002D;
         double zOutline = inPictureVec.zCoord + outline;
@@ -127,9 +129,9 @@ public class PaintingSpecialSelectionBox {
         double dz = event.player.lastTickPosZ +
                     (event.player.posZ - event.player.lastTickPosZ) * (double)event.partialTicks;
         Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.fromPaintingCoords(b)
-                                                                    .offset(event.target.blockX,
-                                                                            event.target.blockY,
-                                                                            event.target.blockZ)
+                                                                    .offset(target.blockX,
+                                                                            target.blockY,
+                                                                            target.blockZ)
                                                                     .offset(-dx, -dy, -dz));
         this.drawLines(frameLines);
     }

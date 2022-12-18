@@ -27,7 +27,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
@@ -71,7 +73,8 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
         if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
-        MessagePaintBrushUse mes = makeBrushUseMessage();
+        Minecraft mc = Minecraft.getMinecraft();
+        MessagePaintBrushUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
         if (mes != null) {
             this.brushUseMessages.add(mes);
         }
@@ -96,7 +99,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
         Minecraft mc = Minecraft.getMinecraft();
         ItemStack itemStack = mc.thePlayer.getItemInUse();
         if (itemStack != null && itemStack.getItem() instanceof ItemPaintBrush) {
-            MessagePaintBrushUse mes = makeBrushUseMessage();
+            MessagePaintBrushUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
             if (mes != null) {
                 this.brushUseMessages.add(mes);
             }
@@ -112,17 +115,18 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     }
     
     @SideOnly(Side.CLIENT)
-    public static MessagePaintBrushUse makeBrushUseMessage() {
-        Minecraft mc = Minecraft.getMinecraft();
-        Picture picture = BlockPaintingContainer.getPicture(mc.theWorld, mc.objectMouseOver);
+    public static MessagePaintBrushUse makeBrushUseMessage(
+            IBlockAccess world,
+            MovingObjectPosition target) {
+        Picture picture = BlockPaintingContainer.getPicture(world, target);
         if (picture == null) {
             return null;
         }
-        int x = mc.objectMouseOver.blockX;
-        int y = mc.objectMouseOver.blockY;
-        int z = mc.objectMouseOver.blockZ;
-        PaintingSide pside = PaintingSide.getSize(mc.objectMouseOver.sideHit);
-        Vec3 inBlock = MainUtils.getInBlockVec(mc.objectMouseOver);
+        int x = target.blockX;
+        int y = target.blockY;
+        int z = target.blockZ;
+        PaintingSide pside = PaintingSide.getSize(target.sideHit);
+        Vec3 inBlock = MainUtils.getInBlockVec(target);
         Vec3 inPainting = pside.toPaintingCoords(inBlock);
         int px = (int)(inPainting.xCoord * picture.getWidth());
         int py = (int)(inPainting.yCoord * picture.getHeight());
