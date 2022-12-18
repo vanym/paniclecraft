@@ -9,12 +9,11 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 public class ItemPainting extends ItemMod3 {
@@ -355,15 +354,23 @@ public class ItemPainting extends ItemMod3 {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
-            ItemStack par1ItemStack,
-            EntityPlayer par2EntityPlayer,
-            List par3List,
-            boolean par4) {
-        if (GuiScreen.isShiftKeyDown()) {
-            if (par1ItemStack.hasTagCompound()) {
-                NBTTagCompound tag = par1ItemStack.getTagCompound();
-                if (tag.hasKey(TAG_PICTURE)) {
-                    par3List.add(StatCollector.translateToLocal("text.paintingHaveSave").trim());
+            ItemStack itemStack,
+            EntityPlayer entityPlayer,
+            List list,
+            boolean advancedItemTooltips) {
+        if (itemStack.hasTagCompound()) {
+            NBTTagCompound itemTag = itemStack.getTagCompound();
+            NBTBase pictureTagBase = itemTag.getTag(TAG_PICTURE);
+            if (pictureTagBase != null && pictureTagBase instanceof NBTTagCompound) {
+                NBTTagCompound pictureTag = (NBTTagCompound)pictureTagBase;
+                NBTBase imageTagBase = pictureTag.getTag(Picture.TAG_IMAGE);
+                if (imageTagBase != null && imageTagBase instanceof NBTTagCompound) {
+                    NBTTagCompound imageTag = (NBTTagCompound)imageTagBase;
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(imageTag.getInteger(Picture.TAG_IMAGE_WIDTH));
+                    sb.append("×");
+                    sb.append(imageTag.getInteger(Picture.TAG_IMAGE_HEIGHT));
+                    list.add(sb.toString());
                 }
             }
         }
