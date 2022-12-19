@@ -98,7 +98,12 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
         Vec3 lookvec = MainUtils.getVecByDirection(ForgeDirection.SOUTH);
         lookvec.rotateAroundX(-(player.rotationPitch * 0.999F) * (float)Math.PI / 180.0F);
         lookvec.rotateAroundY(-player.rotationYaw * (float)Math.PI / 180.0F);
-        return MainUtils.getDirectionByVec(dirvec.subtract(lookvec));
+        Vec3 stackvec = dirvec.subtract(lookvec);
+        ForgeDirection stackdir = MainUtils.getDirectionByVec(stackvec);
+        if (stackdir == dir || stackdir == side) {
+            return ForgeDirection.UNKNOWN;
+        }
+        return stackdir;
     }
     
     public static ItemStack getPictureAsItem(Picture picture) {
