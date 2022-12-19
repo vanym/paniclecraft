@@ -33,16 +33,22 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
         tile.blockType = Core.instance.painting.blockPaintingFrame;
         switch (type) {
             case ENTITY:
-                GL11.glTranslatef(-0.5F, -0.2F, -0.5F);
-            break;
-            case EQUIPPED:
-            break;
-            case EQUIPPED_FIRST_PERSON:
+                GL11.glRotatef(270.0F, 0.0F, 1.0F, 0.0F);
+                GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
             break;
             case FIRST_PERSON_MAP:
             break;
+            case EQUIPPED_FIRST_PERSON:
+                GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
+                GL11.glTranslatef(-1.0F, 0.0F, 0.0F);
+            break;
+            case EQUIPPED:
+                GL11.glRotatef(270.0F, 0.0F, 1.0F, 0.0F);
+                GL11.glTranslatef(0.0F, 0.0F, -1.0F);
+            break;
             case INVENTORY:
-                GL11.glTranslatef(0.0F, -0.1F, 0.0F);
+                GL11.glRotatef(270.0F, 0.0F, 1.0F, 0.0F);
+                GL11.glTranslatef(0.0F, -0.1F, -1.0F);
             break;
             default:
             break;
