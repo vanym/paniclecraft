@@ -1,17 +1,25 @@
 package com.vanym.paniclecraft.block;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
@@ -68,6 +76,43 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
     @SideOnly(Side.CLIENT)
     public abstract boolean shouldSideBeRendered(int side, int meta, TileEntity tile);
+    
+    public static void rotatePicture(
+            EntityPlayer player,
+            Picture picture,
+            ForgeDirection side,
+            boolean place) {
+        if (side != ForgeDirection.DOWN && side != ForgeDirection.UP) {
+            return;
+        }
+        int rot = MathHelper.floor_double((double)(player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        if ((side == ForgeDirection.UP) != place) {
+            rot = (4 - rot) % 4;
+        }
+        picture.rotate(rot);
+    }
+    
+    public static ForgeDirection getStackDirection(EntityPlayer player, ForgeDirection side) {
+        ForgeDirection dir = side.getOpposite();
+        Vec3 dirvec = MainUtils.getVecByDirection(dir);
+        Vec3 lookvec = MainUtils.getVecByDirection(ForgeDirection.SOUTH);
+        lookvec.rotateAroundX(-(player.rotationPitch * 0.999F) * (float)Math.PI / 180.0F);
+        lookvec.rotateAroundY(-player.rotationYaw * (float)Math.PI / 180.0F);
+        return MainUtils.getDirectionByVec(dirvec.subtract(lookvec));
+    }
+    
+    public static ItemStack getPictureAsItem(Picture picture) {
+        ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
+        if (picture == null) {
+            return itemS;
+        }
+        NBTTagCompound itemTag = new NBTTagCompound();
+        NBTTagCompound pictureTag = new NBTTagCompound();
+        picture.writeToNBT(pictureTag);
+        itemS.setTagCompound(itemTag);
+        itemTag.setTag(ItemPainting.TAG_PICTURE, pictureTag);
+        return itemS;
+    }
     
     public static Picture getPicture(IBlockAccess world, int x, int y, int z, int side) {
         TileEntity tile = world.getTileEntity(x, y, z);

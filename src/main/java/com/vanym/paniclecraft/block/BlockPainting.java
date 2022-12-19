@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -15,7 +14,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
@@ -106,60 +104,32 @@ public class BlockPainting extends BlockPaintingContainer {
             int y,
             int z,
             EntityPlayer entityPlayer,
-            int p_149727_6_,
+            int side,
             float p_149727_7_,
             float p_149727_8_,
             float p_149727_9_) {
         if (!entityPlayer.isSneaking()) {
             return false;
         }
-        if (!world.isRemote) {
-            TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
-            int md = world.getBlockMetadata(x, y, z);
-            Picture picture = tileP.getPainting(md);
-            if (md == 0) {
-                int rot = (int)((entityPlayer.rotationYaw + 45.0F) / 90.0F);
-                while (rot >= 4) {
-                    rot -= 4;
-                }
-                switch (rot) {
-                    case 1:
-                        picture.rotate90();
-                    break;
-                    case 2:
-                        picture.rotate180();
-                    break;
-                    case 3:
-                        picture.rotate270();
-                    break;
-                }
-            }
-            if (md == 1) {
-                int rot = (int)((entityPlayer.rotationYaw + 45.0F) / 90.0F);
-                while (rot >= 4) {
-                    rot -= 4;
-                }
-                switch (rot) {
-                    case 1:
-                        picture.rotate270();
-                    break;
-                    case 2:
-                        picture.rotate180();
-                    break;
-                    case 3:
-                        picture.rotate90();
-                    break;
-                }
-            }
-            EntityItem entityItem = new EntityItem(
-                    world,
-                    x + 0.5D,
-                    y + 0.5D,
-                    z + 0.5D,
-                    getSavedPic(picture));
-            world.spawnEntityInWorld(entityItem);
-            world.setBlockToAir(x, y, z);
+        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
+        int meta = tileP.getBlockMetadata();
+        Picture picture = tileP.getPainting(meta);
+        if (picture == null) {
+            return false;
         }
+        if (world.isRemote) {
+            return true;
+        }
+        ForgeDirection dir = ForgeDirection.getOrientation(meta);
+        if (entityPlayer != null) {
+            rotatePicture(entityPlayer, picture, dir, false);
+        }
+        ItemStack itemStack = BlockPaintingContainer.getPictureAsItem(picture);
+        EntityItem entityItem = new EntityItem(world, x + 0.5D, y + 0.5D, z + 0.5D, itemStack);
+        entityItem.delayBeforeCanPickup = 3;
+        world.spawnEntityInWorld(entityItem);
+        world.removeTileEntity(x, y, z);
+        world.setBlockToAir(x, y, z);
         return true;
     }
     
@@ -176,19 +146,6 @@ public class BlockPainting extends BlockPaintingContainer {
         return MainUtils.getBoundsBySide(side, this.getPaintingOutlineSize());
     }
     
-    public static ItemStack getSavedPic(Picture picture) {
-        ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
-        if (picture == null) {
-            return itemS;
-        }
-        NBTTagCompound var1 = new NBTTagCompound();
-        NBTTagCompound var2 = new NBTTagCompound();
-        picture.writeToNBT(var2);
-        itemS.setTagCompound(var1);
-        var1.setTag(ItemPainting.TAG_PICTURE, var2);
-        return itemS;
-    }
-    
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(World par1World, int par2, int par3, int par4) {
         this.setBlockBoundsBasedOnState(par1World, par2, par3, par4);
@@ -199,6 +156,6 @@ public class BlockPainting extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         TileEntityPainting tile = (TileEntityPainting)world.getTileEntity(x, y, z);
-        return getSavedPic(tile.getPainting(tile.getBlockMetadata()));
+        return BlockPaintingContainer.getPictureAsItem(tile.getPainting(tile.getBlockMetadata()));
     }
 }

@@ -62,67 +62,38 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             int z,
             EntityPlayer entityPlayer,
             int side,
-            float p_149727_7_,
-            float p_149727_8_,
-            float p_149727_9_) {
+            float hitX,
+            float hitY,
+            float hitZ) {
         if (!entityPlayer.isSneaking()) {
             return false;
         }
         TileEntityPaintingFrame tileP = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
-        if (tileP != null) {
-            if (tileP.getPainting(side) == null) {
-                return false;
-            }
-            if (world.isRemote) {
-                return true;
-            }
-            Picture picture = tileP.getPainting(side);
-            if (side == 0) {
-                int rot = (int)((entityPlayer.rotationYaw + 45.0F) / 90.0F);
-                while (rot >= 4) {
-                    rot -= 4;
-                }
-                switch (rot) {
-                    case 1:
-                        picture.rotate90();
-                    break;
-                    case 2:
-                        picture.rotate180();
-                    break;
-                    case 3:
-                        picture.rotate270();
-                    break;
-                }
-            }
-            if (side == 1) {
-                int rot = (int)((entityPlayer.rotationYaw + 45.0F) / 90.0F);
-                while (rot >= 4) {
-                    rot -= 4;
-                }
-                switch (rot) {
-                    case 1:
-                        picture.rotate270();
-                    break;
-                    case 2:
-                        picture.rotate180();
-                    break;
-                    case 3:
-                        picture.rotate90();
-                    break;
-                }
-            }
-            ForgeDirection dir = ForgeDirection.getOrientation(side);
-            EntityItem entityItem = new EntityItem(
-                    world,
-                    x + 0.5D + (dir.offsetX * 0.6),
-                    y + 0.5D + (dir.offsetY * 0.6),
-                    z + 0.5D + (dir.offsetZ * 0.6),
-                    BlockPainting.getSavedPic(picture));
-            world.spawnEntityInWorld(entityItem);
-            tileP.clearPicture(side);
-            tileP.markForUpdate();
+        if (tileP == null) {
+            return false;
         }
-        return false;
+        Picture picture = tileP.getPainting(side);
+        if (picture == null) {
+            return false;
+        }
+        if (world.isRemote) {
+            return true;
+        }
+        ForgeDirection dir = ForgeDirection.getOrientation(side);
+        if (entityPlayer != null) {
+            rotatePicture(entityPlayer, picture, dir, false);
+        }
+        double ex = x + 0.5D + (dir.offsetX * 0.6);
+        double ey = y + 0.5D + (dir.offsetY * 0.6);
+        double ez = z + 0.5D + (dir.offsetZ * 0.6);
+        ItemStack itemStack = BlockPaintingContainer.getPictureAsItem(picture);
+        EntityItem entityItem = new EntityItem(world, ex, ey, ez, itemStack);
+        entityItem.delayBeforeCanPickup = 3;
+        world.spawnEntityInWorld(entityItem);
+        tileP.clearPicture(side);
+        tileP.markForUpdate();
+        world.notifyBlockChange(x, y, z, this);
+        return true;
     }
     
     @Override
@@ -214,7 +185,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block p_149749_5_, int p_149749_6_) {
+    public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
         TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
         for (int side = 0; side < 6; side++) {
             Picture picture = tile.getPainting(side);
@@ -223,7 +194,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                                      new ItemStack(Core.instance.painting.itemPainting));
             }
         }
-        super.breakBlock(world, x, y, z, p_149749_5_, p_149749_6_);
+        super.breakBlock(world, x, y, z, block, meta);
     }
     
     @Override

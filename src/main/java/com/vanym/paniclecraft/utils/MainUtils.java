@@ -13,8 +13,10 @@ import java.util.Properties;
 import javax.imageio.ImageIO;
 
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class MainUtils {
     
@@ -67,6 +69,33 @@ public class MainUtils {
     public static Vec3 getInBlockVec(MovingObjectPosition target) {
         return Vec3.createVectorHelper(target.blockX, target.blockY, target.blockZ)
                    .subtract(target.hitVec);
+    }
+    
+    public static Vec3 getVecByDirection(ForgeDirection dir) {
+        return Vec3.createVectorHelper(dir.offsetX, dir.offsetY, dir.offsetZ);
+    }
+    
+    public static ForgeDirection getDirectionRoration(double yaw, double pitch) {
+        ForgeDirection south = ForgeDirection.SOUTH; // +Z
+        ForgeDirection up = ForgeDirection.UP; // +Y
+        ForgeDirection pitchRotator = south.getRotation(up);
+        ForgeDirection current = south;
+        int pitchRot = MathHelper.floor_double((pitch * 4.0F / 360.0F) + 0.5D) & 3;
+        int yawRot = MathHelper.floor_double((yaw * 4.0F / 360.0F) + 0.5D) & 3;
+        for (int i = 0; i < pitchRot; ++i) {
+            current = current.getRotation(pitchRotator);
+        }
+        for (int i = 0; i < yawRot; ++i) {
+            current = current.getRotation(up);
+        }
+        return current;
+    }
+    
+    public static ForgeDirection getDirectionByVec(Vec3 lookVec) {
+        double lookXZ = lookVec.addVector(0, -lookVec.yCoord, 0).lengthVector();
+        double pitch = -Math.atan2(lookVec.yCoord, lookXZ) * 180.0D / Math.PI;
+        double yaw = -Math.atan2(lookVec.xCoord, lookVec.zCoord) * 180.0D / Math.PI;
+        return getDirectionRoration(yaw, pitch);
     }
     
     // public static int[] getRGBFromInt(int par1){

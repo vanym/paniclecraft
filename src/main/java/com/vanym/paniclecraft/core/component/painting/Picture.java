@@ -283,18 +283,18 @@ public class Picture {
         this.packed = null;
     }
     
-    protected boolean rotate(int angle) {
-        if (!this.unpack()) {
+    public boolean rotate(int rot) {
+        if ((rot == 0) || !this.unpack()) {
             return false;
         }
-        switch (angle) {
-            case 90:
+        switch (rot) {
+            case 1:
                 this.image.rotate90();
             break;
-            case 180:
+            case 2:
                 this.image.rotate180();
             break;
-            case 270:
+            case 3:
                 this.image.rotate270();
             break;
             default:
@@ -305,18 +305,6 @@ public class Picture {
         this.imageChanged();
         this.update();
         return true;
-    }
-    
-    public boolean rotate90() {
-        return this.rotate(90);
-    }
-    
-    public boolean rotate180() {
-        return this.rotate(180);
-    }
-    
-    public boolean rotate270() {
-        return this.rotate(270);
     }
     
     public static final String TAG_EDITABLE = "Editable";
