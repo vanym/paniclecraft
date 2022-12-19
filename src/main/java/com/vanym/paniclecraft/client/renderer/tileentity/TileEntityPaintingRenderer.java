@@ -5,6 +5,8 @@ import java.nio.ByteOrder;
 
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.client.utils.IconFlippedBugFixed;
@@ -20,6 +22,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.profiler.Profiler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
@@ -72,14 +75,22 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             double y,
             double z,
             float f) {
-        boolean worldless = (tile.getWorldObj() == null);
+        World world = tile.getWorldObj();
         int meta = tile.getBlockMetadata();
+        Profiler theProfiler = null;
         RenderBlocks render;
-        if (worldless) {
+        if (world == null) {
             this.renderBlocksWorldless.setMeta(meta);
             render = this.renderBlocksWorldless;
         } else {
             render = this.renderBlocks;
+            if (Core.instance.painting.renderProfiling) {
+                theProfiler = world.theProfiler;
+            }
+        }
+        if (theProfiler != null) {
+            theProfiler.startSection(DEF.MOD_ID + ":" + TileEntityPainting.IN_MOD_ID);
+            theProfiler.startSection("frame");
         }
         this.bindTexture(TextureMap.locationBlocksTexture);
         Tessellator tessellator = Tessellator.instance;
@@ -95,18 +106,29 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         block.setRendererBox(box);
         render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
         tessellator.draw();
-        tessellator.startDrawingQuads();
-        {
-            Picture picture = tile.getPainting(meta);
-            IIcon icon = bindTexture(picture, meta);
-            render.setOverrideBlockTexture(icon);
-            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
-            render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
-            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.NONE);
-            render.clearOverrideBlockTexture();
+        Picture picture = tile.getPainting(meta);
+        if (theProfiler != null) {
+            theProfiler.endStartSection("painting"); // frame
+            theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
+            theProfiler.startSection("bind");
         }
+        IIcon icon = bindTexture(picture, meta);
+        if (theProfiler != null) {
+            theProfiler.endSection(); // bind
+        }
+        render.setOverrideBlockTexture(icon);
+        tessellator.startDrawingQuads();
+        block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
+        render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
+        block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.NONE);
+        render.clearOverrideBlockTexture();
         tessellator.draw();
         tessellator.setTranslation(0, 0, 0);
+        if (theProfiler != null) {
+            theProfiler.endSection(); // WxH
+            theProfiler.endSection(); // painting
+            theProfiler.endSection(); // root
+        }
     }
     
     protected static IIcon bindTexture(Picture picture, int side) {

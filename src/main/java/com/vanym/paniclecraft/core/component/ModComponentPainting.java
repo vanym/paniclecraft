@@ -55,6 +55,8 @@ public class ModComponentPainting implements ModComponent {
             new TileEntityPaintingFrameRenderer();
     @SideOnly(Side.CLIENT)
     public boolean specialBoundingBox = true;
+    @SideOnly(Side.CLIENT)
+    public boolean renderProfiling = false;
     
     protected boolean enabled = false;
     
@@ -130,12 +132,13 @@ public class ModComponentPainting implements ModComponent {
         this.blockPainting = new BlockPainting();
         GameRegistry.registerBlock(this.blockPainting, null,
                                    this.blockPainting.getUnlocalizedName().substring(5));
-        GameRegistry.registerTileEntity(TileEntityPainting.class, DEF.MOD_ID + ".painting");
+        GameRegistry.registerTileEntity(TileEntityPainting.class,
+                                        DEF.MOD_ID + "." + TileEntityPainting.IN_MOD_ID);
         this.blockPaintingFrame = new BlockPaintingFrame();
         GameRegistry.registerBlock(this.blockPaintingFrame,
                                    this.blockPaintingFrame.getUnlocalizedName().substring(5));
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class,
-                                        DEF.MOD_ID + ".paintingFrame");
+                                        DEF.MOD_ID + "." + TileEntityPaintingFrame.IN_MOD_ID);
         int crafting_paintingFrame_amount =
                 config.getInt("Crafting_PaintingFrame_Amount", this.getName(), 1, 0, 64,
                               "\'0\' to disable");
@@ -194,6 +197,8 @@ public class ModComponentPainting implements ModComponent {
             MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
                                                       new ItemRendererPaintingFrame());
         }
+        this.renderProfiling =
+                config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
         if (textureCache != null) {
             MinecraftForge.EVENT_BUS.register(textureCache);
         }

@@ -14,6 +14,8 @@ import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
+    public static final String IN_MOD_ID = "paintingFrame";
+    
     protected final PictureHolder[] holders = new PictureHolder[6];
     
     protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE + "[%d]";
