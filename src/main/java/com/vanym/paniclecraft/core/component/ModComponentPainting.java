@@ -14,6 +14,7 @@ import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrame
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPainting;
+import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
@@ -135,7 +136,7 @@ public class ModComponentPainting implements ModComponent {
         GameRegistry.registerTileEntity(TileEntityPainting.class,
                                         DEF.MOD_ID + "." + TileEntityPainting.IN_MOD_ID);
         this.blockPaintingFrame = new BlockPaintingFrame();
-        GameRegistry.registerBlock(this.blockPaintingFrame,
+        GameRegistry.registerBlock(this.blockPaintingFrame, ItemPaintingFrame.class,
                                    this.blockPaintingFrame.getUnlocalizedName().substring(5));
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class,
                                         DEF.MOD_ID + "." + TileEntityPaintingFrame.IN_MOD_ID);
