@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.item;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
@@ -42,6 +43,7 @@ public class ItemPainting extends ItemMod3 {
             float hitX,
             float hitY,
             float hitZ) {
+        final BlockPainting painting = Core.instance.painting.blockPainting;
         int i = 0;
         ForgeDirection dir = ForgeDirection.getOrientation(side);
         if (!entityPlayer.isSneaking()) {
@@ -52,7 +54,7 @@ public class ItemPainting extends ItemMod3 {
             }
             for (; i < paintingPlaceStack; i++) {
                 Block block = world.getBlock(x, y, z);
-                if (block != Core.instance.painting.blockPainting) {
+                if (block != painting) {
                     break;
                 }
                 int meta = world.getBlockMetadata(x, y, z);
@@ -75,10 +77,16 @@ public class ItemPainting extends ItemMod3 {
             z += dir.offsetZ;
         }
         if (!entityPlayer.canPlayerEdit(x, y, z, side, itemStack)
-            || !Core.instance.painting.blockPainting.canPlaceBlockAt(world, x, y, z)) {
+            || !painting.canPlaceBlockAt(world, x, y, z)
+            || !world.setBlock(x, y, z, painting, side, 3)) {
             return false;
         }
-        world.setBlock(x, y, z, Core.instance.painting.blockPainting, side, 3);
+        painting.onBlockPlacedBy(world, x, y, z, entityPlayer, itemStack);
+        painting.onPostBlockPlaced(world, x, y, z, side);
+        world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D,
+                              painting.stepSound.func_150496_b(),
+                              (painting.stepSound.getVolume() + 1.0F) / 2.0F,
+                              painting.stepSound.getPitch() * 0.8F);
         --itemStack.stackSize;
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
         Picture picture = tileP.getPainting(side);
