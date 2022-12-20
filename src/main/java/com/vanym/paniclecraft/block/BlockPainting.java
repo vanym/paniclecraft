@@ -82,18 +82,13 @@ public class BlockPainting extends BlockPaintingContainer {
     }
     
     @Override
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(
-            World par1World,
-            int par2,
-            int par3,
-            int par4) {
-        this.setBlockBoundsBasedOnState(par1World, par2, par3, par4);
-        return super.getCollisionBoundingBoxFromPool(par1World, par2, par3, par4);
-        // return null;
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+        this.setBlockBoundsBasedOnState(world, x, y, z);
+        return super.getCollisionBoundingBoxFromPool(world, x, y, z);
     }
     
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
+    public Item getItemDropped(int meta, Random random, int fortune) {
         return Core.instance.painting.itemPainting;
     }
     
@@ -105,9 +100,9 @@ public class BlockPainting extends BlockPaintingContainer {
             int z,
             EntityPlayer entityPlayer,
             int side,
-            float p_149727_7_,
-            float p_149727_8_,
-            float p_149727_9_) {
+            float hitX,
+            float hitY,
+            float hitZ) {
         if (!entityPlayer.isSneaking()) {
             return false;
         }
@@ -144,12 +139,6 @@ public class BlockPainting extends BlockPaintingContainer {
     public AxisAlignedBB getBlockBoundsBasedOnState(int meta) {
         int side = ForgeDirection.getOrientation(meta).getOpposite().ordinal();
         return MainUtils.getBoundsBySide(side, this.getPaintingOutlineSize());
-    }
-    
-    @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getRenderBoundingBox(World par1World, int par2, int par3, int par4) {
-        this.setBlockBoundsBasedOnState(par1World, par2, par3, par4);
-        return super.getSelectedBoundingBoxFromPool(par1World, par2, par3, par4);
     }
     
     @Override

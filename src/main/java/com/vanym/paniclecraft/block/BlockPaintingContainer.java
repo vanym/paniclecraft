@@ -77,18 +77,23 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     @SideOnly(Side.CLIENT)
     public abstract boolean shouldSideBeRendered(int side, int meta, TileEntity tile);
     
-    public static void rotatePicture(
-            EntityPlayer player,
-            Picture picture,
-            ForgeDirection side,
-            boolean place) {
+    public static int getRotate(EntityPlayer player, ForgeDirection side, boolean place) {
         if (side != ForgeDirection.DOWN && side != ForgeDirection.UP) {
-            return;
+            return 0;
         }
         int rot = MathHelper.floor_double((double)(player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         if ((side == ForgeDirection.UP) != place) {
             rot = (4 - rot) % 4;
         }
+        return rot;
+    }
+    
+    public static void rotatePicture(
+            EntityPlayer player,
+            Picture picture,
+            ForgeDirection side,
+            boolean place) {
+        int rot = getRotate(player, side, place);
         picture.rotate(rot);
     }
     

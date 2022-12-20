@@ -52,7 +52,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         this.readFromNBT(nbtData);
     }
     
-    protected Picture getPicture() {
+    public Picture getPicture() {
         return this.picture;
     }
     

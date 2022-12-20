@@ -50,7 +50,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
-    public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_) {
+    public TileEntity createNewTileEntity(World world, int meta) {
         return new TileEntityPaintingFrame();
     }
     
@@ -203,8 +203,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public IIcon getIcon(int par1, int md) {
-        return Core.instance.painting.blockPainting.getIcon(par1, md);
+    public IIcon getIcon(int side, int meta) {
+        return Core.instance.painting.blockPainting.getIcon(side, meta);
     }
     
     public static List<AxisAlignedBB> getFrameBoxes(final double frameWidth) {
