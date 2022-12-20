@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.common.util.ForgeDirection;
 
 @SideOnly(Side.CLIENT)
 public class ItemRendererPainting implements IItemRenderer {
@@ -41,8 +42,8 @@ public class ItemRendererPainting implements IItemRenderer {
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         TileEntityPainting tilePainting = new TileEntityPainting();
         tilePainting.blockType = Core.instance.painting.blockPainting;
-        tilePainting.blockMetadata = 3;
-        Picture picture = tilePainting.getPainting(3);
+        tilePainting.blockMetadata = ForgeDirection.EAST.ordinal();
+        Picture picture = tilePainting.getPainting(tilePainting.blockMetadata);
         NBTTagCompound nbtPictureTag = null;
         if (item.hasTagCompound()) {
             NBTTagCompound itemTag = item.getTagCompound();
@@ -61,20 +62,30 @@ public class ItemRendererPainting implements IItemRenderer {
         } else if (nbtPictureTag != null) {
             picture.readFromNBT(nbtPictureTag);
         }
-        if (type.equals(ItemRenderType.ENTITY)) {
-            GL11.glTranslatef(-0.25F, -0.18F, 0.0F);
-            float var11 = 0.55F;
-            GL11.glScalef(var11, var11, var11);
-        } else if (type.equals(ItemRenderType.EQUIPPED)
-            || type.equals(ItemRenderType.EQUIPPED_FIRST_PERSON)) {
-            tilePainting.blockMetadata = 4;
-            GL11.glTranslatef(-0.6F, 0.6F, 0.0F);
-        } else if (type.equals(ItemRenderType.INVENTORY)) {
-            float var12 = 1.2F;
-            GL11.glScalef(var12, var12, var12);
-            GL11.glTranslatef(0.0F, -0.18F, 0.42F);
-        } else if (type.equals(ItemRenderType.FIRST_PERSON_MAP)) {
-            
+        switch (type) {
+            case ENTITY:
+                float scaleent = 0.6F;
+                GL11.glScalef(scaleent, scaleent, scaleent);
+                GL11.glTranslatef(0.0F, -0.5F, -0.5F);
+            break;
+            case EQUIPPED:
+                GL11.glRotatef(45.0F, 0.0F, -1.0F, 1.0F);
+                GL11.glRotatef(30.0F, -1.0F, -0.7F, 1.0F);
+                GL11.glTranslatef(1.0F, -0.5F, -0.5F);
+            break;
+            case EQUIPPED_FIRST_PERSON:
+                tilePainting.blockMetadata = ForgeDirection.WEST.ordinal();
+                GL11.glTranslatef(-0.6F, 0.6F, 0.0F);
+            break;
+            case INVENTORY:
+                tilePainting.blockMetadata = ForgeDirection.SOUTH.ordinal();
+                float scaleinv = 1.2F;
+                GL11.glScalef(scaleinv, scaleinv, scaleinv);
+                GL11.glTranslatef(0.0F, -0.12F, 0.42F);
+            break;
+            case FIRST_PERSON_MAP:
+            default:
+            break;
         }
         Core.instance.painting.tilePaintingRenderer.renderTileEntityAtItem(tilePainting);
         if (obtainedTexture < 0) {
