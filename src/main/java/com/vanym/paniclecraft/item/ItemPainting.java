@@ -145,16 +145,24 @@ public class ItemPainting extends ItemMod3 {
             NBTBase pictureTagBase = itemTag.getTag(TAG_PICTURE);
             if (pictureTagBase != null && pictureTagBase instanceof NBTTagCompound) {
                 NBTTagCompound pictureTag = (NBTTagCompound)pictureTagBase;
-                NBTBase imageTagBase = pictureTag.getTag(Picture.TAG_IMAGE);
-                if (imageTagBase != null && imageTagBase instanceof NBTTagCompound) {
-                    NBTTagCompound imageTag = (NBTTagCompound)imageTagBase;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(imageTag.getInteger(Picture.TAG_IMAGE_WIDTH));
-                    sb.append("×");
-                    sb.append(imageTag.getInteger(Picture.TAG_IMAGE_HEIGHT));
-                    list.add(sb.toString());
-                }
+                list.add(pictureInformation(pictureTag));
             }
         }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public static String pictureInformation(NBTTagCompound pictureTag) {
+        StringBuilder sb = new StringBuilder();
+        NBTBase imageTagBase = pictureTag.getTag(Picture.TAG_IMAGE);
+        NBTTagCompound imageTag;
+        if (imageTagBase != null && imageTagBase instanceof NBTTagCompound) {
+            imageTag = (NBTTagCompound)imageTagBase;
+        } else {
+            imageTag = new NBTTagCompound();
+        }
+        sb.append(imageTag.getInteger(Picture.TAG_IMAGE_WIDTH));
+        sb.append("×");
+        sb.append(imageTag.getInteger(Picture.TAG_IMAGE_HEIGHT));
+        return sb.toString();
     }
 }

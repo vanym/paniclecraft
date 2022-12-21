@@ -135,8 +135,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
             NBTTagCompound itemTag = itemStack.getTagCompound();
-            int size = tilePF.getPaintingSlots();
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
                 final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
                 if (!itemTag.hasKey(TAG_PICTURE_I)) {
                     continue;
@@ -259,8 +258,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             return itemS;
         }
         NBTTagCompound itemTag = new NBTTagCompound();
-        int size = tilePF.getPaintingSlots();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
             Picture picture = tilePF.getPainting(i);
             if (picture == null) {
                 continue;

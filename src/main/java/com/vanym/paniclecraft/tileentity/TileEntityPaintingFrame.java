@@ -16,9 +16,11 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     public static final String IN_MOD_ID = "paintingFrame";
     
-    protected final PictureHolder[] holders = new PictureHolder[6];
-    
     public static final String TAG_PICTURE_N = TileEntityPainting.TAG_PICTURE + "[%d]";
+    
+    public static final int N = 6;
+    
+    protected final PictureHolder[] holders = new PictureHolder[N];
     
     @Override
     public void writeToNBT(NBTTagCompound nbtTag) {
@@ -90,10 +92,6 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
             return this.holders[side].picture;
         }
         return null;
-    }
-    
-    public int getPaintingSlots() {
-        return this.holders.length;
     }
     
     protected Picture getPainting(int side, int xO, int yO) {

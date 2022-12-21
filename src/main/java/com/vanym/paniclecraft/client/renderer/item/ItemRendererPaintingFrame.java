@@ -41,13 +41,12 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
     public void renderItem(ItemRenderType type, ItemStack itemS, Object... data) {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
         tilePF.blockType = Core.instance.painting.blockPaintingFrame;
-        int size = tilePF.getPaintingSlots();
-        int[] obtainedTextures = new int[size];
+        int[] obtainedTextures = new int[TileEntityPaintingFrame.N];
         NBTTagCompound itemTag = itemS.getTagCompound();
         if (itemTag == null) {
             itemTag = new NBTTagCompound();
         }
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < TileEntityPaintingFrame.N; ++i) {
             final String TAG_PICTURE_I = String.format(BlockPaintingFrame.TAG_PICTURE_N, i);
             obtainedTextures[i] = -1;
             if (!itemTag.hasKey(TAG_PICTURE_I)) {
@@ -87,7 +86,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             break;
         }
         Core.instance.painting.tilePaintingFrameRenderer.renderTileEntityAtItem(tilePF);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
             Picture picture = tilePF.getPainting(i);
             if (picture == null || obtainedTextures[i] >= 0) {
                 continue;
