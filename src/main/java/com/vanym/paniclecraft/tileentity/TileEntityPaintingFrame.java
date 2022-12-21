@@ -39,11 +39,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     public void readFromNBT(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
-            final String OLD_TAG_PICTURE_I = String.format("PictureData[%d]", i);
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
-            if (nbtTag.hasKey(OLD_TAG_PICTURE_I)) {
-                nbtTag.setTag(TAG_PICTURE_I, nbtTag.getTag(OLD_TAG_PICTURE_I));
-            }
             if (nbtTag.hasKey(TAG_PICTURE_I)) {
                 Picture picture = this.createPicture(i);
                 picture.readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE_I));

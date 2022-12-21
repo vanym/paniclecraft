@@ -30,9 +30,6 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     @Override
     public void readFromNBT(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
-        if (nbtTag.hasKey("PictureData")) {
-            nbtTag.setTag(TAG_PICTURE, nbtTag.getTag("PictureData"));
-        }
         if (nbtTag.hasKey(TAG_PICTURE)) {
             this.getPicture().readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE));
         }
