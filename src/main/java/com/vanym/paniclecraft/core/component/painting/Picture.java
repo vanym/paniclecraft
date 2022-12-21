@@ -41,7 +41,7 @@ public class Picture {
     
     public Picture(IPictureHolder holder) {
         this.holder = holder;
-        this.setSize(16, 16);
+        this.setDefaultSize();
     }
     
     public boolean usePaintingTool(ItemStack itemStack, int x, int y) {
@@ -275,6 +275,11 @@ public class Picture {
             return Core.instance.painting.DEFAULT_COLOR;
         }
         return this.image.getPixelColor(px, py);
+    }
+    
+    protected void setDefaultSize() {
+        this.setSize(Core.instance.painting.config.paintingDefaultWidth,
+                     Core.instance.painting.config.paintingDefaultHeight);
     }
     
     protected void setSize(int width, int height) {
