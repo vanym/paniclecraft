@@ -9,8 +9,8 @@ import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -106,26 +106,52 @@ public class BlockPainting extends BlockPaintingContainer {
         if (!entityPlayer.isSneaking()) {
             return false;
         }
-        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
-        int meta = tileP.getBlockMetadata();
-        Picture picture = tileP.getPainting(meta);
-        if (picture == null) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile == null || !(tile instanceof TileEntityPainting)) {
             return false;
         }
         if (world.isRemote) {
             return true;
         }
-        ForgeDirection dir = ForgeDirection.getOrientation(meta);
-        if (entityPlayer != null) {
-            rotatePicture(entityPlayer, picture, dir, false);
+        return this.removedByPlayer(world, entityPlayer, x, y, z, false);
+    }
+    
+    @Override
+    public int quantityDropped(Random rand) {
+        return 0;
+    }
+    
+    @Override
+    public boolean removedByPlayer(
+            World world,
+            EntityPlayer player,
+            int x,
+            int y,
+            int z,
+            boolean willHarvest) {
+        if (player != null) {
+            TileEntity tile = world.getTileEntity(x, y, z);
+            if (tile != null && tile instanceof TileEntityPainting) {
+                TileEntityPainting tileP = (TileEntityPainting)tile;
+                Picture picture = tileP.getPicture();
+                int meta = tileP.getBlockMetadata();
+                ForgeDirection dir = ForgeDirection.getOrientation(meta);
+                rotatePicture(player, picture, dir, false);
+            }
         }
-        ItemStack itemStack = BlockPaintingContainer.getPictureAsItem(picture);
-        EntityItem entityItem = new EntityItem(world, x + 0.5D, y + 0.5D, z + 0.5D, itemStack);
-        entityItem.delayBeforeCanPickup = 3;
-        world.spawnEntityInWorld(entityItem);
-        world.removeTileEntity(x, y, z);
-        world.setBlockToAir(x, y, z);
-        return true;
+        return super.removedByPlayer(world, player, x, y, z, willHarvest);
+    }
+    
+    @Override
+    public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile != null && tile instanceof TileEntityPainting) {
+            TileEntityPainting tileP = (TileEntityPainting)tile;
+            Picture picture = tileP.getPicture();
+            ItemStack itemStack = BlockPaintingContainer.getPictureAsItem(picture);
+            this.dropBlockAsItem(world, x, y, z, itemStack);
+        }
+        super.breakBlock(world, x, y, z, block, meta);
     }
     
     @Override
