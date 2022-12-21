@@ -384,6 +384,7 @@ public class Picture {
                 }
             }
         } else if (width > 0 && height > 0) {
+            this.packed = null;
             if (raw != null) {
                 this.image = new Image(width, height, raw);
             } else {
