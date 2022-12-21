@@ -24,8 +24,6 @@ public class ItemPainting extends ItemMod3 {
     
     public static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
-    public static int paintingPlaceStack = 2;
-    
     public ItemPainting() {
         super();
         this.setUnlocalizedName("painting");
@@ -52,7 +50,7 @@ public class ItemPainting extends ItemMod3 {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
                 return this.onItemUseOnFrame(itemStack, entityPlayer, world, tilePF, side);
             }
-            for (; i < paintingPlaceStack; i++) {
+            for (; i < Core.instance.painting.config.paintingPlaceStack; i++) {
                 Block block = world.getBlock(x, y, z);
                 if (block != painting) {
                     break;

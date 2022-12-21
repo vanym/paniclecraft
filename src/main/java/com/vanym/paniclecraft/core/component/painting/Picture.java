@@ -158,7 +158,6 @@ public class Picture {
         if (!this.editable || !this.isSameSize(picture)) {
             return false;
         }
-        // TODO brush check
         return true;
     }
     

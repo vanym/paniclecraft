@@ -1,6 +1,9 @@
 package com.vanym.paniclecraft.core.component;
 
 import java.awt.Color;
+import java.util.NoSuchElementException;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -50,6 +53,8 @@ public class ModComponentPainting implements ModComponent {
     public BlockPainting blockPainting;
     public BlockPaintingFrame blockPaintingFrame;
     
+    public ChangeableConfig config = new ChangeableConfig();
+    
     @SideOnly(Side.CLIENT)
     public TileEntityPaintingRenderer tilePaintingRenderer = new TileEntityPaintingRenderer();
     @SideOnly(Side.CLIENT)
@@ -71,14 +76,6 @@ public class ModComponentPainting implements ModComponent {
         this.itemPainting = new ItemPainting();
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPalette = new ItemPalette();
-        config.getInt("PaintingRow", this.getName(), 16, 1, 32, // TODO
-                      "(recommend to degree 2 like 8,16,32)");
-        ItemPaintBrush.brushRadiusRound =
-                config.get(this.getName(), "brushRadius", 3.5D,
-                           "[range: 1 ~ 2048, default: 3.5]", 1.0D, 2048.0D)
-                      .getDouble(3.5D);
-        ItemPainting.paintingPlaceStack =
-                config.getInt("PaintingPlaceStack", this.getName(), 2, 0, 256, "");
         Core.instance.registerItem(this.itemPainting);
         Core.instance.registerItem(this.itemPaintBrush);
         Core.instance.registerItem(this.itemPalette);
@@ -158,6 +155,7 @@ public class ModComponentPainting implements ModComponent {
         Core.instance.network.registerMessage(MessagePaletteChange.class,
                                               MessagePaletteChange.class, 31,
                                               Side.SERVER);
+        this.config = new ChangeableConfig().read(config);
     }
     
     @Override
@@ -236,5 +234,91 @@ public class ModComponentPainting implements ModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
+    }
+    
+    public class ChangeableConfig {
+        public int paintingPlaceStack = 2;
+        public int paintingDefaultWidth = 16;
+        public int paintingDefaultHeight = 16;
+        
+        public SortedMap<Integer, Double> brushRadiuses = new TreeMap<>();
+        public SortedMap<Integer, Double> smallBrushRadiuses = new TreeMap<>();
+        
+        protected ChangeableConfig() {
+            this.brushRadiuses.put(16, 3.5D);
+            this.brushRadiuses.put(32, 6.2D);
+            
+            this.smallBrushRadiuses.put(0, 0.1D);
+        }
+        
+        public ChangeableConfig read(Configuration config) {
+            this.paintingPlaceStack =
+                    config.getInt("paintingPlaceStack", ModComponentPainting.this.getName(),
+                                  2, 0, 64, "");
+            this.paintingDefaultWidth =
+                    config.getInt("paintingDefaultWidth", ModComponentPainting.this.getName(),
+                                  16, 1, 256, "");
+            this.paintingDefaultHeight =
+                    config.getInt("paintingDefaultHeight", ModComponentPainting.this.getName(),
+                                  16, 1, 256, "(recommend to equals width)");
+            {
+                String[] lines = config.getStringList("brushRadiuses",
+                                                      ModComponentPainting.this.getName(),
+                                                      new String[]{"1: 1.5",
+                                                                   "12: 2.5",
+                                                                   "16: 3.5",
+                                                                   "24: 5.2",
+                                                                   "32: 6.2",
+                                                                   "48: 7.5",
+                                                                   "64: 10.5"},
+                                                      "");
+                this.brushRadiuses.clear();
+                parseRadiuses(lines, this.brushRadiuses);
+            }
+            {
+                String[] lines = config.getStringList("smallBrushRadiuses",
+                                                      ModComponentPainting.this.getName(),
+                                                      new String[]{"1: 0.1"}, "");
+                this.smallBrushRadiuses.clear();
+                parseRadiuses(lines, this.smallBrushRadiuses);
+            }
+            return this;
+        }
+        
+        public double getBrushRadius(int row) {
+            return getRadius(row, this.brushRadiuses);
+        }
+        
+        public double getSmallBrushRadius(int row) {
+            return getRadius(row, this.smallBrushRadiuses);
+        }
+    }
+    
+    protected static double getRadius(int row, SortedMap<Integer, Double> radiuses) {
+        try {
+            int key = radiuses.headMap(row + 1).lastKey();
+            return radiuses.get(key);
+        } catch (NoSuchElementException e) {
+            return 0.0D;
+        }
+    }
+    
+    protected static void parseRadiuses(String[] lines, SortedMap<Integer, Double> radiuses) {
+        for (String line : lines) {
+            parseRadius(line, radiuses);
+        }
+    }
+    
+    protected static void parseRadius(String line, SortedMap<Integer, Double> radiuses) {
+        int cut = line.indexOf(':');
+        if (cut == -1) {
+            return;
+        }
+        try {
+            radiuses.put(Integer.parseInt(line.substring(0, cut)),
+                         Double.parseDouble(line.substring(cut + 1)));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
     }
 }

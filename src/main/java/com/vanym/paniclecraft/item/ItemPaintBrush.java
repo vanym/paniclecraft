@@ -60,8 +60,6 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     @SideOnly(Side.CLIENT)
     protected Set<MessagePaintBrushUse> brushUseMessages = new HashSet<>();
     
-    public static double brushRadiusRound = 3.5D;
-    
     public ItemPaintBrush() {
         super();
         this.setUnlocalizedName("paintBrush");
@@ -325,9 +323,19 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
                 return Math.min(MAX_RADIUS, radius);
             }
         }
-        if (itemStack.getItemDamage() == 0) {
-            return brushRadiusRound;
+        int row;
+        if (picture != null) {
+            row = Math.min(picture.getWidth(), picture.getHeight());
+        } else {
+            row = 0;
         }
-        return 0.1D;
+        switch (itemStack.getItemDamage()) {
+            case 0:
+                return Core.instance.painting.config.getBrushRadius(row);
+            case 1:
+                return Core.instance.painting.config.getSmallBrushRadius(row);
+            default:
+                return 0.1D;
+        }
     }
 }
