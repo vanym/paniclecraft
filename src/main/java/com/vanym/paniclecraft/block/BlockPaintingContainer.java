@@ -9,6 +9,7 @@ import com.vanym.paniclecraft.utils.MainUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -77,7 +78,7 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     @SideOnly(Side.CLIENT)
     public abstract boolean shouldSideBeRendered(int side, int meta, TileEntity tile);
     
-    public static int getRotate(EntityPlayer player, ForgeDirection side, boolean place) {
+    public static int getRotate(Entity player, ForgeDirection side, boolean place) {
         if (side != ForgeDirection.DOWN && side != ForgeDirection.UP) {
             return 0;
         }

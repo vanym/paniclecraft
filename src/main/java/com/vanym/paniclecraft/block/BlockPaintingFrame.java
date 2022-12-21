@@ -109,6 +109,25 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
+    public boolean removedByPlayer(
+            World world,
+            EntityPlayer player,
+            int x,
+            int y,
+            int z,
+            boolean willHarvest) {
+        if (player != null) {
+            TileEntity tile = world.getTileEntity(x, y, z);
+            if (tile != null && tile instanceof TileEntityPaintingFrame) {
+                TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
+                int rot = getRotate(player, ForgeDirection.UP, false);
+                tilePF.rotateY(rot);
+            }
+        }
+        return super.removedByPlayer(world, player, x, y, z, willHarvest);
+    }
+    
+    @Override
     public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
         TileEntity tile = world.getTileEntity(x, y, z);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
@@ -143,6 +162,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                 Picture picture = tilePF.createPicture(i);
                 picture.readFromNBT(itemTag.getCompoundTag(TAG_PICTURE_I));
             }
+            int rot = getRotate(entity, ForgeDirection.UP, true);
+            tilePF.rotateY(rot);
         }
     }
     

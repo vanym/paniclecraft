@@ -11,6 +11,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
@@ -101,6 +102,43 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
             return tilePaintingFrame.getPainting(side);
         }
         return null;
+    }
+    
+    public void rotateY(int rotUp) {
+        ForgeDirection rotator = ForgeDirection.UP;
+        ForgeDirection begin = ForgeDirection.SOUTH;
+        Picture pictureUp = this.getPainting(rotator.ordinal());
+        if (pictureUp != null) {
+            pictureUp.rotate(rotUp);
+        }
+        Picture pictureDown = this.getPainting(rotator.getOpposite().ordinal());
+        if (pictureDown != null) {
+            pictureDown.rotate((4 - rotUp) % 4);
+        }
+        for (int i = 0; i < rotUp; i++) {
+            PictureHolder holderBegin = this.holders[begin.ordinal()];
+            ForgeDirection current = begin;
+            while (true) {
+                ForgeDirection next = current.getRotation(rotator.getOpposite());
+                if (next == begin) {
+                    break;
+                }
+                int c = current.ordinal();
+                int n = next.ordinal();
+                PictureHolder nextHolder = this.holders[n];
+                this.holders[n] = null;
+                if (nextHolder != null) {
+                    nextHolder.setSide(c);
+                }
+                this.holders[c] = nextHolder;
+                current = next;
+            }
+            int c = current.ordinal();
+            if (holderBegin != null) {
+                holderBegin.setSide(c);
+            }
+            this.holders[c] = holderBegin;
+        }
     }
     
     @Override
