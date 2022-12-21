@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.block;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -17,17 +18,23 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class BlockPaintingFrame extends BlockPaintingContainer {
+    
+    public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
     @SideOnly(Side.CLIENT)
     protected int specialRendererSide = -1;
@@ -94,6 +101,50 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         tileP.markForUpdate();
         world.notifyBlockChange(x, y, z, this);
         return true;
+    }
+    
+    @Override
+    public int quantityDropped(Random rand) {
+        return 0;
+    }
+    
+    @Override
+    public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile != null && tile instanceof TileEntityPaintingFrame) {
+            TileEntityPaintingFrame timePF = (TileEntityPaintingFrame)tile;
+            ItemStack itemStack = getFrameAsItem(timePF);
+            this.dropBlockAsItem(world, x, y, z, itemStack);
+        }
+        super.breakBlock(world, x, y, z, block, meta);
+    }
+    
+    @Override
+    public void onBlockPlacedBy(
+            World world,
+            int x,
+            int y,
+            int z,
+            EntityLivingBase entity,
+            ItemStack itemStack) {
+        super.onBlockPlacedBy(world, x, y, z, entity, itemStack);
+        if (!itemStack.hasTagCompound()) {
+            return;
+        }
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile != null && tile instanceof TileEntityPaintingFrame) {
+            TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
+            NBTTagCompound itemTag = itemStack.getTagCompound();
+            int size = tilePF.getPaintingSlots();
+            for (int i = 0; i < size; i++) {
+                final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
+                if (!itemTag.hasKey(TAG_PICTURE_I)) {
+                    continue;
+                }
+                Picture picture = tilePF.createPicture(i);
+                picture.readFromNBT(itemTag.getCompoundTag(TAG_PICTURE_I));
+            }
+        }
     }
     
     @Override
@@ -185,19 +236,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
-        TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
-        for (int side = 0; side < 6; side++) {
-            Picture picture = tile.getPainting(side);
-            if (picture != null) {
-                this.dropBlockAsItem(world, x, y, z,
-                                     new ItemStack(Core.instance.painting.itemPainting));
-            }
-        }
-        super.breakBlock(world, x, y, z, block, meta);
-    }
-    
-    @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister iconRegister) {}
     
@@ -205,6 +243,37 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int side, int meta) {
         return Core.instance.painting.blockPainting.getIcon(side, meta);
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+        TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+        return getFrameAsItem(tilePF);
+    }
+    
+    public static ItemStack getFrameAsItem(TileEntityPaintingFrame tilePF) {
+        ItemStack itemS =
+                new ItemStack(Item.getItemFromBlock(Core.instance.painting.blockPaintingFrame));
+        if (tilePF == null) {
+            return itemS;
+        }
+        NBTTagCompound itemTag = new NBTTagCompound();
+        int size = tilePF.getPaintingSlots();
+        for (int i = 0; i < size; i++) {
+            Picture picture = tilePF.getPainting(i);
+            if (picture == null) {
+                continue;
+            }
+            final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
+            NBTTagCompound pictureTag = new NBTTagCompound();
+            picture.writeToNBT(pictureTag);
+            itemTag.setTag(TAG_PICTURE_I, pictureTag);
+        }
+        if (!itemTag.hasNoTags()) {
+            itemS.setTagCompound(itemTag);
+        }
+        return itemS;
     }
     
     public static List<AxisAlignedBB> getFrameBoxes(final double frameWidth) {

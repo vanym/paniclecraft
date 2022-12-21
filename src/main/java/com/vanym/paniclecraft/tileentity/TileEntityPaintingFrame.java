@@ -18,13 +18,13 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     protected final PictureHolder[] holders = new PictureHolder[6];
     
-    protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE + "[%d]";
+    public static final String TAG_PICTURE_N = TileEntityPainting.TAG_PICTURE + "[%d]";
     
     @Override
     public void writeToNBT(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
-            final String TAG_PICTURE_I = String.format(TAG_PICTURE, i);
+            final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (this.holders[i] != null) {
                 NBTTagCompound paintingTag = new NBTTagCompound();
                 this.holders[i].picture.writeToNBT(paintingTag);
@@ -38,7 +38,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         super.readFromNBT(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String OLD_TAG_PICTURE_I = String.format("PictureData[%d]", i);
-            final String TAG_PICTURE_I = String.format(TAG_PICTURE, i);
+            final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (nbtTag.hasKey(OLD_TAG_PICTURE_I)) {
                 nbtTag.setTag(TAG_PICTURE_I, nbtTag.getTag(OLD_TAG_PICTURE_I));
             }
@@ -90,6 +90,10 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
             return this.holders[side].picture;
         }
         return null;
+    }
+    
+    public int getPaintingSlots() {
+        return this.holders.length;
     }
     
     protected Picture getPainting(int side, int xO, int yO) {

@@ -195,8 +195,11 @@ public class ModComponentPainting implements ModComponent {
         }
         boolean paintingFrameItem = config.getBoolean("paintingFrameItem", CLIENT_RENDER, true, "");
         if (paintingFrameItem) {
+            if (textureCache == null) {
+                textureCache = new PictureTextureCache();
+            }
             MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
-                                                      new ItemRendererPaintingFrame());
+                                                      new ItemRendererPaintingFrame(textureCache));
         }
         this.renderProfiling =
                 config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
