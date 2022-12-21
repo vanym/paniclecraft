@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.tileentity;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
@@ -68,7 +67,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     public Picture createPicture(int side) {
-        if (side < 0 || side >= this.holders.length) {
+        if (!this.isValidSide(side)) {
             return null;
         }
         if (this.holders[side] != null) {
@@ -79,20 +78,24 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     public boolean clearPicture(int side) {
-        if (side < 0 || side >= this.holders.length || this.holders[side] == null) {
+        if (!this.isValidSide(side) || this.holders[side] == null) {
             return false;
         }
-        // TODO WIP invalidate
+        this.holders[side].picture.unload();
         this.holders[side] = null;
         return true;
     }
     
     @Override
     public Picture getPainting(int side) {
-        if (side >= 0 && side < this.holders.length && this.holders[side] != null) {
+        if (this.isValidSide(side) && this.holders[side] != null) {
             return this.holders[side].picture;
         }
         return null;
+    }
+    
+    protected boolean isValidSide(int side) {
+        return side >= 0 && side < this.holders.length;
     }
     
     protected Picture getPainting(int side, int xO, int yO) {
@@ -177,39 +180,28 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         return 16384.0D; // 128 * 128
     }
     
-    @SideOnly(Side.CLIENT)
-    protected void invalidatePictures() {
+    protected void unloadPictures() {
         for (PictureHolder holder : this.holders) {
             if (holder != null) {
-                holder.picture.invalidate();
+                holder.picture.unload();
             }
         }
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public void invalidate() {
         super.invalidate();
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.invalidatePictures();
-        }
+        this.unloadPictures();
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public void onChunkUnload() {
         super.onChunkUnload();
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.invalidatePictures();
-        }
+        this.unloadPictures();
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public void onWorldUnload() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.invalidatePictures();
-        }
+        this.unloadPictures();
     }
-    
 }

@@ -12,6 +12,7 @@ import java.util.Set;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.Item;
@@ -393,9 +394,8 @@ public class Picture {
         }
     }
     
-    @SideOnly(Side.CLIENT)
-    public void invalidate() {
-        if (this.texture >= 0) {
+    public void unload() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient() && this.texture >= 0) {
             com.vanym.paniclecraft.client.ClientProxy.deleteTexture(this.texture);
             this.texture = -1;
         }

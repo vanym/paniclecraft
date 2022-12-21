@@ -2,15 +2,12 @@ package com.vanym.paniclecraft.client;
 
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin;
-import com.vanym.paniclecraft.tileentity.TileEntityPaintingContainer;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.event.world.WorldEvent;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {
@@ -24,17 +21,6 @@ public class ClientEventHandler {
                             event.map.registerIcon(DEF.MOD_ID + ":" + "turtle.PaintBrush.left");
                     ComputerCraftPlugin.turtlePaintBrush.iconRight =
                             event.map.registerIcon(DEF.MOD_ID + ":" + "turtle.PaintBrush.right");
-                }
-            }
-        }
-    }
-    
-    @SubscribeEvent
-    public void texruteUnload(WorldEvent.Unload event) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            for (Object tileE : event.world.loadedTileEntityList) {
-                if (tileE instanceof TileEntityPaintingContainer) {
-                    ((TileEntityPaintingContainer)tileE).onWorldUnload();
                 }
             }
         }

@@ -12,6 +12,7 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -140,6 +141,7 @@ public class ModComponentPainting implements ModComponent {
                                    this.blockPaintingFrame.getUnlocalizedName().substring(5));
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class,
                                         DEF.MOD_ID + "." + TileEntityPaintingFrame.IN_MOD_ID);
+        MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
         int crafting_paintingFrame_amount =
                 config.getInt("Crafting_PaintingFrame_Amount", this.getName(), 1, 0, 64,
                               "\'0\' to disable");

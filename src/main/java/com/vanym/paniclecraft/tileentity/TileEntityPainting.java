@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.tileentity;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
@@ -103,28 +102,19 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public void invalidate() {
         super.invalidate();
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.getPicture().invalidate();
-        }
+        this.picture.unload();
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public void onChunkUnload() {
         super.onChunkUnload();
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.getPicture().invalidate();
-        }
+        this.picture.unload();
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public void onWorldUnload() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.getPicture().invalidate();
-        }
+        this.picture.unload();
     }
 }
