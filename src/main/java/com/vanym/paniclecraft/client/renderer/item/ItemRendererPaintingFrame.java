@@ -47,7 +47,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             itemTag = new NBTTagCompound();
         }
         for (int i = 0; i < TileEntityPaintingFrame.N; ++i) {
-            final String TAG_PICTURE_I = String.format(BlockPaintingFrame.TAG_PICTURE_N, i);
+            final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
             obtainedTextures[i] = -1;
             if (!itemTag.hasKey(TAG_PICTURE_I)) {
                 continue;
@@ -91,7 +91,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             if (picture == null || obtainedTextures[i] >= 0) {
                 continue;
             }
-            final String TAG_PICTURE_I = String.format(BlockPaintingFrame.TAG_PICTURE_N, i);
+            final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
             NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
             NBTBase imageTag = pictureTag.getTag(Picture.TAG_IMAGE);
             this.textureCache.putTexture(imageTag, picture.texture);

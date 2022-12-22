@@ -22,6 +22,7 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
+import com.vanym.paniclecraft.recipe.RecipeAddPaintingToFrame;
 import com.vanym.paniclecraft.recipe.RecipePaintBrushByDye;
 import com.vanym.paniclecraft.recipe.RecipePaintBrushByPaintFiller;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
@@ -144,6 +145,7 @@ public class ModComponentPainting implements ModComponent {
             GameRegistry.addRecipe(new RecipePaintingFrame(
                     new Object[]{"sss", "sps", "sss", Character.valueOf('p'), this.itemPainting,
                                  Character.valueOf('s'), "stickWood"}));
+            RecipeAddPaintingToFrame.createAllVariants().forEach(GameRegistry::addRecipe);
         }
         
         Core.instance.network.registerMessage(MessagePaintBrushUse.class,

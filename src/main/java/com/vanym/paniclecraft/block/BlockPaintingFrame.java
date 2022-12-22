@@ -158,7 +158,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
             NBTTagCompound itemTag = itemStack.getTagCompound();
             for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
-                final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
+                final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
                 if (!itemTag.hasKey(TAG_PICTURE_I)) {
                     continue;
                 }
@@ -266,7 +266,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         }
         NBTTagCompound itemTag = new NBTTagCompound();
         map.forEach((pside, picture)-> {
-            final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, pside.ordinal());
+            final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(pside);
             NBTTagCompound pictureTag = new NBTTagCompound();
             if (picture != null) {
                 picture.writeToNBT(pictureTag);
@@ -304,10 +304,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             map.put(pside, null);
         }
         return this.getItemWithPictures(map);
-    }
-    
-    public ItemStack getItemWithEmptyFrontPicture() {
-        return this.getItemWithEmptyPictures(FRONT_SIDE);
     }
     
     @Override
@@ -370,5 +366,13 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             list.add(box);
         }
         return list;
+    }
+    
+    public static String getPictureTag(ForgeDirection pside) {
+        return getPictureTag(pside.ordinal());
+    }
+    
+    public static String getPictureTag(int side) {
+        return String.format(BlockPaintingFrame.TAG_PICTURE_N, side);
     }
 }

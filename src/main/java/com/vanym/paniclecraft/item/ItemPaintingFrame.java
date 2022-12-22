@@ -42,7 +42,7 @@ public class ItemPaintingFrame extends ItemBlock {
             Map<String, Integer> map = new TreeMap<>();
             NBTTagCompound itemTag = itemStack.getTagCompound();
             for (int i = 0; i < TileEntityPaintingFrame.N; ++i) {
-                final String TAG_PICTURE_I = String.format(BlockPaintingFrame.TAG_PICTURE_N, i);
+                final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
                 if (!itemTag.hasKey(TAG_PICTURE_I)) {
                     continue;
                 }
