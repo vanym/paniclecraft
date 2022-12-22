@@ -37,7 +37,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class BlockPaintingFrame extends BlockPaintingContainer {
     
     public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
-    public static final ForgeDirection FRONT_SIDE = ForgeDirection.NORTH;
     
     @SideOnly(Side.CLIENT)
     protected int specialRendererSide = -1;

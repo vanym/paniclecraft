@@ -28,7 +28,7 @@ public class ItemPaintingFrame extends ItemBlock {
     public static final ForgeDirection TOP;
     
     static {
-        FRONT = BlockPaintingFrame.FRONT_SIDE;
+        FRONT = ForgeDirection.NORTH;
         LEFT = FRONT.getRotation(ForgeDirection.UP);
         BACK = LEFT.getRotation(ForgeDirection.UP);
         RIGHT = BACK.getRotation(ForgeDirection.UP);
