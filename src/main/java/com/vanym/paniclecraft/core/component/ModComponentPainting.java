@@ -24,6 +24,7 @@ import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
 import com.vanym.paniclecraft.recipe.RecipePaintBrushByDye;
 import com.vanym.paniclecraft.recipe.RecipePaintBrushByPaintFiller;
+import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
@@ -139,13 +140,9 @@ public class ModComponentPainting implements ModComponent {
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class,
                                         DEF.MOD_ID + "." + TileEntityPaintingFrame.IN_MOD_ID);
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
-        int crafting_paintingFrame_amount =
-                config.getInt("Crafting_PaintingFrame_Amount", this.getName(), 1, 0, 64,
-                              "\'0\' to disable");
-        if (crafting_paintingFrame_amount > 0) {
-            GameRegistry.addRecipe(new ShapedOreRecipe(
-                    new ItemStack(this.blockPaintingFrame, crafting_paintingFrame_amount),
-                    new Object[]{"sss", "sws", "sss", Character.valueOf('w'), "plankWood",
+        if (config.getBoolean("Crafting_PaintingFrame", this.getName(), true, "")) {
+            GameRegistry.addRecipe(new RecipePaintingFrame(
+                    new Object[]{"sss", "sps", "sss", Character.valueOf('p'), this.itemPainting,
                                  Character.valueOf('s'), "stickWood"}));
         }
         

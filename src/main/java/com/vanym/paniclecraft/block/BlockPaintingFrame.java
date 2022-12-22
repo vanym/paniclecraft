@@ -2,7 +2,9 @@ package com.vanym.paniclecraft.block;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
@@ -35,6 +37,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class BlockPaintingFrame extends BlockPaintingContainer {
     
     public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
+    public static final ForgeDirection FRONT_SIDE = ForgeDirection.NORTH;
     
     @SideOnly(Side.CLIENT)
     protected int specialRendererSide = -1;
@@ -132,7 +135,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         TileEntity tile = world.getTileEntity(x, y, z);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame timePF = (TileEntityPaintingFrame)tile;
-            ItemStack itemStack = getFrameAsItem(timePF);
+            ItemStack itemStack = this.getFrameAsItem(timePF);
             this.dropBlockAsItem(world, x, y, z, itemStack);
         }
         super.breakBlock(world, x, y, z, block, meta);
@@ -255,6 +258,58 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         });
     }
     
+    public ItemStack getItemWithPictures(Map<ForgeDirection, Picture> map) {
+        ItemStack itemS =
+                new ItemStack(Item.getItemFromBlock(this));
+        if (map == null) {
+            return itemS;
+        }
+        NBTTagCompound itemTag = new NBTTagCompound();
+        map.forEach((pside, picture)-> {
+            final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, pside.ordinal());
+            NBTTagCompound pictureTag = new NBTTagCompound();
+            if (picture != null) {
+                picture.writeToNBT(pictureTag);
+            }
+            itemTag.setTag(TAG_PICTURE_I, pictureTag);
+        });
+        if (!itemTag.hasNoTags()) {
+            itemS.setTagCompound(itemTag);
+        }
+        return itemS;
+    }
+    
+    public ItemStack getFrameAsItem(TileEntityPaintingFrame tilePF) {
+        if (tilePF == null) {
+            return this.getItemWithPictures(null);
+        }
+        Map<ForgeDirection, Picture> map = new HashMap<>();
+        for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
+            Picture picture = tilePF.getPainting(i);
+            if (picture == null) {
+                continue;
+            }
+            ForgeDirection pside = ForgeDirection.getOrientation(i);
+            map.put(pside, picture);
+        }
+        return this.getItemWithPictures(map);
+    }
+    
+    public ItemStack getItemWithEmptyPictures(ForgeDirection... psides) {
+        if (psides == null) {
+            return this.getItemWithPictures(null);
+        }
+        Map<ForgeDirection, Picture> map = new HashMap<>();
+        for (ForgeDirection pside : psides) {
+            map.put(pside, null);
+        }
+        return this.getItemWithPictures(map);
+    }
+    
+    public ItemStack getItemWithEmptyFrontPicture() {
+        return this.getItemWithEmptyPictures(FRONT_SIDE);
+    }
+    
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister iconRegister) {}
@@ -269,30 +324,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
-        return getFrameAsItem(tilePF);
-    }
-    
-    public static ItemStack getFrameAsItem(TileEntityPaintingFrame tilePF) {
-        ItemStack itemS =
-                new ItemStack(Item.getItemFromBlock(Core.instance.painting.blockPaintingFrame));
-        if (tilePF == null) {
-            return itemS;
-        }
-        NBTTagCompound itemTag = new NBTTagCompound();
-        for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
-            Picture picture = tilePF.getPainting(i);
-            if (picture == null) {
-                continue;
-            }
-            final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
-            NBTTagCompound pictureTag = new NBTTagCompound();
-            picture.writeToNBT(pictureTag);
-            itemTag.setTag(TAG_PICTURE_I, pictureTag);
-        }
-        if (!itemTag.hasNoTags()) {
-            itemS.setTagCompound(itemTag);
-        }
-        return itemS;
+        return this.getFrameAsItem(tilePF);
     }
     
     public static List<AxisAlignedBB> getFrameBoxes(final double frameWidth) {

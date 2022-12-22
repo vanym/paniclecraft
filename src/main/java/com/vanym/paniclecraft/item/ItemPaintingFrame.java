@@ -47,7 +47,12 @@ public class ItemPaintingFrame extends ItemBlock {
                     continue;
                 }
                 NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
-                String info = ItemPainting.pictureInformation(pictureTag);
+                String info;
+                if (pictureTag.hasNoTags()) {
+                    info = "";
+                } else {
+                    info = ItemPainting.pictureInformation(pictureTag);
+                }
                 map.put(info, map.getOrDefault(info, 0) + 1);
             }
             map.forEach((info, count)-> {
