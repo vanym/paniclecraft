@@ -7,7 +7,6 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -99,15 +98,8 @@ public class RecipeRemovePaintingFromFrame extends ShapelessOreRecipe {
                 copy.stackSize = 1;
                 copy.getTagCompound().removeTag(TAG_PICTURE_I);
                 boolean added = event.player.inventory.addItemStackToInventory(copy);
-                if (!added && !world.isRemote) {
-                    EntityItem entityItem = new EntityItem(
-                            world,
-                            event.player.posX,
-                            event.player.posY,
-                            event.player.posZ,
-                            copy);
-                    entityItem.delayBeforeCanPickup = 0;
-                    world.spawnEntityInWorld(entityItem);
+                if (!added) {
+                    event.player.dropPlayerItemWithRandomChoice(copy, false);
                 }
             }
             break;
