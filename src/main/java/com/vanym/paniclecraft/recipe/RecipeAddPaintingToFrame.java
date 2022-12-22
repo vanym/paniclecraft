@@ -7,6 +7,7 @@ import java.util.List;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
+import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -17,22 +18,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class RecipeAddPaintingToFrame extends ShapedOreRecipe {
-    
-    public static final ForgeDirection FRONT;
-    public static final ForgeDirection LEFT;
-    public static final ForgeDirection BACK;
-    public static final ForgeDirection RIGHT;
-    public static final ForgeDirection BOTTOM;
-    public static final ForgeDirection TOP;
-    
-    static {
-        FRONT = BlockPaintingFrame.FRONT_SIDE;
-        LEFT = FRONT.getRotation(ForgeDirection.UP);
-        BACK = LEFT.getRotation(ForgeDirection.UP);
-        RIGHT = BACK.getRotation(ForgeDirection.UP);
-        BOTTOM = ForgeDirection.DOWN;
-        TOP = ForgeDirection.UP;
-    }
     
     protected final ForgeDirection side;
     
@@ -99,11 +84,11 @@ public class RecipeAddPaintingToFrame extends ShapedOreRecipe {
     }
     
     public static List<IRecipe> createAllVariants() {
-        return Arrays.asList(new RecipeAddPaintingToFrame(FRONT, -1, +1),
-                             new RecipeAddPaintingToFrame(BACK, +1, -1),
-                             new RecipeAddPaintingToFrame(LEFT, -1, -1),
-                             new RecipeAddPaintingToFrame(RIGHT, +1, +1),
-                             new RecipeAddPaintingToFrame(BOTTOM, +0, +1),
-                             new RecipeAddPaintingToFrame(TOP, +0, -1));
+        return Arrays.asList(new RecipeAddPaintingToFrame(ItemPaintingFrame.FRONT, -1, +1),
+                             new RecipeAddPaintingToFrame(ItemPaintingFrame.BACK, +1, -1),
+                             new RecipeAddPaintingToFrame(ItemPaintingFrame.LEFT, -1, -1),
+                             new RecipeAddPaintingToFrame(ItemPaintingFrame.RIGHT, +1, +1),
+                             new RecipeAddPaintingToFrame(ItemPaintingFrame.BOTTOM, +0, +1),
+                             new RecipeAddPaintingToFrame(ItemPaintingFrame.TOP, +0, -1));
     }
 }

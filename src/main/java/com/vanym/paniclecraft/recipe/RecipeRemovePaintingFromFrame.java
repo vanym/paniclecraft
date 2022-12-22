@@ -1,11 +1,9 @@
 package com.vanym.paniclecraft.recipe;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPainting;
+import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
@@ -18,11 +16,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class RecipeRemovePaintingFromFrame extends ShapelessOreRecipe {
-    
-    protected static final List<ForgeDirection> REMOVE_ORDER =
-            Arrays.asList(RecipeAddPaintingToFrame.FRONT, RecipeAddPaintingToFrame.RIGHT,
-                          RecipeAddPaintingToFrame.TOP, RecipeAddPaintingToFrame.LEFT,
-                          RecipeAddPaintingToFrame.BACK, RecipeAddPaintingToFrame.BOTTOM);
     
     public RecipeRemovePaintingFromFrame() {
         super(Core.instance.painting.itemPainting,
@@ -39,7 +32,7 @@ public class RecipeRemovePaintingFromFrame extends ShapelessOreRecipe {
             return false;
         }
         NBTTagCompound itemTag = frame.getTagCompound();
-        for (ForgeDirection pside : REMOVE_ORDER) {
+        for (ForgeDirection pside : ItemPaintingFrame.SIDE_ORDER) {
             final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(pside);
             if (itemTag.hasKey(TAG_PICTURE_I)) {
                 return true;
@@ -57,7 +50,7 @@ public class RecipeRemovePaintingFromFrame extends ShapelessOreRecipe {
         }
         NBTTagCompound itemTag = frame.getTagCompound();
         NBTTagCompound pictureTag = null;
-        for (ForgeDirection pside : REMOVE_ORDER) {
+        for (ForgeDirection pside : ItemPaintingFrame.SIDE_ORDER) {
             final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(pside);
             if (itemTag.hasKey(TAG_PICTURE_I)) {
                 pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
@@ -93,7 +86,7 @@ public class RecipeRemovePaintingFromFrame extends ShapelessOreRecipe {
             return;
         }
         NBTTagCompound itemTag = frame.getTagCompound();
-        for (ForgeDirection pside : REMOVE_ORDER) {
+        for (ForgeDirection pside : ItemPaintingFrame.SIDE_ORDER) {
             final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(pside);
             if (!itemTag.hasKey(TAG_PICTURE_I)) {
                 continue;

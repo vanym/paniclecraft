@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.item;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,8 +16,30 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class ItemPaintingFrame extends ItemBlock {
+    
+    public static final ForgeDirection FRONT;
+    public static final ForgeDirection LEFT;
+    public static final ForgeDirection BACK;
+    public static final ForgeDirection RIGHT;
+    public static final ForgeDirection BOTTOM;
+    public static final ForgeDirection TOP;
+    
+    static {
+        FRONT = BlockPaintingFrame.FRONT_SIDE;
+        LEFT = FRONT.getRotation(ForgeDirection.UP);
+        BACK = LEFT.getRotation(ForgeDirection.UP);
+        RIGHT = BACK.getRotation(ForgeDirection.UP);
+        BOTTOM = ForgeDirection.DOWN;
+        TOP = ForgeDirection.UP;
+    }
+    
+    public static final List<ForgeDirection> SIDE_ORDER =
+            Arrays.asList(ItemPaintingFrame.FRONT, ItemPaintingFrame.RIGHT,
+                          ItemPaintingFrame.TOP, ItemPaintingFrame.LEFT,
+                          ItemPaintingFrame.BACK, ItemPaintingFrame.BOTTOM);
     
     public ItemPaintingFrame(Block block) {
         super(block);
