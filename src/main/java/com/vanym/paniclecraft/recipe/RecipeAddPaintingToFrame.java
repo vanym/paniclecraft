@@ -18,6 +18,22 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class RecipeAddPaintingToFrame extends ShapedOreRecipe {
     
+    public static final ForgeDirection FRONT;
+    public static final ForgeDirection LEFT;
+    public static final ForgeDirection BACK;
+    public static final ForgeDirection RIGHT;
+    public static final ForgeDirection BOTTOM;
+    public static final ForgeDirection TOP;
+    
+    static {
+        FRONT = BlockPaintingFrame.FRONT_SIDE;
+        LEFT = FRONT.getRotation(ForgeDirection.UP);
+        BACK = LEFT.getRotation(ForgeDirection.UP);
+        RIGHT = BACK.getRotation(ForgeDirection.UP);
+        BOTTOM = ForgeDirection.DOWN;
+        TOP = ForgeDirection.UP;
+    }
+    
     protected final ForgeDirection side;
     
     protected RecipeAddPaintingToFrame(ForgeDirection pside, int offsetX, int offsetY) {
@@ -83,15 +99,11 @@ public class RecipeAddPaintingToFrame extends ShapedOreRecipe {
     }
     
     public static List<IRecipe> createAllVariants() {
-        ForgeDirection front = BlockPaintingFrame.FRONT_SIDE;
-        ForgeDirection left = front.getRotation(ForgeDirection.UP);
-        ForgeDirection back = left.getRotation(ForgeDirection.UP);
-        ForgeDirection right = back.getRotation(ForgeDirection.UP);
-        return Arrays.asList(new RecipeAddPaintingToFrame(front, -1, +1),
-                             new RecipeAddPaintingToFrame(back, +1, -1),
-                             new RecipeAddPaintingToFrame(left, -1, -1),
-                             new RecipeAddPaintingToFrame(right, +1, +1),
-                             new RecipeAddPaintingToFrame(ForgeDirection.DOWN, +0, +1),
-                             new RecipeAddPaintingToFrame(ForgeDirection.UP, +0, -1));
+        return Arrays.asList(new RecipeAddPaintingToFrame(FRONT, -1, +1),
+                             new RecipeAddPaintingToFrame(BACK, +1, -1),
+                             new RecipeAddPaintingToFrame(LEFT, -1, -1),
+                             new RecipeAddPaintingToFrame(RIGHT, +1, +1),
+                             new RecipeAddPaintingToFrame(BOTTOM, +0, +1),
+                             new RecipeAddPaintingToFrame(TOP, +0, -1));
     }
 }
