@@ -22,11 +22,11 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
-import com.vanym.paniclecraft.recipe.RecipeAddPaintingToFrame;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
-import com.vanym.paniclecraft.recipe.RecipeRemovePaintingFromFrame;
+import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
+import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
@@ -141,8 +141,9 @@ public class ModComponentPainting implements ModComponent {
             GameRegistry.addRecipe(new RecipePaintingFrame(
                     new Object[]{"sss", "sps", "sss", Character.valueOf('p'), this.itemPainting,
                                  Character.valueOf('s'), "stickWood"}));
-            RecipeAddPaintingToFrame.createAllVariants().forEach(GameRegistry::addRecipe);
-            RecipeRemovePaintingFromFrame removeRecipe = new RecipeRemovePaintingFromFrame();
+            RecipePaintingFrameAddPainting.createAllVariants().forEach(GameRegistry::addRecipe);
+            RecipePaintingFrameRemovePainting removeRecipe =
+                    new RecipePaintingFrameRemovePainting();
             GameRegistry.addRecipe(removeRecipe);
             FMLCommonHandler.instance().bus().register(removeRecipe);
         }

@@ -14,9 +14,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-public class RecipeRemovePaintingFromFrame extends ShapelessOreRecipe {
+public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
     
-    public RecipeRemovePaintingFromFrame() {
+    public RecipePaintingFrameRemovePainting() {
         super(Core.instance.painting.itemPainting,
               Core.instance.painting.blockPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT));
     }

@@ -17,11 +17,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class RecipeAddPaintingToFrame extends ShapedOreRecipe {
+public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
     
     protected final ForgeDirection side;
     
-    protected RecipeAddPaintingToFrame(ForgeDirection pside, int offsetX, int offsetY) {
+    protected RecipePaintingFrameAddPainting(ForgeDirection pside, int offsetX, int offsetY) {
         super(Core.instance.painting.blockPaintingFrame.getItemWithEmptyPictures(pside),
               getRecipe(offsetX, offsetY));
         this.side = pside;
@@ -84,11 +84,11 @@ public class RecipeAddPaintingToFrame extends ShapedOreRecipe {
     }
     
     public static List<IRecipe> createAllVariants() {
-        return Arrays.asList(new RecipeAddPaintingToFrame(ItemPaintingFrame.FRONT, -1, +1),
-                             new RecipeAddPaintingToFrame(ItemPaintingFrame.BACK, +1, -1),
-                             new RecipeAddPaintingToFrame(ItemPaintingFrame.LEFT, -1, -1),
-                             new RecipeAddPaintingToFrame(ItemPaintingFrame.RIGHT, +1, +1),
-                             new RecipeAddPaintingToFrame(ItemPaintingFrame.BOTTOM, +0, +1),
-                             new RecipeAddPaintingToFrame(ItemPaintingFrame.TOP, +0, -1));
+        return Arrays.asList(new RecipePaintingFrameAddPainting(ItemPaintingFrame.FRONT, -1, +1),
+                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.BACK, +1, -1),
+                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.LEFT, -1, -1),
+                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.RIGHT, +1, +1),
+                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.BOTTOM, +0, +1),
+                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.TOP, +0, -1));
     }
 }
