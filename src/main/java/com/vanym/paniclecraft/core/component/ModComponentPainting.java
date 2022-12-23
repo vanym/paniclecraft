@@ -6,7 +6,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
@@ -76,80 +75,25 @@ public class ModComponentPainting implements ModComponent {
             return;
         }
         this.enabled = true;
+        
         this.itemPainting = new ItemPainting();
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPalette = new ItemPalette();
         Core.instance.registerItem(this.itemPainting);
         Core.instance.registerItem(this.itemPaintBrush);
         Core.instance.registerItem(this.itemPalette);
-        if (config.getBoolean("Crafting_PaintBrushColorByDyeChange", this.getName(), true, "")) {
-            RecipeColorizeByDye recipe = new RecipeColorizeByDye();
-            GameRegistry.addRecipe(recipe);
-            RecipeDummy.getColorizeByDyeDummies().forEach(GameRegistry::addRecipe);
-        }
-        if (config.getBoolean("Crafting_PaintBrushColorByPaintFiller", this.getName(), true, "")) {
-            RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
-            GameRegistry.addRecipe(recipe);
-            FMLCommonHandler.instance().bus().register(recipe);
-            RecipeDummy.getColorizeByFillerDummies().forEach(GameRegistry::addRecipe);
-        }
-        if (config.getBoolean("Crafting_BigPaintBrush", this.getName(), true, "")) {
-            GameRegistry.addRecipe(new ShapedOreRecipe(
-                    this.itemPaintBrush.getBrush(),
-                    new Object[]{"w", "s", Character.valueOf('w'),
-                                 new ItemStack(Blocks.wool, 1, 0), Character.valueOf('s'),
-                                 "stickWood"}));
-        }
-        if (config.getBoolean("Crafting_SmallPaintBrush", this.getName(), true, "")) {
-            GameRegistry.addRecipe(new ShapedOreRecipe(
-                    this.itemPaintBrush.getSmallBrush(),
-                    new Object[]{"f", "s", Character.valueOf('f'), Items.feather,
-                                 Character.valueOf('s'), "stickWood"}));
-        }
-        if (config.getBoolean("Crafting_PaintFiller", this.getName(), true, "")) {
-            GameRegistry.addRecipe(new ShapedOreRecipe(
-                    this.itemPaintBrush.getFiller(),
-                    new Object[]{"w", "b", Character.valueOf('w'), "dyeWhite",
-                                 Character.valueOf('b'), Items.bowl}));
-        }
-        int crafting_painting_amount = config.getInt("Crafting_Painting_Amount", this.getName(), 8,
-                                                     0, 64, "\'0\' to disable");
-        if (crafting_painting_amount > 0) {
-            GameRegistry.addRecipe(new ShapedOreRecipe(
-                    new ItemStack(this.itemPainting, crafting_painting_amount),
-                    new Object[]{"wsw", "scs", "wsw", Character.valueOf('w'), "plankWood",
-                                 Character.valueOf('s'), "stickWood", Character.valueOf('c'),
-                                 Blocks.wool}));
-        }
-        if (config.getBoolean("Crafting_Painting_Clear", this.getName(), true, "")) {
-            GameRegistry.addShapelessRecipe(new ItemStack(this.itemPainting), this.itemPainting);
-        }
-        if (config.getBoolean("Crafting_Palette", this.getName(), false, "")) {
-            GameRegistry.addRecipe(new ShapelessOreRecipe(
-                    new ItemStack(this.itemPalette),
-                    new Object[]{"slabWood", "dyeRed", "dyeGreen", "dyeBlue"}));
-        }
+        
         this.blockPainting = new BlockPainting();
         GameRegistry.registerBlock(this.blockPainting, null,
                                    this.blockPainting.getUnlocalizedName().substring(5));
-        GameRegistry.registerTileEntity(TileEntityPainting.class,
-                                        DEF.MOD_ID + "." + TileEntityPainting.IN_MOD_ID);
+        GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID);
+        
         this.blockPaintingFrame = new BlockPaintingFrame();
         GameRegistry.registerBlock(this.blockPaintingFrame, ItemPaintingFrame.class,
                                    this.blockPaintingFrame.getUnlocalizedName().substring(5));
-        GameRegistry.registerTileEntity(TileEntityPaintingFrame.class,
-                                        DEF.MOD_ID + "." + TileEntityPaintingFrame.IN_MOD_ID);
+        GameRegistry.registerTileEntity(TileEntityPaintingFrame.class, TileEntityPaintingFrame.ID);
+        
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
-        if (config.getBoolean("Crafting_PaintingFrame", this.getName(), true, "")) {
-            GameRegistry.addRecipe(new RecipePaintingFrame(
-                    new Object[]{"sss", "sps", "sss", Character.valueOf('p'), this.itemPainting,
-                                 Character.valueOf('s'), "stickWood"}));
-            RecipePaintingFrameAddPainting.createAllVariants().forEach(GameRegistry::addRecipe);
-            RecipePaintingFrameRemovePainting removeRecipe =
-                    new RecipePaintingFrameRemovePainting();
-            GameRegistry.addRecipe(removeRecipe);
-            FMLCommonHandler.instance().bus().register(removeRecipe);
-        }
         
         Core.instance.network.registerMessage(MessagePaintBrushUse.class,
                                               MessagePaintBrushUse.class, 30,
@@ -157,7 +101,102 @@ public class ModComponentPainting implements ModComponent {
         Core.instance.network.registerMessage(MessagePaletteChange.class,
                                               MessagePaletteChange.class, 31,
                                               Side.SERVER);
+        this.initRecipe(config);
         this.config = new ChangeableConfig().read(config);
+    }
+    
+    protected void initRecipe(Configuration config) {
+        if (config.getBoolean("craftingRecipePaintBrush", this.getName(), true, "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintBrush.getBrush(),
+                    "w",
+                    "s",
+                    Character.valueOf('w'),
+                    new ItemStack(Blocks.wool, 1, 0),
+                    Character.valueOf('s'),
+                    "stickWood");
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipeSmallPaintBrush", this.getName(), true, "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintBrush.getSmallBrush(),
+                    "f",
+                    "s",
+                    Character.valueOf('f'),
+                    Items.feather,
+                    Character.valueOf('s'),
+                    "stickWood");
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipePaintFiller", this.getName(), true, "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintBrush.getFiller(),
+                    "w",
+                    "b",
+                    Character.valueOf('w'),
+                    "dyeWhite",
+                    Character.valueOf('b'),
+                    Items.bowl);
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
+            RecipeColorizeByDye recipe = new RecipeColorizeByDye();
+            GameRegistry.addRecipe(recipe);
+            RecipeDummy.getColorizeByDyeDummies().forEach(GameRegistry::addRecipe);
+        }
+        if (config.getBoolean("craftingRecipeColorizeByFiller", this.getName(), true, "")) {
+            RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
+            GameRegistry.addRecipe(recipe);
+            FMLCommonHandler.instance().bus().register(recipe);
+            RecipeDummy.getColorizeByFillerDummies().forEach(GameRegistry::addRecipe);
+        }
+        if (config.getBoolean("craftingRecipePalette", this.getName(), false, "")) {
+            ShapelessOreRecipe recipe = new ShapelessOreRecipe(
+                    new ItemStack(this.itemPalette),
+                    "slabWood",
+                    "dyeRed",
+                    "dyeGreen",
+                    "dyeBlue");
+            GameRegistry.addRecipe(recipe);
+        }
+        int paintingsAmount = config.getInt("craftingRecipePaintingAmount", this.getName(), 8,
+                                            0, 64, "\'0\' to disable");
+        if (paintingsAmount > 0) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    new ItemStack(this.itemPainting, paintingsAmount),
+                    "wsw",
+                    "scs",
+                    "wsw",
+                    Character.valueOf('w'),
+                    "plankWood",
+                    Character.valueOf('s'),
+                    "stickWood",
+                    Character.valueOf('c'),
+                    Blocks.wool);
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipePaintingClear", this.getName(), true, "")) {
+            GameRegistry.addShapelessRecipe(new ItemStack(this.itemPainting), this.itemPainting);
+        }
+        if (config.getBoolean("craftingRecipePaintingFrame", this.getName(), true, "")) {
+            RecipePaintingFrame recipe = new RecipePaintingFrame(
+                    "sss",
+                    "sps",
+                    "sss",
+                    Character.valueOf('p'),
+                    this.itemPainting,
+                    Character.valueOf('s'),
+                    "stickWood");
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipePaintingFrameAdd", this.getName(), true, "")) {
+            RecipePaintingFrameAddPainting.createAllVariants().forEach(GameRegistry::addRecipe);
+        }
+        if (config.getBoolean("craftingRecipePaintingFrameRemove", this.getName(), true, "")) {
+            RecipePaintingFrameRemovePainting recipe = new RecipePaintingFrameRemovePainting();
+            GameRegistry.addRecipe(recipe);
+            FMLCommonHandler.instance().bus().register(recipe);
+        }
     }
     
     @Override

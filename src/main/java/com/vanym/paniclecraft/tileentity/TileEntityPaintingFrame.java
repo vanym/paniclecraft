@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.tileentity;
 
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
@@ -15,6 +16,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     public static final String IN_MOD_ID = "paintingFrame";
+    public static final String ID = DEF.MOD_ID + "." + IN_MOD_ID;
     
     public static final String TAG_PICTURE_N = TileEntityPainting.TAG_PICTURE + "[%d]";
     

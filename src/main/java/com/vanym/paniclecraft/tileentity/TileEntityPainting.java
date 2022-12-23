@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.tileentity;
 
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
@@ -14,6 +15,7 @@ import net.minecraft.tileentity.TileEntity;
 public class TileEntityPainting extends TileEntityPaintingContainer {
     
     public static final String IN_MOD_ID = "painting";
+    public static final String ID = DEF.MOD_ID + "." + IN_MOD_ID;
     
     protected final Picture picture = new Picture(new PictureHolder());
     
