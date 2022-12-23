@@ -18,7 +18,7 @@ public class RecipeRemovePaintingFromFrame extends ShapelessOreRecipe {
     
     public RecipeRemovePaintingFromFrame() {
         super(Core.instance.painting.itemPainting,
-              Core.instance.painting.blockPaintingFrame.getItemWithEmptyPictures(BlockPaintingFrame.FRONT_SIDE));
+              Core.instance.painting.blockPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT));
     }
     
     @Override
