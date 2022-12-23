@@ -67,6 +67,18 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
         this.setHasSubtypes(true);
     }
     
+    public ItemStack getBrush() {
+        return new ItemStack(this, 1, 0);
+    }
+    
+    public ItemStack getSmallBrush() {
+        return new ItemStack(this, 1, 1);
+    }
+    
+    public ItemStack getFiller() {
+        return new ItemStack(this, 1, 2);
+    }
+    
     @Override
     public boolean isItemTool(ItemStack par1ItemStack) {
         return true;
@@ -268,7 +280,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
                 return itemTag.getInteger(TAG_COLOR);
             }
         }
-        return Core.instance.painting.DEFAULT_COLOR.getRGB() & 0xffffff;
+        return MainUtils.getAlphaless(Core.instance.painting.DEFAULT_COLOR);
     }
     
     @Override

@@ -98,6 +98,10 @@ public class MainUtils {
         return getDirectionRoration(yaw, pitch);
     }
     
+    public static int getAlphaless(Color color) {
+        return color.getRGB() & 0xffffff;
+    }
+    
     // public static int[] getRGBFromInt(int par1){
     // return new int[]{((par1 >> 16) & 0xFF), ((par1 >> 8) & 0xFF), (par1 & 0xFF)};
     // }

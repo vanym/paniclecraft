@@ -24,7 +24,7 @@ import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
 import com.vanym.paniclecraft.recipe.RecipeAddPaintingToFrame;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
-import com.vanym.paniclecraft.recipe.RecipePaintBrushByPaintFiller;
+import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipeRemovePaintingFromFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
@@ -42,7 +42,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
@@ -87,30 +86,26 @@ public class ModComponentPainting implements ModComponent {
             GameRegistry.addRecipe(recipe);
         }
         if (config.getBoolean("Crafting_PaintBrushColorByPaintFiller", this.getName(), true, "")) {
-            RecipePaintBrushByPaintFiller recipePaintBrushByPaintFiller =
-                    new RecipePaintBrushByPaintFiller();
-            GameRegistry.addRecipe(recipePaintBrushByPaintFiller);
-            FMLCommonHandler.instance().bus().register(recipePaintBrushByPaintFiller);
-            RecipeSorter.register(DEF.MOD_ID + ":recipePaintBrushByPaintFiller",
-                                  RecipePaintBrushByPaintFiller.class,
-                                  RecipeSorter.Category.SHAPELESS, "");
+            RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
+            GameRegistry.addRecipe(recipe);
+            FMLCommonHandler.instance().bus().register(recipe);
         }
         if (config.getBoolean("Crafting_BigPaintBrush", this.getName(), true, "")) {
             GameRegistry.addRecipe(new ShapedOreRecipe(
-                    new ItemStack(this.itemPaintBrush, 1, 0),
+                    this.itemPaintBrush.getBrush(),
                     new Object[]{"w", "s", Character.valueOf('w'),
                                  new ItemStack(Blocks.wool, 1, 0), Character.valueOf('s'),
                                  "stickWood"}));
         }
         if (config.getBoolean("Crafting_SmallPaintBrush", this.getName(), true, "")) {
             GameRegistry.addRecipe(new ShapedOreRecipe(
-                    new ItemStack(this.itemPaintBrush, 1, 1),
+                    this.itemPaintBrush.getSmallBrush(),
                     new Object[]{"f", "s", Character.valueOf('f'), Items.feather,
                                  Character.valueOf('s'), "stickWood"}));
         }
         if (config.getBoolean("Crafting_PaintFiller", this.getName(), true, "")) {
             GameRegistry.addRecipe(new ShapedOreRecipe(
-                    new ItemStack(this.itemPaintBrush, 1, 2),
+                    this.itemPaintBrush.getFiller(),
                     new Object[]{"w", "b", Character.valueOf('w'), "dyeWhite",
                                  Character.valueOf('b'), Items.bowl}));
         }
