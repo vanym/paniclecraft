@@ -69,6 +69,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
     
     @SubscribeEvent
     public void itemCraftedEvent(ItemCraftedEvent event) {
+        // Can't use (without dirty hacks) 'ContainerItem' because of RecipePaintingFrameAddPainting
         if (event.player == null) {
             return;
         }

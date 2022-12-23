@@ -88,6 +88,7 @@ public class RecipeColorizeByFiller implements IRecipe {
     
     @SubscribeEvent
     public void itemCraftedEvent(ItemCraftedEvent event) {
+        // Can't use (without dirty hacks) 'ContainerItem' because of RecipeColorizeByDye
         if (event.player == null) {
             return;
         }
