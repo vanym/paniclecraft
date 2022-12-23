@@ -92,11 +92,18 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
             }
             if (frame.stackSize == 1) {
                 itemTag.removeTag(TAG_PICTURE_I);
+                if (itemTag.hasNoTags()) {
+                    frame.setTagCompound(null);
+                }
                 ++frame.stackSize;
             } else if (frame.stackSize > 1) {
                 ItemStack copy = frame.copy();
                 copy.stackSize = 1;
-                copy.getTagCompound().removeTag(TAG_PICTURE_I);
+                NBTTagCompound copyItemTag = copy.getTagCompound();
+                copyItemTag.removeTag(TAG_PICTURE_I);
+                if (copyItemTag.hasNoTags()) {
+                    copy.setTagCompound(null);
+                }
                 boolean added = event.player.inventory.addItemStackToInventory(copy);
                 if (!added) {
                     event.player.dropPlayerItemWithRandomChoice(copy, false);
