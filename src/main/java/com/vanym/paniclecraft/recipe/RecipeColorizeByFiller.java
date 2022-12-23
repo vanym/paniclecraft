@@ -2,7 +2,6 @@ package com.vanym.paniclecraft.recipe;
 
 import java.awt.Color;
 
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
@@ -13,16 +12,10 @@ import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-public class RecipeColorizeByFiller extends ShapelessOreRecipe {
-    
-    public RecipeColorizeByFiller() {
-        super(Core.instance.painting.itemPaintBrush.getBrush(),
-              Core.instance.painting.itemPaintBrush.getBrush(),
-              Core.instance.painting.itemPaintBrush.getFiller());
-    }
+public class RecipeColorizeByFiller implements IRecipe {
     
     @Override
     public boolean matches(InventoryCrafting inv, World world) {
@@ -121,5 +114,15 @@ public class RecipeColorizeByFiller extends ShapelessOreRecipe {
                 }
             }
         }
+    }
+    
+    @Override
+    public int getRecipeSize() {
+        return 2;
+    }
+    
+    @Override
+    public ItemStack getRecipeOutput() {
+        return null;
     }
 }

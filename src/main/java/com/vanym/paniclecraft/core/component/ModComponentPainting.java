@@ -24,6 +24,7 @@ import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
+import com.vanym.paniclecraft.recipe.RecipeDummy;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
@@ -84,11 +85,13 @@ public class ModComponentPainting implements ModComponent {
         if (config.getBoolean("Crafting_PaintBrushColorByDyeChange", this.getName(), true, "")) {
             RecipeColorizeByDye recipe = new RecipeColorizeByDye();
             GameRegistry.addRecipe(recipe);
+            RecipeDummy.getColorizeByDyeDummies().forEach(GameRegistry::addRecipe);
         }
         if (config.getBoolean("Crafting_PaintBrushColorByPaintFiller", this.getName(), true, "")) {
             RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
             GameRegistry.addRecipe(recipe);
             FMLCommonHandler.instance().bus().register(recipe);
+            RecipeDummy.getColorizeByFillerDummies().forEach(GameRegistry::addRecipe);
         }
         if (config.getBoolean("Crafting_BigPaintBrush", this.getName(), true, "")) {
             GameRegistry.addRecipe(new ShapedOreRecipe(

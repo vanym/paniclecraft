@@ -4,20 +4,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 
 import net.minecraft.block.BlockColored;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-public class RecipeColorizeByDye extends ShapelessOreRecipe {
+public class RecipeColorizeByDye implements IRecipe {
     
-    protected static final String DYE = "dye";
+    public static final String DYE = "dye";
     protected static final String[] DYES_SUFFIX = // from OreDictionary
             {"Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan", "LightGray", "Gray",
              "Pink", "Lime", "Yellow", "LightBlue", "Magenta", "Orange", "White"};
@@ -25,8 +24,6 @@ public class RecipeColorizeByDye extends ShapelessOreRecipe {
     protected final List<List<ItemStack>> dyesByColor;
     
     public RecipeColorizeByDye() {
-        super(Core.instance.painting.itemPaintBrush,
-              Core.instance.painting.itemPaintBrush, DYE);
         ArrayList<List<ItemStack>> list = new ArrayList<>();
         for (String suffix : DYES_SUFFIX) {
             List<ItemStack> dyeColor = OreDictionary.getOres(DYE + suffix);
@@ -153,5 +150,15 @@ public class RecipeColorizeByDye extends ShapelessOreRecipe {
             }
         }
         return false;
+    }
+    
+    @Override
+    public int getRecipeSize() {
+        return 2;
+    }
+    
+    @Override
+    public ItemStack getRecipeOutput() {
+        return null;
     }
 }
