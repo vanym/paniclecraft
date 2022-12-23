@@ -9,6 +9,7 @@ import java.util.Set;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
+import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -34,12 +35,10 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
-    public static final int DEFAULT_COLOR_RGB = 200;
-    public static final int DEFAULT_COLOR =
-            MainUtils.getIntFromRGB(DEFAULT_COLOR_RGB, DEFAULT_COLOR_RGB, DEFAULT_COLOR_RGB);
+public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorizeable {
     
     public static final String TAG_RADIUS = "Radius";
+    public static final String TAG_COLOR = "color";
     
     protected static final double MAX_RADIUS = 256.0D;
     protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
@@ -215,42 +214,6 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
         }
     }
     
-    public int getColor(ItemStack par1ItemStack) {
-        NBTTagCompound var2 = par1ItemStack.getTagCompound();
-        if (var2 == null) {
-            return ItemPaintBrush.DEFAULT_COLOR;
-        } else {
-            return var2 == null ? ItemPaintBrush.DEFAULT_COLOR
-                                : (var2.hasKey("color") ? var2.getInteger("color")
-                                                        : ItemPaintBrush.DEFAULT_COLOR);
-        }
-    }
-    
-    public void removeColor(ItemStack par1ItemStack) {
-        NBTTagCompound var2 = par1ItemStack.getTagCompound();
-        if (var2 != null) {
-            if (var2.hasKey("color")) {
-                var2.removeTag("color");
-            }
-        }
-    }
-    
-    public boolean hasColor(ItemStack par1ItemStack) {
-        return par1ItemStack.hasTagCompound() && par1ItemStack.getTagCompound().hasKey("color");
-    }
-    
-    public void setColor(ItemStack par1ItemStack, int par2) {
-        NBTTagCompound var3 = par1ItemStack.getTagCompound();
-        
-        if (var3 == null) {
-            var3 = new NBTTagCompound();
-            par1ItemStack.setTagCompound(var3);
-        }
-        
-        var3.setInteger("color", par2);
-        
-    }
-    
     @Override
     public String getUnlocalizedName(ItemStack itemStack) {
         return this.getUnlocalizedName() + itemStack.getItemDamage();
@@ -295,6 +258,41 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool {
     @Override
     public boolean isFull3D() {
         return true;
+    }
+    
+    @Override
+    public int getColor(ItemStack itemStack) {
+        if (itemStack.hasTagCompound()) {
+            NBTTagCompound itemTag = itemStack.getTagCompound();
+            if (itemTag.hasKey(TAG_COLOR)) {
+                return itemTag.getInteger(TAG_COLOR);
+            }
+        }
+        return Core.instance.painting.DEFAULT_COLOR.getRGB() & 0xffffff;
+    }
+    
+    @Override
+    public void clearColor(ItemStack itemStack) {
+        if (itemStack.hasTagCompound()) {
+            NBTTagCompound itemTag = itemStack.getTagCompound();
+            if (itemTag.hasKey(TAG_COLOR)) {
+                itemTag.removeTag(TAG_COLOR);
+            }
+        }
+    }
+    
+    @Override
+    public boolean hasCustomColor(ItemStack itemStack) {
+        return itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(TAG_COLOR);
+    }
+    
+    @Override
+    public void setColor(ItemStack itemStack, int color) {
+        if (!itemStack.hasTagCompound()) {
+            itemStack.setTagCompound(new NBTTagCompound());
+        }
+        NBTTagCompound itemTag = itemStack.getTagCompound();
+        itemTag.setInteger(TAG_COLOR, color);
     }
     
     @Override

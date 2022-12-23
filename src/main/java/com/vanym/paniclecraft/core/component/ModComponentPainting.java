@@ -23,7 +23,7 @@ import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteChange;
 import com.vanym.paniclecraft.recipe.RecipeAddPaintingToFrame;
-import com.vanym.paniclecraft.recipe.RecipePaintBrushByDye;
+import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipePaintBrushByPaintFiller;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipeRemovePaintingFromFrame;
@@ -83,8 +83,8 @@ public class ModComponentPainting implements ModComponent {
         Core.instance.registerItem(this.itemPaintBrush);
         Core.instance.registerItem(this.itemPalette);
         if (config.getBoolean("Crafting_PaintBrushColorByDyeChange", this.getName(), true, "")) {
-            RecipePaintBrushByDye recipePaintBrushByDye = new RecipePaintBrushByDye();
-            GameRegistry.addRecipe(recipePaintBrushByDye);
+            RecipeColorizeByDye recipe = new RecipeColorizeByDye();
+            GameRegistry.addRecipe(recipe);
         }
         if (config.getBoolean("Crafting_PaintBrushColorByPaintFiller", this.getName(), true, "")) {
             RecipePaintBrushByPaintFiller recipePaintBrushByPaintFiller =
