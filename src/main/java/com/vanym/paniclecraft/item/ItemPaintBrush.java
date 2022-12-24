@@ -257,14 +257,13 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister) {
-        // @formatter:off
-        this.big = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_big");
-        this.big_overlay = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_big_overlay");
-        this.small = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_small");
-        this.small_overlay = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_small_overlay");
-        this.fill = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_fill");
-        this.fill_overlay = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getUnlocalizedName().substring(this.getUnlocalizedName().indexOf(".") + 1) + "_fill_overlay");
-        // @formatter:on
+        final String PREFIX = DEF.MOD_ID + ":" + this.getName();
+        this.big = iconRegister.registerIcon(PREFIX + "_big");
+        this.big_overlay = iconRegister.registerIcon(PREFIX + "_big_overlay");
+        this.small = iconRegister.registerIcon(PREFIX + "_small");
+        this.small_overlay = iconRegister.registerIcon(PREFIX + "_small_overlay");
+        this.fill = iconRegister.registerIcon(PREFIX + "_fill");
+        this.fill_overlay = iconRegister.registerIcon(PREFIX + "_fill_overlay");
     }
     
     @Override

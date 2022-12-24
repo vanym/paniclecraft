@@ -106,7 +106,7 @@ public class Core {
     }
     
     public void registerItem(ItemMod3 item) {
-        GameRegistry.registerItem(item, item.getUnlocalizedName().substring(5));
+        GameRegistry.registerItem(item, item.getName());
         if (this.tab != null) {
             item.setCreativeTab(this.tab);
             if (this.tab.iconitem == null) {
