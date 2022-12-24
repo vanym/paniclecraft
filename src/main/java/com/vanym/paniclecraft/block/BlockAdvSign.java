@@ -22,6 +22,10 @@ public class BlockAdvSign extends BlockSign {
         this.setBlockName("advSign");
     }
     
+    public String getName() {
+        return this.getUnlocalizedName().substring(5);
+    }
+    
     @Override
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
         return Core.instance.advSign.itemAdvSign;

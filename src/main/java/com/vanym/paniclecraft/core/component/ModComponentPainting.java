@@ -84,13 +84,12 @@ public class ModComponentPainting implements ModComponent {
         Core.instance.registerItem(this.itemPalette);
         
         this.blockPainting = new BlockPainting();
-        GameRegistry.registerBlock(this.blockPainting, null,
-                                   this.blockPainting.getUnlocalizedName().substring(5));
+        GameRegistry.registerBlock(this.blockPainting, null, this.blockPainting.getName());
         GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID);
         
         this.blockPaintingFrame = new BlockPaintingFrame();
         GameRegistry.registerBlock(this.blockPaintingFrame, ItemPaintingFrame.class,
-                                   this.blockPaintingFrame.getUnlocalizedName().substring(5));
+                                   this.blockPaintingFrame.getName());
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class, TileEntityPaintingFrame.ID);
         
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());

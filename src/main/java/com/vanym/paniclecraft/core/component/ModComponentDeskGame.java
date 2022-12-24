@@ -40,8 +40,7 @@ public class ModComponentDeskGame implements ModComponent {
         this.itemChessDesk = new ItemChessDesk();
         this.blockChessDesk = new BlockChessDesk();
         Core.instance.registerItem(this.itemChessDesk);
-        GameRegistry.registerBlock(this.blockChessDesk, null,
-                                   this.blockChessDesk.getUnlocalizedName().substring(5));
+        GameRegistry.registerBlock(this.blockChessDesk, null, this.blockChessDesk.getName());
         GameRegistry.registerTileEntity(TileEntityChessDesk.class, DEF.MOD_ID + ".chessDesk");
         boolean craftingRecipeChessDesk =
                 config.getBoolean("craftingRecipeChessDesk", this.getName(), true, "");

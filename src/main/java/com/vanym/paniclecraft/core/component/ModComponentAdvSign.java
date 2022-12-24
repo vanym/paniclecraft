@@ -39,11 +39,9 @@ public class ModComponentAdvSign implements ModComponent {
         this.blockAdvSignWall = new BlockAdvSign(false);
         this.itemAdvSign = new ItemAdvSign(this.blockAdvSignPost, this.blockAdvSignWall);
         GameRegistry.registerBlock(this.blockAdvSignPost, null,
-                                   this.blockAdvSignPost.getUnlocalizedName().substring(5) +
-                                       ".post");
+                                   this.blockAdvSignPost.getName() + ".post");
         GameRegistry.registerBlock(this.blockAdvSignWall, null,
-                                   this.blockAdvSignWall.getUnlocalizedName().substring(5) +
-                                       ".wall");
+                                   this.blockAdvSignWall.getName() + ".wall");
         Core.instance.registerItem(this.itemAdvSign);
         GameRegistry.registerTileEntity(TileEntityAdvSign.class, DEF.MOD_ID + ".advSign");
         boolean craftingRecipeEasy = config.getBoolean("craftingRecipeEasy", this.getName(), true,
