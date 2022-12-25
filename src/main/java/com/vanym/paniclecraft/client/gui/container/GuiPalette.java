@@ -257,12 +257,11 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         int k = (this.width - this.xSize) / 2;
         int l = (this.height - this.ySize) / 2;
         this.drawTexturedModalRect(k, l, 0, 0, this.xSize, 3 * 18 + 17 + 96);
-        int rgb = MainUtils.getAlphaless(this.getColor());
-        float f7 = (float)(rgb >> 16 & 255) / 255.0F;
-        float f6 = (float)(rgb >> 8 & 255) / 255.0F;
-        float f5 = (float)(rgb & 255) / 255.0F;
-        GL11.glColor4f(1.0F * f7, 1.0F * f6, 1.0F * f5, 1.0F);
-        this.drawTexturedModalRect(k + 8, l + 38, 0, 167, 16, 16);
+        Color color = this.getColor();
+        if (color == null) {
+            color = new Color(0);
+        }
+        drawRect(k + 8, l + 38, k + 8 + 16, l + 38 + 16, color.getRGB());
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_BLEND);
         this.textHex.drawTextBox();
