@@ -97,7 +97,50 @@ public class GuiPalette extends GuiContainer implements ICrafting {
                 return;
             }
         }
+        if (this.switchTextTyped(character, key)) {
+            return;
+        }
         super.keyTyped(character, key);
+    }
+    
+    protected boolean switchTextTyped(char character, int key) {
+        boolean up;
+        switch (key) {
+            case 200: // up
+                up = true;
+            break;
+            case 15: // tab
+            case 28: // enter
+            case 156: // enter numpad
+            case 208: // down
+                up = false;
+            break;
+            default:
+                return false;
+        }
+        int last = this.textColor.length - 1;
+        for (int i = 0; i <= last; ++i) {
+            GuiTextField textOne = this.textColor[i];
+            if (!textOne.isFocused()) {
+                continue;
+            }
+            int sel = textOne.getSelectionEnd();
+            textOne.setFocused(false);
+            int move = i + (up ? 1 : -1);
+            if (move < 0 || move > last) {
+                this.textHex.setFocused(true);
+            } else {
+                this.textColor[move].setFocused(true);
+                this.textColor[move].setCursorPosition(sel);
+            }
+            return true;
+        }
+        if (this.textHex.isFocused()) {
+            this.textHex.setFocused(false);
+            this.textColor[up ? 0 : last].setFocused(true);
+            return true;
+        }
+        return false;
     }
     
     protected boolean textHexKeyTyped(char character, int key) {
