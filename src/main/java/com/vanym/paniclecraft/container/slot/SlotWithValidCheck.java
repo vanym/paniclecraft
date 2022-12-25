@@ -6,12 +6,12 @@ import net.minecraft.item.ItemStack;
 
 public class SlotWithValidCheck extends Slot {
     
-    public SlotWithValidCheck(IInventory par1iInventory, int par2, int par3, int par4) {
-        super(par1iInventory, par2, par3, par4);
+    public SlotWithValidCheck(IInventory inv, int slotIndex, int x, int y) {
+        super(inv, slotIndex, x, y);
     }
     
     @Override
-    public boolean isItemValid(ItemStack par1ItemStack) {
-        return this.inventory.isItemValidForSlot(this.getSlotIndex(), par1ItemStack);
+    public boolean isItemValid(ItemStack itemStack) {
+        return this.inventory.isItemValidForSlot(this.getSlotIndex(), itemStack);
     }
 }

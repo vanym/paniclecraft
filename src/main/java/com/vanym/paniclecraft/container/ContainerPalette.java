@@ -1,68 +1,77 @@
 package com.vanym.paniclecraft.container;
 
+import java.awt.Color;
+
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.container.slot.SlotCanBeSelected;
 import com.vanym.paniclecraft.container.slot.SlotWithValidCheck;
+import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.inventory.InventoryPalette;
-import com.vanym.paniclecraft.item.ItemPaintBrush;
+import com.vanym.paniclecraft.utils.MainUtils;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInvBasic;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class ContainerPalette extends Container {
+public class ContainerPalette extends ContainerBase implements IInvBasic {
     
-    public InventoryPalette inventoryPalette = new InventoryPalette(this);
+    public final InventoryPalette inventoryPalette = new InventoryPalette();
     
-    public InventoryPlayer inventoryPlayer;
+    public final InventoryPlayer inventoryPlayer;
     
-    public ContainerPalette(InventoryPlayer par1InventoryPlayer) {
-        this.inventoryPlayer = par1InventoryPlayer;
-        
-        int i = -18;
-        int j;
-        int k;
+    public ContainerPalette(InventoryPlayer playerInv) {
+        this.inventoryPlayer = playerInv;
         this.addSlotToContainer(new SlotWithValidCheck(this.inventoryPalette, 0, 8, 18));
-        for (j = 0; j < 3; ++j) {
-            for (k = 0; k < 9; ++k) {
-                this.addSlotToContainer(new Slot(
-                        par1InventoryPlayer,
-                        k + j * 9 + 9,
-                        8 + k * 18,
-                        103 + j * 18 + i));
-            }
+        this.addPlayerInventorySlots(playerInv);
+        this.inventoryPalette.func_110134_a(this);
+    }
+    
+    public Color getColor() {
+        ItemStack stack = this.inventoryPalette.getStackInSlot(0);
+        IColorizeable colorizeable = getColorizeable(stack);
+        if (colorizeable == null) {
+            return null;
         }
-        
-        for (j = 0; j < 9; ++j) {
-            this.addSlotToContainer(new SlotCanBeSelected(
-                    par1InventoryPlayer,
-                    j,
-                    8 + j * 18,
-                    161 + i));
+        int rgb = colorizeable.getColor(stack);
+        return new Color(rgb);
+    }
+    
+    public boolean setColor(Color color) {
+        ItemStack stack = this.inventoryPalette.getStackInSlot(0);
+        IColorizeable colorizeable = getColorizeable(stack);
+        if (colorizeable == null) {
+            return false;
         }
+        colorizeable.setColor(stack, MainUtils.getAlphaless(color));
+        return true;
     }
     
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2) {
+    public void onInventoryChanged(InventoryBasic inv) {
+        this.onCraftMatrixChanged(inv);
+    }
+    
+    @Override
+    public ItemStack transferStackInSlot(EntityPlayer player, int slotNum) {
         ItemStack itemstack = null;
-        Slot slot = (Slot)this.inventorySlots.get(par2);
+        Slot slot = (Slot)this.inventorySlots.get(slotNum);
         
         if (slot != null && slot.getHasStack()) {
             ItemStack itemstack1 = slot.getStack();
-            if (par2 == 0) {
+            if (slotNum == 0) {
                 if (!this.mergeItemStack(itemstack1, 1, 37, true)) {
                     return null;
                 }
-            } else if (itemstack1.getItem() instanceof ItemPaintBrush
+            } else if (this.inventoryPalette.isItemValidForSlot(0, itemstack1)
                 && this.mergeItemStack(itemstack1, 0, 1, true)) {
-                
-            } else if (par2 >= 1 && par2 < 28) {
+            } else if (slotNum >= 1 && slotNum < 28) {
                 if (!this.mergeItemStack(itemstack1, 28, 37, false)) {
                     return null;
                 }
-            } else if (par2 >= 28 && par2 < 37) {
+            } else if (slotNum >= 28 && slotNum < 37) {
                 if (!this.mergeItemStack(itemstack1, 1, 28, false)) {
                     return null;
                 }
@@ -78,11 +87,17 @@ public class ContainerPalette extends Container {
     }
     
     @Override
-    public void onContainerClosed(EntityPlayer par1EntityPlayer) {
-        super.onContainerClosed(par1EntityPlayer);
-        if (this.inventoryPalette.item != null) {
-            par1EntityPlayer.dropPlayerItemWithRandomChoice(this.inventoryPalette.item, false);
-            this.inventoryPalette.item = null;
+    public void onContainerClosed(EntityPlayer entityPlayer) {
+        super.onContainerClosed(entityPlayer);
+        if (!entityPlayer.worldObj.isRemote) {
+            int size = this.inventoryPalette.getSizeInventory();
+            for (int i = 0; i < size; ++i) {
+                ItemStack itemStack = this.inventoryPalette.getStackInSlotOnClosing(i);
+                if (itemStack == null) {
+                    continue;
+                }
+                entityPlayer.dropPlayerItemWithRandomChoice(itemStack, false);
+            }
         }
     }
     
@@ -91,8 +106,22 @@ public class ContainerPalette extends Container {
         return canBePalette(entityplayer.getHeldItem());
     }
     
-    public static boolean canBePalette(ItemStack par1) {
-        return par1 == null ? false : par1.getItem() == Core.instance.painting.itemPalette
-            && par1.stackSize > 0;
+    public static boolean canBePalette(ItemStack itemStack) {
+        if (itemStack == null || itemStack.stackSize == 0) {
+            return false;
+        }
+        Item item = itemStack.getItem();
+        return item == Core.instance.painting.itemPalette;
+    }
+    
+    protected static IColorizeable getColorizeable(ItemStack stack) {
+        if (stack == null) {
+            return null;
+        }
+        Item item = stack.getItem();
+        if (!(item instanceof IColorizeable)) {
+            return null;
+        }
+        return (IColorizeable)item;
     }
 }

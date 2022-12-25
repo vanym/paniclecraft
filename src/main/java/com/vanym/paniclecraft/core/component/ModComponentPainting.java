@@ -20,7 +20,7 @@ import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
-import com.vanym.paniclecraft.network.message.MessagePaletteChange;
+import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
@@ -97,8 +97,8 @@ public class ModComponentPainting implements ModComponent {
         Core.instance.network.registerMessage(MessagePaintBrushUse.class,
                                               MessagePaintBrushUse.class, 30,
                                               Side.SERVER);
-        Core.instance.network.registerMessage(MessagePaletteChange.class,
-                                              MessagePaletteChange.class, 31,
+        Core.instance.network.registerMessage(MessagePaletteSetColor.class,
+                                              MessagePaletteSetColor.class, 32,
                                               Side.SERVER);
         this.initRecipe(config);
         this.config = new ChangeableConfig().read(config);

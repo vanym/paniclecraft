@@ -99,6 +99,9 @@ public class MainUtils {
     }
     
     public static int getAlphaless(Color color) {
+        if (color == null) {
+            return 0;
+        }
         return color.getRGB() & 0xffffff;
     }
     
