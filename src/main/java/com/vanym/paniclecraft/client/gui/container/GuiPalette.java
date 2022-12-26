@@ -10,13 +10,16 @@ import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.ColorChartTexture;
 import com.vanym.paniclecraft.container.ContainerPalette;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
@@ -31,9 +34,13 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     
     protected static final ResourceLocation GUI_TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/guis/paletteGui.png");
+    protected static final ResourceLocation CHART_TEXTURE =
+            new ResourceLocation(DEF.MOD_ID, "textures/guis/paletteGuiColorChart.png");
+    protected static ColorChartTexture chartTexture;
     
     protected final GuiOneColorField[] textColor = new GuiOneColorField[3];
     protected GuiHexColorField textHex;
+    protected GuiColorChart chart;
     
     protected ContainerPalette container;
     
@@ -45,6 +52,12 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     @Override
     public void initGui() {
         super.initGui();
+        if (chartTexture == null) {
+            chartTexture = new ColorChartTexture(CHART_TEXTURE);
+            this.mc.getTextureManager().loadTexture(CHART_TEXTURE, chartTexture);
+        }
+        this.chart =
+                new GuiColorChart(chartTexture, this.guiLeft, this.guiTop, this.xSize, this.ySize);
         Keyboard.enableRepeatEvents(true);
         for (int i = 0; i < this.textColor.length; ++i) {
             this.textColor[i] = new GuiOneColorField(
@@ -208,6 +221,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         super.mouseClicked(x, y, eventButton);
         this.textHex.mouseClicked(x, y, eventButton);
         Arrays.asList(this.textColor).forEach(t->t.mouseClicked(x, y, eventButton));
+        this.chart.mouseClicked(x, y, eventButton);
     }
     
     @Override
@@ -257,6 +271,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         int k = (this.width - this.xSize) / 2;
         int l = (this.height - this.ySize) / 2;
         this.drawTexturedModalRect(k, l, 0, 0, this.xSize, 3 * 18 + 17 + 96);
+        this.chart.drawChart(this.mc);
         Color color = this.getColor();
         if (color == null) {
             color = new Color(0);
@@ -295,6 +310,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
                 this.textColor[i].setFocused(false);
             }
         }
+        this.chart.enabled = !empty;
     }
     
     @Override
@@ -313,6 +329,54 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     
     @Override
     public void sendProgressBarUpdate(Container container, int id, int level) {}
+    
+    protected class GuiColorChart extends Gui {
+        
+        public int width;
+        public int height;
+        public int xPosition;
+        public int yPosition;
+        
+        public boolean enabled;
+        public boolean visible;
+        
+        protected final ColorChartTexture chart;
+        
+        public GuiColorChart(ColorChartTexture chart, int x, int y, int width, int height) {
+            this.chart = chart;
+            this.xPosition = x;
+            this.yPosition = y;
+            this.width = width;
+            this.height = height;
+            this.enabled = true;
+            this.visible = true;
+        }
+        
+        public void mouseClicked(int x, int y, int eventButton) {
+            if (!this.enabled || eventButton != 0 /* left */) {
+                return;
+            }
+            x -= this.xPosition;
+            y -= this.yPosition;
+            if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
+                return;
+            }
+            Color color = this.chart.getColor(x, y);
+            if (color == null || color.getAlpha() == 0) {
+                return;
+            }
+            GuiPalette.this.setColor(color);
+        }
+        
+        public void drawChart(Minecraft mc) {
+            if (!this.visible) {
+                return;
+            }
+            mc.getTextureManager().bindTexture(this.chart.textureLocation);
+            this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 0, this.width,
+                                       this.height);
+        }
+    }
     
     protected static class GuiOneColorField extends GuiTextField {
         
