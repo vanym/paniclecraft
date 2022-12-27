@@ -38,7 +38,7 @@ import net.minecraft.world.World;
 public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorizeable {
     
     public static final String TAG_RADIUS = "Radius";
-    public static final String TAG_COLOR = "color";
+    public static final String TAG_COLOR = "Color";
     
     protected static final double MAX_RADIUS = 256.0D;
     protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
