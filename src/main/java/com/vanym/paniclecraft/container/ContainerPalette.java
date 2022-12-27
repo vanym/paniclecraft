@@ -31,7 +31,7 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
     
     public Color getColor() {
         ItemStack stack = this.inventoryPalette.getStackInSlot(0);
-        IColorizeable colorizeable = getColorizeable(stack);
+        IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
         if (colorizeable == null) {
             return null;
         }
@@ -41,7 +41,7 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
     
     public boolean setColor(Color color) {
         ItemStack stack = this.inventoryPalette.getStackInSlot(0);
-        IColorizeable colorizeable = getColorizeable(stack);
+        IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
         if (colorizeable == null) {
             return false;
         }
@@ -112,16 +112,5 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
         }
         Item item = itemStack.getItem();
         return item == Core.instance.painting.itemPalette;
-    }
-    
-    protected static IColorizeable getColorizeable(ItemStack stack) {
-        if (stack == null) {
-            return null;
-        }
-        Item item = stack.getItem();
-        if (!(item instanceof IColorizeable)) {
-            return null;
-        }
-        return (IColorizeable)item;
     }
 }

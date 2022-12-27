@@ -12,6 +12,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.ColorChartTexture;
 import com.vanym.paniclecraft.container.ContainerPalette;
+import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -41,6 +42,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     protected final GuiOneColorField[] textColor = new GuiOneColorField[3];
     protected GuiHexColorField textHex;
     protected GuiColorChart chart;
+    protected GuiColorPicker picker;
     
     protected ContainerPalette container;
     
@@ -58,6 +60,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         }
         this.chart =
                 new GuiColorChart(chartTexture, this.guiLeft, this.guiTop, this.xSize, this.ySize);
+        this.picker = new GuiColorPicker(this.guiLeft + 8, this.guiTop + 38, 16, 16);
         Keyboard.enableRepeatEvents(true);
         for (int i = 0; i < this.textColor.length; ++i) {
             this.textColor[i] = new GuiOneColorField(
@@ -222,6 +225,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         this.textHex.mouseClicked(x, y, eventButton);
         Arrays.asList(this.textColor).forEach(t->t.mouseClicked(x, y, eventButton));
         this.chart.mouseClicked(x, y, eventButton);
+        this.picker.mouseClicked(x, y, eventButton);
     }
     
     @Override
@@ -329,6 +333,42 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     
     @Override
     public void sendProgressBarUpdate(Container container, int id, int level) {}
+    
+    protected class GuiColorPicker extends Gui {
+        
+        public int width;
+        public int height;
+        public int xPosition;
+        public int yPosition;
+        
+        public boolean enabled;
+        
+        public GuiColorPicker(int x, int y, int width, int height) {
+            this.xPosition = x;
+            this.yPosition = y;
+            this.width = width;
+            this.height = height;
+            this.enabled = true;
+        }
+        
+        public void mouseClicked(int x, int y, int eventButton) {
+            if (!this.enabled || (eventButton != 0 /* left */ && eventButton != 1 /* right */)) {
+                return;
+            }
+            x -= this.xPosition;
+            y -= this.yPosition;
+            if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
+                return;
+            }
+            ItemStack stack = GuiPalette.this.container.inventoryPlayer.getItemStack();
+            IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
+            if (colorizeable == null) {
+                return;
+            }
+            int rgb = colorizeable.getColor(stack);
+            GuiPalette.this.setColor(new Color(rgb));
+        }
+    }
     
     protected class GuiColorChart extends Gui {
         
