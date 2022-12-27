@@ -25,6 +25,16 @@ color-chart-gui.png: flat-color-chart-scale4.png minecraft-color-chart-scale5.pn
 	magick -size 256x256 canvas:none \
 	       -draw 'image Src 76,17 0,0 minecraft-color-chart-scale5.png' \
 	       -draw 'image Src 76,26 0,0 flat-color-chart-scale4.png' \
+	       -fill '#a0a0a0' -draw 'rectangle 160,17 165,22' \
+	       -fill '#c8c8c8' -draw 'rectangle 161,18 164,21' \
+	       -fill '#ff0000' -draw 'rectangle 161,26 164,29' \
+	       -fill '#00ff00' -draw 'rectangle 161,30 164,33' \
+	       -fill '#0000ff' -draw 'rectangle 161,34 164,37' \
+	       -fill '#00ffff' -draw 'rectangle 161,38 164,41' \
+	       -fill '#ff00ff' -draw 'rectangle 161,42 164,45' \
+	       -fill '#ffff00' -draw 'rectangle 161,46 164,49' \
+	       -fill '#ffffff' -draw 'rectangle 161,50 164,53' \
+	       -fill '#000000' -draw 'rectangle 161,54 164,57' \
 	       +set date:create +set date:modify +set date:timestamp \
                color-chart-gui.png
 
