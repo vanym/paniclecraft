@@ -48,17 +48,17 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     protected static final int DAMAGE_FILLER = 2;
     
     @SideOnly(Side.CLIENT)
-    public IIcon iconBrush;
+    public IIcon iconBrushHead;
     @SideOnly(Side.CLIENT)
-    public IIcon iconBrushOverlay;
+    public IIcon iconBrushBody;
     @SideOnly(Side.CLIENT)
-    public IIcon iconSmallBrush;
+    public IIcon iconSmallBrushHead;
     @SideOnly(Side.CLIENT)
-    public IIcon iconSmallBrushOverlay;
+    public IIcon iconSmallBrushBody;
     @SideOnly(Side.CLIENT)
-    public IIcon iconFiller;
+    public IIcon iconFillerHead;
     @SideOnly(Side.CLIENT)
-    public IIcon iconFillerOverlay;
+    public IIcon iconFillerBody;
     
     @SideOnly(Side.CLIENT)
     protected Set<MessagePaintBrushUse> brushUseMessages = new HashSet<>();
@@ -235,11 +235,11 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
         switch (damage) {
             default:
             case DAMAGE_BRUSH:
-                return (pass != 1 ? this.iconBrush : this.iconBrushOverlay);
+                return (pass == 0 ? this.iconBrushHead : this.iconBrushBody);
             case DAMAGE_SMALLBRUSH:
-                return (pass != 1 ? this.iconSmallBrush : this.iconSmallBrushOverlay);
+                return (pass == 0 ? this.iconSmallBrushHead : this.iconSmallBrushBody);
             case DAMAGE_FILLER:
-                return (pass != 1 ? this.iconFiller : this.iconFillerOverlay);
+                return (pass == 0 ? this.iconFillerHead : this.iconFillerBody);
         }
     }
     
@@ -260,12 +260,12 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister) {
         final String PREFIX = DEF.MOD_ID + ":" + this.getName();
-        this.iconBrush = iconRegister.registerIcon(PREFIX + "_brush");
-        this.iconBrushOverlay = iconRegister.registerIcon(PREFIX + "_brush_overlay");
-        this.iconSmallBrush = iconRegister.registerIcon(PREFIX + "_smallbrush");
-        this.iconSmallBrushOverlay = iconRegister.registerIcon(PREFIX + "_smallbrush_overlay");
-        this.iconFiller = iconRegister.registerIcon(PREFIX + "_filler");
-        this.iconFillerOverlay = iconRegister.registerIcon(PREFIX + "_filler_overlay");
+        this.iconBrushHead = iconRegister.registerIcon(PREFIX + "_brush_head");
+        this.iconBrushBody = iconRegister.registerIcon(PREFIX + "_brush_body");
+        this.iconSmallBrushHead = iconRegister.registerIcon(PREFIX + "_smallbrush_head");
+        this.iconSmallBrushBody = iconRegister.registerIcon(PREFIX + "_smallbrush_body");
+        this.iconFillerHead = iconRegister.registerIcon(PREFIX + "_filler_head");
+        this.iconFillerBody = iconRegister.registerIcon(PREFIX + "_filler_body");
     }
     
     @Override
