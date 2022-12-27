@@ -45,7 +45,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     
     protected static final int DAMAGE_BRUSH = 0;
     protected static final int DAMAGE_SMALLBRUSH = 1;
-    protected static final int DAMAGE_FILLER = 2;
+    protected static final int DAMAGE_FILLER = 4;
     
     @SideOnly(Side.CLIENT)
     public IIcon iconBrushHead;
