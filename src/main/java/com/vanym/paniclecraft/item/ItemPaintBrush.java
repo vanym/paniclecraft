@@ -43,6 +43,10 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     protected static final double MAX_RADIUS = 256.0D;
     protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
     
+    protected static final int DAMAGE_BRUSH = 0;
+    protected static final int DAMAGE_SMALLBRUSH = 1;
+    protected static final int DAMAGE_FILLER = 2;
+    
     @SideOnly(Side.CLIENT)
     public IIcon big;
     @SideOnly(Side.CLIENT)
@@ -68,15 +72,15 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     }
     
     public ItemStack getBrush() {
-        return new ItemStack(this, 1, 0);
+        return new ItemStack(this, 1, DAMAGE_BRUSH);
     }
     
     public ItemStack getSmallBrush() {
-        return new ItemStack(this, 1, 1);
+        return new ItemStack(this, 1, DAMAGE_SMALLBRUSH);
     }
     
     public ItemStack getFiller() {
-        return new ItemStack(this, 1, 2);
+        return new ItemStack(this, 1, DAMAGE_FILLER);
     }
     
     @Override
@@ -233,15 +237,15 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     
     @Override
     @SideOnly(Side.CLIENT)
-    public IIcon getIconFromDamageForRenderPass(int par1, int par2) {
-        switch (par1) {
+    public IIcon getIconFromDamageForRenderPass(int damage, int pass) {
+        switch (damage) {
             default:
-            case 0:
-                return (par2 != 1 ? this.big : this.big_overlay);
-            case 1:
-                return (par2 != 1 ? this.small : this.small_overlay);
-            case 2:
-                return (par2 != 1 ? this.fill : this.fill_overlay);
+            case DAMAGE_BRUSH:
+                return (pass != 1 ? this.big : this.big_overlay);
+            case DAMAGE_SMALLBRUSH:
+                return (pass != 1 ? this.small : this.small_overlay);
+            case DAMAGE_FILLER:
+                return (pass != 1 ? this.fill : this.fill_overlay);
         }
     }
     
@@ -249,9 +253,13 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item item, CreativeTabs creativetabs, List list) {
-        list.add(new ItemStack(item, 1, 0));
-        list.add(new ItemStack(item, 1, 1));
-        list.add(new ItemStack(item, 1, 2));
+        if (!(item instanceof ItemPaintBrush)) {
+            return;
+        }
+        ItemPaintBrush brush = (ItemPaintBrush)item;
+        list.add(brush.getBrush());
+        list.add(brush.getSmallBrush());
+        list.add(brush.getFiller());
     }
     
     @Override
@@ -309,10 +317,10 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     @Override
     public PaintingToolType getPaintingToolType(ItemStack itemStack) {
         switch (itemStack.getItemDamage()) {
-            case 0:
-            case 1:
+            case DAMAGE_BRUSH:
+            case DAMAGE_SMALLBRUSH:
                 return PaintingToolType.BRUSH;
-            case 2:
+            case DAMAGE_FILLER:
                 return PaintingToolType.FILLER;
         }
         return PaintingToolType.NONE;
