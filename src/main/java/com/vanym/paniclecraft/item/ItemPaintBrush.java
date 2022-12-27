@@ -84,7 +84,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     }
     
     @Override
-    public boolean isItemTool(ItemStack par1ItemStack) {
+    public boolean isItemTool(ItemStack stack) {
         return true;
     }
     
@@ -216,17 +216,11 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     }
     
     @Override
-    public int getColorFromItemStack(ItemStack par1ItemStack, int par2) {
-        if (par2 > 0) {
-            return 16777215;
+    public int getColorFromItemStack(ItemStack stack, int pass) {
+        if (pass == 0) {
+            return this.getColor(stack);
         } else {
-            int var3 = this.getColor(par1ItemStack);
-            
-            if (var3 < 0) {
-                var3 = 16777215;
-            }
-            
-            return var3;
+            return 0xffffff;
         }
     }
     
