@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
+import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -74,6 +75,12 @@ public class Picture {
                     this.update();
                 }
             }
+        } else if (toolType == PaintingToolType.COLORPICKER) {
+            if (!(item instanceof IColorizeable)) {
+                return false;
+            }
+            IColorizeable colorizeable = (IColorizeable)item;
+            colorizeable.setColor(itemStack, MainUtils.getAlphaless(this.getPixelColor(x, y)));
         }
         return false;
     }

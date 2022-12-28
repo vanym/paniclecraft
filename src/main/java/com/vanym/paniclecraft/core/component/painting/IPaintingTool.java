@@ -6,9 +6,20 @@ import net.minecraft.item.ItemStack;
 
 public interface IPaintingTool {
     public static enum PaintingToolType {
-        NONE,
-        BRUSH,
-        FILLER,
+        NONE(false),
+        BRUSH(true),
+        FILLER(false),
+        COLORPICKER(true);
+        
+        protected boolean pixelSelector;
+        
+        PaintingToolType(boolean pixelSelector) {
+            this.pixelSelector = pixelSelector;
+        }
+        
+        public boolean isPixelSelector() {
+            return this.pixelSelector;
+        }
     }
     
     public PaintingToolType getPaintingToolType(ItemStack itemStack);

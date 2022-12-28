@@ -46,6 +46,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     protected static final int DAMAGE_BRUSH = 0;
     protected static final int DAMAGE_SMALLBRUSH = 1;
     protected static final int DAMAGE_FILLER = 4;
+    protected static final int DAMAGE_COLORPICKER = 6;
     
     @SideOnly(Side.CLIENT)
     public IIcon iconBrushHead;
@@ -59,6 +60,10 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     public IIcon iconFillerHead;
     @SideOnly(Side.CLIENT)
     public IIcon iconFillerBody;
+    @SideOnly(Side.CLIENT)
+    public IIcon iconColorPickerHead;
+    @SideOnly(Side.CLIENT)
+    public IIcon iconColorPickerBody;
     
     @SideOnly(Side.CLIENT)
     protected Set<MessagePaintBrushUse> brushUseMessages = new HashSet<>();
@@ -81,6 +86,10 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     
     public ItemStack getFiller() {
         return new ItemStack(this, 1, DAMAGE_FILLER);
+    }
+    
+    public ItemStack getColorPicker() {
+        return new ItemStack(this, 1, DAMAGE_COLORPICKER);
     }
     
     @Override
@@ -240,6 +249,8 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
                 return (pass == 0 ? this.iconSmallBrushHead : this.iconSmallBrushBody);
             case DAMAGE_FILLER:
                 return (pass == 0 ? this.iconFillerHead : this.iconFillerBody);
+            case DAMAGE_COLORPICKER:
+                return (pass == 0 ? this.iconColorPickerHead : this.iconColorPickerBody);
         }
     }
     
@@ -254,6 +265,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
         list.add(brush.getBrush());
         list.add(brush.getSmallBrush());
         list.add(brush.getFiller());
+        list.add(brush.getColorPicker());
     }
     
     @Override
@@ -266,6 +278,8 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
         this.iconSmallBrushBody = iconRegister.registerIcon(PREFIX + "_smallbrush_body");
         this.iconFillerHead = iconRegister.registerIcon(PREFIX + "_filler_head");
         this.iconFillerBody = iconRegister.registerIcon(PREFIX + "_filler_body");
+        this.iconColorPickerHead = iconRegister.registerIcon(PREFIX + "_colorpicker_head");
+        this.iconColorPickerBody = iconRegister.registerIcon(PREFIX + "_colorpicker_body");
     }
     
     @Override
@@ -316,6 +330,9 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
                 return PaintingToolType.BRUSH;
             case DAMAGE_FILLER:
                 return PaintingToolType.FILLER;
+            case DAMAGE_COLORPICKER:
+                return PaintingToolType.COLORPICKER;
+            
         }
         return PaintingToolType.NONE;
     }
