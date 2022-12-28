@@ -358,9 +358,9 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
             row = 0;
         }
         switch (itemStack.getItemDamage()) {
-            case 0:
+            case DAMAGE_BRUSH:
                 return Core.instance.painting.config.getBrushRadius(row);
-            case 1:
+            case DAMAGE_SMALLBRUSH:
                 return Core.instance.painting.config.getSmallBrushRadius(row);
             default:
                 return 0.1D;
