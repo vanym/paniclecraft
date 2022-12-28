@@ -138,6 +138,16 @@ public class ModComponentPainting implements ModComponent {
                     Items.bowl);
             GameRegistry.addRecipe(recipe);
         }
+        if (config.getBoolean("craftingRecipeColorPicker", this.getName(), true, "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintBrush.getColorPicker(),
+                    false,
+                    " b",
+                    "b ",
+                    Character.valueOf('b'),
+                    Items.glass_bottle);
+            GameRegistry.addRecipe(recipe);
+        }
         if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
             RecipeColorizeByDye recipe = new RecipeColorizeByDye();
             GameRegistry.addRecipe(recipe);
