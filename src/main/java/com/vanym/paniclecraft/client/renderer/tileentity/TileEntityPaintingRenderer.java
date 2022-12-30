@@ -84,7 +84,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             render = this.renderBlocksWorldless;
         } else {
             render = this.renderBlocks;
-            if (Core.instance.painting.renderProfiling) {
+            if (Core.instance.painting.clientConfig.renderProfiling) {
                 theProfiler = world.theProfiler;
             }
         }

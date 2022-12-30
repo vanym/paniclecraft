@@ -35,6 +35,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -58,14 +59,20 @@ public class ModComponentPainting implements ModComponent {
     public ChangeableConfig config = new ChangeableConfig();
     
     @SideOnly(Side.CLIENT)
-    public TileEntityPaintingRenderer tilePaintingRenderer = new TileEntityPaintingRenderer();
+    protected TileEntityPaintingRenderer paintingTileRenderer;
     @SideOnly(Side.CLIENT)
-    public TileEntityPaintingFrameRenderer tilePaintingFrameRenderer =
-            new TileEntityPaintingFrameRenderer();
+    protected TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
     @SideOnly(Side.CLIENT)
-    public boolean specialBoundingBox = true;
+    protected PictureTextureCache textureCache;
     @SideOnly(Side.CLIENT)
-    public boolean renderProfiling = false;
+    protected ItemRendererPainting paintingItemRenderer;
+    @SideOnly(Side.CLIENT)
+    protected ItemRendererPaintingFrame paintingFrameItemRenderer;
+    @SideOnly(Side.CLIENT)
+    protected PaintingSpecialSelectionBox paintingSpecialSelectionBox = null;
+    
+    @SideOnly(Side.CLIENT)
+    public ChangeableClientConfig clientConfig = new ChangeableClientConfig();
     
     protected boolean enabled = false;
     
@@ -102,6 +109,11 @@ public class ModComponentPainting implements ModComponent {
                                               Side.SERVER);
         this.initRecipe(config);
         this.config = new ChangeableConfig().read(config);
+    }
+    
+    @Override
+    public void configChanged(Configuration config) {
+        this.config.read(config);
     }
     
     protected void initRecipe(Configuration config) {
@@ -219,60 +231,64 @@ public class ModComponentPainting implements ModComponent {
             return;
         }
         
-        boolean perFrameBrushUse = config.getBoolean("perFrameBrushUse", this.getName(), true, "");
-        if (perFrameBrushUse && this.itemPaintBrush != null) {
+        this.textureCache = new PictureTextureCache();
+        this.paintingTileRenderer = new TileEntityPaintingRenderer();
+        this.paintingItemRenderer =
+                new ItemRendererPainting(this.textureCache, this.paintingTileRenderer);
+        this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
+        this.paintingFrameItemRenderer =
+                new ItemRendererPaintingFrame(this.textureCache, this.paintingFrameTileRenderer);
+        
+        MinecraftForgeClient.registerItemRenderer(this.itemPainting, this.paintingItemRenderer);
+        MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
+                                                  this.paintingFrameItemRenderer);
+        MinecraftForge.EVENT_BUS.register(this.textureCache);
+        
+        this.clientConfig = new ChangeableClientConfig().read(config);
+        this.applyConfigClient();
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void configChangedClient(Configuration config) {
+        this.clientConfig.read(config);
+        this.applyConfigClient();
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected void applyConfigClient() {
+        if (this.clientConfig.perFrameBrushUse) {
             MinecraftForge.EVENT_BUS.register(this.itemPaintBrush);
+        } else {
+            MinecraftForge.EVENT_BUS.unregister(this.itemPaintBrush);
         }
         
-        PictureTextureCache textureCache = null;
-        boolean paintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
-        if (paintingTile) {
+        if (this.clientConfig.renderPaintingTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPainting.class,
-                                                         this.tilePaintingRenderer);
+                                                         this.paintingTileRenderer);
+        } else {
+            TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(TileEntityPainting.class,
+                                                                             this.paintingTileRenderer);
         }
-        boolean paintingItem = config.getBoolean("paintingItem", CLIENT_RENDER, true, "");
-        if (paintingItem) {
-            if (textureCache == null) {
-                textureCache = new PictureTextureCache();
-            }
-            ItemRendererPainting paintingItemRenderer = new ItemRendererPainting(textureCache);
-            MinecraftForgeClient.registerItemRenderer(this.itemPainting, paintingItemRenderer);
-        }
-        boolean paintingFrameTile = config.getBoolean("paintingFrameTile", CLIENT_RENDER, true, "");
-        if (paintingFrameTile) {
+        
+        if (this.clientConfig.renderPaintingFrameTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPaintingFrame.class,
-                                                         this.tilePaintingFrameRenderer);
+                                                         this.paintingFrameTileRenderer);
+        } else {
+            TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(TileEntityPaintingFrame.class,
+                                                                             this.paintingFrameTileRenderer);
         }
-        boolean paintingFrameItem = config.getBoolean("paintingFrameItem", CLIENT_RENDER, true, "");
-        if (paintingFrameItem) {
-            if (textureCache == null) {
-                textureCache = new PictureTextureCache();
-            }
-            MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
-                                                      new ItemRendererPaintingFrame(textureCache));
+        
+        if (this.paintingSpecialSelectionBox != null) {
+            MinecraftForge.EVENT_BUS.unregister(this.paintingSpecialSelectionBox);
+            this.paintingSpecialSelectionBox = null;
         }
-        this.renderProfiling =
-                config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
-        if (textureCache != null) {
-            MinecraftForge.EVENT_BUS.register(textureCache);
-        }
-        boolean paintingSpecialSelectionBox =
-                config.getBoolean("paintingSpecialSelectionBox", CLIENT_RENDER, true, "");
-        String paintingSpecialSelectionBoxColorString =
-                config.getString("paintingSpecialSelectionBoxColor", CLIENT_RENDER, "",
-                                 "Color of selection box. Example: #ff0000");
-        Color paintingSpecialSelectionBoxColor;
-        try {
-            paintingSpecialSelectionBoxColor = Color.decode(paintingSpecialSelectionBoxColorString);
-        } catch (NumberFormatException e) {
-            paintingSpecialSelectionBoxColor = null;
-        }
-        boolean paintingNoneSelectionBox =
-                config.getBoolean("paintingNoneSelectionBox", CLIENT_RENDER, false, "");
-        if (paintingSpecialSelectionBox || paintingNoneSelectionBox) {
-            MinecraftForge.EVENT_BUS.register(new PaintingSpecialSelectionBox(
-                    paintingNoneSelectionBox,
-                    paintingSpecialSelectionBoxColor));
+        if (this.clientConfig.paintingSpecialSelectionBox
+            || this.clientConfig.paintingNoneSelectionBox) {
+            this.paintingSpecialSelectionBox = new PaintingSpecialSelectionBox(
+                    this.clientConfig.paintingNoneSelectionBox,
+                    this.clientConfig.paintingSpecialSelectionBoxColor);
+            MinecraftForge.EVENT_BUS.register(this.paintingSpecialSelectionBox);
         }
     }
     
@@ -341,6 +357,51 @@ public class ModComponentPainting implements ModComponent {
         
         public double getSmallBrushRadius(int row) {
             return getRadius(row, this.smallBrushRadiuses);
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public class ChangeableClientConfig {
+        public boolean perFrameBrushUse = true;
+        
+        public boolean renderPaintingTile = true;
+        public boolean renderPaintingItem = true;
+        public boolean renderPaintingFrameTile = true;
+        public boolean renderPaintingFrameItem = true;
+        public boolean renderProfiling = false;
+        public boolean paintingSpecialSelectionBox = true;
+        public Color paintingSpecialSelectionBoxColor = null;
+        public boolean paintingNoneSelectionBox = false;
+        
+        public ChangeableClientConfig() {}
+        
+        public ChangeableClientConfig read(Configuration config) {
+            this.perFrameBrushUse =
+                    config.getBoolean("perFrameBrushUse", ModComponentPainting.this.getName(),
+                                      true, "");
+            
+            this.renderPaintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
+            this.renderPaintingItem = config.getBoolean("paintingItem", CLIENT_RENDER, true, "");
+            this.renderPaintingFrameTile =
+                    config.getBoolean("paintingFrameTile", CLIENT_RENDER, true, "");
+            this.renderPaintingFrameItem =
+                    config.getBoolean("paintingFrameItem", CLIENT_RENDER, true, "");
+            this.renderProfiling =
+                    config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
+            this.paintingSpecialSelectionBox =
+                    config.getBoolean("paintingSpecialSelectionBox", CLIENT_RENDER, true, "");
+            String paintingSpecialSelectionBoxColorString =
+                    config.getString("paintingSpecialSelectionBoxColor", CLIENT_RENDER, "",
+                                     "Color of selection box. Example: #00ff00");
+            try {
+                this.paintingSpecialSelectionBoxColor =
+                        Color.decode(paintingSpecialSelectionBoxColorString);
+            } catch (NumberFormatException e) {
+                this.paintingSpecialSelectionBoxColor = null;
+            }
+            this.paintingNoneSelectionBox =
+                    config.getBoolean("paintingNoneSelectionBox", CLIENT_RENDER, false, "");
+            return this;
         }
     }
     

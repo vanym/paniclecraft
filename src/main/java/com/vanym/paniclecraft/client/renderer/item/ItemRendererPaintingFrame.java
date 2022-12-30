@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
+import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
@@ -20,12 +21,19 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
     
     protected PictureTextureCache textureCache;
     
-    public ItemRendererPaintingFrame(PictureTextureCache textureCache) {
+    protected TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
+    
+    public ItemRendererPaintingFrame(PictureTextureCache textureCache,
+            TileEntityPaintingFrameRenderer paintingFrameTileRenderer) {
         this.textureCache = textureCache;
+        this.paintingFrameTileRenderer = paintingFrameTileRenderer;
     }
     
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        if (!Core.instance.painting.clientConfig.renderPaintingFrameItem) {
+            return false;
+        }
         return true;
     }
     
@@ -85,7 +93,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             default:
             break;
         }
-        Core.instance.painting.tilePaintingFrameRenderer.renderTileEntityAtItem(tilePF);
+        this.paintingFrameTileRenderer.renderTileEntityAtItem(tilePF);
         for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
             Picture picture = tilePF.getPainting(i);
             if (picture == null || obtainedTextures[i] >= 0) {

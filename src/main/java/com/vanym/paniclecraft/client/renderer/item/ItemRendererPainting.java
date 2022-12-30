@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
+import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
@@ -21,12 +22,19 @@ public class ItemRendererPainting implements IItemRenderer {
     
     protected PictureTextureCache textureCache;
     
-    public ItemRendererPainting(PictureTextureCache textureCache) {
+    protected TileEntityPaintingRenderer paintingTileRenderer;
+    
+    public ItemRendererPainting(PictureTextureCache textureCache,
+            TileEntityPaintingRenderer paintingTileRenderer) {
         this.textureCache = textureCache;
+        this.paintingTileRenderer = paintingTileRenderer;
     }
     
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        if (!Core.instance.painting.clientConfig.renderPaintingItem) {
+            return false;
+        }
         return true;
     }
     
@@ -87,7 +95,7 @@ public class ItemRendererPainting implements IItemRenderer {
             default:
             break;
         }
-        Core.instance.painting.tilePaintingRenderer.renderTileEntityAtItem(tilePainting);
+        this.paintingTileRenderer.renderTileEntityAtItem(tilePainting);
         if (obtainedTexture < 0) {
             this.textureCache.putTexture(nbtImageTag, picture.texture);
         }
