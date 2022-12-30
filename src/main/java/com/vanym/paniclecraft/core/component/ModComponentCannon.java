@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.core.component;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockCannon;
+import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererCannon;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityCannonRenderer;
 import com.vanym.paniclecraft.item.ItemCannon;
@@ -16,7 +17,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class ModComponentCannon implements ModComponent {
@@ -30,7 +30,7 @@ public class ModComponentCannon implements ModComponent {
     protected boolean enabled = false;
     
     @Override
-    public void preInit(Configuration config) {
+    public void preInit(ModConfig config) {
         if (!config.getBoolean(ENABLE_FLAG, this.getName(), true, "")) {
             return;
         }
@@ -63,7 +63,7 @@ public class ModComponentCannon implements ModComponent {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void initClient(Configuration config) {
+    public void initClient(ModConfig config) {
         if (!this.isEnabled()) {
             return;
         }

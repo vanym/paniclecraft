@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
+import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
@@ -77,7 +78,7 @@ public class ModComponentPainting implements ModComponent {
     protected boolean enabled = false;
     
     @Override
-    public void preInit(Configuration config) {
+    public void preInit(ModConfig config) {
         if (!config.getBoolean(ENABLE_FLAG, this.getName(), true, "")) {
             return;
         }
@@ -112,7 +113,7 @@ public class ModComponentPainting implements ModComponent {
     }
     
     @Override
-    public void configChanged(Configuration config) {
+    public void configChanged(ModConfig config) {
         this.config.read(config);
     }
     
@@ -222,11 +223,11 @@ public class ModComponentPainting implements ModComponent {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void preInitClient(Configuration config) {}
+    public void preInitClient(ModConfig config) {}
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void initClient(Configuration config) {
+    public void initClient(ModConfig config) {
         if (!this.isEnabled()) {
             return;
         }
@@ -250,7 +251,7 @@ public class ModComponentPainting implements ModComponent {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void configChangedClient(Configuration config) {
+    public void configChangedClient(ModConfig config) {
         this.clientConfig.read(config);
         this.applyConfigClient();
     }
@@ -317,7 +318,8 @@ public class ModComponentPainting implements ModComponent {
             this.smallBrushRadiuses.put(0, 0.1D);
         }
         
-        public ChangeableConfig read(Configuration config) {
+        public ChangeableConfig read(ModConfig config) {
+            config.restartless();
             this.paintingPlaceStack =
                     config.getInt("paintingPlaceStack", ModComponentPainting.this.getName(),
                                   2, 0, 64, "");
@@ -348,6 +350,7 @@ public class ModComponentPainting implements ModComponent {
                 this.smallBrushRadiuses.clear();
                 parseRadiuses(lines, this.smallBrushRadiuses);
             }
+            config.restartlessReset();
             return this;
         }
         
@@ -375,7 +378,8 @@ public class ModComponentPainting implements ModComponent {
         
         public ChangeableClientConfig() {}
         
-        public ChangeableClientConfig read(Configuration config) {
+        public ChangeableClientConfig read(ModConfig config) {
+            config.restartless();
             this.perFrameBrushUse =
                     config.getBoolean("perFrameBrushUse", ModComponentPainting.this.getName(),
                                       true, "");
@@ -401,6 +405,7 @@ public class ModComponentPainting implements ModComponent {
             }
             this.paintingNoneSelectionBox =
                     config.getBoolean("paintingNoneSelectionBox", CLIENT_RENDER, false, "");
+            config.restartlessReset();
             return this;
         }
     }

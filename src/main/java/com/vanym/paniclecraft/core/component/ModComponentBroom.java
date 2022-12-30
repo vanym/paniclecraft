@@ -1,11 +1,11 @@
 package com.vanym.paniclecraft.core.component;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.item.ItemBroom;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.init.Items;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class ModComponentBroom implements ModComponent {
@@ -15,7 +15,7 @@ public class ModComponentBroom implements ModComponent {
     protected boolean enabled = false;
     
     @Override
-    public void preInit(Configuration config) {
+    public void preInit(ModConfig config) {
         if (!config.getBoolean(ENABLE_FLAG, this.getName(), true, "")) {
             return;
         }

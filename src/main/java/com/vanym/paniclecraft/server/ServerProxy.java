@@ -1,24 +1,24 @@
 package com.vanym.paniclecraft.server;
 
+import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.core.CommonProxy;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraftforge.common.config.Configuration;
 
 @SideOnly(Side.SERVER)
 public class ServerProxy extends CommonProxy {
     
     @Override
-    public void preInit(Configuration config) {}
+    public void preInit(ModConfig config) {}
     
     @Override
-    public void init(Configuration config) {}
+    public void init(ModConfig config) {}
     
     @Override
-    public void postInit(Configuration config) {}
+    public void postInit(ModConfig config) {}
     
     @Override
-    public void configChanged(Configuration config) {}
+    public void configChanged(ModConfig config) {}
     
 }

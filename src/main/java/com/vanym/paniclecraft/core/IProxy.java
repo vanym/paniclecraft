@@ -1,13 +1,13 @@
 package com.vanym.paniclecraft.core;
 
-import net.minecraftforge.common.config.Configuration;
+import com.vanym.paniclecraft.client.ModConfig;
 
 public interface IProxy {
-    public void preInit(Configuration config);
+    public void preInit(ModConfig config);
     
-    public void init(Configuration config);
+    public void init(ModConfig config);
     
-    public void postInit(Configuration config);
+    public void postInit(ModConfig config);
     
-    public void configChanged(Configuration config);
+    public void configChanged(ModConfig config);
 }

@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.core.component;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPortableWorkbench;
 import com.vanym.paniclecraft.item.ItemWorkbench;
 
@@ -9,7 +10,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class ModComponentPortableWorkbench implements ModComponent {
@@ -19,7 +19,7 @@ public class ModComponentPortableWorkbench implements ModComponent {
     protected boolean enabled = false;
     
     @Override
-    public void preInit(Configuration config) {
+    public void preInit(ModConfig config) {
         if (!config.getBoolean(ENABLE_FLAG, this.getName(), true, "")) {
             return;
         }
@@ -46,7 +46,7 @@ public class ModComponentPortableWorkbench implements ModComponent {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void initClient(Configuration config) {
+    public void initClient(ModConfig config) {
         if (!this.isEnabled()) {
             return;
         }

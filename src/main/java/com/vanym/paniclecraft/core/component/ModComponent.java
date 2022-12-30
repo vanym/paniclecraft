@@ -1,8 +1,9 @@
 package com.vanym.paniclecraft.core.component;
 
+import com.vanym.paniclecraft.client.ModConfig;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraftforge.common.config.Configuration;
 
 public interface ModComponent {
     
@@ -11,20 +12,20 @@ public interface ModComponent {
     @SideOnly(Side.CLIENT)
     public static final String CLIENT_RENDER = "clientRender";
     
-    public void preInit(Configuration config);
+    public void preInit(ModConfig config);
     
-    default public void init(Configuration config) {}
+    default public void init(ModConfig config) {}
     
-    default public void configChanged(Configuration config) {}
-    
-    @SideOnly(Side.CLIENT)
-    default public void preInitClient(Configuration config) {}
+    default public void configChanged(ModConfig config) {}
     
     @SideOnly(Side.CLIENT)
-    default public void initClient(Configuration config) {}
+    default public void preInitClient(ModConfig config) {}
     
     @SideOnly(Side.CLIENT)
-    default public void configChangedClient(Configuration config) {}
+    default public void initClient(ModConfig config) {}
+    
+    @SideOnly(Side.CLIENT)
+    default public void configChangedClient(ModConfig config) {}
     
     public String getName();
     
