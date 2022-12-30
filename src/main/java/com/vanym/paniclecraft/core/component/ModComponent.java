@@ -15,11 +15,16 @@ public interface ModComponent {
     
     default public void init(Configuration config) {}
     
+    default public void configChanged(Configuration config) {}
+    
     @SideOnly(Side.CLIENT)
     default public void preInitClient(Configuration config) {}
     
     @SideOnly(Side.CLIENT)
     default public void initClient(Configuration config) {}
+    
+    @SideOnly(Side.CLIENT)
+    default public void configChangedClient(Configuration config) {}
     
     public String getName();
     

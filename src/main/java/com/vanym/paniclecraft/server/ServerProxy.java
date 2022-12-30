@@ -18,4 +18,7 @@ public class ServerProxy extends CommonProxy {
     @Override
     public void postInit(Configuration config) {}
     
+    @Override
+    public void configChanged(Configuration config) {}
+    
 }

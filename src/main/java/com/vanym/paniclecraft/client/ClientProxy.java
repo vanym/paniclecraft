@@ -32,6 +32,13 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void postInit(Configuration config) {}
     
+    @Override
+    public void configChanged(Configuration config) {
+        for (ModComponent component : Core.instance.getComponents()) {
+            component.configChangedClient(config);
+        }
+    }
+    
     public static void deleteTexture(int texID) {
         GL11.glDeleteTextures(texID);
         // System.out.println(texID);

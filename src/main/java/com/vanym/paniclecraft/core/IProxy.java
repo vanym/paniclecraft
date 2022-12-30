@@ -8,4 +8,6 @@ public interface IProxy {
     public void init(Configuration config);
     
     public void postInit(Configuration config);
+    
+    public void configChanged(Configuration config);
 }

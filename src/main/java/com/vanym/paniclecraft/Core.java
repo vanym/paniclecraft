@@ -15,6 +15,8 @@ import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.item.ItemMod3;
 
+import cpw.mods.fml.client.event.ConfigChangedEvent;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -24,12 +26,17 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraftforge.common.config.Configuration;
 
-@Mod(modid = DEF.MOD_ID, name = DEF.MOD_NAME, version = DEF.VERSION)
+@Mod(
+    modid = DEF.MOD_ID,
+    name = DEF.MOD_NAME,
+    version = DEF.VERSION,
+    guiFactory = "com.vanym.paniclecraft.client.gui.config.GuiModConfigFactory")
 public class Core {
     
     @Instance(DEF.MOD_ID)
@@ -51,7 +58,7 @@ public class Core {
     
     public CreativeTabMod3 tab;
     
-    protected Configuration config;
+    public Configuration config;
     
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
@@ -75,6 +82,8 @@ public class Core {
         
         this.config = new Configuration(event.getSuggestedConfigurationFile());
         
+        FMLCommonHandler.instance().bus().register(this);
+        
         if (this.config.getBoolean("creativeTab", "general", true, "")) {
             this.tab = new CreativeTabMod3(DEF.MOD_ID);
         }
@@ -91,15 +100,29 @@ public class Core {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new GuiHandler());
-        proxy.init(this.config);
         for (ModComponent component : Core.instance.getComponents()) {
             component.init(this.config);
         }
+        proxy.init(this.config);
     }
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(this.config);
+        if (this.config.hasChanged()) {
+            this.config.save();
+        }
+    }
+    
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
+        if (!event.modID.equals(DEF.MOD_ID)) {
+            return;
+        }
+        for (ModComponent component : Core.instance.getComponents()) {
+            component.configChanged(this.config);
+        }
+        proxy.configChanged(this.config);
         if (this.config.hasChanged()) {
             this.config.save();
         }
