@@ -234,11 +234,9 @@ public class ModComponentPainting implements ModComponent {
         
         this.textureCache = new PictureTextureCache();
         this.paintingTileRenderer = new TileEntityPaintingRenderer();
-        this.paintingItemRenderer =
-                new ItemRendererPainting(this.textureCache, this.paintingTileRenderer);
+        this.paintingItemRenderer = new ItemRendererPainting(this.textureCache);
         this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
-        this.paintingFrameItemRenderer =
-                new ItemRendererPaintingFrame(this.textureCache, this.paintingFrameTileRenderer);
+        this.paintingFrameItemRenderer = new ItemRendererPaintingFrame(this.textureCache);
         
         MinecraftForgeClient.registerItemRenderer(this.itemPainting, this.paintingItemRenderer);
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
@@ -264,6 +262,10 @@ public class ModComponentPainting implements ModComponent {
             MinecraftForge.EVENT_BUS.unregister(this.itemPaintBrush);
         }
         
+        this.paintingTileRenderer.renderFrameType =
+                this.clientConfig.renderPaintingTilePartFrameType;
+        this.paintingTileRenderer.renderPictureType =
+                this.clientConfig.renderPaintingTilePartPictureType;
         if (this.clientConfig.renderPaintingTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPainting.class,
                                                          this.paintingTileRenderer);
@@ -272,6 +274,10 @@ public class ModComponentPainting implements ModComponent {
                                                                              this.paintingTileRenderer);
         }
         
+        this.paintingFrameTileRenderer.renderFrameType =
+                this.clientConfig.renderPaintingFrameTilePartFrameType;
+        this.paintingFrameTileRenderer.renderPictureType =
+                this.clientConfig.renderPaintingFrameTilePartPictureType;
         if (this.clientConfig.renderPaintingFrameTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPaintingFrame.class,
                                                          this.paintingFrameTileRenderer);
@@ -369,8 +375,12 @@ public class ModComponentPainting implements ModComponent {
         
         public boolean renderPaintingTile = true;
         public boolean renderPaintingItem = true;
+        public int renderPaintingTilePartFrameType = 1;
+        public int renderPaintingTilePartPictureType = 2;
         public boolean renderPaintingFrameTile = true;
         public boolean renderPaintingFrameItem = true;
+        public int renderPaintingFrameTilePartFrameType = 0;
+        public int renderPaintingFrameTilePartPictureType = 2;
         public boolean renderProfiling = false;
         public boolean paintingSpecialSelectionBox = true;
         public Color paintingSpecialSelectionBoxColor = null;
@@ -386,10 +396,18 @@ public class ModComponentPainting implements ModComponent {
             
             this.renderPaintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
             this.renderPaintingItem = config.getBoolean("paintingItem", CLIENT_RENDER, true, "");
+            this.renderPaintingTilePartFrameType =
+                    config.getInt("paintingTilePartFrameType", CLIENT_RENDER, 1, -1, 2, "");
+            this.renderPaintingTilePartPictureType =
+                    config.getInt("paintingTilePartPictureType", CLIENT_RENDER, 2, -1, 2, "");
             this.renderPaintingFrameTile =
                     config.getBoolean("paintingFrameTile", CLIENT_RENDER, true, "");
             this.renderPaintingFrameItem =
                     config.getBoolean("paintingFrameItem", CLIENT_RENDER, true, "");
+            this.renderPaintingFrameTilePartFrameType =
+                    config.getInt("paintingFrameTilePartFrameType", CLIENT_RENDER, 0, -1, 2, "");
+            this.renderPaintingFrameTilePartPictureType =
+                    config.getInt("paintingFrameTilePartPictureType", CLIENT_RENDER, 2, -1, 2, "");
             this.renderProfiling =
                     config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
             this.paintingSpecialSelectionBox =

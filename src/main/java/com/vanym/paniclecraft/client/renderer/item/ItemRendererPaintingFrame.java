@@ -11,6 +11,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -19,14 +20,14 @@ import net.minecraftforge.client.IItemRenderer;
 @SideOnly(Side.CLIENT)
 public class ItemRendererPaintingFrame implements IItemRenderer {
     
+    public final TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
+    
     protected PictureTextureCache textureCache;
     
-    protected TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
-    
-    public ItemRendererPaintingFrame(PictureTextureCache textureCache,
-            TileEntityPaintingFrameRenderer paintingFrameTileRenderer) {
+    public ItemRendererPaintingFrame(PictureTextureCache textureCache) {
         this.textureCache = textureCache;
-        this.paintingFrameTileRenderer = paintingFrameTileRenderer;
+        this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
+        this.paintingFrameTileRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
     }
     
     @Override

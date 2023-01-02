@@ -9,6 +9,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
+import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
 import com.vanym.paniclecraft.client.utils.IconFlippedBugFixed;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
@@ -17,7 +18,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -31,13 +31,16 @@ import net.minecraft.world.World;
 @SideOnly(Side.CLIENT)
 public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     
+    public int renderFrameType = 1;
+    public int renderPictureType = 2;
+    
     protected final RenderBlocksWorldless renderBlocksWorldless = new RenderBlocksWorldless();
     
-    protected RenderBlocks renderBlocks;
+    protected RenderBlocksPainting renderBlocks;
     
     @Override
     public void func_147496_a(World world) {
-        this.renderBlocks = new RenderBlocks(world);
+        this.renderBlocks = new RenderBlocksPainting(world);
     }
     
     @Override
@@ -78,7 +81,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         World world = tile.getWorldObj();
         int meta = tile.getBlockMetadata();
         Profiler theProfiler = null;
-        RenderBlocks render;
+        RenderBlocksPainting render;
         if (world == null) {
             this.renderBlocksWorldless.setMeta(meta);
             render = this.renderBlocksWorldless;
@@ -90,43 +93,57 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         }
         if (theProfiler != null) {
             theProfiler.startSection(DEF.MOD_ID + ":" + TileEntityPainting.IN_MOD_ID);
-            theProfiler.startSection("frame");
         }
-        this.bindTexture(TextureMap.locationBlocksTexture);
         Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
         render.setRenderAllFaces(false);
         tessellator.setTranslation(x - tile.xCoord, y - tile.yCoord, z - tile.zCoord);
         tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
         BlockPainting block = (BlockPainting)tile.getBlockType();
-        block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAME);
         AxisAlignedBB box = block.getBlockBoundsBasedOnState(meta);
         render.overrideBlockBounds(box.minX, box.minY, box.minZ,
                                    box.maxX, box.maxY, box.maxZ);
         block.setRendererBox(box);
-        render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
-        tessellator.draw();
-        Picture picture = tile.getPainting(meta);
-        if (theProfiler != null) {
-            theProfiler.endStartSection("painting"); // frame
-            theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
-            theProfiler.startSection("bind");
+        if (this.renderFrameType >= 0) {
+            if (theProfiler != null) {
+                theProfiler.startSection("frame");
+            }
+            tessellator.startDrawingQuads();
+            this.bindTexture(TextureMap.locationBlocksTexture);
+            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAME);
+            render.setMaxAmbientOcclusion(this.renderFrameType);
+            render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
+            tessellator.draw();
+            if (theProfiler != null) {
+                theProfiler.endSection(); // frame
+            }
         }
-        IIcon icon = bindTexture(picture, meta);
-        if (theProfiler != null) {
-            theProfiler.endSection(); // bind
+        if (this.renderPictureType >= 0) {
+            Picture picture = tile.getPainting(meta);
+            if (theProfiler != null) {
+                theProfiler.startSection("painting");
+                theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
+                theProfiler.startSection("bind");
+            }
+            IIcon icon = bindTexture(picture, meta);
+            if (theProfiler != null) {
+                theProfiler.endSection(); // bind
+            }
+            render.setOverrideBlockTexture(icon);
+            tessellator.startDrawingQuads();
+            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
+            render.setMaxAmbientOcclusion(this.renderPictureType);
+            render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
+            tessellator.draw();
+            render.clearOverrideBlockTexture();
+            if (theProfiler != null) {
+                theProfiler.endSection(); // WxH
+                theProfiler.endSection(); // painting
+            }
         }
-        render.setOverrideBlockTexture(icon);
-        tessellator.startDrawingQuads();
-        block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
-        render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
+        render.resetMaxAmbientOcclusion();
         block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.NONE);
-        render.clearOverrideBlockTexture();
-        tessellator.draw();
         tessellator.setTranslation(0, 0, 0);
         if (theProfiler != null) {
-            theProfiler.endSection(); // WxH
-            theProfiler.endSection(); // painting
             theProfiler.endSection(); // root
         }
     }
@@ -185,7 +202,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         // @formatter:on
     }
     
-    protected static class RenderBlocksWorldless extends RenderBlocks {
+    protected static class RenderBlocksWorldless extends RenderBlocksPainting {
         
         protected int meta;
         protected TileEntity tile;
