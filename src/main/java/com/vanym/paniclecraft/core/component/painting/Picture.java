@@ -29,6 +29,8 @@ public class Picture {
     
     protected boolean editable = true;
     
+    protected boolean hasAlpha = false;
+    
     protected Image image;
     
     protected byte[] packed;
@@ -41,7 +43,12 @@ public class Picture {
     public boolean imageChangeProcessed = false;
     
     public Picture(IPictureHolder holder) {
+        this(holder, false);
+    }
+    
+    public Picture(IPictureHolder holder, boolean hasAlpha) {
         this.holder = holder;
+        this.hasAlpha = hasAlpha;
         this.setDefaultSize();
     }
     
@@ -188,6 +195,10 @@ public class Picture {
         return this.image;
     }
     
+    public boolean hasAlpha() {
+        return this.hasAlpha;
+    }
+    
     public int getWidth() {
         if (this.image != null) {
             return this.image.getWidth();
@@ -209,7 +220,7 @@ public class Picture {
     }
     
     protected int getSize() {
-        return this.getWidth() * this.getHeight() * Image.PIXEL_SIZE;
+        return this.getWidth() * this.getHeight() * Image.getPixelSize(this.hasAlpha);
     }
     
     @SideOnly(Side.CLIENT)
@@ -228,7 +239,7 @@ public class Picture {
         }
         ByteArrayInputStream in = new ByteArrayInputStream(this.packed);
         try {
-            ByteBuffer buffer = ImageUtils.readImageToDirectByteBuffer(in);
+            ByteBuffer buffer = ImageUtils.readImageToDirectByteBuffer(in, this.hasAlpha);
             if (buffer.capacity() != this.getSize()) {
                 return null;
             }
@@ -247,7 +258,7 @@ public class Picture {
             return false;
         }
         ByteArrayInputStream in = new ByteArrayInputStream(this.packed);
-        Image image = ImageUtils.readImage(in);
+        Image image = ImageUtils.readImage(in, this.hasAlpha);
         if (image != null && this.packedWidth == image.getWidth()
             && this.packedHeight == image.getHeight()) {
             this.image = image;
@@ -290,8 +301,10 @@ public class Picture {
     }
     
     protected void setSize(int width, int height) {
-        this.image = new Image(width, height);
-        this.image.fill(Core.instance.painting.DEFAULT_COLOR);
+        this.image = new Image(width, height, this.hasAlpha);
+        if (!this.hasAlpha) {
+            this.image.fill(Core.instance.painting.DEFAULT_COLOR);
+        }
         this.packed = null;
     }
     
@@ -386,7 +399,7 @@ public class Picture {
                 this.imageChanged();
             } else {
                 ByteArrayInputStream in = new ByteArrayInputStream(packed);
-                Image image = ImageUtils.readImage(in);
+                Image image = ImageUtils.readImage(in, this.hasAlpha);
                 if (image != null) {
                     this.image = image;
                     this.packed = packed;
@@ -398,7 +411,7 @@ public class Picture {
         } else if (width > 0 && height > 0) {
             this.packed = null;
             if (raw != null) {
-                this.image = new Image(width, height, raw);
+                this.image = new Image(width, height, raw, this.hasAlpha);
             } else {
                 this.setSize(width, height);
             }

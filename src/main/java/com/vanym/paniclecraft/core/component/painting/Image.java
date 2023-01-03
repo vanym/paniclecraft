@@ -5,19 +5,19 @@ import java.util.Arrays;
 
 public class Image {
     
-    public final static int PIXEL_SIZE = 3;
-    
     protected int width;
     protected int height;
     protected final byte[] data;
+    protected final boolean hasAlpha;
     
-    public Image(int width, int height) {
-        this(width, height, null);
+    public Image(int width, int height, boolean hasAlpha) {
+        this(width, height, null, hasAlpha);
     }
     
-    public Image(int width, int height, byte[] data) {
+    public Image(int width, int height, byte[] data, boolean hasAlpha) {
         this.width = width;
         this.height = height;
+        this.hasAlpha = hasAlpha;
         if (data == null) {
             this.data = new byte[this.getSize()];
         } else if (data.length != this.getSize()) {
@@ -27,12 +27,20 @@ public class Image {
         }
     }
     
+    protected int getPixelSize() {
+        return getPixelSize(this.hasAlpha);
+    }
+    
     protected int getSize() {
-        return this.width * this.height * PIXEL_SIZE;
+        return this.width * this.height * this.getPixelSize();
     }
     
     public boolean isSameSize(Image image) {
         return (this.width == image.width) && (this.height == image.height);
+    }
+    
+    public boolean hasAlpha() {
+        return this.hasAlpha;
     }
     
     public int getWidth() {
@@ -52,7 +60,7 @@ public class Image {
     }
     
     public boolean setPixelColor(int px, int py, Color color) {
-        int offset = (py * this.width + px) * PIXEL_SIZE;
+        int offset = (py * this.width + px) * this.getPixelSize();
         int offsetR = offset;
         int offsetG = offset + 1;
         int offsetB = offset + 2;
@@ -72,26 +80,42 @@ public class Image {
             this.data[offsetB] = b;
             changed = true;
         }
+        if (this.hasAlpha) {
+            int offsetA = offset + 3;
+            byte a = (byte)color.getAlpha();
+            if (this.data[offsetA] != a) {
+                this.data[offsetA] = a;
+                changed = true;
+            }
+        }
         return changed;
     }
     
     public Color getPixelColor(int px, int py) {
-        int offset = (py * this.width + px) * PIXEL_SIZE;
+        int offset = (py * this.width + px) * this.getPixelSize();
         int offsetR = offset;
         int offsetG = offset + 1;
         int offsetB = offset + 2;
         int r = (int)this.data[offsetR] & 0xFF;
         int g = (int)this.data[offsetG] & 0xFF;
         int b = (int)this.data[offsetB] & 0xFF;
-        return new Color(r, g, b);
+        int a;
+        if (this.hasAlpha) {
+            int offsetA = offset + 3;
+            a = (int)this.data[offsetA] & 0xFF;
+        } else {
+            a = 255;
+        }
+        return new Color(r, g, b, a);
     }
     
     public boolean fill(Color color) {
         byte r = (byte)color.getRed();
         byte g = (byte)color.getGreen();
         byte b = (byte)color.getBlue();
+        byte a = (byte)color.getAlpha();
         boolean changed = false;
-        for (int i = 0; i < this.data.length; i += PIXEL_SIZE) {
+        for (int i = 0; i < this.data.length; i += this.getPixelSize()) {
             int iR = i;
             int iG = i + 1;
             int iB = i + 2;
@@ -107,23 +131,30 @@ public class Image {
                 this.data[iB] = b;
                 changed = true;
             }
+            if (this.hasAlpha) {
+                int iA = i + 3;
+                if (this.data[iA] != a) {
+                    this.data[iA] = a;
+                    changed = true;
+                }
+            }
         }
         return changed;
     }
     
     protected void transpose() {
-        MatrixUtils.transpose(this.data, this.width, PIXEL_SIZE);
+        MatrixUtils.transpose(this.data, this.width, this.getPixelSize());
         int t = this.width;
         this.width = this.height;
         this.height = t;
     }
     
     protected void flipH() {
-        MatrixUtils.flipH(this.data, this.width, PIXEL_SIZE);
+        MatrixUtils.flipH(this.data, this.width, this.getPixelSize());
     }
     
     protected void flipV() {
-        MatrixUtils.flipV(this.data, this.width, PIXEL_SIZE);
+        MatrixUtils.flipV(this.data, this.width, this.getPixelSize());
     }
     
     public void rotate90() {
@@ -133,12 +164,16 @@ public class Image {
     }
     
     public void rotate180() {
-        MatrixUtils.rotate180(this.data, PIXEL_SIZE);
+        MatrixUtils.rotate180(this.data, this.getPixelSize());
     }
     
     public void rotate270() {
         // Clockwise
         this.transpose();
         this.flipV();
+    }
+    
+    public static int getPixelSize(boolean hasAlpha) {
+        return hasAlpha ? 4 : 3;
     }
 }

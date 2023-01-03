@@ -20,21 +20,40 @@ import java.nio.ByteOrder;
 import javax.imageio.ImageIO;
 
 public class ImageUtils {
-    protected static final ColorModel COLOR_MODEL =
+    
+    protected static final ColorModel COLOR_MODEL_ALPHAFUL =
             new ComponentColorModel(
                     ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    new int[]{8, 8, 8},
+                    true,
+                    false,
+                    Transparency.TRANSLUCENT,
+                    DataBuffer.TYPE_BYTE);
+    
+    protected static final ColorModel COLOR_MODEL_ALPHALESS =
+            new ComponentColorModel(
+                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
                     false,
                     false,
                     Transparency.OPAQUE,
                     DataBuffer.TYPE_BYTE);
     
-    public static boolean writePng(Image image, OutputStream out) {
-        return writePng(image.getData(), image.getWidth(), image.getHeight(), out);
+    protected static ColorModel getColorModel(boolean hasAlpha) {
+        return hasAlpha ? COLOR_MODEL_ALPHAFUL : COLOR_MODEL_ALPHALESS;
     }
     
-    protected static boolean writePng(byte[] bytes, int width, int height, OutputStream out) {
-        BufferedImage img = createRGBImage(bytes, width, height);
+    public static boolean writePng(Image image, OutputStream out) {
+        return writePng(image.getData(), image.getWidth(),
+                        image.getHeight(), image.hasAlpha(),
+                        out);
+    }
+    
+    protected static boolean writePng(
+            byte[] bytes,
+            int width,
+            int height,
+            boolean hasAlpha,
+            OutputStream out) {
+        BufferedImage img = createRGBImage(bytes, width, height, hasAlpha);
         try {
             ImageIO.write(img, "png", out);
             return true;
@@ -59,36 +78,50 @@ public class ImageUtils {
         };
     }
     
-    public static ByteBuffer readImageToDirectByteBuffer(InputStream in) throws IOException {
+    public static ByteBuffer readImageToDirectByteBuffer(InputStream in, boolean hasAlpha)
+            throws IOException {
+        return readImageToDirectByteBuffer(in, getColorModel(hasAlpha));
+    }
+    
+    protected static ByteBuffer readImageToDirectByteBuffer(InputStream in, ColorModel colorModel)
+            throws IOException {
         BufferedImage inImg = ImageIO.read(in);
-        int size = inImg.getWidth() * inImg.getHeight() * COLOR_MODEL.getNumComponents();
+        int size = inImg.getWidth() * inImg.getHeight() * colorModel.getNumComponents();
         ByteBuffer buffer = ByteBuffer.allocateDirect(size);
         buffer.order(ByteOrder.nativeOrder());
         buffer.clear();
         DataBuffer dataBuf = wrapByteBuffer(buffer);
         SampleModel sampleModel =
-                COLOR_MODEL.createCompatibleSampleModel(inImg.getWidth(), inImg.getHeight());
+                colorModel.createCompatibleSampleModel(inImg.getWidth(), inImg.getHeight());
         WritableRaster raster = new WritableRaster(sampleModel, dataBuf, new java.awt.Point()) {};
-        BufferedImage myImg = new BufferedImage(COLOR_MODEL, raster, false, null);
+        BufferedImage myImg = new BufferedImage(colorModel, raster, false, null);
         ColorConvertOp colorConvert = new ColorConvertOp(null);
         colorConvert.filter(inImg, myImg);
         return buffer;
     }
     
-    protected static BufferedImage createRGBImage(byte[] bytes, int width, int height) {
+    protected static BufferedImage createRGBImage(
+            byte[] bytes,
+            int width,
+            int height,
+            boolean hasAlpha) {
+        ColorModel colorModel = getColorModel(hasAlpha);
         DataBufferByte buffer = new DataBufferByte(bytes, bytes.length);
+        int[] bandOffsets = hasAlpha ? new int[]{0, 1, 2, 3} : new int[]{0, 1, 2};
         WritableRaster raster =
-                Raster.createInterleavedRaster(buffer, width, height, width * 3, 3,
-                                               new int[]{0, 1, 2}, null);
-        return new BufferedImage(COLOR_MODEL, raster, false, null);
+                Raster.createInterleavedRaster(buffer, width, height,
+                                               width * colorModel.getNumComponents(),
+                                               colorModel.getNumComponents(),
+                                               bandOffsets, null);
+        return new BufferedImage(colorModel, raster, false, null);
     }
     
-    public static Image readImage(InputStream in) {
+    public static Image readImage(InputStream in, boolean hasAlpha) {
         try {
             BufferedImage inImg = ImageIO.read(in);
-            Image raw = new Image(inImg.getWidth(), inImg.getHeight());
+            Image raw = new Image(inImg.getWidth(), inImg.getHeight(), hasAlpha);
             BufferedImage myImg =
-                    createRGBImage(raw.getData(), raw.getWidth(), raw.getHeight());
+                    createRGBImage(raw.getData(), raw.getWidth(), raw.getHeight(), raw.hasAlpha());
             ColorConvertOp colorConvert = new ColorConvertOp(null);
             colorConvert.filter(inImg, myImg);
             return raw;

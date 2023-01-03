@@ -160,14 +160,15 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             if (textureBuffer != null) {
                 final int width = picture.getWidth();
                 final int height = picture.getHeight();
+                final int format = picture.hasAlpha() ? GL11.GL_RGBA : GL11.GL_RGB;
                 textureBuffer.order(ByteOrder.nativeOrder());
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
                                      GL11.GL_NEAREST);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
                                      GL11.GL_NEAREST);
                 GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB,
-                                  width, height, 0, GL11.GL_RGB,
+                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, format,
+                                  width, height, 0, format,
                                   GL11.GL_UNSIGNED_BYTE,
                                   textureBuffer);
             }
