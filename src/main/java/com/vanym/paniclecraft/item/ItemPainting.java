@@ -87,7 +87,7 @@ public class ItemPainting extends ItemMod3 {
                               painting.stepSound.getPitch() * 0.8F);
         --itemStack.stackSize;
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
-        Picture picture = tileP.getPainting(side);
+        Picture picture = tileP.getPicture(side);
         this.fillPicture(picture, itemStack);
         if (entityPlayer != null) {
             BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
@@ -101,7 +101,7 @@ public class ItemPainting extends ItemMod3 {
             World world,
             TileEntityPaintingFrame tilePF,
             int side) {
-        if (tilePF.getPainting(side) != null) {
+        if (tilePF.getPicture(side) != null) {
             return false;
         }
         Picture picture = tilePF.createPicture(side);

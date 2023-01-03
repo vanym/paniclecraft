@@ -38,7 +38,7 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
         // TODO WIP refactor it
         switch (method) {
             case 0: {
-                return new Object[]{this.tileP.getPainting(this.tileP.getBlockMetadata())
+                return new Object[]{this.tileP.getPicture(this.tileP.getBlockMetadata())
                                               .getWidth()};
             }
             case 1: {
@@ -54,15 +54,15 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
                 if (px < 0
-                    || px > this.tileP.getPainting(this.tileP.getBlockMetadata())
+                    || px > this.tileP.getPicture(this.tileP.getBlockMetadata())
                                       .getWidth()
                     || py < 0
-                    || py > this.tileP.getPainting(this.tileP.getBlockMetadata())
+                    || py > this.tileP.getPicture(this.tileP.getBlockMetadata())
                                       .getWidth()) {
                     throw new LuaException("number must be from 0 to row");
                 }
                 Color color =
-                        this.tileP.getPainting(this.tileP.getBlockMetadata())
+                        this.tileP.getPicture(this.tileP.getBlockMetadata())
                                   .getPixelColor(px, py);
                 return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
             }
@@ -82,10 +82,10 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
                 int px = ((Double)arguments[0]).intValue();
                 int py = ((Double)arguments[1]).intValue();
                 if (px < 0
-                    || px > this.tileP.getPainting(this.tileP.getBlockMetadata())
+                    || px > this.tileP.getPicture(this.tileP.getBlockMetadata())
                                       .getWidth()
                     || py < 0
-                    || py > this.tileP.getPainting(this.tileP.getBlockMetadata())
+                    || py > this.tileP.getPicture(this.tileP.getBlockMetadata())
                                       .getWidth()) {
                     throw new LuaException("number must be from 0 to row");
                 }
@@ -100,7 +100,7 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
                 } finally {
                     ItemStack itemStack = new ItemStack(Core.instance.painting.itemPaintBrush);
                     Core.instance.painting.itemPaintBrush.setColor(itemStack, color.getRGB());
-                    this.tileP.getPainting(this.tileP.getBlockMetadata())
+                    this.tileP.getPicture(this.tileP.getBlockMetadata())
                               .usePaintingTool(itemStack, px, py);
                 }
                 return new Object[]{true};
@@ -128,7 +128,7 @@ public class TileEntityPaintingPeripheral implements IPeripheral {
                     ItemStack itemStack = new ItemStack(Core.instance.painting.itemPaintBrush);
                     itemStack.setItemDamage(2);
                     Core.instance.painting.itemPaintBrush.setColor(itemStack, color.getRGB());
-                    this.tileP.getPainting(this.tileP.getBlockMetadata())
+                    this.tileP.getPicture(this.tileP.getBlockMetadata())
                               .usePaintingTool(itemStack, 0, 0);
                 }
                 return new Object[]{true};

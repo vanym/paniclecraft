@@ -26,7 +26,7 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
     @SideOnly(Side.CLIENT)
     public static enum SpecialRendererPhase {
-        NONE, FRAME, FRAMEINSIDE, PAINTING;
+        NONE, FRAME, FRAMEINSIDE, PICTURE;
         
         public boolean isNone() {
             return (this == NONE);
@@ -131,7 +131,7 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
             return null;
         }
         ISidePictureProvider tileP = (ISidePictureProvider)tile;
-        return tileP.getPainting(side);
+        return tileP.getPicture(side);
     }
     
     public static Picture getPicture(IBlockAccess world, MovingObjectPosition target) {

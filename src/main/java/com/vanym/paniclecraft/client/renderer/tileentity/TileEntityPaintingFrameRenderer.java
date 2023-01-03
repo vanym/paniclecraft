@@ -64,7 +64,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         final double paintingWidth = block.getPaintingOutlineSize();
         boolean skipFrame = (this.renderPictureType >= 0);
         for (int side = 0; side < TileEntityPaintingFrame.N; ++side) {
-            Picture picture = tile.getPainting(side);
+            Picture picture = tile.getPicture(side);
             if (picture == null) {
                 skipFrame = false;
                 break;
@@ -94,7 +94,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
             }
             block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAMEINSIDE);
             for (int side = 0; side < TileEntityPaintingFrame.N; ++side) {
-                Picture picture = tile.getPainting(side);
+                Picture picture = tile.getPicture(side);
                 if (picture == null) {
                     continue;
                 }
@@ -116,12 +116,12 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         }
         if (this.renderPictureType >= 0) {
             if (theProfiler != null) {
-                theProfiler.startSection("painting");
+                theProfiler.startSection("picture");
             }
             render.setMaxAmbientOcclusion(this.renderPictureType);
-            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
+            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PICTURE);
             for (int side = 0; side < TileEntityPaintingFrame.N; ++side) {
-                Picture picture = tile.getPainting(side);
+                Picture picture = tile.getPicture(side);
                 if (picture == null) {
                     continue;
                 }
@@ -147,7 +147,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
                 }
             }
             if (theProfiler != null) {
-                theProfiler.endSection(); // painting
+                theProfiler.endSection(); // picture
             }
         }
         block.setRendererBox(null);

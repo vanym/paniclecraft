@@ -61,7 +61,7 @@ public class BlockPainting extends BlockPaintingContainer {
             default:
             case FRAME:
                 return !contains;
-            case PAINTING:
+            case PICTURE:
                 return contains;
         }
     }
@@ -171,6 +171,6 @@ public class BlockPainting extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         TileEntityPainting tile = (TileEntityPainting)world.getTileEntity(x, y, z);
-        return BlockPaintingContainer.getPictureAsItem(tile.getPainting(tile.getBlockMetadata()));
+        return BlockPaintingContainer.getPictureAsItem(tile.getPicture(tile.getBlockMetadata()));
     }
 }

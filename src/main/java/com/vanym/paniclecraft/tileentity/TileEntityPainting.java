@@ -24,9 +24,9 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     @Override
     public void writeToNBT(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
-        NBTTagCompound paintingTag = new NBTTagCompound();
-        this.getPicture().writeToNBT(paintingTag);
-        nbtTag.setTag(TAG_PICTURE, paintingTag);
+        NBTTagCompound pictureTag = new NBTTagCompound();
+        this.getPicture().writeToNBT(pictureTag);
+        nbtTag.setTag(TAG_PICTURE, pictureTag);
     }
     
     @Override
@@ -55,7 +55,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     }
     
     @Override
-    public Picture getPainting(int side) {
+    public Picture getPicture(int side) {
         if (side == this.getBlockMetadata()) {
             return this.getPicture();
         } else {
@@ -70,7 +70,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         TileEntity tile = this.getNeighborTile(side, xO, yO);
         if (tile != null && tile instanceof TileEntityPainting) {
             TileEntityPainting tilePainting = (TileEntityPainting)tile;
-            return tilePainting.getPainting(side);
+            return tilePainting.getPicture(side);
         }
         return null;
     }

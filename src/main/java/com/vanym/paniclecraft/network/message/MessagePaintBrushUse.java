@@ -82,7 +82,7 @@ public class MessagePaintBrushUse
                     && playerEntity.canPlayerEdit(message.x, message.y, message.z, message.side,
                                                   playerEntity.getHeldItem())) {
                     Picture picture =
-                            ((ISidePictureProvider)tileEntity).getPainting(message.side);
+                            ((ISidePictureProvider)tileEntity).getPicture(message.side);
                     if (picture != null) {
                         picture.usePaintingTool(playerEntity.getHeldItem(), message.px, message.py);
                     }

@@ -30,9 +30,9 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (this.holders[i] != null) {
-                NBTTagCompound paintingTag = new NBTTagCompound();
-                this.holders[i].picture.writeToNBT(paintingTag);
-                nbtTag.setTag(TAG_PICTURE_I, paintingTag);
+                NBTTagCompound pictureTag = new NBTTagCompound();
+                this.holders[i].picture.writeToNBT(pictureTag);
+                nbtTag.setTag(TAG_PICTURE_I, pictureTag);
             }
         }
     }
@@ -85,7 +85,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     @Override
-    public Picture getPainting(int side) {
+    public Picture getPicture(int side) {
         if (this.isValidSide(side) && this.holders[side] != null) {
             return this.holders[side].picture;
         }
@@ -100,7 +100,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         TileEntity tile = this.getNeighborTile(side, xO, yO);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePaintingFrame = (TileEntityPaintingFrame)tile;
-            return tilePaintingFrame.getPainting(side);
+            return tilePaintingFrame.getPicture(side);
         }
         return null;
     }
@@ -108,11 +108,11 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     public void rotateY(int rotUp) {
         ForgeDirection rotator = ForgeDirection.UP;
         ForgeDirection begin = ForgeDirection.SOUTH;
-        Picture pictureUp = this.getPainting(rotator.ordinal());
+        Picture pictureUp = this.getPicture(rotator.ordinal());
         if (pictureUp != null) {
             pictureUp.rotate(rotUp);
         }
-        Picture pictureDown = this.getPainting(rotator.getOpposite().ordinal());
+        Picture pictureDown = this.getPicture(rotator.getOpposite().ordinal());
         if (pictureDown != null) {
             pictureDown.rotate((4 - rotUp) % 4);
         }

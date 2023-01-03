@@ -118,9 +118,9 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             }
         }
         if (this.renderPictureType >= 0) {
-            Picture picture = tile.getPainting(meta);
+            Picture picture = tile.getPicture(meta);
             if (theProfiler != null) {
-                theProfiler.startSection("painting");
+                theProfiler.startSection("picture");
                 theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
                 theProfiler.startSection("bind");
             }
@@ -130,14 +130,14 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             }
             render.setOverrideBlockTexture(icon);
             tessellator.startDrawingQuads();
-            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PAINTING);
+            block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PICTURE);
             render.setMaxAmbientOcclusion(this.renderPictureType);
             render.renderStandardBlock(block, tile.xCoord, tile.yCoord, tile.zCoord);
             tessellator.draw();
             render.clearOverrideBlockTexture();
             if (theProfiler != null) {
                 theProfiler.endSection(); // WxH
-                theProfiler.endSection(); // painting
+                theProfiler.endSection(); // picture
             }
         }
         render.resetMaxAmbientOcclusion();

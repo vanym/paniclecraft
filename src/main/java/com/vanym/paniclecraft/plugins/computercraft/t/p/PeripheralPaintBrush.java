@@ -259,7 +259,7 @@ public class PeripheralPaintBrush implements IPeripheral {
             return null;
         }
         ISidePictureProvider tileP = (ISidePictureProvider)tile;
-        return tileP.getPainting(dir.getOpposite().ordinal());
+        return tileP.getPicture(dir.getOpposite().ordinal());
     }
     
     @Override

@@ -81,7 +81,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         if (tileP == null) {
             return false;
         }
-        Picture picture = tileP.getPainting(side);
+        Picture picture = tileP.getPicture(side);
         if (picture == null) {
             return false;
         }
@@ -195,8 +195,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(int side, int meta, TileEntity tile) {
         TileEntityPaintingFrame tileFrame = (TileEntityPaintingFrame)tile;
-        boolean contains = (tileFrame.getPainting(side) != null);
-        if (this.specialRendererPhase == SpecialRendererPhase.PAINTING) {
+        boolean contains = (tileFrame.getPicture(side) != null);
+        if (this.specialRendererPhase == SpecialRendererPhase.PICTURE) {
             return contains && side == this.specialRendererSide;
         } else if (this.specialRendererPhase == SpecialRendererPhase.FRAME && contains) {
             return !MainUtils.isTouchingSide(side, this.specialRendererBox);
@@ -218,7 +218,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @Override
     public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
         TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
-        if (tile.getPainting(side.ordinal()) != null) {
+        if (tile.getPicture(side.ordinal()) != null) {
             return true;
         } else {
             return false;
@@ -243,7 +243,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
         Builder<AxisAlignedBB> facades = Stream.builder();
         for (int i = 0; i < 6; ++i) {
-            if (tile.getPainting(i) != null) {
+            if (tile.getPicture(i) != null) {
                 AxisAlignedBB box = MainUtils.getBoundsBySide(i, this.getPaintingOutlineSize());
                 facades.add(box);
             }
@@ -284,7 +284,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         }
         Map<ForgeDirection, Picture> map = new HashMap<>();
         for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
-            Picture picture = tilePF.getPainting(i);
+            Picture picture = tilePF.getPicture(i);
             if (picture == null) {
                 continue;
             }

@@ -52,7 +52,7 @@ public class ItemRendererPainting implements IItemRenderer {
         TileEntityPainting tilePainting = new TileEntityPainting();
         tilePainting.blockType = Core.instance.painting.blockPainting;
         tilePainting.blockMetadata = ForgeDirection.EAST.ordinal();
-        Picture picture = tilePainting.getPainting(tilePainting.blockMetadata);
+        Picture picture = tilePainting.getPicture(tilePainting.blockMetadata);
         NBTTagCompound nbtPictureTag = null;
         if (item.hasTagCompound()) {
             NBTTagCompound itemTag = item.getTagCompound();

@@ -96,7 +96,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
         }
         this.paintingFrameTileRenderer.renderTileEntityAtItem(tilePF);
         for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
-            Picture picture = tilePF.getPainting(i);
+            Picture picture = tilePF.getPicture(i);
             if (picture == null || obtainedTextures[i] >= 0) {
                 continue;
             }
