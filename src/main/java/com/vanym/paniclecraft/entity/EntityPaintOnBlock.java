@@ -129,15 +129,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public void onUpdate() {
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
-        
-        if (!isValidBlock(this.worldObj, this.getBlockX(), this.getBlockY(), this.getBlockZ())) {
-            this.setDead();
-        }
-    }
+    public void onUpdate() {}
     
     @Override
     public void moveEntity(double x, double y, double z) {}

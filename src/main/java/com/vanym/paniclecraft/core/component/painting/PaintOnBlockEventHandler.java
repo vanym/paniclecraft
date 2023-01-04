@@ -7,9 +7,19 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
 public class PaintOnBlockEventHandler {
+    
+    @SubscribeEvent
+    public void entityCanUpdate(EntityEvent.CanUpdate event) {
+        if (event.entity instanceof EntityPaintOnBlock) {
+            ++event.entity.ticksExisted;
+            event.entity.onUpdate();
+            event.canUpdate = false;
+        }
+    }
     
     @SubscribeEvent
     public void worldLoad(WorldEvent.Load event) {
