@@ -23,7 +23,7 @@ import net.minecraft.nbt.NBTBase.NBTPrimitive;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class Picture {
+public class Picture implements IPictureSize {
     
     protected IPictureHolder holder;
     
@@ -199,6 +199,7 @@ public class Picture {
         return this.hasAlpha;
     }
     
+    @Override
     public int getWidth() {
         if (this.image != null) {
             return this.image.getWidth();
@@ -209,6 +210,7 @@ public class Picture {
         }
     }
     
+    @Override
     public int getHeight() {
         if (this.image != null) {
             return this.image.getHeight();
@@ -296,8 +298,11 @@ public class Picture {
     }
     
     protected void setDefaultSize() {
-        this.setSize(Core.instance.painting.config.paintingDefaultWidth,
-                     Core.instance.painting.config.paintingDefaultHeight);
+        this.setSize(Core.instance.painting.config.paintingDefaultSize);
+    }
+    
+    protected void setSize(IPictureSize size) {
+        this.setSize(size.getWidth(), size.getHeight());
     }
     
     protected void setSize(int width, int height) {

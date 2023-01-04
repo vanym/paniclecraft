@@ -11,11 +11,14 @@ import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
+import com.vanym.paniclecraft.client.renderer.entity.EntityPaintOnBlockRenderer;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
+import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -32,7 +35,9 @@ import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -71,6 +76,8 @@ public class ModComponentPainting implements ModComponent {
     protected ItemRendererPaintingFrame paintingFrameItemRenderer;
     @SideOnly(Side.CLIENT)
     protected PaintingSpecialSelectionBox paintingSpecialSelectionBox = null;
+    @SideOnly(Side.CLIENT)
+    protected EntityPaintOnBlockRenderer paintOnBlockRenderer;
     
     @SideOnly(Side.CLIENT)
     public ChangeableClientConfig clientConfig = new ChangeableClientConfig();
@@ -99,6 +106,10 @@ public class ModComponentPainting implements ModComponent {
         GameRegistry.registerBlock(this.blockPaintingFrame, ItemPaintingFrame.class,
                                    this.blockPaintingFrame.getName());
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class, TileEntityPaintingFrame.ID);
+        
+        EntityRegistry.registerModEntity(EntityPaintOnBlock.class,
+                                         EntityPaintOnBlock.IN_MOD_ID, 33,
+                                         Core.instance, 64, 1, true);
         
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
         
@@ -237,11 +248,14 @@ public class ModComponentPainting implements ModComponent {
         this.paintingItemRenderer = new ItemRendererPainting(this.textureCache);
         this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
         this.paintingFrameItemRenderer = new ItemRendererPaintingFrame(this.textureCache);
+        this.paintOnBlockRenderer = new EntityPaintOnBlockRenderer();
         
         MinecraftForgeClient.registerItemRenderer(this.itemPainting, this.paintingItemRenderer);
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
                                                   this.paintingFrameItemRenderer);
         MinecraftForge.EVENT_BUS.register(this.textureCache);
+        RenderingRegistry.registerEntityRenderingHandler(EntityPaintOnBlock.class,
+                                                         this.paintOnBlockRenderer);
         
         this.clientConfig = new ChangeableClientConfig().read(config);
         this.applyConfigClient();
@@ -286,6 +300,9 @@ public class ModComponentPainting implements ModComponent {
                                                                              this.paintingFrameTileRenderer);
         }
         
+        this.paintOnBlockRenderer.renderPictureType =
+                this.clientConfig.renderPaintOnBlockPartPictureType;
+        
         if (this.paintingSpecialSelectionBox != null) {
             MinecraftForge.EVENT_BUS.unregister(this.paintingSpecialSelectionBox);
             this.paintingSpecialSelectionBox = null;
@@ -311,11 +328,15 @@ public class ModComponentPainting implements ModComponent {
     
     public class ChangeableConfig {
         public int paintingPlaceStack = 2;
-        public int paintingDefaultWidth = 16;
-        public int paintingDefaultHeight = 16;
+        public final DefaultPictureSize paintingDefaultSize = new DefaultPictureSize();
         
         public SortedMap<Integer, Double> brushRadiuses = new TreeMap<>();
         public SortedMap<Integer, Double> smallBrushRadiuses = new TreeMap<>();
+        
+        public boolean allowPaintOnBlock = false;
+        
+        protected int paintingDefaultWidth = 16;
+        protected int paintingDefaultHeight = 16;
         
         protected ChangeableConfig() {
             this.brushRadiuses.put(16, 3.5D);
@@ -335,6 +356,9 @@ public class ModComponentPainting implements ModComponent {
             this.paintingDefaultHeight =
                     config.getInt("paintingDefaultHeight", ModComponentPainting.this.getName(),
                                   16, 1, 256, "(recommend to equals width)");
+            this.allowPaintOnBlock =
+                    config.getBoolean("allowPaintOnBlock", ModComponentPainting.this.getName(),
+                                      false, "");
             {
                 String[] lines = config.getStringList("brushRadiuses",
                                                       ModComponentPainting.this.getName(),
@@ -367,6 +391,20 @@ public class ModComponentPainting implements ModComponent {
         public double getSmallBrushRadius(int row) {
             return getRadius(row, this.smallBrushRadiuses);
         }
+        
+        public class DefaultPictureSize implements IPictureSize {
+            
+            @Override
+            public int getWidth() {
+                return ChangeableConfig.this.paintingDefaultWidth;
+            }
+            
+            @Override
+            public int getHeight() {
+                return ChangeableConfig.this.paintingDefaultHeight;
+            }
+            
+        }
     }
     
     @SideOnly(Side.CLIENT)
@@ -381,6 +419,8 @@ public class ModComponentPainting implements ModComponent {
         public boolean renderPaintingFrameItem = true;
         public int renderPaintingFrameTilePartFrameType = 0;
         public int renderPaintingFrameTilePartPictureType = 2;
+        public boolean renderPaintOnBlock = true;
+        public int renderPaintOnBlockPartPictureType = 2;
         public boolean renderProfiling = false;
         public boolean paintingSpecialSelectionBox = true;
         public Color paintingSpecialSelectionBoxColor = null;
@@ -408,6 +448,10 @@ public class ModComponentPainting implements ModComponent {
                     config.getInt("paintingFrameTilePartFrameType", CLIENT_RENDER, 0, -1, 2, "");
             this.renderPaintingFrameTilePartPictureType =
                     config.getInt("paintingFrameTilePartPictureType", CLIENT_RENDER, 2, -1, 2, "");
+            this.renderPaintOnBlock =
+                    config.getBoolean("paintOnBlock", CLIENT_RENDER, true, "");
+            this.renderPaintOnBlockPartPictureType =
+                    config.getInt("paintOnBlockPartPictureType", CLIENT_RENDER, 2, -1, 2, "");
             this.renderProfiling =
                     config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
             this.paintingSpecialSelectionBox =

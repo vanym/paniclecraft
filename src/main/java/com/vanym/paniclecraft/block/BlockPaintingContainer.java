@@ -125,13 +125,20 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
         return itemS;
     }
     
-    public static Picture getPicture(IBlockAccess world, int x, int y, int z, int side) {
+    public static ISidePictureProvider getProvider(IBlockAccess world, int x, int y, int z) {
         TileEntity tile = world.getTileEntity(x, y, z);
-        if (tile == null || !(tile instanceof ISidePictureProvider)) {
+        if (tile != null && tile instanceof ISidePictureProvider) {
+            return (ISidePictureProvider)tile;
+        }
+        return null;
+    }
+    
+    public static Picture getPicture(IBlockAccess world, int x, int y, int z, int side) {
+        ISidePictureProvider provider = getProvider(world, x, y, z);
+        if (provider == null) {
             return null;
         }
-        ISidePictureProvider tileP = (ISidePictureProvider)tile;
-        return tileP.getPicture(side);
+        return provider.getPicture(side);
     }
     
     public static Picture getPicture(IBlockAccess world, MovingObjectPosition target) {

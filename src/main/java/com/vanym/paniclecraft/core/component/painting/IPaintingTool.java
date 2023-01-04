@@ -26,5 +26,5 @@ public interface IPaintingTool {
     
     public Color getPaintingToolColor(ItemStack itemStack);
     
-    public double getPaintingToolRadius(ItemStack itemStack, Picture picture);
+    public double getPaintingToolRadius(ItemStack itemStack, IPictureSize picture);
 }

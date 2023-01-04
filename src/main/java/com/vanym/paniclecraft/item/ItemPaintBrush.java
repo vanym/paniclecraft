@@ -11,8 +11,10 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
+import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -32,7 +34,6 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorizeable {
@@ -145,22 +146,33 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     
     @SideOnly(Side.CLIENT)
     public static MessagePaintBrushUse makeBrushUseMessage(
-            IBlockAccess world,
+            World world,
             MovingObjectPosition target) {
-        Picture picture = BlockPaintingContainer.getPicture(world, target);
-        if (picture == null) {
-            return null;
-        }
         int x = target.blockX;
         int y = target.blockY;
         int z = target.blockZ;
-        PaintingSide pside = PaintingSide.getSize(target.sideHit);
+        int side = target.sideHit;
+        boolean tile = true;
+        IPictureSize picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
+        if (picture == null) {
+            tile = false;
+            if (Core.instance.painting.config.allowPaintOnBlock
+                && EntityPaintOnBlock.isValidBlock(world, x, y, z)) {
+                picture = EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
+                if (picture == null) {
+                    picture = Core.instance.painting.config.paintingDefaultSize;
+                }
+            } else {
+                return null;
+            }
+        }
+        PaintingSide pside = PaintingSide.getSize(side);
         Vec3 inBlock = MainUtils.getInBlockVec(target);
         Vec3 inPainting = pside.toPaintingCoords(inBlock);
         int px = (int)(inPainting.xCoord * picture.getWidth());
         int py = (int)(inPainting.yCoord * picture.getHeight());
         MessagePaintBrushUse message =
-                new MessagePaintBrushUse(x, y, z, px, py, (byte)pside.ordinal());
+                new MessagePaintBrushUse(x, y, z, px, py, (byte)pside.ordinal(), tile);
         return message;
     }
     
@@ -178,11 +190,12 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
             int y,
             int z,
             int side,
-            float ibx,
-            float iby,
-            float ibz) {
+            float hitX,
+            float hitY,
+            float hitZ) {
         Picture picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
-        if (picture != null) {
+        if (picture != null || (Core.instance.painting.config.allowPaintOnBlock
+            && EntityPaintOnBlock.isValidBlock(world, x, y, z))) {
             entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
             if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
                 this.brushUseMessages.clear();
@@ -343,7 +356,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     }
     
     @Override
-    public double getPaintingToolRadius(ItemStack itemStack, Picture picture) {
+    public double getPaintingToolRadius(ItemStack itemStack, IPictureSize picture) {
         if (itemStack.hasTagCompound()) {
             NBTTagCompound itemTag = itemStack.getTagCompound();
             if (itemTag.hasKey(TAG_RADIUS)) {

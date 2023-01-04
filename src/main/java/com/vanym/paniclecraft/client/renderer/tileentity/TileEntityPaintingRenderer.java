@@ -52,8 +52,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         this.renderTileEntity(tile, 0, 0, 0, 0);
     }
     
-    public void renderTileEntityAtWorld(TileEntity tile, double x, double y, double z, float f) {
-        // based on TileEntityRendererPiston
+    public static void renderInWorldEnable() {
         RenderHelper.disableStandardItemLighting();
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_BLEND);
@@ -64,8 +63,17 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         } else {
             GL11.glShadeModel(GL11.GL_FLAT);
         }
-        this.renderTileEntity(tile, x, y, z, f);
+    }
+    
+    public static void renderInWorldDisable() {
         RenderHelper.enableStandardItemLighting();
+    }
+    
+    public void renderTileEntityAtWorld(TileEntity tile, double x, double y, double z, float f) {
+        // based on TileEntityRendererPiston
+        renderInWorldEnable();
+        this.renderTileEntity(tile, x, y, z, f);
+        renderInWorldDisable();
     }
     
     protected void renderTileEntity(TileEntity tile, double x, double y, double z, float f) {
@@ -148,7 +156,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         }
     }
     
-    protected static IIcon bindTexture(Picture picture, int side) {
+    public static IIcon bindTexture(Picture picture, int side) {
         boolean newtexture = false;
         if (picture.texture < 0) {
             picture.texture = GL11.glGenTextures();
