@@ -17,6 +17,7 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
+import com.vanym.paniclecraft.core.component.painting.PaintOnBlockEventHandler;
 import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
@@ -112,6 +113,7 @@ public class ModComponentPainting implements ModComponent {
                                          Core.instance, 64, 1, true);
         
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
+        MinecraftForge.EVENT_BUS.register(new PaintOnBlockEventHandler());
         
         Core.instance.network.registerMessage(MessagePaintBrushUse.class,
                                               MessagePaintBrushUse.class, 30,

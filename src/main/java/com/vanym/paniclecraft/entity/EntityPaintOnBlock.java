@@ -111,6 +111,22 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     @Override
     protected void entityInit() {}
     
+    protected void unloadPictures() {
+        for (PictureHolder holder : this.holders) {
+            if (holder != null) {
+                holder.picture.unload();
+            }
+        }
+    }
+    
+    public void onEntityDestroy() {
+        this.unloadPictures();
+    }
+    
+    public void onWorldUnload() {
+        this.unloadPictures();
+    }
+    
     @Override
     public void onUpdate() {
         this.prevPosX = this.posX;
