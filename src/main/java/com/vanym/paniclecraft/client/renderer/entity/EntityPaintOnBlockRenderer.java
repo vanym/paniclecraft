@@ -19,7 +19,6 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -89,7 +88,11 @@ public class EntityPaintOnBlockRenderer extends Render {
                                                              realBlock.getBlockBoundsMaxY(),
                                                              realBlock.getBlockBoundsMaxZ());
             this.block.setRendererBox(box);
-            double l = Vec3.createVectorHelper(x, y, z).lengthVector();
+            final double expandBase = 0.0005D;
+            final double expandAdjust = 0.0001D;
+            final double expandX = expandBase + Math.pow(x / 4, 2) * expandAdjust;
+            final double expandY = expandBase + Math.pow(y / 4, 2) * expandAdjust;
+            final double expandZ = expandBase + Math.pow(z / 4, 2) * expandAdjust;
             for (int side = 0; side < EntityPaintOnBlock.N; ++side) {
                 Picture picture = entityPOB.getExistingPicture(side);
                 if (picture == null) {
@@ -111,13 +114,12 @@ public class EntityPaintOnBlockRenderer extends Render {
                 if (theProfiler != null) {
                     theProfiler.endSection(); // bind
                 }
-                final double expand = 0.0005D + Math.pow(l / 4, 2) * 0.00005D;
-                render.overrideBlockBounds(box.minX + pside.offsetX * expand,
-                                           box.minY + pside.offsetY * expand,
-                                           box.minZ + pside.offsetZ * expand,
-                                           box.maxX + pside.offsetX * expand,
-                                           box.maxY + pside.offsetY * expand,
-                                           box.maxZ + pside.offsetZ * expand);
+                render.overrideBlockBounds(box.minX + pside.offsetX * expandX,
+                                           box.minY + pside.offsetY * expandY,
+                                           box.minZ + pside.offsetZ * expandZ,
+                                           box.maxX + pside.offsetX * expandX,
+                                           box.maxY + pside.offsetY * expandY,
+                                           box.maxZ + pside.offsetZ * expandZ);
                 this.block.setRendererSide(side);
                 render.setOverrideBlockTexture(icon);
                 tessellator.startDrawingQuads();
