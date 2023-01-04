@@ -89,7 +89,7 @@ public class EntityPaintOnBlockRenderer extends Render {
                                                              realBlock.getBlockBoundsMaxY(),
                                                              realBlock.getBlockBoundsMaxZ());
             this.block.setRendererBox(box);
-            Vec3 vec = Vec3.createVectorHelper(x, y, z);
+            double l = Vec3.createVectorHelper(x, y, z).lengthVector();
             for (int side = 0; side < EntityPaintOnBlock.N; ++side) {
                 Picture picture = entityPOB.getExistingPicture(side);
                 if (picture == null) {
@@ -104,7 +104,7 @@ public class EntityPaintOnBlockRenderer extends Render {
                     theProfiler.endSection(); // bind
                 }
                 ForgeDirection pside = ForgeDirection.getOrientation(side);
-                final double expand = 0.0005D + vec.lengthVector() * 0.0001D;
+                final double expand = 0.0005D + Math.pow(l / 4, 2) * 0.00005D;
                 render.overrideBlockBounds(box.minX + pside.offsetX * expand,
                                            box.minY + pside.offsetY * expand,
                                            box.minZ + pside.offsetZ * expand,

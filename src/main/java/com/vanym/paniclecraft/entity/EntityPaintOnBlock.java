@@ -42,6 +42,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         this.setSize(1.0F, 1.0F);
         this.noClip = true;
         this.isImmuneToFire = true;
+        this.renderDistanceWeight = 4.0D;
         
         DataWatcher orig = this.dataWatcher;
         this.dataWatcher = this.picturesWatcher;
@@ -151,6 +152,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             float pitch,
             int i) {
         this.setPositionAndRotation(x, y, z, yaw, pitch);
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean isInRangeToRenderDist(double dist) {
+        double d1 = 64.0D * this.renderDistanceWeight;
+        return dist < d1 * d1;
     }
     
     @Override
