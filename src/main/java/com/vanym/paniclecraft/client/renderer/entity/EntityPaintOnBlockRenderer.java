@@ -95,6 +95,14 @@ public class EntityPaintOnBlockRenderer extends Render {
                 if (picture == null) {
                     continue;
                 }
+                ForgeDirection pside = ForgeDirection.getOrientation(side);
+                if (!realBlock.shouldSideBeRendered(world,
+                                                    entityPOB.getBlockX() + pside.offsetX,
+                                                    entityPOB.getBlockY() + pside.offsetY,
+                                                    entityPOB.getBlockZ() + pside.offsetZ,
+                                                    side)) {
+                    continue;
+                }
                 if (theProfiler != null) {
                     theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
                     theProfiler.startSection("bind");
@@ -103,7 +111,6 @@ public class EntityPaintOnBlockRenderer extends Render {
                 if (theProfiler != null) {
                     theProfiler.endSection(); // bind
                 }
-                ForgeDirection pside = ForgeDirection.getOrientation(side);
                 final double expand = 0.0005D + Math.pow(l / 4, 2) * 0.00005D;
                 render.overrideBlockBounds(box.minX + pside.offsetX * expand,
                                            box.minY + pside.offsetY * expand,
