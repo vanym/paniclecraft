@@ -74,7 +74,8 @@ public class ItemPaintRemover extends ItemPaintingTool {
             return;
         }
         ItemPaintRemover remover = (ItemPaintRemover)item;
-        if (!Core.instance.painting.config.allowPaintOnBlock
+        if (!Core.instance.painting.clientConfig.forceUnhidePaintRemover
+            && !Core.instance.painting.config.allowPaintOnBlock
             && creativetab != null
             && creativetab == Core.instance.tab) {
             // This item is used to remove paint from block,

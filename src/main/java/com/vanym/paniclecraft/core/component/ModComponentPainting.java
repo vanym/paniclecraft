@@ -463,6 +463,8 @@ public class ModComponentPainting implements ModComponent {
     public class ChangeableClientConfig {
         public boolean perFrameBrushUse = true;
         
+        public boolean forceUnhidePaintRemover = false;
+        
         public boolean renderPaintingTile = true;
         public boolean renderPaintingItem = true;
         public int renderPaintingTilePartFrameType = 1;
@@ -485,6 +487,10 @@ public class ModComponentPainting implements ModComponent {
             this.perFrameBrushUse =
                     config.getBoolean("perFrameBrushUse", ModComponentPainting.this.getName(),
                                       true, "");
+            this.forceUnhidePaintRemover =
+                    config.getBoolean("forceUnhidePaintRemover",
+                                      ModComponentPainting.this.getName(),
+                                      false, "");
             
             this.renderPaintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
             this.renderPaintingItem = config.getBoolean("paintingItem", CLIENT_RENDER, true, "");
