@@ -11,7 +11,7 @@ public class AnyBlockValidForPaintEventHandler {
             new AnyBlockValidForPaintEventHandler();
     
     @SubscribeEvent
-    public void validCheck(EntityPaintOnBlock.BlockValidForPaint event) {
+    public void validCheck(EntityPaintOnBlock.BlockSideValidForPaint event) {
         if (!event.air && !event.liquid) {
             event.setResult(Event.Result.ALLOW);
         }

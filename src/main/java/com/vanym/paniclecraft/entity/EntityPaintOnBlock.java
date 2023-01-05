@@ -26,6 +26,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.world.BlockEvent;
 
 public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
@@ -80,6 +81,19 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         this.setLocationAndAngles(x + 0.5D, y, z + 0.5D, 0.0F, 0.0F);
     }
     
+    public void checkValidness() {
+        for (int i = 0; i < this.holders.length; ++i) {
+            if ((this.holders[i] == null)
+                || EntityPaintOnBlock.isValidBlockSide(this.worldObj,
+                                                       this.getBlockX(),
+                                                       this.getBlockY(),
+                                                       this.getBlockZ(), i)) {
+                continue;
+            }
+            this.clearPicture(i);
+        }
+    }
+    
     public Picture createPicture(int side) {
         if (!this.isValidSide(side)) {
             return null;
@@ -98,15 +112,12 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
         this.holders[side].picture.unload();
         this.holders[side] = null;
+        this.needProceed();
         return true;
     }
     
     @Override
     public Picture getPicture(int side) {
-        return this.createPicture(side);
-    }
-    
-    public Picture getExistingPicture(int side) {
         if (this.isValidSide(side) && this.holders[side] != null) {
             return this.holders[side].picture;
         }
@@ -248,12 +259,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             int z = EntityPaintOnBlock.this.getBlockZ() +
                     pside.xDir.offsetZ * offsetX +
                     pside.yDir.offsetZ * offsetY;
-            EntityPaintOnBlock entityPOB =
-                    getOrCreateEntity(EntityPaintOnBlock.this.worldObj, x, y, z);
-            if (entityPOB == null) {
-                return null;
-            }
-            return entityPOB.getPicture(this.side);
+            return getOrCreateEntityPicture(EntityPaintOnBlock.this.worldObj, x, y, z, this.side);
         }
         
         @Override
@@ -373,23 +379,28 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             
             @Override
             public Object getObject() {
-                return BlockPaintingContainer.getPictureAsItem(EntityPaintOnBlock.this.getExistingPicture(this.side));
+                return BlockPaintingContainer.getPictureAsItem(EntityPaintOnBlock.this.getPicture(this.side));
             }
         }
     }
     
-    public static EntityPaintOnBlock getOrCreateEntity(World world, int x, int y, int z) {
+    public static Picture getOrCreateEntityPicture(World world, int x, int y, int z, int side) {
         EntityPaintOnBlock entityPON = getEntity(world, x, y, z);
         if (entityPON != null) {
-            return entityPON;
+            Picture picture = entityPON.getPicture(side);
+            if (!world.isRemote && picture == null
+                && isValidBlockSide(world, x, y, z, side)) {
+                picture = entityPON.createPicture(side);
+            }
+            return picture;
         }
-        if (world.isRemote || !isValidBlock(world, x, y, z)) {
+        if (world.isRemote || !isValidBlockSide(world, x, y, z, side)) {
             return null;
         }
         entityPON = new EntityPaintOnBlock(world);
         entityPON.setBlock(x, y, z);
         if (world.spawnEntityInWorld(entityPON)) {
-            return entityPON;
+            return entityPON.createPicture(side);
         } else {
             return null;
         }
@@ -424,10 +435,10 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         if (entityPOB == null) {
             return null;
         }
-        return entityPOB.getExistingPicture(side);
+        return entityPOB.getPicture(side);
     }
     
-    public static boolean isValidBlock(World world, int x, int y, int z) {
+    public static boolean isValidBlockSide(World world, int x, int y, int z, int side) {
         boolean valid;
         boolean air = false;
         boolean liquid = false;
@@ -454,8 +465,10 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 case 24: // BlockCauldron
                 case 35: // BlockAnvil
                 case 26: // BlockEndPortalFrame
-                case 38: // BlockHopper
                     valid = true;
+                break;
+                case 38: // BlockHopper
+                    valid = (ForgeDirection.getOrientation(side) == ForgeDirection.UP);
                 break;
                 case 20: // BlockVine
                 case 5: // BlockRedstoneWire
@@ -493,8 +506,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 break;
             }
         }
-        BlockValidForPaint event =
-                new BlockValidForPaint(x, y, z, world, block, meta, valid, air, liquid);
+        BlockSideValidForPaint event =
+                new BlockSideValidForPaint(x, y, z, world, block, meta, side, valid, air, liquid);
         MinecraftForge.EVENT_BUS.post(event);
         switch (event.getResult()) {
             case ALLOW:
@@ -511,22 +524,25 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Event.HasResult
-    public static class BlockValidForPaint extends BlockEvent {
+    public static class BlockSideValidForPaint extends BlockEvent {
         
+        public final int side;
         public final boolean valid;
         public final boolean air;
         public final boolean liquid;
         
-        public BlockValidForPaint(int x,
+        public BlockSideValidForPaint(int x,
                 int y,
                 int z,
                 World world,
                 Block block,
                 int meta,
+                int side,
                 boolean valid,
                 boolean air,
                 boolean liquid) {
             super(x, y, z, world, block, meta);
+            this.side = side;
             this.valid = valid;
             this.air = air;
             this.liquid = liquid;

@@ -12,7 +12,6 @@ import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
-import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -99,15 +98,15 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         IPictureSize picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
         if (picture == null) {
             tile = false;
-            if (Core.instance.painting.config.allowPaintOnBlock
-                && EntityPaintOnBlock.isValidBlock(world, x, y, z)) {
+            if (Core.instance.painting.config.allowPaintOnBlock) {
                 picture = EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
-                if (picture == null) {
+                if (picture == null && EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)) {
                     picture = Core.instance.painting.config.paintOnBlockDefaultSize;
                 }
-            } else {
-                return null;
             }
+        }
+        if (picture == null) {
+            return null;
         }
         PaintingSide pside = PaintingSide.getSize(side);
         Vec3 inBlock = MainUtils.getInBlockVec(target);
@@ -136,9 +135,10 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             float hitX,
             float hitY,
             float hitZ) {
-        Picture picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
-        if (picture != null || (Core.instance.painting.config.allowPaintOnBlock
-            && EntityPaintOnBlock.isValidBlock(world, x, y, z))) {
+        if (BlockPaintingContainer.getPicture(world, x, y, z, side) != null
+            || (Core.instance.painting.config.allowPaintOnBlock
+                && (EntityPaintOnBlock.getExistingPicture(world, x, y, z, side) != null
+                    || EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)))) {
             entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
             if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
                 this.brushUseMessages.clear();

@@ -2,8 +2,8 @@ package com.vanym.paniclecraft.network.message;
 
 import java.util.Objects;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
-import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
@@ -90,18 +90,18 @@ public class MessagePaintingToolUse
             return null;
         }
         World world = playerEntity.worldObj;
-        ISidePictureProvider provider;
+        Picture picture = null;
         if (message.tile) {
-            provider = BlockPaintingContainer.getProvider(world, message.x, message.y, message.z);
-        } else {
-            provider = EntityPaintOnBlock.getOrCreateEntity(world, message.x, message.y, message.z);
+            picture = BlockPaintingContainer.getPicture(world, message.x, message.y, message.z,
+                                                        message.side);
+        } else if (Core.instance.painting.config.allowPaintOnBlock) {
+            picture = EntityPaintOnBlock.getOrCreateEntityPicture(world, message.x,
+                                                                  message.y,
+                                                                  message.z,
+                                                                  message.side);
         }
-        if ((provider == null) || !playerEntity.canPlayerEdit(message.x, message.y, message.z,
-                                                              message.side, heldItem)) {
-            return null;
-        }
-        Picture picture = provider.getPicture(message.side);
-        if (picture == null) {
+        if (picture == null || !playerEntity.canPlayerEdit(message.x, message.y, message.z,
+                                                           message.side, heldItem)) {
             return null;
         }
         picture.usePaintingTool(heldItem, message.px, message.py);

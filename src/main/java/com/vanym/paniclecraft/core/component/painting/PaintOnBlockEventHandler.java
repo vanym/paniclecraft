@@ -48,8 +48,8 @@ public class PaintOnBlockEventHandler {
         @Override
         public void markBlockForUpdate(int x, int y, int z) {
             EntityPaintOnBlock entityPOB = EntityPaintOnBlock.getEntity(this.world, x, y, z);
-            if (entityPOB != null && !EntityPaintOnBlock.isValidBlock(this.world, x, y, z)) {
-                entityPOB.setDead();
+            if (entityPOB != null) {
+                entityPOB.checkValidness();
             }
         }
         

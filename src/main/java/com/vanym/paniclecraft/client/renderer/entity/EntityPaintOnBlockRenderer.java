@@ -94,7 +94,7 @@ public class EntityPaintOnBlockRenderer extends Render {
             final double expandY = expandBase + Math.pow(y / 4, 2) * expandAdjust;
             final double expandZ = expandBase + Math.pow(z / 4, 2) * expandAdjust;
             for (int side = 0; side < EntityPaintOnBlock.N; ++side) {
-                Picture picture = entityPOB.getExistingPicture(side);
+                Picture picture = entityPOB.getPicture(side);
                 if (picture == null) {
                     continue;
                 }
