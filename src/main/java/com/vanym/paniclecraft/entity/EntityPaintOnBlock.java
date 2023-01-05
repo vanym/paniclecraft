@@ -184,6 +184,21 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     public void moveEntity(double x, double y, double z) {}
     
     @Override
+    public boolean isEntityInvulnerable() {
+        return true;
+    }
+    
+    @Override
+    public boolean doesEntityNotTriggerPressurePlate() {
+        return true;
+    }
+    
+    @Override
+    public boolean isPushedByWater() {
+        return false;
+    }
+    
+    @Override
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotation2(
             double x,
