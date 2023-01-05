@@ -104,9 +104,9 @@ public class ItemPaintRemover extends ItemPaintingTool {
         }
         switch (itemStack.getItemDamage()) {
             case DAMAGE_REMOVER:
-                return getRadius(Core.instance.painting.config.brushRadiuses, picture);
+                return getRadius(Core.instance.painting.config.removerRadiuses, picture);
             case DAMAGE_SMALLREMOVER:
-                return getRadius(Core.instance.painting.config.smallBrushRadiuses, picture);
+                return getRadius(Core.instance.painting.config.smallRemoverRadiuses, picture);
             default:
                 return 0.1D;
         }

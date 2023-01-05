@@ -380,12 +380,26 @@ public class ModComponentPainting implements ModComponent {
         return this.enabled;
     }
     
+    protected static final String[] DEFAULT_BRUSH_RADIUSES = new String[]{"1: 1.5",
+                                                                          "12: 2.5",
+                                                                          "16: 3.5",
+                                                                          "24: 5.2",
+                                                                          "32: 6.2",
+                                                                          "48: 7.5",
+                                                                          "64: 10.5"};
+    
+    protected static final String[] DEFAULT_SMALL_BRUSH_RADIUSES = new String[]{"1: 0.1"};
+    
     public class ChangeableConfig {
+        
         public int paintingPlaceStack = 2;
         public final DefaultPictureSize paintingDefaultSize = new DefaultPictureSize();
         
         public final SortedMap<Integer, Double> brushRadiuses;
         public final SortedMap<Integer, Double> smallBrushRadiuses;
+        
+        public final SortedMap<Integer, Double> removerRadiuses;
+        public final SortedMap<Integer, Double> smallRemoverRadiuses;
         
         public boolean allowPaintOnBlock = false;
         
@@ -395,14 +409,24 @@ public class ModComponentPainting implements ModComponent {
         protected final SortedMap<Integer, Double> iBrushRadiuses = new TreeMap<>();
         protected final SortedMap<Integer, Double> iSmallBrushRadiuses = new TreeMap<>();
         
+        protected final SortedMap<Integer, Double> iRemoverRadiuses = new TreeMap<>();
+        protected final SortedMap<Integer, Double> iSmallRemoverRadiuses = new TreeMap<>();
+        
         protected ChangeableConfig() {
             this.brushRadiuses = Collections.unmodifiableSortedMap(this.iBrushRadiuses);
             this.smallBrushRadiuses = Collections.unmodifiableSortedMap(this.iSmallBrushRadiuses);
+            
+            this.removerRadiuses = Collections.unmodifiableSortedMap(this.iRemoverRadiuses);
+            this.smallRemoverRadiuses =
+                    Collections.unmodifiableSortedMap(this.iSmallRemoverRadiuses);
             
             this.iBrushRadiuses.put(16, 3.5D);
             this.iBrushRadiuses.put(32, 6.2D);
             
             this.iSmallBrushRadiuses.put(0, 0.1D);
+            
+            this.iRemoverRadiuses.putAll(this.iBrushRadiuses);
+            this.iSmallRemoverRadiuses.putAll(this.iSmallBrushRadiuses);
         }
         
         public ChangeableConfig read(ModConfig config) {
@@ -422,23 +446,30 @@ public class ModComponentPainting implements ModComponent {
             {
                 String[] lines = config.getStringList("brushRadiuses",
                                                       ModComponentPainting.this.getName(),
-                                                      new String[]{"1: 1.5",
-                                                                   "12: 2.5",
-                                                                   "16: 3.5",
-                                                                   "24: 5.2",
-                                                                   "32: 6.2",
-                                                                   "48: 7.5",
-                                                                   "64: 10.5"},
-                                                      "");
+                                                      DEFAULT_BRUSH_RADIUSES, "");
                 this.iBrushRadiuses.clear();
                 parseRadiuses(lines, this.iBrushRadiuses);
             }
             {
                 String[] lines = config.getStringList("smallBrushRadiuses",
                                                       ModComponentPainting.this.getName(),
-                                                      new String[]{"1: 0.1"}, "");
+                                                      DEFAULT_SMALL_BRUSH_RADIUSES, "");
                 this.iSmallBrushRadiuses.clear();
                 parseRadiuses(lines, this.iSmallBrushRadiuses);
+            }
+            {
+                String[] lines = config.getStringList("removerRadiuses",
+                                                      ModComponentPainting.this.getName(),
+                                                      DEFAULT_BRUSH_RADIUSES, "");
+                this.iRemoverRadiuses.clear();
+                parseRadiuses(lines, this.iRemoverRadiuses);
+            }
+            {
+                String[] lines = config.getStringList("smallRemoverRadiuses",
+                                                      ModComponentPainting.this.getName(),
+                                                      DEFAULT_SMALL_BRUSH_RADIUSES, "");
+                this.iSmallRemoverRadiuses.clear();
+                parseRadiuses(lines, this.iSmallRemoverRadiuses);
             }
             config.restartlessReset();
             return this;
