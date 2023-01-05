@@ -1,28 +1,16 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
-import java.text.DecimalFormat;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
-import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
-import com.vanym.paniclecraft.core.component.painting.PaintingSide;
-import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
-import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
 import com.vanym.paniclecraft.utils.MainUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
@@ -31,18 +19,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 
-public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorizeable {
+public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
-    public static final String TAG_RADIUS = "Radius";
     public static final String TAG_COLOR = "Color";
-    
-    protected static final double MAX_RADIUS = 256.0D;
-    protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
     
     protected static final int DAMAGE_BRUSH = 0;
     protected static final int DAMAGE_SMALLBRUSH = 1;
@@ -65,9 +45,6 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     public IIcon iconColorPickerHead;
     @SideOnly(Side.CLIENT)
     public IIcon iconColorPickerBody;
-    
-    @SideOnly(Side.CLIENT)
-    protected Set<MessagePaintBrushUse> brushUseMessages = new HashSet<>();
     
     public ItemPaintBrush() {
         super();
@@ -94,117 +71,6 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     }
     
     @Override
-    public boolean isItemTool(ItemStack stack) {
-        return true;
-    }
-    
-    @Override
-    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-        if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            return;
-        }
-        Minecraft mc = Minecraft.getMinecraft();
-        MessagePaintBrushUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
-        if (mes != null) {
-            this.brushUseMessages.add(mes);
-        }
-        this.flashBrushUseMessages();
-    }
-    
-    @Override
-    public void onPlayerStoppedUsing(
-            ItemStack itemStack,
-            World world,
-            EntityPlayer player,
-            int count) {
-        if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            return;
-        }
-        this.flashBrushUseMessages();
-    }
-    
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    public void renderWorldLast(net.minecraftforge.client.event.RenderWorldLastEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        ItemStack itemStack = mc.thePlayer.getItemInUse();
-        if (itemStack != null && itemStack.getItem() instanceof ItemPaintBrush) {
-            MessagePaintBrushUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
-            if (mes != null) {
-                this.brushUseMessages.add(mes);
-            }
-        }
-    }
-    
-    @SideOnly(Side.CLIENT)
-    public void flashBrushUseMessages() {
-        for (MessagePaintBrushUse mes : this.brushUseMessages) {
-            Core.instance.network.sendToServer(mes);
-        }
-        this.brushUseMessages.clear();
-    }
-    
-    @SideOnly(Side.CLIENT)
-    public static MessagePaintBrushUse makeBrushUseMessage(
-            World world,
-            MovingObjectPosition target) {
-        int x = target.blockX;
-        int y = target.blockY;
-        int z = target.blockZ;
-        int side = target.sideHit;
-        boolean tile = true;
-        IPictureSize picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
-        if (picture == null) {
-            tile = false;
-            if (Core.instance.painting.config.allowPaintOnBlock
-                && EntityPaintOnBlock.isValidBlock(world, x, y, z)) {
-                picture = EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
-                if (picture == null) {
-                    picture = Core.instance.painting.config.paintingDefaultSize;
-                }
-            } else {
-                return null;
-            }
-        }
-        PaintingSide pside = PaintingSide.getSize(side);
-        Vec3 inBlock = MainUtils.getInBlockVec(target);
-        Vec3 inPainting = pside.toPaintingCoords(inBlock);
-        int px = (int)(inPainting.xCoord * picture.getWidth());
-        int py = (int)(inPainting.yCoord * picture.getHeight());
-        MessagePaintBrushUse message =
-                new MessagePaintBrushUse(x, y, z, px, py, (byte)pside.ordinal(), tile);
-        return message;
-    }
-    
-    @Override
-    public int getMaxItemUseDuration(ItemStack itemstack) {
-        return 72000;
-    }
-    
-    @Override
-    public boolean onItemUse(
-            ItemStack itemStack,
-            EntityPlayer entityPlayer,
-            World world,
-            int x,
-            int y,
-            int z,
-            int side,
-            float hitX,
-            float hitY,
-            float hitZ) {
-        Picture picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
-        if (picture != null || (Core.instance.painting.config.allowPaintOnBlock
-            && EntityPaintOnBlock.isValidBlock(world, x, y, z))) {
-            entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
-            if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-                this.brushUseMessages.clear();
-            }
-        }
-        return false;
-    }
-    
-    @Override
     @SideOnly(Side.CLIENT)
     public boolean requiresMultipleRenderPasses() {
         return true;
@@ -218,17 +84,7 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
             EntityPlayer entityPlayer,
             List list,
             boolean advancedItemTooltips) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            if (itemTag.hasKey(TAG_RADIUS)) {
-                double radius = this.getPaintingToolRadius(itemStack, null);
-                StringBuilder sb = new StringBuilder();
-                sb.append(StatCollector.translateToLocal(this.getUnlocalizedName() + ".radius"));
-                sb.append(": ");
-                sb.append(NUMBER_FORMATTER.format(radius));
-                list.add(sb.toString());
-            }
-        }
+        super.addInformation(itemStack, entityPlayer, list, advancedItemTooltips);
         if (GuiScreen.isShiftKeyDown()) {
             Color rgbColor = MainUtils.getColorFromInt(this.getColor(itemStack));
             list.add("R: \u00a7c" + rgbColor.getRed());
@@ -296,11 +152,6 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     }
     
     @Override
-    public boolean isFull3D() {
-        return true;
-    }
-    
-    @Override
     public int getColor(ItemStack itemStack) {
         if (itemStack.hasTagCompound()) {
             NBTTagCompound itemTag = itemStack.getTagCompound();
@@ -357,12 +208,9 @@ public class ItemPaintBrush extends ItemMod3 implements IPaintingTool, IColorize
     
     @Override
     public double getPaintingToolRadius(ItemStack itemStack, IPictureSize picture) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            if (itemTag.hasKey(TAG_RADIUS)) {
-                double radius = itemTag.getDouble(TAG_RADIUS);
-                return Math.min(MAX_RADIUS, radius);
-            }
+        Double tagRadius = getTagRadius(itemStack);
+        if (tagRadius != null) {
+            return tagRadius;
         }
         int row;
         if (picture != null) {
