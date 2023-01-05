@@ -393,7 +393,8 @@ public class ModComponentPainting implements ModComponent {
     public class ChangeableConfig {
         
         public int paintingPlaceStack = 2;
-        public final DefaultPictureSize paintingDefaultSize = new DefaultPictureSize();
+        public final IPictureSize paintingDefaultSize = new DefaultPictureSize();
+        public final IPictureSize paintOnBlockDefaultSize = new DefaultPaintOnBlockSize();
         
         public final SortedMap<Integer, Double> brushRadiuses;
         public final SortedMap<Integer, Double> smallBrushRadiuses;
@@ -405,6 +406,9 @@ public class ModComponentPainting implements ModComponent {
         
         protected int paintingDefaultWidth = 16;
         protected int paintingDefaultHeight = 16;
+        
+        protected int paintOnBlockDefaultWidth = 16;
+        protected int paintOnBlockDefaultHeight = 16;
         
         protected final SortedMap<Integer, Double> iBrushRadiuses = new TreeMap<>();
         protected final SortedMap<Integer, Double> iSmallBrushRadiuses = new TreeMap<>();
@@ -439,10 +443,16 @@ public class ModComponentPainting implements ModComponent {
                                   16, 1, 256, "");
             this.paintingDefaultHeight =
                     config.getInt("paintingDefaultHeight", ModComponentPainting.this.getName(),
-                                  16, 1, 256, "(recommend to equals width)");
+                                  16, 1, 256, "(recommended to equals width)");
             this.allowPaintOnBlock =
                     config.getBoolean("allowPaintOnBlock", ModComponentPainting.this.getName(),
                                       false, "");
+            this.paintOnBlockDefaultWidth =
+                    config.getInt("paintOnBlockDefaultWidth", ModComponentPainting.this.getName(),
+                                  16, 1, 256, "");
+            this.paintOnBlockDefaultHeight =
+                    config.getInt("paintOnBlockDefaultHeight", ModComponentPainting.this.getName(),
+                                  16, 1, 256, "(highly recommended to equals width)");
             {
                 String[] lines = config.getStringList("brushRadiuses",
                                                       ModComponentPainting.this.getName(),
@@ -475,7 +485,7 @@ public class ModComponentPainting implements ModComponent {
             return this;
         }
         
-        public class DefaultPictureSize implements IPictureSize {
+        protected class DefaultPictureSize implements IPictureSize {
             
             @Override
             public int getWidth() {
@@ -486,7 +496,19 @@ public class ModComponentPainting implements ModComponent {
             public int getHeight() {
                 return ChangeableConfig.this.paintingDefaultHeight;
             }
+        }
+        
+        protected class DefaultPaintOnBlockSize implements IPictureSize {
             
+            @Override
+            public int getWidth() {
+                return ChangeableConfig.this.paintOnBlockDefaultWidth;
+            }
+            
+            @Override
+            public int getHeight() {
+                return ChangeableConfig.this.paintOnBlockDefaultHeight;
+            }
         }
     }
     

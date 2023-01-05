@@ -7,6 +7,7 @@ import java.util.List;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
+import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -224,6 +225,11 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         
         public void setSide(int side) {
             this.side = side;
+        }
+        
+        @Override
+        public IPictureSize getDefaultSize() {
+            return Core.instance.painting.config.paintOnBlockDefaultSize;
         }
         
         @Override

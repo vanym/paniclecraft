@@ -103,7 +103,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
                 && EntityPaintOnBlock.isValidBlock(world, x, y, z)) {
                 picture = EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
                 if (picture == null) {
-                    picture = Core.instance.painting.config.paintingDefaultSize;
+                    picture = Core.instance.painting.config.paintOnBlockDefaultSize;
                 }
             } else {
                 return null;

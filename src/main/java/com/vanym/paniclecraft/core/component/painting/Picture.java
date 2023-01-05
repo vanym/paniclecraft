@@ -312,7 +312,16 @@ public class Picture implements IPictureSize {
     }
     
     protected void setDefaultSize() {
-        this.setSize(Core.instance.painting.config.paintingDefaultSize);
+        IPictureSize size;
+        if (this.holder != null) {
+            size = this.holder.getDefaultSize();
+        } else {
+            size = null;
+        }
+        if (size == null) {
+            size = Core.instance.painting.config.paintingDefaultSize;
+        }
+        this.setSize(size);
     }
     
     protected void setSize(IPictureSize size) {

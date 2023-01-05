@@ -1,7 +1,6 @@
 package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
 import cpw.mods.fml.relauncher.Side;
@@ -80,17 +79,12 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         super.updateEntity();
     }
     
-    protected class PictureHolder implements IPictureHolder {
+    protected class PictureHolder extends TileEntityPaintingContainer.PictureHolder {
         
         @Override
         public Picture getNeighborPicture(int offsetX, int offsetY) {
             return TileEntityPainting.this.getPainting(TileEntityPainting.this.getBlockMetadata(),
                                                        offsetX, offsetY);
-        }
-        
-        @Override
-        public void update() {
-            TileEntityPainting.this.markForUpdate();
         }
     }
     
