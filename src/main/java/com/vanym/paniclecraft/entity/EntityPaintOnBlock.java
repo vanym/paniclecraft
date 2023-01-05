@@ -13,8 +13,10 @@ import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
+import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.DataWatcher.WatchableObject;
 import net.minecraft.entity.Entity;
@@ -23,6 +25,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.BlockEvent;
 
 public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
@@ -374,10 +378,6 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
     }
     
-    public static boolean isValidBlock(World world, int x, int y, int z) {
-        return !world.isAirBlock(x, y, z);
-    }
-    
     public static EntityPaintOnBlock getOrCreateEntity(World world, int x, int y, int z) {
         EntityPaintOnBlock entityPON = getEntity(world, x, y, z);
         if (entityPON != null) {
@@ -425,5 +425,96 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             return null;
         }
         return entityPOB.getExistingPicture(side);
+    }
+    
+    public static boolean isValidBlock(World world, int x, int y, int z) {
+        boolean valid;
+        Block block = world.getBlock(x, y, z);
+        int meta = world.getBlockMetadata(x, y, z);
+        if (block.isAir(world, x, y, z) || block.getMaterial().isLiquid()) {
+            valid = false;
+        } else if (block.isOpaqueCube()) {
+            valid = true;
+        } else {
+            switch (block.getRenderType()) {
+                case 0: // StandardBlock
+                case 31: // BlockLog
+                case 39: // BlockQuartz
+                case 34: // BlockBeacon
+                    valid = true;
+                break;
+                case 13: // BlockCactus
+                case 14: // BlockBed
+                case 24: // BlockCauldron
+                case 35: // BlockAnvil
+                case 26: // BlockEndPortalFrame
+                case 38: // BlockHopper
+                    valid = true;
+                break;
+                case 20: // BlockVine
+                case 5: // BlockRedstoneWire
+                case 23: // BlockLilyPad
+                case 8: // BlockLadder
+                case 30: // BlockTripWire
+                case 25: // BlockBrewingStand
+                    valid = true;
+                break;
+                case 10: // BlockStairs
+                    valid = true;
+                break;
+                case 16: // PistonBase
+                case 17: // PistonExtension
+                    valid = true;
+                break;
+                case 22: // BlockChest
+                    valid = true;
+                break;
+                case 9: // BlockMinecartTrack
+                    switch (meta & 0b111) {
+                        case 2:
+                        case 4:
+                        case 3:
+                        case 5:
+                            valid = false;
+                        break;
+                        default:
+                            valid = true;
+                        break;
+                    }
+                break;
+                default:
+                    valid = false;
+                break;
+            }
+        }
+        BlockValidForPaint event = new BlockValidForPaint(x, y, z, world, block, meta, valid);
+        MinecraftForge.EVENT_BUS.post(event);
+        switch (event.getResult()) {
+            case ALLOW:
+                valid = true;
+            case DENY:
+                valid = false;
+            case DEFAULT:
+            default:
+            break;
+        }
+        return valid;
+    }
+    
+    @Event.HasResult
+    public static class BlockValidForPaint extends BlockEvent {
+        
+        public final boolean valid;
+        
+        public BlockValidForPaint(int x,
+                int y,
+                int z,
+                World world,
+                Block block,
+                int meta,
+                boolean valid) {
+            super(x, y, z, world, block, meta);
+            this.valid = valid;
+        }
     }
 }
