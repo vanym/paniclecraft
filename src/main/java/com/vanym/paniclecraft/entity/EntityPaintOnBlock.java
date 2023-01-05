@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.entity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
@@ -21,7 +22,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import scala.actors.threadpool.Arrays;
 
 public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
@@ -34,6 +34,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     protected final PictureHolder[] holders = new PictureHolder[N];
     
     protected final PaintOnBlockWatcher picturesWatcher = new PaintOnBlockWatcher();
+    
+    protected boolean proceeded = false;
     
     public EntityPaintOnBlock(World world) {
         super(world);
@@ -80,6 +82,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         if (this.holders[side] != null) {
             return this.holders[side].picture;
         } else {
+            this.needProceed(); // to remove if it will stay empty
             return (this.holders[side] = new PictureHolder(side)).picture;
         }
     }
@@ -109,6 +112,30 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         return side >= 0 && side < this.holders.length;
     }
     
+    protected void clearEmpty() {
+        for (int i = 0; i < this.holders.length; ++i) {
+            if (this.holders[i] != null && this.holders[i].picture.isEmpty()) {
+                this.clearPicture(i);
+            }
+        }
+    }
+    
+    protected boolean isEmpty() {
+        return Arrays.asList(this.holders).stream().allMatch(h->h == null || h.picture.isEmpty());
+    }
+    
+    protected boolean killIfEmpty() {
+        if (this.isEmpty()) {
+            this.setDead();
+            return true;
+        }
+        return false;
+    }
+    
+    protected void needProceed() {
+        this.proceeded = false;
+    }
+    
     @Override
     protected void entityInit() {}
     
@@ -129,7 +156,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public void onUpdate() {}
+    public void onUpdate() {
+        if (!this.proceeded) {
+            this.clearEmpty();
+            this.killIfEmpty();
+            this.proceeded = true;
+        }
+    }
     
     @Override
     public void moveEntity(double x, double y, double z) {}
@@ -216,6 +249,10 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         @Override
         public void update() {
             EntityPaintOnBlock.this.picturesWatcher.setPictureWatched(this.side);
+            if (this.picture.isEmpty()) {
+                EntityPaintOnBlock.this.clearPicture(this.side);
+                EntityPaintOnBlock.this.needProceed();
+            }
         }
     }
     

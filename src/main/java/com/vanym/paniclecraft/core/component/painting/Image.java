@@ -142,6 +142,19 @@ public class Image {
         return changed;
     }
     
+    public boolean isEmpty() {
+        if (!this.hasAlpha) {
+            return false;
+        }
+        for (int i = 0; i < this.data.length; i += this.getPixelSize()) {
+            int iA = i + 3;
+            if (this.data[iA] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     protected void transpose() {
         MatrixUtils.transpose(this.data, this.width, this.getPixelSize());
         int t = this.width;

@@ -190,6 +190,13 @@ public class Picture implements IPictureSize {
         return (this.getWidth() == picture.getWidth()) && (this.getHeight() == picture.getHeight());
     }
     
+    public boolean isEmpty() {
+        if (!this.hasAlpha || !this.unpack()) {
+            return false;
+        }
+        return this.image.isEmpty();
+    }
+    
     protected void imageChanged() {
         this.imageChangeProcessed = false;
     }
