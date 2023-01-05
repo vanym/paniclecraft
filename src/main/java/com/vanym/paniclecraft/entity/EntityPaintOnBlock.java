@@ -429,10 +429,16 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
     public static boolean isValidBlock(World world, int x, int y, int z) {
         boolean valid;
+        boolean air = false;
+        boolean liquid = false;
         Block block = world.getBlock(x, y, z);
         int meta = world.getBlockMetadata(x, y, z);
-        if (block.isAir(world, x, y, z) || block.getMaterial().isLiquid()) {
+        if (block.isAir(world, x, y, z)) {
             valid = false;
+            air = true;
+        } else if (block.getMaterial().isLiquid()) {
+            valid = false;
+            liquid = true;
         } else if (block.isOpaqueCube()) {
             valid = true;
         } else {
@@ -487,13 +493,16 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 break;
             }
         }
-        BlockValidForPaint event = new BlockValidForPaint(x, y, z, world, block, meta, valid);
+        BlockValidForPaint event =
+                new BlockValidForPaint(x, y, z, world, block, meta, valid, air, liquid);
         MinecraftForge.EVENT_BUS.post(event);
         switch (event.getResult()) {
             case ALLOW:
                 valid = true;
+            break;
             case DENY:
                 valid = false;
+            break;
             case DEFAULT:
             default:
             break;
@@ -505,6 +514,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     public static class BlockValidForPaint extends BlockEvent {
         
         public final boolean valid;
+        public final boolean air;
+        public final boolean liquid;
         
         public BlockValidForPaint(int x,
                 int y,
@@ -512,9 +523,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 World world,
                 Block block,
                 int meta,
-                boolean valid) {
+                boolean valid,
+                boolean air,
+                boolean liquid) {
             super(x, y, z, world, block, meta);
             this.valid = valid;
+            this.air = air;
+            this.liquid = liquid;
         }
     }
 }

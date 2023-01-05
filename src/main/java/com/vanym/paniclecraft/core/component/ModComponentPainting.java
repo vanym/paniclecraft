@@ -16,6 +16,7 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintOnBlockEventHandler;
 import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
@@ -127,11 +128,21 @@ public class ModComponentPainting implements ModComponent {
                                               Side.SERVER);
         this.initRecipe(config);
         this.config = new ChangeableConfig().read(config);
+        this.applyConfig();
     }
     
     @Override
     public void configChanged(ModConfig config) {
         this.config.read(config);
+        this.applyConfig();
+    }
+    
+    protected void applyConfig() {
+        if (this.config.anyBlockValidForPaint) {
+            MinecraftForge.EVENT_BUS.register(AnyBlockValidForPaintEventHandler.instance);
+        } else {
+            MinecraftForge.EVENT_BUS.unregister(AnyBlockValidForPaintEventHandler.instance);
+        }
     }
     
     protected void initRecipe(Configuration config) {
@@ -403,6 +414,7 @@ public class ModComponentPainting implements ModComponent {
         public final SortedMap<Integer, Double> smallRemoverRadiuses;
         
         public boolean allowPaintOnBlock = false;
+        public boolean anyBlockValidForPaint = false;
         
         protected int paintingDefaultWidth = 16;
         protected int paintingDefaultHeight = 16;
@@ -453,6 +465,9 @@ public class ModComponentPainting implements ModComponent {
             this.paintOnBlockDefaultHeight =
                     config.getInt("paintOnBlockDefaultHeight", ModComponentPainting.this.getName(),
                                   16, 1, 256, "(highly recommended to equals width)");
+            this.anyBlockValidForPaint =
+                    config.getBoolean("anyBlockValidForPaint", ModComponentPainting.this.getName(),
+                                      false, "");
             {
                 String[] lines = config.getStringList("brushRadiuses",
                                                       ModComponentPainting.this.getName(),
