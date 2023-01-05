@@ -10,7 +10,9 @@ item.paintBrush0.name=Paint Brush
 item.paintBrush1.name=Small Paint Brush
 item.paintBrush4.name=Paint Filler
 item.paintBrush6.name=Color Picker
-item.paintBrush.radius=Radius
+item.paintRemover0.name=Paint Chipper
+item.paintRemover1.name=Paint Knife
+text.paintingtool.radius=Radius
 item.palette.name=Palette
 item.palette.inv.name=Palette
 

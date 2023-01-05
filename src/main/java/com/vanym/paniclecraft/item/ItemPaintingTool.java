@@ -3,7 +3,9 @@ package com.vanym.paniclecraft.item;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.SortedMap;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
@@ -12,7 +14,7 @@ import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
-import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
+import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -37,7 +39,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
     
     @SideOnly(Side.CLIENT)
-    protected Set<MessagePaintBrushUse> brushUseMessages = new HashSet<>();
+    protected Set<MessagePaintingToolUse> brushUseMessages = new HashSet<>();
     
     @Override
     public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
@@ -45,7 +47,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             return;
         }
         Minecraft mc = Minecraft.getMinecraft();
-        MessagePaintBrushUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
+        MessagePaintingToolUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
         if (mes != null) {
             this.brushUseMessages.add(mes);
         }
@@ -70,7 +72,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         Minecraft mc = Minecraft.getMinecraft();
         ItemStack itemStack = mc.thePlayer.getItemInUse();
         if (itemStack != null && itemStack.getItem() == this) {
-            MessagePaintBrushUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
+            MessagePaintingToolUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
             if (mes != null) {
                 this.brushUseMessages.add(mes);
             }
@@ -79,14 +81,14 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     
     @SideOnly(Side.CLIENT)
     public void flashBrushUseMessages() {
-        for (MessagePaintBrushUse mes : this.brushUseMessages) {
+        for (MessagePaintingToolUse mes : this.brushUseMessages) {
             Core.instance.network.sendToServer(mes);
         }
         this.brushUseMessages.clear();
     }
     
     @SideOnly(Side.CLIENT)
-    public static MessagePaintBrushUse makeBrushUseMessage(
+    public static MessagePaintingToolUse makeBrushUseMessage(
             World world,
             MovingObjectPosition target) {
         int x = target.blockX;
@@ -112,8 +114,8 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         Vec3 inPainting = pside.toPaintingCoords(inBlock);
         int px = (int)(inPainting.xCoord * picture.getWidth());
         int py = (int)(inPainting.yCoord * picture.getHeight());
-        MessagePaintBrushUse message =
-                new MessagePaintBrushUse(x, y, z, px, py, (byte)pside.ordinal(), tile);
+        MessagePaintingToolUse message =
+                new MessagePaintingToolUse(x, y, z, px, py, (byte)pside.ordinal(), tile);
         return message;
     }
     
@@ -168,7 +170,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             if (itemTag.hasKey(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 StringBuilder sb = new StringBuilder();
-                sb.append(StatCollector.translateToLocal(this.getUnlocalizedName() + ".radius"));
+                sb.append(StatCollector.translateToLocal("text.paintingtool.radius"));
                 sb.append(": ");
                 sb.append(NUMBER_FORMATTER.format(radius));
                 list.add(sb.toString());
@@ -185,5 +187,24 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             }
         }
         return null;
+    }
+    
+    protected static double getRadius(SortedMap<Integer, Double> radiuses, IPictureSize picture) {
+        int row;
+        if (picture != null) {
+            row = Math.min(picture.getWidth(), picture.getHeight());
+        } else {
+            row = 0;
+        }
+        return getRadius(radiuses, row);
+    }
+    
+    protected static double getRadius(SortedMap<Integer, Double> radiuses, int row) {
+        try {
+            int key = radiuses.headMap(row + 1).lastKey();
+            return radiuses.get(key);
+        } catch (NoSuchElementException e) {
+            return 0.0D;
+        }
     }
 }

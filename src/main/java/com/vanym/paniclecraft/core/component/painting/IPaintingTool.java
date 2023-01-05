@@ -9,7 +9,8 @@ public interface IPaintingTool {
         NONE(false),
         BRUSH(true),
         FILLER(false),
-        COLORPICKER(true);
+        COLORPICKER(true),
+        REMOVER(true);
         
         protected boolean pixelSelector;
         

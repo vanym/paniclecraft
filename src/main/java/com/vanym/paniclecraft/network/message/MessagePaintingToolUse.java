@@ -6,7 +6,7 @@ import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
-import com.vanym.paniclecraft.item.ItemPaintBrush;
+import com.vanym.paniclecraft.item.ItemPaintingTool;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -16,17 +16,17 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class MessagePaintBrushUse
+public class MessagePaintingToolUse
         implements
             IMessage,
-            IMessageHandler<MessagePaintBrushUse, IMessage> {
+            IMessageHandler<MessagePaintingToolUse, IMessage> {
     int x, y, z, px, py;
     byte side;
     boolean tile;
     
-    public MessagePaintBrushUse() {}
+    public MessagePaintingToolUse() {}
     
-    public MessagePaintBrushUse(int x, int y, int z, int px, int py, byte side, boolean tile) {
+    public MessagePaintingToolUse(int x, int y, int z, int px, int py, byte side, boolean tile) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -43,10 +43,10 @@ public class MessagePaintBrushUse
     
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof MessagePaintBrushUse) && this.equals((MessagePaintBrushUse)obj);
+        return (obj instanceof MessagePaintingToolUse) && this.equals((MessagePaintingToolUse)obj);
     }
     
-    public boolean equals(MessagePaintBrushUse mes) {
+    public boolean equals(MessagePaintingToolUse mes) {
         return mes != null
             && this.x == mes.x
             && this.y == mes.y
@@ -80,13 +80,13 @@ public class MessagePaintBrushUse
     }
     
     @Override
-    public IMessage onMessage(MessagePaintBrushUse message, MessageContext ctx) {
+    public IMessage onMessage(MessagePaintingToolUse message, MessageContext ctx) {
         EntityPlayer playerEntity = ctx.getServerHandler().playerEntity;
         if (playerEntity.getHeldItem() == null) {
             return null;
         }
         ItemStack heldItem = playerEntity.getHeldItem();
-        if (!(heldItem.getItem() instanceof ItemPaintBrush)) {
+        if (!(heldItem.getItem() instanceof ItemPaintingTool)) {
             return null;
         }
         World world = playerEntity.worldObj;

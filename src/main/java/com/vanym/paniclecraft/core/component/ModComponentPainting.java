@@ -1,7 +1,7 @@
 package com.vanym.paniclecraft.core.component;
 
 import java.awt.Color;
-import java.util.NoSuchElementException;
+import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -21,10 +21,11 @@ import com.vanym.paniclecraft.core.component.painting.PaintOnBlockEventHandler;
 import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
+import com.vanym.paniclecraft.item.ItemPaintRemover;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPalette;
-import com.vanym.paniclecraft.network.message.MessagePaintBrushUse;
+import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
@@ -59,6 +60,7 @@ public class ModComponentPainting implements ModComponent {
     
     public ItemPainting itemPainting;
     public ItemPaintBrush itemPaintBrush;
+    public ItemPaintRemover itemPaintRemover;
     public ItemPalette itemPalette;
     public BlockPainting blockPainting;
     public BlockPaintingFrame blockPaintingFrame;
@@ -94,9 +96,11 @@ public class ModComponentPainting implements ModComponent {
         
         this.itemPainting = new ItemPainting();
         this.itemPaintBrush = new ItemPaintBrush();
+        this.itemPaintRemover = new ItemPaintRemover();
         this.itemPalette = new ItemPalette();
         Core.instance.registerItem(this.itemPainting);
         Core.instance.registerItem(this.itemPaintBrush);
+        Core.instance.registerItem(this.itemPaintRemover);
         Core.instance.registerItem(this.itemPalette);
         
         this.blockPainting = new BlockPainting();
@@ -115,8 +119,8 @@ public class ModComponentPainting implements ModComponent {
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
         MinecraftForge.EVENT_BUS.register(new PaintOnBlockEventHandler());
         
-        Core.instance.network.registerMessage(MessagePaintBrushUse.class,
-                                              MessagePaintBrushUse.class, 30,
+        Core.instance.network.registerMessage(MessagePaintingToolUse.class,
+                                              MessagePaintingToolUse.class, 30,
                                               Side.SERVER);
         Core.instance.network.registerMessage(MessagePaletteSetColor.class,
                                               MessagePaletteSetColor.class, 32,
@@ -274,8 +278,10 @@ public class ModComponentPainting implements ModComponent {
     protected void applyConfigClient() {
         if (this.clientConfig.perFrameBrushUse) {
             MinecraftForge.EVENT_BUS.register(this.itemPaintBrush);
+            MinecraftForge.EVENT_BUS.register(this.itemPaintRemover);
         } else {
             MinecraftForge.EVENT_BUS.unregister(this.itemPaintBrush);
+            MinecraftForge.EVENT_BUS.unregister(this.itemPaintRemover);
         }
         
         this.paintingTileRenderer.renderFrameType =
@@ -332,19 +338,25 @@ public class ModComponentPainting implements ModComponent {
         public int paintingPlaceStack = 2;
         public final DefaultPictureSize paintingDefaultSize = new DefaultPictureSize();
         
-        public SortedMap<Integer, Double> brushRadiuses = new TreeMap<>();
-        public SortedMap<Integer, Double> smallBrushRadiuses = new TreeMap<>();
+        public final SortedMap<Integer, Double> brushRadiuses;
+        public final SortedMap<Integer, Double> smallBrushRadiuses;
         
         public boolean allowPaintOnBlock = false;
         
         protected int paintingDefaultWidth = 16;
         protected int paintingDefaultHeight = 16;
         
+        protected final SortedMap<Integer, Double> iBrushRadiuses = new TreeMap<>();
+        protected final SortedMap<Integer, Double> iSmallBrushRadiuses = new TreeMap<>();
+        
         protected ChangeableConfig() {
-            this.brushRadiuses.put(16, 3.5D);
-            this.brushRadiuses.put(32, 6.2D);
+            this.brushRadiuses = Collections.unmodifiableSortedMap(this.iBrushRadiuses);
+            this.smallBrushRadiuses = Collections.unmodifiableSortedMap(this.iSmallBrushRadiuses);
             
-            this.smallBrushRadiuses.put(0, 0.1D);
+            this.iBrushRadiuses.put(16, 3.5D);
+            this.iBrushRadiuses.put(32, 6.2D);
+            
+            this.iSmallBrushRadiuses.put(0, 0.1D);
         }
         
         public ChangeableConfig read(ModConfig config) {
@@ -372,26 +384,18 @@ public class ModComponentPainting implements ModComponent {
                                                                    "48: 7.5",
                                                                    "64: 10.5"},
                                                       "");
-                this.brushRadiuses.clear();
-                parseRadiuses(lines, this.brushRadiuses);
+                this.iBrushRadiuses.clear();
+                parseRadiuses(lines, this.iBrushRadiuses);
             }
             {
                 String[] lines = config.getStringList("smallBrushRadiuses",
                                                       ModComponentPainting.this.getName(),
                                                       new String[]{"1: 0.1"}, "");
-                this.smallBrushRadiuses.clear();
-                parseRadiuses(lines, this.smallBrushRadiuses);
+                this.iSmallBrushRadiuses.clear();
+                parseRadiuses(lines, this.iSmallBrushRadiuses);
             }
             config.restartlessReset();
             return this;
-        }
-        
-        public double getBrushRadius(int row) {
-            return getRadius(row, this.brushRadiuses);
-        }
-        
-        public double getSmallBrushRadius(int row) {
-            return getRadius(row, this.smallBrushRadiuses);
         }
         
         public class DefaultPictureSize implements IPictureSize {
@@ -471,15 +475,6 @@ public class ModComponentPainting implements ModComponent {
                     config.getBoolean("paintingNoneSelectionBox", CLIENT_RENDER, false, "");
             config.restartlessReset();
             return this;
-        }
-    }
-    
-    protected static double getRadius(int row, SortedMap<Integer, Double> radiuses) {
-        try {
-            int key = radiuses.headMap(row + 1).lastKey();
-            return radiuses.get(key);
-        } catch (NoSuchElementException e) {
-            return 0.0D;
         }
     }
     

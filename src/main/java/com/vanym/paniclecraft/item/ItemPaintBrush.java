@@ -212,17 +212,11 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
         if (tagRadius != null) {
             return tagRadius;
         }
-        int row;
-        if (picture != null) {
-            row = Math.min(picture.getWidth(), picture.getHeight());
-        } else {
-            row = 0;
-        }
         switch (itemStack.getItemDamage()) {
             case DAMAGE_BRUSH:
-                return Core.instance.painting.config.getBrushRadius(row);
+                return getRadius(Core.instance.painting.config.brushRadiuses, picture);
             case DAMAGE_SMALLBRUSH:
-                return Core.instance.painting.config.getSmallBrushRadius(row);
+                return getRadius(Core.instance.painting.config.smallBrushRadiuses, picture);
             default:
                 return 0.1D;
         }

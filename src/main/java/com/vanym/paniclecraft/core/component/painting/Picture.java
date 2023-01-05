@@ -66,7 +66,14 @@ public class Picture implements IPictureSize {
             return false;
         }
         Color color = tool.getPaintingToolColor(itemStack);
-        if (toolType == PaintingToolType.BRUSH) {
+        if (toolType == PaintingToolType.BRUSH || toolType == PaintingToolType.REMOVER) {
+            if (toolType == PaintingToolType.REMOVER) {
+                if (this.hasAlpha) {
+                    color = new Color(0, 0, 0, 0);
+                } else {
+                    color = Core.instance.painting.DEFAULT_COLOR;
+                }
+            }
             double radius = tool.getPaintingToolRadius(itemStack, this);
             Set<Picture> changedSet = new HashSet<>();
             this.setPixelsColor(x, y, radius, color, changedSet);
