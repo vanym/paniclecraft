@@ -69,11 +69,18 @@ public class ItemPaintRemover extends ItemPaintingTool {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
-    public void getSubItems(Item item, CreativeTabs creativetabs, List list) {
+    public void getSubItems(Item item, CreativeTabs creativetab, List list) {
         if (!(item instanceof ItemPaintRemover)) {
             return;
         }
         ItemPaintRemover remover = (ItemPaintRemover)item;
+        if (!Core.instance.painting.config.allowPaintOnBlock
+            && creativetab != null
+            && creativetab == Core.instance.tab) {
+            // This item is used to remove paint from block,
+            // so hide it if painting on block is not allowed
+            return;
+        }
         list.add(remover.getRemover());
         list.add(remover.getSmallRemover());
     }
