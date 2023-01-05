@@ -178,6 +178,52 @@ public class ModComponentPainting implements ModComponent {
                     Items.glass_bottle);
             GameRegistry.addRecipe(recipe);
         }
+        if (config.getBoolean("craftingRecipePaintRemoverFromStick", this.getName(), false, "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintRemover.getRemover(),
+                    "i",
+                    "s",
+                    Character.valueOf('i'),
+                    "ingotIron",
+                    Character.valueOf('s'),
+                    "stickWood");
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipePaintRemoverFromBrush", this.getName(), false, "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintRemover.getRemover(),
+                    "i",
+                    "b",
+                    Character.valueOf('i'),
+                    "ingotIron",
+                    Character.valueOf('b'),
+                    this.itemPaintBrush.getBrush());
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipeSmallPaintRemoverFromStick", this.getName(), false,
+                              "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintRemover.getSmallRemover(),
+                    "f",
+                    "s",
+                    Character.valueOf('f'),
+                    Items.flint,
+                    Character.valueOf('s'),
+                    "stickWood");
+            GameRegistry.addRecipe(recipe);
+        }
+        if (config.getBoolean("craftingRecipeSmallPaintRemoverFromBrush", this.getName(), false,
+                              "")) {
+            ShapedOreRecipe recipe = new ShapedOreRecipe(
+                    this.itemPaintRemover.getSmallRemover(),
+                    "f",
+                    "b",
+                    Character.valueOf('f'),
+                    Items.flint,
+                    Character.valueOf('b'),
+                    this.itemPaintBrush.getSmallBrush());
+            GameRegistry.addRecipe(recipe);
+        }
         if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
             RecipeColorizeByDye recipe = new RecipeColorizeByDye();
             GameRegistry.addRecipe(recipe);
