@@ -31,3 +31,6 @@ gui.chess.startGame=Start Game
 text.chessGameHaveSave=Have saved game
 
 item.portableWorkbench.name=Portable Workbench
+
+commands.paniclecraft.paintonblock.cleararea.usage=/paniclecraft paintonblock cleararea <radius> [<pos>]
+commands.paniclecraft.paintonblock.cleararea.clear=Clear %d paint from blocks in %s%s

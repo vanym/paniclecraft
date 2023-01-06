@@ -22,6 +22,7 @@ import net.minecraft.entity.DataWatcher.WatchableObject;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -397,6 +398,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 return BlockPaintingContainer.getPictureAsItem(EntityPaintOnBlock.this.getPicture(this.side));
             }
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static int clearArea(World world, AxisAlignedBB box) {
+        List<Entity> list = world.getEntitiesWithinAABB(EntityPaintOnBlock.class, box);
+        list.forEach(e->e.setDead());
+        return list.size();
     }
     
     public static Picture getOrCreateEntityPicture(World world, int x, int y, int z, int side) {
