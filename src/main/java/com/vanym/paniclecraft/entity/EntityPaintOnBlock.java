@@ -467,6 +467,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         boolean liquid = false;
         Block block = world.getBlock(x, y, z);
         int meta = world.getBlockMetadata(x, y, z);
+        ForgeDirection pside = ForgeDirection.getOrientation(side);
         if (block.isAir(world, x, y, z)) {
             valid = false;
             air = true;
@@ -474,7 +475,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             valid = false;
             liquid = true;
         } else if (block.isOpaqueCube()) {
-            valid = true;
+            Block neighbor =
+                    world.getBlock(x + pside.offsetX, y + pside.offsetY, z + pside.offsetZ);
+            if (neighbor.isOpaqueCube()) {
+                valid = false;
+            } else {
+                valid = true;
+            }
         } else {
             switch (block.getRenderType()) {
                 case 0: // StandardBlock
@@ -491,7 +498,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                     valid = true;
                 break;
                 case 38: // BlockHopper
-                    valid = (ForgeDirection.getOrientation(side) == ForgeDirection.UP);
+                    valid = (pside == ForgeDirection.UP);
                 break;
                 case 20: // BlockVine
                 case 5: // BlockRedstoneWire
