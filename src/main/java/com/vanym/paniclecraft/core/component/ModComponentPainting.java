@@ -540,12 +540,14 @@ public class ModComponentPainting implements ModComponent {
         public boolean renderPaintingItem = true;
         public int renderPaintingTilePartFrameType = 1;
         public int renderPaintingTilePartPictureType = 2;
+        public double renderPaintingTileMaxRenderDistanceSquared = Math.pow(128.0D, 2);
         public boolean renderPaintingFrameTile = true;
         public boolean renderPaintingFrameItem = true;
         public int renderPaintingFrameTilePartFrameType = 0;
         public int renderPaintingFrameTilePartPictureType = 2;
-        public boolean renderPaintOnBlock = true;
+        public double renderPaintingFrameTileMaxRenderDistanceSquared = Math.pow(128.0D, 2);
         public int renderPaintOnBlockPartPictureType = 2;
+        public double renderPaintOnBlockMaxRenderDistanceSquared = Math.pow(256.0D, 2);
         public boolean renderProfiling = false;
         public boolean paintingSpecialSelectionBox = true;
         public Color paintingSpecialSelectionBoxColor = null;
@@ -569,6 +571,10 @@ public class ModComponentPainting implements ModComponent {
                     config.getInt("paintingTilePartFrameType", CLIENT_RENDER, 1, -1, 2, "");
             this.renderPaintingTilePartPictureType =
                     config.getInt("paintingTilePartPictureType", CLIENT_RENDER, 2, -1, 2, "");
+            this.renderPaintingTileMaxRenderDistanceSquared =
+                    Math.pow(config.getFloat("renderPaintingTileMaxRenderDistance", CLIENT_RENDER,
+                                             128.0F, 0.0F, 1024.0F, ""),
+                             2);
             this.renderPaintingFrameTile =
                     config.getBoolean("paintingFrameTile", CLIENT_RENDER, true, "");
             this.renderPaintingFrameItem =
@@ -577,10 +583,17 @@ public class ModComponentPainting implements ModComponent {
                     config.getInt("paintingFrameTilePartFrameType", CLIENT_RENDER, 0, -1, 2, "");
             this.renderPaintingFrameTilePartPictureType =
                     config.getInt("paintingFrameTilePartPictureType", CLIENT_RENDER, 2, -1, 2, "");
-            this.renderPaintOnBlock =
-                    config.getBoolean("paintOnBlock", CLIENT_RENDER, true, "");
+            this.renderPaintOnBlockMaxRenderDistanceSquared =
+                    Math.pow(config.getFloat("renderPaintOnBlockMaxRenderDistance", CLIENT_RENDER,
+                                             256.0F, 0.0F, 1024.0F, ""),
+                             2);
             this.renderPaintOnBlockPartPictureType =
                     config.getInt("paintOnBlockPartPictureType", CLIENT_RENDER, 2, -1, 2, "");
+            this.renderPaintingFrameTileMaxRenderDistanceSquared =
+                    Math.pow(config.getFloat("renderPaintingFrameTileMaxRenderDistance",
+                                             CLIENT_RENDER,
+                                             128.0F, 0.0F, 1024.0F, ""),
+                             2);
             this.renderProfiling =
                     config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
             this.paintingSpecialSelectionBox =

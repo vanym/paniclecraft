@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.tileentity;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
@@ -153,7 +154,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     @Override
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-        return 16384.0D; // 128 * 128
+        return Core.instance.painting.clientConfig.renderPaintingFrameTileMaxRenderDistanceSquared;
     }
     
     protected void unloadPictures() {

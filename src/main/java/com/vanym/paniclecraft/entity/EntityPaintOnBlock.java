@@ -214,8 +214,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     @Override
     @SideOnly(Side.CLIENT)
     public boolean isInRangeToRenderDist(double dist) {
-        double d1 = 64.0D * this.renderDistanceWeight;
-        return dist < d1 * d1;
+        return dist <= Core.instance.painting.clientConfig.renderPaintOnBlockMaxRenderDistanceSquared;
     }
     
     @Override

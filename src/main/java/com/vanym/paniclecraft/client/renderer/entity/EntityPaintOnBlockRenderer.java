@@ -36,9 +36,6 @@ public class EntityPaintOnBlockRenderer extends Render {
             double z,
             float yaw,
             float partialTicks) {
-        if (!Core.instance.painting.clientConfig.renderPaintOnBlock) {
-            return;
-        }
         TileEntityPaintingRenderer.renderInWorldEnable();
         this.doRender((EntityPaintOnBlock)entity, x, y, z, partialTicks);
         TileEntityPaintingRenderer.renderInWorldDisable();
