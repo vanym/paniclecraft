@@ -76,7 +76,7 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
             list.add(sb.toString());
         }
         list.addAll(Arrays.asList(Character.valueOf('f'),
-                                  Core.instance.painting.blockPaintingFrame));
+                                  Core.instance.painting.itemPaintingFrame));
         list.addAll(Arrays.asList(Character.valueOf('p'),
                                   Core.instance.painting.itemPainting));
         return list.toArray();

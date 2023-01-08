@@ -319,7 +319,7 @@ public class ModComponentPainting implements ModComponent {
         this.paintOnBlockRenderer = new EntityPaintOnBlockRenderer();
         
         MinecraftForgeClient.registerItemRenderer(this.itemPainting, this.paintingItemRenderer);
-        MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(this.blockPaintingFrame),
+        MinecraftForgeClient.registerItemRenderer(this.itemPaintingFrame,
                                                   this.paintingFrameItemRenderer);
         MinecraftForge.EVENT_BUS.register(this.textureCache);
         RenderingRegistry.registerEntityRenderingHandler(EntityPaintOnBlock.class,
