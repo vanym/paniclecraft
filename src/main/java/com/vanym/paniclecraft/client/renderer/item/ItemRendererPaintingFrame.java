@@ -3,10 +3,11 @@ package com.vanym.paniclecraft.client.renderer.item;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import cpw.mods.fml.relauncher.Side;
@@ -50,13 +51,13 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
     public void renderItem(ItemRenderType type, ItemStack itemS, Object... data) {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
         tilePF.blockType = Core.instance.painting.blockPaintingFrame;
-        int[] obtainedTextures = new int[TileEntityPaintingFrame.N];
+        int[] obtainedTextures = new int[ISidePictureProvider.N];
         NBTTagCompound itemTag = itemS.getTagCompound();
         if (itemTag == null) {
             itemTag = new NBTTagCompound();
         }
-        for (int i = 0; i < TileEntityPaintingFrame.N; ++i) {
-            final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
+        for (int i = 0; i < ISidePictureProvider.N; ++i) {
+            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
             obtainedTextures[i] = -1;
             if (!itemTag.hasKey(TAG_PICTURE_I)) {
                 continue;
@@ -95,12 +96,12 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             break;
         }
         this.paintingFrameTileRenderer.renderTileEntityAtItem(tilePF);
-        for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
+        for (int i = 0; i < ISidePictureProvider.N; i++) {
             Picture picture = tilePF.getPicture(i);
             if (picture == null || obtainedTextures[i] >= 0) {
                 continue;
             }
-            final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
+            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
             NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
             NBTBase imageTag = pictureTag.getTag(Picture.TAG_IMAGE);
             this.textureCache.putTexture(imageTag, picture.texture);

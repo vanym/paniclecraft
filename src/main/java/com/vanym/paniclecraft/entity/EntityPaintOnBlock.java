@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import cpw.mods.fml.common.eventhandler.Event;
@@ -35,8 +35,6 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     public static final String IN_MOD_ID = "paintonblock";
     
     public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
-    
-    public static final int N = TileEntityPaintingFrame.N;
     
     protected final PictureHolder[] holders = new PictureHolder[N];
     
@@ -385,7 +383,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 ItemStack stack = (ItemStack)obj;
                 if (stack.hasTagCompound()) {
                     Picture picture = EntityPaintOnBlock.this.createPicture(this.side);
-                    if (Core.instance.painting.itemPainting.fillPicture(picture, stack)) {
+                    if (ItemPainting.fillPicture(picture, stack)) {
                         return;
                     }
                 }
@@ -394,7 +392,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             
             @Override
             public Object getObject() {
-                return BlockPaintingContainer.getPictureAsItem(EntityPaintOnBlock.this.getPicture(this.side));
+                return ItemPainting.getPictureAsItem(EntityPaintOnBlock.this.getPicture(this.side));
             }
         }
     }

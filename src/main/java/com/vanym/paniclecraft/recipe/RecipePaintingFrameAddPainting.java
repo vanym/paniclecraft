@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
@@ -22,7 +21,7 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
     protected final ForgeDirection side;
     
     protected RecipePaintingFrameAddPainting(ForgeDirection pside, int offsetX, int offsetY) {
-        super(Core.instance.painting.blockPaintingFrame.getItemWithEmptyPictures(pside),
+        super(ItemPaintingFrame.getItemWithEmptyPictures(pside),
               getRecipe(offsetX, offsetY));
         this.side = pside;
     }
@@ -32,10 +31,10 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
         if (!super.matches(inv, world)) {
             return false;
         }
-        ItemStack frame = RecipeUtils.findItem(inv, Core.instance.painting.blockPaintingFrame);
+        ItemStack frame = RecipeUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         if (frame.hasTagCompound()) {
             NBTTagCompound itemTag = frame.getTagCompound();
-            if (itemTag.hasKey(BlockPaintingFrame.getPictureTag(this.side))) {
+            if (itemTag.hasKey(ItemPaintingFrame.getPictureTag(this.side))) {
                 return false;
             }
         }
@@ -45,7 +44,7 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
     @Override
     public ItemStack getCraftingResult(InventoryCrafting inv) {
         ItemStack frame = super.getCraftingResult(inv);
-        ItemStack inputFrame = RecipeUtils.findItem(inv, Core.instance.painting.blockPaintingFrame);
+        ItemStack inputFrame = RecipeUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         ItemStack painting = RecipeUtils.findItem(inv, Core.instance.painting.itemPainting);
         if (inputFrame.hasTagCompound()) {
             frame.setTagCompound((NBTTagCompound)inputFrame.getTagCompound().copy());

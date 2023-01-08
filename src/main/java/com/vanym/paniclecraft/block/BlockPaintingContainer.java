@@ -1,9 +1,7 @@
 package com.vanym.paniclecraft.block;
 
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -11,8 +9,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -110,19 +106,6 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
             return ForgeDirection.UNKNOWN;
         }
         return stackdir;
-    }
-    
-    public static ItemStack getPictureAsItem(Picture picture) {
-        ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
-        if (picture == null) {
-            return itemS;
-        }
-        NBTTagCompound itemTag = new NBTTagCompound();
-        NBTTagCompound pictureTag = new NBTTagCompound();
-        picture.writeToNBT(pictureTag);
-        itemS.setTagCompound(itemTag);
-        itemTag.setTag(ItemPainting.TAG_PICTURE, pictureTag);
-        return itemS;
     }
     
     public static ISidePictureProvider getProvider(IBlockAccess world, int x, int y, int z) {

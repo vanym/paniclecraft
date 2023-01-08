@@ -7,6 +7,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -63,7 +64,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
         BlockPaintingFrame block = (BlockPaintingFrame)tile.getBlockType();
         final double paintingWidth = block.getPaintingOutlineSize();
         boolean skipFrame = (this.renderPictureType >= 0);
-        for (int side = 0; side < TileEntityPaintingFrame.N; ++side) {
+        for (int side = 0; side < ISidePictureProvider.N; ++side) {
             Picture picture = tile.getPicture(side);
             if (picture == null) {
                 skipFrame = false;
@@ -93,7 +94,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
                 theProfiler.endStartSection("inside"); // outside
             }
             block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.FRAMEINSIDE);
-            for (int side = 0; side < TileEntityPaintingFrame.N; ++side) {
+            for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = tile.getPicture(side);
                 if (picture == null) {
                     continue;
@@ -120,7 +121,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
             }
             render.setMaxAmbientOcclusion(this.renderPictureType);
             block.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PICTURE);
-            for (int side = 0; side < TileEntityPaintingFrame.N; ++side) {
+            for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = tile.getPicture(side);
                 if (picture == null) {
                     continue;

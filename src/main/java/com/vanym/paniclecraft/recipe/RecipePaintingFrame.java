@@ -10,8 +10,7 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 public class RecipePaintingFrame extends ShapedOreRecipe {
     
     public RecipePaintingFrame(Object... recipe) {
-        super(Core.instance.painting.blockPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT),
-              recipe);
+        super(ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT), recipe);
     }
     
     @Override

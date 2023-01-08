@@ -2,15 +2,16 @@ package com.vanym.paniclecraft.block;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.item.ItemPainting;
+import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -23,7 +24,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -35,8 +35,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class BlockPaintingFrame extends BlockPaintingContainer {
-    
-    public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
     @SideOnly(Side.CLIENT)
     protected int specialRendererSide = -1;
@@ -95,7 +93,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         double ex = x + 0.5D + (dir.offsetX * 0.6);
         double ey = y + 0.5D + (dir.offsetY * 0.6);
         double ez = z + 0.5D + (dir.offsetZ * 0.6);
-        ItemStack itemStack = BlockPaintingContainer.getPictureAsItem(picture);
+        ItemStack itemStack = ItemPainting.getPictureAsItem(picture);
         EntityItem entityItem = new EntityItem(world, ex, ey, ez, itemStack);
         entityItem.delayBeforeCanPickup = 3;
         world.spawnEntityInWorld(entityItem);
@@ -134,7 +132,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         TileEntity tile = world.getTileEntity(x, y, z);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame timePF = (TileEntityPaintingFrame)tile;
-            ItemStack itemStack = this.getFrameAsItem(timePF);
+            ItemStack itemStack = ItemPaintingFrame.getFrameAsItem(timePF);
             this.dropBlockAsItem(world, x, y, z, itemStack);
         }
         super.breakBlock(world, x, y, z, block, meta);
@@ -156,8 +154,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
             NBTTagCompound itemTag = itemStack.getTagCompound();
-            for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
-                final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
+            for (int i = 0; i < ISidePictureProvider.N; i++) {
+                final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
                 if (!itemTag.hasKey(TAG_PICTURE_I)) {
                     continue;
                 }
@@ -257,54 +255,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         });
     }
     
-    public ItemStack getItemWithPictures(Map<ForgeDirection, Picture> map) {
-        ItemStack itemS =
-                new ItemStack(Item.getItemFromBlock(this));
-        if (map == null) {
-            return itemS;
-        }
-        NBTTagCompound itemTag = new NBTTagCompound();
-        map.forEach((pside, picture)-> {
-            final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(pside);
-            NBTTagCompound pictureTag = new NBTTagCompound();
-            if (picture != null) {
-                picture.writeToNBT(pictureTag);
-            }
-            itemTag.setTag(TAG_PICTURE_I, pictureTag);
-        });
-        if (!itemTag.hasNoTags()) {
-            itemS.setTagCompound(itemTag);
-        }
-        return itemS;
-    }
-    
-    public ItemStack getFrameAsItem(TileEntityPaintingFrame tilePF) {
-        if (tilePF == null) {
-            return this.getItemWithPictures(null);
-        }
-        Map<ForgeDirection, Picture> map = new HashMap<>();
-        for (int i = 0; i < TileEntityPaintingFrame.N; i++) {
-            Picture picture = tilePF.getPicture(i);
-            if (picture == null) {
-                continue;
-            }
-            ForgeDirection pside = ForgeDirection.getOrientation(i);
-            map.put(pside, picture);
-        }
-        return this.getItemWithPictures(map);
-    }
-    
-    public ItemStack getItemWithEmptyPictures(ForgeDirection... psides) {
-        if (psides == null) {
-            return this.getItemWithPictures(null);
-        }
-        Map<ForgeDirection, Picture> map = new HashMap<>();
-        for (ForgeDirection pside : psides) {
-            map.put(pside, null);
-        }
-        return this.getItemWithPictures(map);
-    }
-    
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister iconRegister) {}
@@ -319,7 +269,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
-        return this.getFrameAsItem(tilePF);
+        return ItemPaintingFrame.getFrameAsItem(tilePF);
     }
     
     public static List<AxisAlignedBB> getFrameBoxes(final double frameWidth) {
@@ -365,13 +315,5 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             list.add(box);
         }
         return list;
-    }
-    
-    public static String getPictureTag(ForgeDirection pside) {
-        return getPictureTag(pside.ordinal());
-    }
-    
-    public static String getPictureTag(int side) {
-        return String.format(BlockPaintingFrame.TAG_PICTURE_N, side);
     }
 }

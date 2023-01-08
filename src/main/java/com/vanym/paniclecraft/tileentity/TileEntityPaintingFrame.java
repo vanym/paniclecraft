@@ -17,8 +17,6 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     public static final String TAG_PICTURE_N = TileEntityPainting.TAG_PICTURE + "[%d]";
     
-    public static final int N = 6;
-    
     protected final PictureHolder[] holders = new PictureHolder[N];
     
     @Override

@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -148,7 +149,7 @@ public class BlockPainting extends BlockPaintingContainer {
         if (tile != null && tile instanceof TileEntityPainting) {
             TileEntityPainting tileP = (TileEntityPainting)tile;
             Picture picture = tileP.getPicture();
-            ItemStack itemStack = BlockPaintingContainer.getPictureAsItem(picture);
+            ItemStack itemStack = ItemPainting.getPictureAsItem(picture);
             this.dropBlockAsItem(world, x, y, z, itemStack);
         }
         super.breakBlock(world, x, y, z, block, meta);
@@ -171,6 +172,6 @@ public class BlockPainting extends BlockPaintingContainer {
     @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         TileEntityPainting tile = (TileEntityPainting)world.getTileEntity(x, y, z);
-        return BlockPaintingContainer.getPictureAsItem(tile.getPicture(tile.getBlockMetadata()));
+        return ItemPainting.getPictureAsItem(tile.getPicture(tile.getBlockMetadata()));
     }
 }

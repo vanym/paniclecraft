@@ -1,11 +1,14 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.vanym.paniclecraft.block.BlockPaintingFrame;
+import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import cpw.mods.fml.relauncher.Side;
@@ -19,6 +22,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class ItemPaintingFrame extends ItemBlock {
+    
+    public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
     public static final ForgeDirection FRONT;
     public static final ForgeDirection LEFT;
@@ -37,9 +42,7 @@ public class ItemPaintingFrame extends ItemBlock {
     }
     
     public static final List<ForgeDirection> SIDE_ORDER =
-            Arrays.asList(ItemPaintingFrame.FRONT, ItemPaintingFrame.RIGHT,
-                          ItemPaintingFrame.TOP, ItemPaintingFrame.LEFT,
-                          ItemPaintingFrame.BACK, ItemPaintingFrame.BOTTOM);
+            Arrays.asList(FRONT, RIGHT, TOP, LEFT, BACK, BOTTOM);
     
     public ItemPaintingFrame(Block block) {
         super(block);
@@ -64,8 +67,8 @@ public class ItemPaintingFrame extends ItemBlock {
         if (itemStack.hasTagCompound()) {
             Map<String, Integer> map = new TreeMap<>();
             NBTTagCompound itemTag = itemStack.getTagCompound();
-            for (int i = 0; i < TileEntityPaintingFrame.N; ++i) {
-                final String TAG_PICTURE_I = BlockPaintingFrame.getPictureTag(i);
+            for (int i = 0; i < ISidePictureProvider.N; ++i) {
+                final String TAG_PICTURE_I = getPictureTag(i);
                 if (!itemTag.hasKey(TAG_PICTURE_I)) {
                     continue;
                 }
@@ -86,5 +89,60 @@ public class ItemPaintingFrame extends ItemBlock {
                 list.add(sb.toString());
             });
         }
+    }
+    
+    public static ItemStack getItemWithPictures(Map<ForgeDirection, Picture> map) {
+        ItemStack itemS = new ItemStack(Core.instance.painting.itemPaintingFrame);
+        if (map == null) {
+            return itemS;
+        }
+        NBTTagCompound itemTag = new NBTTagCompound();
+        map.forEach((pside, picture)-> {
+            final String TAG_PICTURE_I = getPictureTag(pside);
+            NBTTagCompound pictureTag = new NBTTagCompound();
+            if (picture != null) {
+                picture.writeToNBT(pictureTag);
+            }
+            itemTag.setTag(TAG_PICTURE_I, pictureTag);
+        });
+        if (!itemTag.hasNoTags()) {
+            itemS.setTagCompound(itemTag);
+        }
+        return itemS;
+    }
+    
+    public static ItemStack getFrameAsItem(ISidePictureProvider provider) {
+        if (provider == null) {
+            return getItemWithPictures(null);
+        }
+        Map<ForgeDirection, Picture> map = new HashMap<>();
+        for (int i = 0; i < ISidePictureProvider.N; i++) {
+            Picture picture = provider.getPicture(i);
+            if (picture == null) {
+                continue;
+            }
+            ForgeDirection pside = ForgeDirection.getOrientation(i);
+            map.put(pside, picture);
+        }
+        return getItemWithPictures(map);
+    }
+    
+    public static ItemStack getItemWithEmptyPictures(ForgeDirection... psides) {
+        if (psides == null) {
+            return getItemWithPictures(null);
+        }
+        Map<ForgeDirection, Picture> map = new HashMap<>();
+        for (ForgeDirection pside : psides) {
+            map.put(pside, null);
+        }
+        return getItemWithPictures(map);
+    }
+    
+    public static String getPictureTag(ForgeDirection pside) {
+        return getPictureTag(pside.ordinal());
+    }
+    
+    public static String getPictureTag(int side) {
+        return String.format(TAG_PICTURE_N, side);
     }
 }

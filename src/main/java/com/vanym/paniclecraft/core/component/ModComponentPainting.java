@@ -61,6 +61,7 @@ public class ModComponentPainting implements ModComponent {
     public final Color DEFAULT_COLOR = new Color(200, 200, 200);
     
     public ItemPainting itemPainting;
+    public ItemPaintingFrame itemPaintingFrame;
     public ItemPaintBrush itemPaintBrush;
     public ItemPaintRemover itemPaintRemover;
     public ItemPalette itemPalette;
@@ -112,6 +113,7 @@ public class ModComponentPainting implements ModComponent {
         this.blockPaintingFrame = new BlockPaintingFrame();
         GameRegistry.registerBlock(this.blockPaintingFrame, ItemPaintingFrame.class,
                                    this.blockPaintingFrame.getName());
+        this.itemPaintingFrame = (ItemPaintingFrame)Item.getItemFromBlock(this.blockPaintingFrame);
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class, TileEntityPaintingFrame.ID);
         
         EntityRegistry.registerModEntity(EntityPaintOnBlock.class,

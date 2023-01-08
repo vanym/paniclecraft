@@ -88,7 +88,7 @@ public class ItemPainting extends ItemMod3 {
         --itemStack.stackSize;
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
         Picture picture = tileP.getPicture(side);
-        this.fillPicture(picture, itemStack);
+        fillPicture(picture, itemStack);
         if (entityPlayer != null) {
             BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
         }
@@ -106,7 +106,7 @@ public class ItemPainting extends ItemMod3 {
         }
         Picture picture = tilePF.createPicture(side);
         --itemStack.stackSize;
-        this.fillPicture(picture, itemStack);
+        fillPicture(picture, itemStack);
         if (entityPlayer != null) {
             ForgeDirection dir = ForgeDirection.getOrientation(side);
             BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
@@ -114,20 +114,6 @@ public class ItemPainting extends ItemMod3 {
         tilePF.markForUpdate();
         world.notifyBlockChange(tilePF.xCoord, tilePF.yCoord, tilePF.zCoord, tilePF.getBlockType());
         return true;
-    }
-    
-    public boolean fillPicture(Picture picture, ItemStack itemStack) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            if (itemTag.hasKey(TAG_PICTURE)) {
-                NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
-                if (!pictureTag.hasNoTags()) {
-                    picture.readFromNBT(pictureTag);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
     
     @Override
@@ -146,6 +132,33 @@ public class ItemPainting extends ItemMod3 {
                 list.add(pictureInformation(pictureTag));
             }
         }
+    }
+    
+    public static boolean fillPicture(Picture picture, ItemStack itemStack) {
+        if (itemStack.hasTagCompound()) {
+            NBTTagCompound itemTag = itemStack.getTagCompound();
+            if (itemTag.hasKey(TAG_PICTURE)) {
+                NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
+                if (!pictureTag.hasNoTags()) {
+                    picture.readFromNBT(pictureTag);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    public static ItemStack getPictureAsItem(Picture picture) {
+        ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
+        if (picture == null) {
+            return itemS;
+        }
+        NBTTagCompound itemTag = new NBTTagCompound();
+        NBTTagCompound pictureTag = new NBTTagCompound();
+        picture.writeToNBT(pictureTag);
+        itemS.setTagCompound(itemTag);
+        itemTag.setTag(TAG_PICTURE, pictureTag);
+        return itemS;
     }
     
     @SideOnly(Side.CLIENT)

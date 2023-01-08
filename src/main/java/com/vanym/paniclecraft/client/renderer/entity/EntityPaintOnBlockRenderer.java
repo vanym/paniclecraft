@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 
@@ -82,7 +83,7 @@ public class EntityPaintOnBlockRenderer extends Render {
                     new RenderPaintOnBlocks(world, expandX, expandY, expandZ, wrapBlock, realBlock);
             render.setRenderAllFaces(false);
             render.setMaxAmbientOcclusion(this.renderPictureType);
-            for (int side = 0; side < EntityPaintOnBlock.N; ++side) {
+            for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = entityPOB.getPicture(side);
                 if (picture == null) {
                     continue;
