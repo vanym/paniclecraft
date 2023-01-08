@@ -65,29 +65,36 @@ public class Picture implements IPictureSize {
         if (toolType == PaintingToolType.NONE) {
             return false;
         }
-        Color color = tool.getPaintingToolColor(itemStack);
-        if (toolType == PaintingToolType.BRUSH || toolType == PaintingToolType.REMOVER) {
+        if ((toolType == PaintingToolType.BRUSH || toolType == PaintingToolType.REMOVER)
+            && this.holder != null) {
+            Color color;
             if (toolType == PaintingToolType.REMOVER) {
                 if (this.hasAlpha) {
                     color = new Color(0, 0, 0, 0);
                 } else {
                     color = Core.instance.painting.DEFAULT_COLOR;
                 }
+            } else {
+                color = tool.getPaintingToolColor(itemStack);
             }
             double radius = tool.getPaintingToolRadius(itemStack, this);
             Set<Picture> changedSet = new HashSet<>();
-            this.setPixelsColor(x, y, radius, color, changedSet);
+            boolean changed = this.setPixelsColor(x, y, radius, color, changedSet);
             for (Picture picture : changedSet) {
                 picture.imageChanged();
                 picture.update();
             }
-        } else if (toolType == PaintingToolType.FILLER) {
-            if (color != null && this.isEditableBy(this)) {
-                if (this.unpack() && this.image.fill(color)) {
-                    this.packed = null;
-                    this.imageChanged();
-                    this.update();
-                }
+            return changed;
+        } else if (toolType == PaintingToolType.FILLER && this.holder != null) {
+            Color color = tool.getPaintingToolColor(itemStack);
+            if (color != null
+                && this.isEditableBy(this)
+                && this.unpack()
+                && this.image.fill(color)) {
+                this.packed = null;
+                this.imageChanged();
+                this.update();
+                return true;
             }
         } else if (toolType == PaintingToolType.COLORPICKER) {
             if (!(item instanceof IColorizeable)) {
@@ -370,15 +377,7 @@ public class Picture implements IPictureSize {
     public void writeToNBT(NBTTagCompound nbtTag) {
         nbtTag.setBoolean(TAG_EDITABLE, this.editable);
         NBTTagCompound nbtImageTag = new NBTTagCompound();
-        if (this.pack()) {
-            nbtImageTag.setByteArray(TAG_IMAGE_PACKED, this.packed);
-            nbtImageTag.setInteger(TAG_IMAGE_WIDTH, this.packedWidth);
-            nbtImageTag.setInteger(TAG_IMAGE_HEIGHT, this.packedHeight);
-        } else if (this.image != null) {
-            nbtImageTag.setInteger(TAG_IMAGE_WIDTH, this.image.getWidth());
-            nbtImageTag.setInteger(TAG_IMAGE_HEIGHT, this.image.getHeight());
-            nbtImageTag.setByteArray(TAG_IMAGE_RAWDATA, this.image.getData());
-        }
+        this.writeImageToNBT(nbtImageTag);
         if (!nbtImageTag.hasNoTags()) {
             nbtTag.setTag(TAG_IMAGE, nbtImageTag);
         }
@@ -388,35 +387,51 @@ public class Picture implements IPictureSize {
         if (nbtTag.hasKey(TAG_EDITABLE)) {
             this.editable = nbtTag.getBoolean(TAG_EDITABLE);
         }
+        if (nbtTag.hasKey(TAG_IMAGE)) {
+            NBTBase nbtImage = nbtTag.getTag(TAG_IMAGE);
+            this.readImageFromNBT(nbtImage);
+        }
+    }
+    
+    public void writeImageToNBT(NBTTagCompound nbtImageTag) {
+        if (this.pack()) {
+            nbtImageTag.setByteArray(TAG_IMAGE_PACKED, this.packed);
+            nbtImageTag.setInteger(TAG_IMAGE_WIDTH, this.packedWidth);
+            nbtImageTag.setInteger(TAG_IMAGE_HEIGHT, this.packedHeight);
+        } else if (this.image != null) {
+            nbtImageTag.setInteger(TAG_IMAGE_WIDTH, this.image.getWidth());
+            nbtImageTag.setInteger(TAG_IMAGE_HEIGHT, this.image.getHeight());
+            nbtImageTag.setByteArray(TAG_IMAGE_RAWDATA, this.image.getData());
+        }
+    }
+    
+    public void readImageFromNBT(NBTBase nbtImage) {
         int width = 0;
         int height = 0;
         byte[] packed = null;
         byte[] raw = null;
-        if (nbtTag.hasKey(TAG_IMAGE)) {
-            NBTBase nbtImage = nbtTag.getTag(TAG_IMAGE);
-            if (nbtImage instanceof NBTTagByteArray) {
-                NBTTagByteArray nbtImageBytes = (NBTTagByteArray)nbtImage;
-                packed = nbtImageBytes.func_150292_c();
-            } else if (nbtImage instanceof NBTTagCompound) {
-                NBTTagCompound nbtImageTag = (NBTTagCompound)nbtImage;
-                width = nbtImageTag.getInteger(TAG_IMAGE_WIDTH);
-                height = nbtImageTag.getInteger(TAG_IMAGE_HEIGHT);
-                NBTBase nbtImageRaw = nbtImageTag.getTag(TAG_IMAGE_RAWDATA);
-                if (nbtImageRaw instanceof NBTTagByteArray) {
-                    NBTTagByteArray nbtImageRawBytes = (NBTTagByteArray)nbtImageRaw;
-                    raw = nbtImageRawBytes.func_150292_c();
-                }
-                NBTBase nbtImagePacked = nbtImageTag.getTag(TAG_IMAGE_PACKED);
-                if (nbtImagePacked instanceof NBTTagByteArray) {
-                    NBTTagByteArray nbtImagePackedBytes = (NBTTagByteArray)nbtImagePacked;
-                    packed = nbtImagePackedBytes.func_150292_c();
-                }
-            } else if (nbtImage instanceof NBTBase.NBTPrimitive) {
-                NBTBase.NBTPrimitive nbtPrim = (NBTPrimitive)nbtImage;
-                int rowSize = nbtPrim.func_150287_d();
-                width = rowSize;
-                height = rowSize;
+        if (nbtImage instanceof NBTTagByteArray) {
+            NBTTagByteArray nbtImageBytes = (NBTTagByteArray)nbtImage;
+            packed = nbtImageBytes.func_150292_c();
+        } else if (nbtImage instanceof NBTTagCompound) {
+            NBTTagCompound nbtImageTag = (NBTTagCompound)nbtImage;
+            width = nbtImageTag.getInteger(TAG_IMAGE_WIDTH);
+            height = nbtImageTag.getInteger(TAG_IMAGE_HEIGHT);
+            NBTBase nbtImageRaw = nbtImageTag.getTag(TAG_IMAGE_RAWDATA);
+            if (nbtImageRaw instanceof NBTTagByteArray) {
+                NBTTagByteArray nbtImageRawBytes = (NBTTagByteArray)nbtImageRaw;
+                raw = nbtImageRawBytes.func_150292_c();
             }
+            NBTBase nbtImagePacked = nbtImageTag.getTag(TAG_IMAGE_PACKED);
+            if (nbtImagePacked instanceof NBTTagByteArray) {
+                NBTTagByteArray nbtImagePackedBytes = (NBTTagByteArray)nbtImagePacked;
+                packed = nbtImagePackedBytes.func_150292_c();
+            }
+        } else if (nbtImage instanceof NBTBase.NBTPrimitive) {
+            NBTBase.NBTPrimitive nbtPrim = (NBTPrimitive)nbtImage;
+            int rowSize = nbtPrim.func_150287_d();
+            width = rowSize;
+            height = rowSize;
         }
         if (packed != null) {
             if (width > 0 && height > 0) {
