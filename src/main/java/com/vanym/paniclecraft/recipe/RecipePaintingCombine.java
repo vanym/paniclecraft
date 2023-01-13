@@ -31,6 +31,7 @@ public class RecipePaintingCombine extends ShapedOreRecipe {
             return false;
         }
         Picture[][] pictures = getAsPictures(this.getItemMatrix(inv));
+        int sizeHeight = 0;
         for (int y = 0; y < this.sizeY; ++y) {
             int height = pictures[y][0].getHeight();
             for (int x = 1; x < this.sizeX; ++x) {
@@ -38,7 +39,12 @@ public class RecipePaintingCombine extends ShapedOreRecipe {
                     return false;
                 }
             }
+            sizeHeight += height;
         }
+        if (sizeHeight > Core.instance.painting.config.paintingMaxCraftableHeight) {
+            return false;
+        }
+        int sizeWidth = 0;
         for (int x = 0; x < this.sizeX; ++x) {
             int width = pictures[0][x].getWidth();
             for (int y = 1; y < this.sizeY; ++y) {
@@ -46,6 +52,10 @@ public class RecipePaintingCombine extends ShapedOreRecipe {
                     return false;
                 }
             }
+            sizeWidth += width;
+        }
+        if (sizeWidth > Core.instance.painting.config.paintingMaxCraftableWidth) {
+            return false;
         }
         return true;
     }

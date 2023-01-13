@@ -441,6 +441,9 @@ public class ModComponentPainting implements ModComponent {
         public boolean allowPaintOnBlock = false;
         public boolean anyBlockValidForPaint = false;
         
+        public int paintingMaxCraftableWidth = 64;
+        public int paintingMaxCraftableHeight = 64;
+        
         protected int paintingDefaultWidth = 16;
         protected int paintingDefaultHeight = 16;
         
@@ -493,6 +496,12 @@ public class ModComponentPainting implements ModComponent {
             this.anyBlockValidForPaint =
                     config.getBoolean("anyBlockValidForPaint", ModComponentPainting.this.getName(),
                                       false, "");
+            this.paintingMaxCraftableWidth =
+                    config.getInt("paintingMaxCraftableWidth", ModComponentPainting.this.getName(),
+                                  64, 1, 256, "");
+            this.paintingMaxCraftableHeight =
+                    config.getInt("paintingMaxCraftableHeight", ModComponentPainting.this.getName(),
+                                  64, 1, 256, "");
             {
                 String[] lines = config.getStringList("brushRadiuses",
                                                       ModComponentPainting.this.getName(),
