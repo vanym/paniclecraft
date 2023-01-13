@@ -20,6 +20,7 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.command.CommandPaintOnBlock;
+import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
 import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintOnBlockEventHandler;
@@ -153,6 +154,11 @@ public class ModComponentPainting implements ModComponent {
             MinecraftForge.EVENT_BUS.register(AnyBlockValidForPaintEventHandler.instance);
         } else {
             MinecraftForge.EVENT_BUS.unregister(AnyBlockValidForPaintEventHandler.instance);
+        }
+        if (this.config.copyOnAnvil) {
+            MinecraftForge.EVENT_BUS.register(AnvilCopyEventHandler.instance);
+        } else {
+            MinecraftForge.EVENT_BUS.unregister(AnvilCopyEventHandler.instance);
         }
     }
     
@@ -443,6 +449,9 @@ public class ModComponentPainting implements ModComponent {
         public boolean allowPaintOnBlock = false;
         public boolean anyBlockValidForPaint = false;
         
+        public boolean copyOnAnvil = true;
+        public int copyOnAnvilCost = 5;
+        
         public int paintingMaxCraftableWidth = 64;
         public int paintingMaxCraftableHeight = 64;
         
@@ -506,6 +515,11 @@ public class ModComponentPainting implements ModComponent {
             this.paintingMaxCraftableHeight =
                     config.getInt("paintingMaxCraftableHeight", ModComponentPainting.this.getName(),
                                   64, 1, ModComponentPainting.this.MAX_HEIGHT, "");
+            this.copyOnAnvil =
+                    config.getBoolean("copyOnAnvil", ModComponentPainting.this.getName(), true, "");
+            this.copyOnAnvilCost =
+                    config.getInt("copyOnAnvilCost", ModComponentPainting.this.getName(), 5, 0, 40,
+                                  "");
             {
                 String[] lines = config.getStringList("brushRadiuses",
                                                       ModComponentPainting.this.getName(),
