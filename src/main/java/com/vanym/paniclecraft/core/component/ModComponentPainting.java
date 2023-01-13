@@ -62,6 +62,8 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class ModComponentPainting implements ModComponent {
     
+    public final int MAX_WIDTH = 256;
+    public final int MAX_HEIGHT = 256;
     public final Color DEFAULT_COLOR = new Color(200, 200, 200);
     
     public ItemPainting itemPainting;
@@ -480,28 +482,30 @@ public class ModComponentPainting implements ModComponent {
                                   2, 0, 64, "");
             this.paintingDefaultWidth =
                     config.getInt("paintingDefaultWidth", ModComponentPainting.this.getName(),
-                                  16, 1, 256, "");
+                                  16, 1, ModComponentPainting.this.MAX_WIDTH, "");
             this.paintingDefaultHeight =
                     config.getInt("paintingDefaultHeight", ModComponentPainting.this.getName(),
-                                  16, 1, 256, "(recommended to equals width)");
+                                  16, 1, ModComponentPainting.this.MAX_HEIGHT,
+                                  "(recommended to equals width)");
             this.allowPaintOnBlock =
                     config.getBoolean("allowPaintOnBlock", ModComponentPainting.this.getName(),
                                       false, "");
             this.paintOnBlockDefaultWidth =
                     config.getInt("paintOnBlockDefaultWidth", ModComponentPainting.this.getName(),
-                                  16, 1, 256, "");
+                                  16, 1, ModComponentPainting.this.MAX_WIDTH, "");
             this.paintOnBlockDefaultHeight =
                     config.getInt("paintOnBlockDefaultHeight", ModComponentPainting.this.getName(),
-                                  16, 1, 256, "(highly recommended to equals width)");
+                                  16, 1, ModComponentPainting.this.MAX_HEIGHT,
+                                  "(highly recommended to equals width)");
             this.anyBlockValidForPaint =
                     config.getBoolean("anyBlockValidForPaint", ModComponentPainting.this.getName(),
                                       false, "");
             this.paintingMaxCraftableWidth =
                     config.getInt("paintingMaxCraftableWidth", ModComponentPainting.this.getName(),
-                                  64, 1, 256, "");
+                                  64, 1, ModComponentPainting.this.MAX_WIDTH, "");
             this.paintingMaxCraftableHeight =
                     config.getInt("paintingMaxCraftableHeight", ModComponentPainting.this.getName(),
-                                  64, 1, 256, "");
+                                  64, 1, ModComponentPainting.this.MAX_HEIGHT, "");
             {
                 String[] lines = config.getStringList("brushRadiuses",
                                                       ModComponentPainting.this.getName(),
