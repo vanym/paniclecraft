@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,14 +43,26 @@ public class Picture implements IPictureSize {
     // unused on server side
     public boolean imageChangeProcessed = false;
     
+    public Picture(IPictureSize size) {
+        this(size, false);
+    }
+    
+    public Picture(IPictureSize size, boolean hasAlpha) {
+        this(null, hasAlpha, size);
+    }
+    
     public Picture(IPictureHolder holder) {
         this(holder, false);
     }
     
     public Picture(IPictureHolder holder, boolean hasAlpha) {
+        this(holder, hasAlpha, holder != null ? holder.getDefaultSize() : new FixedPictureSize(1));
+    }
+    
+    protected Picture(IPictureHolder holder, boolean hasAlpha, IPictureSize size) {
         this.holder = holder;
         this.hasAlpha = hasAlpha;
-        this.setDefaultSize();
+        this.setSize(size);
     }
     
     public boolean usePaintingTool(ItemStack itemStack, int x, int y) {
@@ -318,19 +331,6 @@ public class Picture implements IPictureSize {
         return this.image.getPixelColor(px, py);
     }
     
-    protected void setDefaultSize() {
-        IPictureSize size;
-        if (this.holder != null) {
-            size = this.holder.getDefaultSize();
-        } else {
-            size = null;
-        }
-        if (size == null) {
-            size = Core.instance.painting.config.paintingDefaultSize;
-        }
-        this.setSize(size);
-    }
-    
     protected void setSize(IPictureSize size) {
         this.setSize(size.getWidth(), size.getHeight());
     }
@@ -467,5 +467,85 @@ public class Picture implements IPictureSize {
             com.vanym.paniclecraft.client.ClientProxy.deleteTexture(this.texture);
             this.texture = -1;
         }
+    }
+    
+    public static Picture mergeH(Picture... subs) {
+        if (subs.length == 0) {
+            return null;
+        }
+        Picture picture = subs[0];
+        for (int i = 1; i < subs.length; ++i) {
+            Picture sub = subs[i];
+            picture = mergeH(picture, sub);
+        }
+        return picture;
+    }
+    
+    public static Picture mergeH(Picture first, Picture second) {
+        return merge(first, second, false);
+    }
+    
+    public static Picture mergeV(Picture... subs) {
+        if (subs.length == 0) {
+            return null;
+        }
+        Picture picture = subs[0];
+        for (int i = 1; i < subs.length; ++i) {
+            Picture sub = subs[i];
+            picture = mergeV(picture, sub);
+        }
+        return picture;
+    }
+    
+    public static Picture mergeV(Picture first, Picture second) {
+        return merge(first, second, true);
+    }
+    
+    public static Picture merge(Picture[][] pictures) {
+        return mergeV(Arrays.asList(pictures)
+                            .stream()
+                            .map(Picture::mergeH)
+                            .toArray(Picture[]::new));
+    }
+    
+    protected static Picture merge(Picture first, Picture second, boolean vertically) {
+        int firstWidth = first.getWidth();
+        int firstHeight = first.getHeight();
+        int secondWidth = second.getWidth();
+        int secondHeight = second.getHeight();
+        int width;
+        int height;
+        int secondOffsetX;
+        int secondOffsetY;
+        if (vertically) {
+            width = Math.max(firstWidth, secondWidth);
+            height = firstHeight + secondHeight;
+            secondOffsetX = 0;
+            secondOffsetY = firstHeight;
+        } else {
+            width = firstWidth + secondWidth;
+            height = Math.max(firstHeight, secondHeight);
+            secondOffsetX = firstWidth;
+            secondOffsetY = 0;
+        }
+        Picture picture = new Picture(
+                new FixedPictureSize(width, height),
+                first.hasAlpha || second.hasAlpha);
+        if (first.unpack()) {
+            for (int y = 0; y < firstHeight; ++y) {
+                for (int x = 0; x < firstWidth; ++x) {
+                    picture.image.setPixelColor(x, y, first.image.getPixelColor(x, y));
+                }
+            }
+        }
+        if (second.unpack()) {
+            for (int y = 0; y < secondHeight; ++y) {
+                for (int x = 0; x < secondWidth; ++x) {
+                    picture.image.setPixelColor(secondOffsetX + x, secondOffsetY + y,
+                                                second.image.getPixelColor(x, y));
+                }
+            }
+        }
+        return picture;
     }
 }

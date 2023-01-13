@@ -1,9 +1,12 @@
 package com.vanym.paniclecraft.core.component;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPainting;
@@ -32,6 +35,7 @@ import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
+import com.vanym.paniclecraft.recipe.RecipePaintingCombine;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
@@ -279,6 +283,22 @@ public class ModComponentPainting implements ModComponent {
         if (config.getBoolean("craftingRecipePaintingClear", this.getName(), true, "")) {
             GameRegistry.addShapelessRecipe(new ItemStack(this.itemPainting), this.itemPainting);
         }
+        String[] paintingCombines =
+                config.getStringList("craftingRecipePaintingCombine", this.getName(),
+                                     new String[]{"2x2"},
+                                     "", new String[]{"2x1", "1x2", "2x2",
+                                                      "3x1", "3x2", "1x3", "2x3", "3x3"});
+        final Pattern combinePattern = Pattern.compile("(\\d+)x(\\d+)");
+        Arrays.asList(paintingCombines)
+              .stream()
+              .map(combinePattern::matcher)
+              .filter(Matcher::matches)
+              .map(m-> {
+                  int x = Integer.parseInt(m.group(1));
+                  int y = Integer.parseInt(m.group(2));
+                  return new RecipePaintingCombine(x, y);
+              })
+              .forEach(GameRegistry::addRecipe);
         if (config.getBoolean("craftingRecipePaintingFrame", this.getName(), true, "")) {
             RecipePaintingFrame recipe = new RecipePaintingFrame(
                     "sss",

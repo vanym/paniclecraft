@@ -5,6 +5,7 @@ import java.util.List;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
+import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
@@ -159,6 +160,23 @@ public class ItemPainting extends ItemMod3 {
         itemS.setTagCompound(itemTag);
         itemTag.setTag(TAG_PICTURE, pictureTag);
         return itemS;
+    }
+    
+    public static ItemStack getSizedItem(IPictureSize size) {
+        return getSizedItem(size.getWidth(), size.getHeight());
+    }
+    
+    public static ItemStack getSizedItem(int width, int height) {
+        ItemStack stack = new ItemStack(Core.instance.painting.itemPainting);
+        NBTTagCompound itemTag = new NBTTagCompound();
+        NBTTagCompound pictureTag = new NBTTagCompound();
+        NBTTagCompound imageTag = new NBTTagCompound();
+        imageTag.setInteger(Picture.TAG_IMAGE_WIDTH, width);
+        imageTag.setInteger(Picture.TAG_IMAGE_HEIGHT, height);
+        pictureTag.setTag(Picture.TAG_IMAGE, imageTag);
+        itemTag.setTag(ItemPainting.TAG_PICTURE, pictureTag);
+        stack.setTagCompound(itemTag);
+        return stack;
     }
     
     @SideOnly(Side.CLIENT)
