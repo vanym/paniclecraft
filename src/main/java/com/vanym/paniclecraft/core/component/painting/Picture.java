@@ -27,10 +27,10 @@ import net.minecraft.nbt.NBTTagCompound;
 public class Picture implements IPictureSize {
     
     protected IPictureHolder holder;
+    protected boolean hasAlpha = false;
     
     protected boolean editable = true;
-    
-    protected boolean hasAlpha = false;
+    protected String name;
     
     protected Image image;
     
@@ -195,8 +195,12 @@ public class Picture implements IPictureSize {
         return this.holder.getNeighborPicture(offsetX, offsetY);
     }
     
+    public boolean isEditable() {
+        return this.editable && this.name == null;
+    }
+    
     public boolean isEditableBy(Picture picture) {
-        if (!this.editable || !this.isSameSize(picture)) {
+        if (!this.isEditable() || !this.isSameSize(picture)) {
             return false;
         }
         return true;
@@ -367,7 +371,15 @@ public class Picture implements IPictureSize {
         return true;
     }
     
+    public void setName(String name) {
+        if (name.isEmpty()) {
+            name = null;
+        }
+        this.name = name;
+    }
+    
     public static final String TAG_EDITABLE = "Editable";
+    public static final String TAG_NAME = "Name";
     public static final String TAG_IMAGE = "Image";
     public static final String TAG_IMAGE_WIDTH = "Width";
     public static final String TAG_IMAGE_HEIGHT = "Height";
@@ -376,6 +388,9 @@ public class Picture implements IPictureSize {
     
     public void writeToNBT(NBTTagCompound nbtTag) {
         nbtTag.setBoolean(TAG_EDITABLE, this.editable);
+        if (this.name != null) {
+            nbtTag.setString(TAG_NAME, this.name);
+        }
         NBTTagCompound nbtImageTag = new NBTTagCompound();
         this.writeImageToNBT(nbtImageTag);
         if (!nbtImageTag.hasNoTags()) {
@@ -386,6 +401,11 @@ public class Picture implements IPictureSize {
     public void readFromNBT(NBTTagCompound nbtTag) {
         if (nbtTag.hasKey(TAG_EDITABLE)) {
             this.editable = nbtTag.getBoolean(TAG_EDITABLE);
+        }
+        if (nbtTag.hasKey(TAG_NAME)) {
+            this.setName(nbtTag.getString(TAG_NAME));
+        } else {
+            this.name = null;
         }
         if (nbtTag.hasKey(TAG_IMAGE)) {
             NBTBase nbtImage = nbtTag.getTag(TAG_IMAGE);

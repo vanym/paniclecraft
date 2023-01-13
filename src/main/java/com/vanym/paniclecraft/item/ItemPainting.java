@@ -142,6 +142,9 @@ public class ItemPainting extends ItemMod3 {
                 NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
                 if (!pictureTag.hasNoTags()) {
                     picture.readFromNBT(pictureTag);
+                    if (itemStack.hasDisplayName()) {
+                        picture.setName(itemStack.getDisplayName());
+                    }
                     return true;
                 }
             }
@@ -155,9 +158,13 @@ public class ItemPainting extends ItemMod3 {
             return itemS;
         }
         NBTTagCompound itemTag = new NBTTagCompound();
+        itemS.setTagCompound(itemTag);
         NBTTagCompound pictureTag = new NBTTagCompound();
         picture.writeToNBT(pictureTag);
-        itemS.setTagCompound(itemTag);
+        if (pictureTag.hasKey(Picture.TAG_NAME)) {
+            itemS.setStackDisplayName(pictureTag.getString(Picture.TAG_NAME));
+            pictureTag.removeTag(Picture.TAG_NAME);
+        }
         itemTag.setTag(TAG_PICTURE, pictureTag);
         return itemS;
     }

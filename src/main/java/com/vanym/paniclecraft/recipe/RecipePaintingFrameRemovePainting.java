@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.recipe;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
@@ -62,7 +63,12 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
             painting.setTagCompound(new NBTTagCompound());
         }
         NBTTagCompound paintingItemTag = painting.getTagCompound();
-        paintingItemTag.setTag(ItemPainting.TAG_PICTURE, pictureTag);
+        NBTTagCompound paintingItemPictureTag = (NBTTagCompound)pictureTag.copy();
+        if (paintingItemPictureTag.hasKey(Picture.TAG_NAME)) {
+            painting.setStackDisplayName(paintingItemPictureTag.getString(Picture.TAG_NAME));
+            paintingItemPictureTag.removeTag(Picture.TAG_NAME);
+        }
+        paintingItemTag.setTag(ItemPainting.TAG_PICTURE, paintingItemPictureTag);
         return painting;
     }
     

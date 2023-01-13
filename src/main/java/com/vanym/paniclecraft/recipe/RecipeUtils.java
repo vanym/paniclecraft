@@ -1,12 +1,12 @@
 package com.vanym.paniclecraft.recipe;
 
+import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -27,12 +27,15 @@ public class RecipeUtils {
             frame.setTagCompound(new NBTTagCompound());
         }
         NBTTagCompound inputItemTag = painting.getTagCompound();
-        NBTBase pictureTag;
+        NBTTagCompound pictureTag;
         if (painting.hasTagCompound() && inputItemTag.hasKey(ItemPainting.TAG_PICTURE)) {
             NBTTagCompound inputPictureTag = inputItemTag.getCompoundTag(ItemPainting.TAG_PICTURE);
-            pictureTag = inputPictureTag.copy();
+            pictureTag = (NBTTagCompound)inputPictureTag.copy();
         } else {
             pictureTag = new NBTTagCompound();
+        }
+        if (painting.hasDisplayName()) {
+            pictureTag.setString(Picture.TAG_NAME, painting.getDisplayName());
         }
         NBTTagCompound outputItemTag = frame.getTagCompound();
         final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
