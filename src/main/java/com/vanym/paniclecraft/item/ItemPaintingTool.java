@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -95,7 +95,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         int z = target.blockZ;
         int side = target.sideHit;
         boolean tile = true;
-        IPictureSize picture = BlockPaintingContainer.getPicture(world, x, y, z, side);
+        IPictureSize picture = WorldPictureProvider.ANYTILE.getPicture(world, x, y, z, side);
         if (picture == null) {
             tile = false;
             if (Core.instance.painting.config.allowPaintOnBlock) {
@@ -135,7 +135,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             float hitX,
             float hitY,
             float hitZ) {
-        if (BlockPaintingContainer.getPicture(world, x, y, z, side) != null
+        if (WorldPictureProvider.ANYTILE.getPicture(world, x, y, z, side) != null
             || (Core.instance.painting.config.allowPaintOnBlock
                 && (EntityPaintOnBlock.getExistingPicture(world, x, y, z, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)))) {

@@ -8,8 +8,8 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
-import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
@@ -262,17 +262,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         
         @Override
         public Picture getNeighborPicture(int offsetX, int offsetY) {
-            PaintingSide pside = PaintingSide.getSide(this.side);
-            int x = EntityPaintOnBlock.this.getBlockX() +
-                    pside.xDir.offsetX * offsetX +
-                    pside.yDir.offsetX * offsetY;
-            int y = EntityPaintOnBlock.this.getBlockY() +
-                    pside.xDir.offsetY * offsetX +
-                    pside.yDir.offsetY * offsetY;
-            int z = EntityPaintOnBlock.this.getBlockZ() +
-                    pside.xDir.offsetZ * offsetX +
-                    pside.yDir.offsetZ * offsetY;
-            return getOrCreateEntityPicture(EntityPaintOnBlock.this.worldObj, x, y, z, this.side);
+            return WorldPictureProvider.PAINTONBLOCK.getNeighborPicture(EntityPaintOnBlock.this.worldObj,
+                                                                        EntityPaintOnBlock.this.getBlockX(),
+                                                                        EntityPaintOnBlock.this.getBlockY(),
+                                                                        EntityPaintOnBlock.this.getBlockZ(),
+                                                                        this.side,
+                                                                        offsetX,
+                                                                        offsetY);
         }
         
         @Override

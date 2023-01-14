@@ -1,6 +1,5 @@
 package com.vanym.paniclecraft.block;
 
-import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -12,8 +11,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -106,28 +103,5 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
             return ForgeDirection.UNKNOWN;
         }
         return stackdir;
-    }
-    
-    public static ISidePictureProvider getProvider(IBlockAccess world, int x, int y, int z) {
-        TileEntity tile = world.getTileEntity(x, y, z);
-        if (tile != null && tile instanceof ISidePictureProvider) {
-            return (ISidePictureProvider)tile;
-        }
-        return null;
-    }
-    
-    public static Picture getPicture(IBlockAccess world, int x, int y, int z, int side) {
-        ISidePictureProvider provider = getProvider(world, x, y, z);
-        if (provider == null) {
-            return null;
-        }
-        return provider.getPicture(side);
-    }
-    
-    public static Picture getPicture(IBlockAccess world, MovingObjectPosition target) {
-        if (target.typeOfHit != MovingObjectType.BLOCK) {
-            return null;
-        }
-        return getPicture(world, target.blockX, target.blockY, target.blockZ, target.sideHit);
     }
 }

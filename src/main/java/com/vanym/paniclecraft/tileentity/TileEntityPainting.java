@@ -3,11 +3,11 @@ package com.vanym.paniclecraft.tileentity;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityPainting extends TileEntityPaintingContainer {
     
@@ -47,16 +47,15 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         }
     }
     
-    protected Picture getPainting(int side, int xO, int yO) {
-        if (side != this.getBlockMetadata()) {
-            return null;
-        }
-        TileEntity tile = this.getNeighborTile(side, xO, yO);
-        if (tile != null && tile instanceof TileEntityPainting) {
-            TileEntityPainting tilePainting = (TileEntityPainting)tile;
-            return tilePainting.getPicture(side);
-        }
-        return null;
+    protected Picture getNeighborPicture(int offsetX, int offsetY) {
+        int side = this.getBlockMetadata();
+        return WorldPictureProvider.PAINTING.getNeighborPicture(this.getWorldObj(),
+                                                                this.xCoord,
+                                                                this.yCoord,
+                                                                this.zCoord,
+                                                                side,
+                                                                offsetX,
+                                                                offsetY);
     }
     
     @Override
@@ -68,8 +67,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         
         @Override
         public Picture getNeighborPicture(int offsetX, int offsetY) {
-            return TileEntityPainting.this.getPainting(TileEntityPainting.this.getBlockMetadata(),
-                                                       offsetX, offsetY);
+            return TileEntityPainting.this.getNeighborPicture(offsetX, offsetY);
         }
     }
     

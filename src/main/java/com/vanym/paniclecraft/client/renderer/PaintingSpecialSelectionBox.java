@@ -6,10 +6,10 @@ import java.util.stream.Stream.Builder;
 
 import org.lwjgl.opengl.GL11;
 
-import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -64,7 +64,11 @@ public class PaintingSpecialSelectionBox {
         if (!tool.getPaintingToolType(event.currentItem).isPixelSelector()) {
             return;
         }
-        Picture picture = BlockPaintingContainer.getPicture(event.player.worldObj, target);
+        Picture picture = WorldPictureProvider.ANYTILE.getPicture(event.player.worldObj,
+                                                                  target.blockX,
+                                                                  target.blockY,
+                                                                  target.blockZ,
+                                                                  target.sideHit);
         if (picture == null) {
             return;
         }

@@ -3,11 +3,11 @@ package com.vanym.paniclecraft.tileentity;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
@@ -78,13 +78,14 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         return side >= 0 && side < this.holders.length;
     }
     
-    protected Picture getPainting(int side, int xO, int yO) {
-        TileEntity tile = this.getNeighborTile(side, xO, yO);
-        if (tile != null && tile instanceof TileEntityPaintingFrame) {
-            TileEntityPaintingFrame tilePaintingFrame = (TileEntityPaintingFrame)tile;
-            return tilePaintingFrame.getPicture(side);
-        }
-        return null;
+    protected Picture getNeighborPicture(int side, int offsetX, int offsetY) {
+        return WorldPictureProvider.PAINTINGFRAME.getNeighborPicture(this.getWorldObj(),
+                                                                     this.xCoord,
+                                                                     this.yCoord,
+                                                                     this.zCoord,
+                                                                     side,
+                                                                     offsetX,
+                                                                     offsetY);
     }
     
     public void rotateY(int rotUp) {
@@ -145,7 +146,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         
         @Override
         public Picture getNeighborPicture(int offsetX, int offsetY) {
-            return TileEntityPaintingFrame.this.getPainting(this.side, offsetX, offsetY);
+            return TileEntityPaintingFrame.this.getNeighborPicture(this.side, offsetX, offsetY);
         }
     }
     

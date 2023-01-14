@@ -3,9 +3,8 @@ package com.vanym.paniclecraft.network.message;
 import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -91,14 +90,14 @@ public class MessagePaintingToolUse
         }
         World world = playerEntity.worldObj;
         Picture picture = null;
+        WorldPictureProvider provider = null;
         if (message.tile) {
-            picture = BlockPaintingContainer.getPicture(world, message.x, message.y, message.z,
-                                                        message.side);
+            provider = WorldPictureProvider.ANYTILE;
         } else if (Core.instance.painting.config.allowPaintOnBlock) {
-            picture = EntityPaintOnBlock.getOrCreateEntityPicture(world, message.x,
-                                                                  message.y,
-                                                                  message.z,
-                                                                  message.side);
+            provider = WorldPictureProvider.PAINTONBLOCK;
+        }
+        if (provider != null) {
+            picture = provider.getPicture(world, message.x, message.y, message.z, message.side);
         }
         if (picture == null || !playerEntity.canPlayerEdit(message.x, message.y, message.z,
                                                            message.side, heldItem)) {
