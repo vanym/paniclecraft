@@ -23,7 +23,7 @@ public enum PaintingSide {
         this.zDir = ForgeDirection.getOrientation(this.ordinal());
     }
     
-    public static PaintingSide getSize(int id) {
+    public static PaintingSide getSide(int id) {
         return values()[id % values().length];
     }
     

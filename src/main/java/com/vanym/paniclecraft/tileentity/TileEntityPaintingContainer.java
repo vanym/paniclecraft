@@ -17,7 +17,7 @@ public abstract class TileEntityPaintingContainer extends TileEntity
             ISidePictureProvider {
     
     public TileEntity getNeighborTile(int side, int xOffset, int yOffset) {
-        PaintingSide pside = PaintingSide.getSize(side);
+        PaintingSide pside = PaintingSide.getSide(side);
         int x = this.xCoord + pside.xDir.offsetX * xOffset + pside.yDir.offsetX * yOffset;
         int y = this.yCoord + pside.xDir.offsetY * xOffset + pside.yDir.offsetY * yOffset;
         int z = this.zCoord + pside.xDir.offsetZ * xOffset + pside.yDir.offsetZ * yOffset;

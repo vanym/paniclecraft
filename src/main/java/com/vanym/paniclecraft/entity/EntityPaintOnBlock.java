@@ -262,7 +262,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         
         @Override
         public Picture getNeighborPicture(int offsetX, int offsetY) {
-            PaintingSide pside = PaintingSide.getSize(this.side);
+            PaintingSide pside = PaintingSide.getSide(this.side);
             int x = EntityPaintOnBlock.this.getBlockX() +
                     pside.xDir.offsetX * offsetX +
                     pside.yDir.offsetX * offsetY;

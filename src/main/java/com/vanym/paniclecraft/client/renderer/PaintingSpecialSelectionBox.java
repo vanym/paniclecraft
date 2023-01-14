@@ -72,7 +72,7 @@ public class PaintingSpecialSelectionBox {
         if (this.onlyCancel) {
             return;
         }
-        PaintingSide pside = PaintingSide.getSize(target.sideHit);
+        PaintingSide pside = PaintingSide.getSide(target.sideHit);
         double radius = tool.getPaintingToolRadius(event.currentItem, picture);
         int width = picture.getWidth();
         int height = picture.getHeight();

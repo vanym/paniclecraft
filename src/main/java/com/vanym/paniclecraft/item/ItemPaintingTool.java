@@ -108,7 +108,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         if (picture == null) {
             return null;
         }
-        PaintingSide pside = PaintingSide.getSize(side);
+        PaintingSide pside = PaintingSide.getSide(side);
         Vec3 inBlock = MainUtils.getInBlockVec(target);
         Vec3 inPainting = pside.toPaintingCoords(inBlock);
         int px = (int)(inPainting.xCoord * picture.getWidth());
