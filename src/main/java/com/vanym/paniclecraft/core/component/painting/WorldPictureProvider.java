@@ -31,19 +31,4 @@ public enum WorldPictureProvider {
         }
         return null;
     }
-    
-    public Picture getNeighborPicture(
-            World world,
-            int x,
-            int y,
-            int z,
-            int side,
-            int xOffset,
-            int yOffset) {
-        PaintingSide pside = PaintingSide.getSide(side);
-        x += pside.xDir.offsetX * xOffset + pside.yDir.offsetX * yOffset;
-        y += pside.xDir.offsetY * xOffset + pside.yDir.offsetY * yOffset;
-        z += pside.xDir.offsetZ * xOffset + pside.yDir.offsetZ * yOffset;
-        return this.getPicture(world, x, y, z, side);
-    }
 }

@@ -9,6 +9,7 @@ import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
@@ -262,13 +263,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         
         @Override
         public Picture getNeighborPicture(int offsetX, int offsetY) {
-            return WorldPictureProvider.PAINTONBLOCK.getNeighborPicture(EntityPaintOnBlock.this.worldObj,
-                                                                        EntityPaintOnBlock.this.getBlockX(),
-                                                                        EntityPaintOnBlock.this.getBlockY(),
-                                                                        EntityPaintOnBlock.this.getBlockZ(),
-                                                                        this.side,
-                                                                        offsetX,
-                                                                        offsetY);
+            return new WorldPicturePoint(
+                    WorldPictureProvider.PAINTONBLOCK,
+                    EntityPaintOnBlock.this.worldObj,
+                    EntityPaintOnBlock.this.getBlockX(),
+                    EntityPaintOnBlock.this.getBlockY(),
+                    EntityPaintOnBlock.this.getBlockZ(),
+                    this.side).getNeighborPoint(offsetX, offsetY).getPicture();
         }
         
         @Override

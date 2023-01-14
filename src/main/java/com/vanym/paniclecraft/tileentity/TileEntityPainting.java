@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.tileentity;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
 import cpw.mods.fml.relauncher.Side;
@@ -49,13 +50,13 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     protected Picture getNeighborPicture(int offsetX, int offsetY) {
         int side = this.getBlockMetadata();
-        return WorldPictureProvider.PAINTING.getNeighborPicture(this.getWorldObj(),
-                                                                this.xCoord,
-                                                                this.yCoord,
-                                                                this.zCoord,
-                                                                side,
-                                                                offsetX,
-                                                                offsetY);
+        return new WorldPicturePoint(
+                WorldPictureProvider.PAINTING,
+                this.getWorldObj(),
+                this.xCoord,
+                this.yCoord,
+                this.zCoord,
+                side).getNeighborPoint(offsetX, offsetY).getPicture();
     }
     
     @Override

@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -64,11 +65,13 @@ public class PaintingSpecialSelectionBox {
         if (!tool.getPaintingToolType(event.currentItem).isPixelSelector()) {
             return;
         }
-        Picture picture = WorldPictureProvider.ANYTILE.getPicture(event.player.worldObj,
-                                                                  target.blockX,
-                                                                  target.blockY,
-                                                                  target.blockZ,
-                                                                  target.sideHit);
+        Picture picture = new WorldPicturePoint(
+                WorldPictureProvider.ANYTILE,
+                event.player.worldObj,
+                target.blockX,
+                target.blockY,
+                target.blockZ,
+                target.sideHit).getPicture();
         if (picture == null) {
             return;
         }
