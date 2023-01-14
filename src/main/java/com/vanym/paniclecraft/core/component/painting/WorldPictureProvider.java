@@ -13,8 +13,13 @@ public enum WorldPictureProvider {
     ANYTILE(ISidePictureProvider.class),
     PAINTONBLOCK(EntityPaintOnBlock.class) {
         @Override
-        public Picture getPicture(World world, int x, int y, int z, int side) {
+        public Picture getOrCreatePicture(World world, int x, int y, int z, int side) {
             return EntityPaintOnBlock.getOrCreateEntityPicture(world, x, y, z, side);
+        }
+        
+        @Override
+        public Picture getPicture(World world, int x, int y, int z, int side) {
+            return EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
         }
     };
     
@@ -22,6 +27,10 @@ public enum WorldPictureProvider {
     
     WorldPictureProvider(Class<? extends ISidePictureProvider> providerClass) {
         this.providerClass = providerClass;
+    }
+    
+    public Picture getOrCreatePicture(World world, int x, int y, int z, int side) {
+        return this.getPicture(world, x, y, z, side);
     }
     
     public Picture getPicture(World world, int x, int y, int z, int side) {

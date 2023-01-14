@@ -97,7 +97,8 @@ public class MessagePaintingToolUse
             provider = WorldPictureProvider.PAINTONBLOCK;
         }
         if (provider != null) {
-            picture = provider.getPicture(world, message.x, message.y, message.z, message.side);
+            picture = provider.getOrCreatePicture(world, message.x, message.y, message.z,
+                                                  message.side);
         }
         if (picture == null || !playerEntity.canPlayerEdit(message.x, message.y, message.z,
                                                            message.side, heldItem)) {

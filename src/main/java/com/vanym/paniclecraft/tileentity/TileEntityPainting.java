@@ -56,7 +56,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
                 this.xCoord,
                 this.yCoord,
                 this.zCoord,
-                side).getNeighborPoint(offsetX, offsetY).getPicture();
+                side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
     }
     
     @Override

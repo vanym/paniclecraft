@@ -86,7 +86,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
                 this.xCoord,
                 this.yCoord,
                 this.zCoord,
-                side).getNeighborPoint(offsetX, offsetY).getPicture();
+                side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
     }
     
     public void rotateY(int rotUp) {

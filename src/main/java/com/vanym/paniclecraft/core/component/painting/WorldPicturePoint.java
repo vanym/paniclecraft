@@ -25,6 +25,10 @@ public final class WorldPicturePoint {
         this.side = side;
     }
     
+    public Picture getOrCreatePicture() {
+        return this.provider.getOrCreatePicture(this.world, this.x, this.y, this.z, this.side);
+    }
+    
     public Picture getPicture() {
         return this.provider.getPicture(this.world, this.x, this.y, this.z, this.side);
     }

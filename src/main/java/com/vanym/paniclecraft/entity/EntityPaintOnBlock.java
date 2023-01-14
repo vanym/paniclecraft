@@ -269,7 +269,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                     EntityPaintOnBlock.this.getBlockX(),
                     EntityPaintOnBlock.this.getBlockY(),
                     EntityPaintOnBlock.this.getBlockZ(),
-                    this.side).getNeighborPoint(offsetX, offsetY).getPicture();
+                    this.side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
         }
         
         @Override
