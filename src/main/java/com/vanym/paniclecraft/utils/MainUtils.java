@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -103,6 +104,17 @@ public class MainUtils {
             return 0;
         }
         return color.getRGB() & 0xffffff;
+    }
+    
+    public static MovingObjectPosition rayTraceBlocks(EntityPlayer player, double distance) {
+        Vec3 pos = Vec3.createVectorHelper(player.posX,
+                                           player.posY + player.getEyeHeight(),
+                                           player.posZ);
+        Vec3 look = player.getLookVec();
+        Vec3 posTo = pos.addVector(look.xCoord * distance,
+                                   look.yCoord * distance,
+                                   look.zCoord * distance);
+        return player.worldObj.rayTraceBlocks(pos, posTo);
     }
     
     // public static int[] getRGBFromInt(int par1){

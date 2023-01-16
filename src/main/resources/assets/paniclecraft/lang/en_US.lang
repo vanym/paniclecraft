@@ -33,4 +33,8 @@ text.chessGameHaveSave=Have saved game
 item.portableWorkbench.name=Portable Workbench
 
 commands.paniclecraft.paintonblock.cleararea.usage=/paniclecraft paintonblock cleararea <radius> [<pos>]
-commands.paniclecraft.paintonblock.cleararea.clear=Clear %d paint from blocks in %s%s
+commands.paniclecraft.paintonblock.cleararea.clear=Clear paint from %d blocks in %s%s
+commands.paniclecraft.paintonblock.info.usage=/paniclecraft paintonblock info [<pos>]
+commands.paniclecraft.paintonblock.info.playerless=Only players can use this command without pos
+commands.paniclecraft.paintonblock.info.noblock=You don't look at block
+commands.paniclecraft.paintonblock.info.nopaintonblock=No paint on block found at %d %d %d

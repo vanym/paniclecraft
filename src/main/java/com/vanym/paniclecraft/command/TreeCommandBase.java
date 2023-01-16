@@ -24,12 +24,24 @@ public abstract class TreeCommandBase extends CommandBase {
     
     @SuppressWarnings("unchecked")
     protected void addSubCommand(ICommand subCommand) {
+        if (subCommand instanceof CommandBase) {
+            ((CommandBase)subCommand).setParentPath(this.path);
+        }
         this.commandList.add(subCommand);
         this.subCommands.put(subCommand.getCommandName(), subCommand);
         List<String> aliases = subCommand.getCommandAliases();
         if (aliases != null) {
             aliases.stream().forEach(a->this.subCommands.put(a, subCommand));
         }
+    }
+    
+    @Override
+    protected void setParentPath(String[] path) {
+        super.setParentPath(path);
+        this.commandList.stream()
+                        .filter(c->c instanceof CommandBase)
+                        .map(c->(CommandBase)c)
+                        .forEach(c->c.setParentPath(this.path));
     }
     
     @Override

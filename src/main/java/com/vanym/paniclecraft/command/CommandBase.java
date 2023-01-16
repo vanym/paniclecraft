@@ -18,6 +18,14 @@ public abstract class CommandBase extends net.minecraft.command.CommandBase {
         }
     }
     
+    protected void setParentPath(String[] path) {
+        if (path != null) {
+            List<String> list = new ArrayList<>(Arrays.asList(path));
+            list.add(this.getCommandName());
+            this.path = list.toArray(new String[list.size()]);
+        }
+    }
+    
     @Override
     public String getCommandUsage(ICommandSender sender) {
         return this.getTranslationPrefix() + ".usage";

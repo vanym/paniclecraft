@@ -1,17 +1,28 @@
 package com.vanym.paniclecraft.command;
 
+import java.util.UUID;
+
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
+import com.vanym.paniclecraft.utils.MainUtils;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChatComponentStyle;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
     
     public CommandPaintOnBlock() {
+        this.addSubCommand(new CommandInfo());
         this.addSubCommand(new CommandClearArea());
     }
     
@@ -22,11 +33,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
     
     protected class CommandClearArea extends CommandBase {
         
-        public CommandClearArea() {
-            this.path = new String[]{CommandMod3.NAME,
-                                     CommandPaintOnBlock.this.getCommandName(),
-                                     this.getCommandName()};
-        }
+        public CommandClearArea() {}
         
         @Override
         public String getCommandName() {
@@ -61,6 +68,71 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             String name = world.provider.getDimensionName();
             String line = this.getTranslationPrefix() + ".clear";
             func_152373_a(sender, this, line, count, name, box.toString().substring(3));
+        }
+    }
+    
+    protected class CommandInfo extends CommandBase {
+        
+        public CommandInfo() {}
+        
+        @Override
+        public String getCommandName() {
+            return "info";
+        }
+        
+        @Override
+        public int getRequiredPermissionLevel() {
+            return 2;
+        }
+        
+        @Override
+        public void processCommand(ICommandSender sender, String[] args) {
+            int x, y, z;
+            if (args.length == 0) {
+                if (!(sender instanceof EntityPlayer)) {
+                    ChatComponentStyle message = new ChatComponentTranslation(
+                            this.getTranslationPrefix() + ".playerless");
+                    message.getChatStyle().setColor(EnumChatFormatting.RED);
+                    sender.addChatMessage(message);
+                    return;
+                }
+                EntityPlayer player = (EntityPlayer)sender;
+                MovingObjectPosition target = MainUtils.rayTraceBlocks(player, 6.0D);
+                if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
+                    ChatComponentStyle message = new ChatComponentTranslation(
+                            this.getTranslationPrefix() + ".noblock");
+                    message.getChatStyle().setColor(EnumChatFormatting.RED);
+                    sender.addChatMessage(message);
+                    return;
+                }
+                x = target.blockX;
+                y = target.blockY;
+                z = target.blockZ;
+            } else if (args.length == 3) {
+                x = parseInt(sender, args[0]);
+                y = parseInt(sender, args[1]);
+                z = parseInt(sender, args[2]);
+            } else {
+                throw new WrongUsageException(this.getCommandUsage(sender));
+            }
+            EntityPaintOnBlock entityPOB =
+                    EntityPaintOnBlock.getEntity(sender.getEntityWorld(), x, y, z);
+            if (entityPOB == null) {
+                ChatComponentStyle message = new ChatComponentTranslation(
+                        this.getTranslationPrefix() + ".nopaintonblock",
+                        new Object[]{x, y, z});
+                sender.addChatMessage(message);
+                return;
+            }
+            String name = entityPOB.getClass().getSimpleName();
+            int id = entityPOB.getEntityId();
+            UUID uuid = entityPOB.getUniqueID();
+            String line = String.format("%s[x=%d, y=%d, z=%d, id=%d, uuid=%s]", name,
+                                        entityPOB.getBlockX(),
+                                        entityPOB.getBlockY(),
+                                        entityPOB.getBlockZ(),
+                                        id, uuid.toString());
+            sender.addChatMessage(new ChatComponentText(line));
         }
     }
 }
