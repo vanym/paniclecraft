@@ -21,6 +21,11 @@ public enum WorldPictureProvider {
         public Picture getPicture(World world, int x, int y, int z, int side) {
             return EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
         }
+        
+        @Override
+        public boolean hasAlpha() {
+            return true;
+        }
     };
     
     protected final Class<? extends ISidePictureProvider> providerClass;
@@ -39,5 +44,9 @@ public enum WorldPictureProvider {
             return ((ISidePictureProvider)tile).getPicture(side);
         }
         return null;
+    }
+    
+    public boolean hasAlpha() {
+        return false;
     }
 }

@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.command;
 
 import java.util.UUID;
 
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -24,6 +25,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
     public CommandPaintOnBlock() {
         this.addSubCommand(new CommandInfo());
         this.addSubCommand(new CommandClearArea());
+        this.addSubCommand(new CommandPaintingView(WorldPictureProvider.PAINTONBLOCK));
     }
     
     @Override

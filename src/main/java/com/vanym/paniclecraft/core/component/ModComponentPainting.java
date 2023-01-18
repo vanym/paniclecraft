@@ -20,6 +20,7 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.command.CommandPaintOnBlock;
+import com.vanym.paniclecraft.command.CommandPainting;
 import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
 import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -31,6 +32,7 @@ import com.vanym.paniclecraft.item.ItemPaintRemover;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPalette;
+import com.vanym.paniclecraft.network.message.MessageOpenPaintingView;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
@@ -130,7 +132,8 @@ public class ModComponentPainting implements ModComponent {
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
         MinecraftForge.EVENT_BUS.register(new PaintOnBlockEventHandler());
         
-        Core.instance.command.addSubCommand(new CommandPaintOnBlock());
+        Arrays.asList(new CommandPainting(), new CommandPaintOnBlock())
+              .forEach(Core.instance.command::addSubCommand);
         
         Core.instance.network.registerMessage(MessagePaintingToolUse.class,
                                               MessagePaintingToolUse.class, 30,
@@ -138,6 +141,9 @@ public class ModComponentPainting implements ModComponent {
         Core.instance.network.registerMessage(MessagePaletteSetColor.class,
                                               MessagePaletteSetColor.class, 32,
                                               Side.SERVER);
+        Core.instance.network.registerMessage(MessageOpenPaintingView.class,
+                                              MessageOpenPaintingView.class, 33,
+                                              Side.CLIENT);
         this.initRecipe(config);
         this.config = new ChangeableConfig().read(config);
         this.applyConfig();
