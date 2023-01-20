@@ -1,15 +1,24 @@
 package com.vanym.paniclecraft.container;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
+import com.vanym.paniclecraft.core.component.painting.ImageUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.event.ClickEvent;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.IChatComponent;
 
 public abstract class ContainerPaintingViewBase extends Container {
     
@@ -62,6 +71,22 @@ public abstract class ContainerPaintingViewBase extends Container {
     
     protected final int getSize() {
         return this.sizeX * this.sizeY;
+    }
+    
+    public IChatComponent savePainting(File file) {
+        try {
+            ImageUtils.savePainting(file, this.pictureSize, this.sizeX, this.sizeY,
+                                    (x, y)->this.getPicture(x, y));
+            ChatComponentText message = new ChatComponentText(file.getName());
+            ChatStyle style = message.getChatStyle();
+            style.setChatClickEvent(new ClickEvent(
+                    ClickEvent.Action.OPEN_FILE,
+                    file.getAbsolutePath()));
+            style.setUnderlined(true);
+            return new ChatComponentTranslation("painting.export.success", message);
+        } catch (IOException e) {
+            return new ChatComponentTranslation("painting.export.failure", e.getMessage());
+        }
     }
     
     protected class PictureInv implements IInventory {

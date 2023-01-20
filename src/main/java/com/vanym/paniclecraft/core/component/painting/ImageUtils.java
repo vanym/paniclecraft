@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.core.component.painting;
 
+import java.awt.Color;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -11,11 +12,13 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
 
@@ -129,5 +132,50 @@ public class ImageUtils {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public static void savePainting(File file, Picture picture) throws IOException {
+        savePainting(file, picture, 1, 1, (x, y)->picture);
+    }
+    
+    public static void savePainting(
+            File file,
+            IPictureSize elementSize,
+            int sizeX,
+            int sizeY,
+            BiFunction<Integer, Integer, Picture> getter) throws IOException {
+        BufferedImage img = makePaintingImage(elementSize, sizeX, sizeY, getter);
+        ImageIO.write(img, "png", file);
+    }
+    
+    protected static BufferedImage makePaintingImage(
+            IPictureSize elementSize,
+            int sizeX,
+            int sizeY,
+            BiFunction<Integer, Integer, Picture> getter) {
+        int stepX = elementSize.getWidth();
+        int stepY = elementSize.getHeight();
+        int totalSizeX = stepX * sizeX;
+        int totalSizeY = stepY * sizeY;
+        BufferedImage img = new BufferedImage(totalSizeX, totalSizeY, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < sizeY; ++y) {
+            for (int x = 0; x < sizeX; ++x) {
+                Picture picture = getter.apply(x, y);
+                if (picture == null) {
+                    continue;
+                }
+                int offsetX = x * stepX;
+                int offsetY = y * stepY;
+                int pxmax = Math.min(stepX, picture.getWidth());
+                int pymax = Math.min(stepY, picture.getHeight());
+                for (int py = 0; py < pymax; ++py) {
+                    for (int px = 0; px < pxmax; ++px) {
+                        Color color = picture.getPixelColor(px, py);
+                        img.setRGB(offsetX + px, offsetY + py, color.getRGB());
+                    }
+                }
+            }
+        }
+        return img;
     }
 }

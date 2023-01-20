@@ -16,6 +16,10 @@ text.paintingtool.radius=Radius
 item.palette.name=Palette
 item.palette.inv.name=Palette
 
+gui.paintingview.export=Export
+painting.export.success=Saved painting as %s
+painting.export.failure=Couldn't save painting: %s
+
 item.cannon.name=Cannon
 tile.cannon.inv.name=Cannon
 gui.cannon.direction=Direction:

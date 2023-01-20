@@ -1,40 +1,88 @@
 package com.vanym.paniclecraft.client.gui.container;
 
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
+@SideOnly(Side.CLIENT)
 public class GuiPaintingView extends GuiScreen {
     
+    protected static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
+    
     protected static final int PADDING_TOP = 20;
-    protected static final int PADDING_BOTTOM = 20;
+    protected static final int PADDING_BOTTOM = 30;
     protected static final int PADDING_LEFT = 20;
     protected static final int PADDING_RIGHT = 20;
     
     protected final ContainerPaintingViewClient view;
+    
+    protected int viewX;
+    protected int viewY;
+    protected int viewStep;
+    
+    protected final GuiButton buttonExport =
+            new GuiButton(1, 100, 0, 80, 20, I18n.format("gui.paintingview.export"));
     
     public GuiPaintingView(ContainerPaintingViewClient view) {
         this.view = view;
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
         this.mc.thePlayer.openContainer = this.view;
+        this.buttonList.add(this.buttonExport);
+    }
+    
+    @Override
+    public void setWorldAndResolution(Minecraft mc, int width, int height) {
+        super.setWorldAndResolution(mc, width, height);
+        int viewMaxWidth = this.width - (PADDING_LEFT + PADDING_RIGHT);
+        int viewMaxHeight = this.height - (PADDING_TOP + PADDING_BOTTOM);
+        this.viewStep = Math.min(viewMaxWidth / this.view.sizeX, viewMaxHeight / this.view.sizeY);
+        this.viewX = PADDING_LEFT + (viewMaxWidth - (this.viewStep * this.view.sizeX)) / 2;
+        this.viewY = PADDING_TOP + (viewMaxHeight - (this.viewStep * this.view.sizeY)) / 2;
+        int controlsX = (width / 2) - 100;
+        this.buttonExport.xPosition =
+                Math.max(controlsX + 120, this.getViewEndX() - this.buttonExport.width);
+        this.buttonExport.yPosition = height - this.buttonExport.height - 5;
+    }
+    
+    protected int getViewWidth() {
+        return this.viewStep * this.view.sizeX;
+    }
+    
+    protected int getViewHeight() {
+        return this.viewStep * this.view.sizeY;
+    }
+    
+    protected int getViewEndX() {
+        return this.viewX + this.getViewWidth();
+    }
+    
+    protected int getViewEndY() {
+        return this.viewY + this.getViewHeight();
     }
     
     @Override
     public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
         this.drawDefaultBackground();
-        int width = this.width - (PADDING_LEFT + PADDING_RIGHT);
-        int height = this.height - (PADDING_TOP + PADDING_BOTTOM);
-        int step = Math.min(width / this.view.sizeX, height / this.view.sizeY);
-        int offsetX = PADDING_LEFT + (width - (step * this.view.sizeX)) / 2;
-        int offsetY = PADDING_TOP + (height - (step * this.view.sizeY)) / 2;
         for (int y = 0; y < this.view.sizeY; ++y) {
             for (int x = 0; x < this.view.sizeX; ++x) {
                 Picture picture = this.view.getPicture(x, y);
@@ -43,11 +91,34 @@ public class GuiPaintingView extends GuiScreen {
                 }
                 int side = ForgeDirection.SOUTH.ordinal();
                 IIcon icon = TileEntityPaintingRenderer.bindTexture(picture, side);
-                this.drawTexturedModelRectFromIcon(offsetX + x * step, offsetY + y * step,
-                                                   icon, step, step);
+                this.drawTexturedModelRectFromIcon(this.viewX + x * this.viewStep,
+                                                   this.viewY + y * this.viewStep,
+                                                   icon, this.viewStep, this.viewStep);
             }
         }
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(this.view.sizeX * this.view.pictureSize.getWidth());
+            sb.append("×");
+            sb.append(this.view.sizeY * this.view.pictureSize.getHeight());
+            this.fontRendererObj.drawString(sb.toString(), 2, 2, 0x7f7f7f);
+        }
         super.drawScreen(mouseX, mouseY, renderPartialTicks);
+    }
+    
+    @Override
+    public void actionPerformed(GuiButton button) {
+        if (button.id == this.buttonExport.id) {
+            this.paintingExport();
+        }
+    }
+    
+    protected void paintingExport() {
+        File dir = new File(this.mc.mcDataDir, "paintings");
+        dir.mkdir();
+        File file = getTimestampedPNGFileForDirectory(dir);
+        IChatComponent message = this.view.savePainting(file);
+        this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }
     
     @Override
@@ -61,6 +132,17 @@ public class GuiPaintingView extends GuiScreen {
     public void onGuiClosed() {
         if (this.mc.thePlayer != null) {
             this.view.onContainerClosed(this.mc.thePlayer);
+        }
+    }
+    
+    // from ScreenShotHelper
+    protected static File getTimestampedPNGFileForDirectory(File dir) {
+        String s = DATE_FORMAT.format(new Date()).toString();
+        for (int i = 1;; ++i) {
+            File file = new File(dir, s + (i == 1 ? "" : "_" + i) + ".png");
+            if (!file.exists()) {
+                return file;
+            }
         }
     }
 }
