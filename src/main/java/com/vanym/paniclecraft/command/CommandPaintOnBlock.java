@@ -15,6 +15,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
@@ -55,9 +56,11 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             double radius = parseDoubleBounded(sender, args[0], 0.0D, 1024.0D);
             ChunkCoordinates coords = sender.getPlayerCoordinates();
             if (args.length == 4) {
-                coords.set(parseInt(sender, args[1]),
-                           parseInt(sender, args[2]),
-                           parseInt(sender, args[3]));
+                int x, y, z;
+                x = MathHelper.floor_double(func_110666_a(sender, coords.posX, args[1]));
+                y = MathHelper.floor_double(func_110666_a(sender, coords.posY, args[2]));
+                z = MathHelper.floor_double(func_110666_a(sender, coords.posZ, args[3]));
+                coords.set(x, y, z);
             }
             World world = sender.getEntityWorld();
             Vec3 vec = Vec3.createVectorHelper(coords.posX + 0.5D,
@@ -111,9 +114,10 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                 y = target.blockY;
                 z = target.blockZ;
             } else if (args.length == 3) {
-                x = parseInt(sender, args[0]);
-                y = parseInt(sender, args[1]);
-                z = parseInt(sender, args[2]);
+                ChunkCoordinates coords = sender.getPlayerCoordinates();
+                x = MathHelper.floor_double(func_110666_a(sender, coords.posX, args[0]));
+                y = MathHelper.floor_double(func_110666_a(sender, coords.posY, args[1]));
+                z = MathHelper.floor_double(func_110666_a(sender, coords.posZ, args[2]));
             } else {
                 throw new WrongUsageException(this.getCommandUsage(sender));
             }
