@@ -1,5 +1,8 @@
 package com.vanym.paniclecraft.command;
 
+import java.util.List;
+
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
@@ -8,6 +11,7 @@ import com.vanym.paniclecraft.utils.MainUtils;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
@@ -17,14 +21,21 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 public class CommandPaintingView extends CommandBase {
     
     protected final WorldPictureProvider[] providers;
+    protected final boolean to;
     
-    public CommandPaintingView(WorldPictureProvider... providers) {
+    public CommandPaintingView(boolean to, WorldPictureProvider... providers) {
         this.providers = providers;
+        this.to = to;
     }
     
     @Override
     public String getCommandName() {
-        return "view";
+        StringBuilder sb = new StringBuilder();
+        sb.append("view");
+        if (this.to) {
+            sb.append("to");
+        }
+        return sb.toString();
     }
     
     @Override
@@ -33,15 +44,32 @@ public class CommandPaintingView extends CommandBase {
     }
     
     @Override
-    public void processCommand(ICommandSender sender, String[] args) {
-        int maxRadius;
-        if (args.length == 0) {
-            maxRadius = 1024;
-        } else if (args.length == 1) {
-            maxRadius = parseInt(sender, args[0]);
-        } else {
-            throw new WrongUsageException(this.getCommandUsage(sender));
+    public String getCommandUsage(ICommandSender sender) {
+        return super.getTranslationPrefix() + ".usage";
+    }
+    
+    @Override
+    protected String getTranslationPrefix() {
+        return "commands." + DEF.MOD_ID + ".paintingview";
+    }
+    
+    @Override
+    public boolean isUsernameIndex(String[] args, int index) {
+        return super.isUsernameIndex(args, index) || (this.to && index == 0);
+    }
+    
+    @Override
+    @SuppressWarnings("rawtypes")
+    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+        if (this.to && args.length == 1) {
+            return getListOfStringsMatchingLastWord(args,
+                                                    MinecraftServer.getServer().getAllUsernames());
         }
+        return super.addTabCompletionOptions(sender, args);
+    }
+    
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) {
         if (!(sender instanceof EntityPlayerMP)) {
             ChatComponentStyle message = new ChatComponentTranslation(
                     this.getTranslationPrefix() + ".playerless");
@@ -50,6 +78,24 @@ public class CommandPaintingView extends CommandBase {
             return;
         }
         EntityPlayerMP player = (EntityPlayerMP)sender;
+        EntityPlayerMP viewer;
+        int i = 0;
+        if (this.to) {
+            if (args.length == i) {
+                throw new WrongUsageException(this.getCommandUsage(sender));
+            }
+            viewer = getPlayer(sender, args[i++]);
+        } else {
+            viewer = player;
+        }
+        int maxRadius;
+        if (args.length == i) {
+            maxRadius = 1024;
+        } else if (args.length == (i + 1)) {
+            maxRadius = parseInt(sender, args[i++]);
+        } else {
+            throw new WrongUsageException(this.getCommandUsage(sender));
+        }
         MovingObjectPosition target = MainUtils.rayTraceBlocks(player, 6.0D);
         if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
             ChatComponentStyle message = new ChatComponentTranslation(
@@ -69,7 +115,7 @@ public class CommandPaintingView extends CommandBase {
             ContainerPaintingViewServer view =
                     ContainerPaintingViewServer.makeFullView(point, maxRadius);
             if (view != null) {
-                ContainerPaintingViewServer.openGui(player, view);
+                ContainerPaintingViewServer.openGui(viewer, view);
                 return;
             }
         }

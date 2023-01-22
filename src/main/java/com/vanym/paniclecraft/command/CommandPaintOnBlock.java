@@ -26,7 +26,8 @@ public class CommandPaintOnBlock extends TreeCommandBase {
     public CommandPaintOnBlock() {
         this.addSubCommand(new CommandInfo());
         this.addSubCommand(new CommandClearArea());
-        this.addSubCommand(new CommandPaintingView(WorldPictureProvider.PAINTONBLOCK));
+        this.addSubCommand(new CommandView(false));
+        this.addSubCommand(new CommandView(true));
     }
     
     @Override
@@ -139,6 +140,13 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                                         entityPOB.getBlockZ(),
                                         id, uuid.toString());
             sender.addChatMessage(new ChatComponentText(line));
+        }
+    }
+    
+    protected class CommandView extends CommandPaintingView {
+        
+        public CommandView(boolean to) {
+            super(to, WorldPictureProvider.PAINTONBLOCK);
         }
     }
 }

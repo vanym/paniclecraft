@@ -36,8 +36,19 @@ text.chessGameHaveSave=Have saved game
 
 item.portableWorkbench.name=Portable Workbench
 
+commands.paniclecraft.paintingview.playerless=Only players can use this command
+commands.paniclecraft.paintingview.noblock=Can't find block you looking at
+commands.paniclecraft.paintingview.nopainting=Can't find picture you looking at
+
+commands.paniclecraft.painting.view.usage=/paniclecraft painting view [<maxRadius>]
+commands.paniclecraft.painting.viewto.usage=/paniclecraft painting viewto <player> [<maxRadius>]
+
+commands.paniclecraft.paintonblock.view.usage=/paniclecraft paintonblock view [<maxRadius>]
+commands.paniclecraft.paintonblock.viewto.usage=/paniclecraft paintonblock viewto <player> [<maxRadius>]
+
 commands.paniclecraft.paintonblock.cleararea.usage=/paniclecraft paintonblock cleararea <radius> [<pos>]
 commands.paniclecraft.paintonblock.cleararea.clear=Clear paint from %d blocks in %s%s
+
 commands.paniclecraft.paintonblock.info.usage=/paniclecraft paintonblock info [<pos>]
 commands.paniclecraft.paintonblock.info.playerless=Only players can use this command without pos
 commands.paniclecraft.paintonblock.info.noblock=You don't look at block
