@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.network.message;
 
+import com.vanym.paniclecraft.client.gui.container.GuiPaintingEditView;
 import com.vanym.paniclecraft.client.gui.container.GuiPaintingView;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.FixedPictureSize;
@@ -18,7 +19,7 @@ public class MessageOpenPaintingView
             IMessageHandler<MessageOpenPaintingView, IMessage> {
     
     int windowId, pictureWidth, pictureHeight, sizeX, sizeY;
-    boolean hasAlpha;
+    boolean hasAlpha, editable;
     
     public MessageOpenPaintingView() {}
     
@@ -27,13 +28,15 @@ public class MessageOpenPaintingView
             int pictureHeight,
             int sizeX,
             int sizeY,
-            boolean hasAlpha) {
+            boolean hasAlpha,
+            boolean editable) {
         this.windowId = windowId;
         this.pictureWidth = pictureWidth;
         this.pictureHeight = pictureHeight;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.hasAlpha = hasAlpha;
+        this.editable = editable;
     }
     
     @Override
@@ -44,6 +47,7 @@ public class MessageOpenPaintingView
         this.sizeX = buf.readInt();
         this.sizeY = buf.readInt();
         this.hasAlpha = buf.readBoolean();
+        this.editable = buf.readBoolean();
     }
     
     @Override
@@ -54,20 +58,24 @@ public class MessageOpenPaintingView
         buf.writeInt(this.sizeX);
         buf.writeInt(this.sizeY);
         buf.writeBoolean(this.hasAlpha);
+        buf.writeBoolean(this.editable);
     }
     
     @Override
     public IMessage onMessage(MessageOpenPaintingView message, MessageContext ctx) {
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
-        FMLCommonHandler.instance()
-                        .showGuiScreen(new GuiPaintingView(
-                                new ContainerPaintingViewClient(
-                                        new FixedPictureSize(
-                                                message.pictureWidth,
-                                                message.pictureHeight),
-                                        message.sizeX,
-                                        message.sizeY,
-                                        message.hasAlpha)));
+        ContainerPaintingViewClient view = new ContainerPaintingViewClient(
+                new FixedPictureSize(message.pictureWidth, message.pictureHeight),
+                message.sizeX,
+                message.sizeY,
+                message.hasAlpha);
+        GuiPaintingView gui;
+        if (message.editable) {
+            gui = new GuiPaintingEditView(view);
+        } else {
+            gui = new GuiPaintingView(view);
+        }
+        FMLCommonHandler.instance().showGuiScreen(gui);
         player.openContainer.windowId = message.windowId;
         return null;
     }

@@ -34,6 +34,7 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.message.MessageOpenPaintingView;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
+import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
@@ -144,6 +145,9 @@ public class ModComponentPainting implements ModComponent {
         Core.instance.network.registerMessage(MessageOpenPaintingView.class,
                                               MessageOpenPaintingView.class, 33,
                                               Side.CLIENT);
+        Core.instance.network.registerMessage(MessagePaintingViewAddPicture.class,
+                                              MessagePaintingViewAddPicture.class, 34,
+                                              Side.SERVER);
         this.initRecipe(config);
         this.config = new ChangeableConfig().read(config);
         this.applyConfig();

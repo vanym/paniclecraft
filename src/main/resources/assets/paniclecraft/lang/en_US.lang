@@ -19,6 +19,10 @@ item.palette.inv.name=Palette
 gui.paintingview.export=Export
 painting.export.success=Saved painting as %s
 painting.export.failure=Couldn't save painting: %s
+gui.paintingview.import=Import
+gui.paintingview.importsave=Save
+gui.paintingview.importcancel=Cancel
+painting.import.failure=Couldn't import image: %s
 
 item.cannon.name=Cannon
 tile.cannon.inv.name=Cannon

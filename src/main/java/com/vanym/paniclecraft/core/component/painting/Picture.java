@@ -51,6 +51,10 @@ public class Picture implements IPictureSize {
         this(null, hasAlpha, size);
     }
     
+    public Picture(boolean hasAlpha) {
+        this((IPictureHolder)null, hasAlpha);
+    }
+    
     public Picture(IPictureHolder holder) {
         this(holder, false);
     }
@@ -63,6 +67,16 @@ public class Picture implements IPictureSize {
         this.holder = holder;
         this.hasAlpha = hasAlpha;
         this.setSize(size);
+    }
+    
+    public Picture(Image image) {
+        this(null, image);
+    }
+    
+    public Picture(IPictureHolder holder, Image image) {
+        this.holder = holder;
+        this.hasAlpha = image.hasAlpha();
+        this.image = image;
     }
     
     public boolean usePaintingTool(ItemStack itemStack, int x, int y) {
@@ -188,6 +202,28 @@ public class Picture implements IPictureSize {
         return false;
     }
     
+    public boolean addPicture(int x, int y, Picture input) {
+        if (!this.isEditable()) {
+            return false;
+        }
+        boolean changed = false;
+        int ex = Math.min(this.getWidth(), x + input.getWidth());
+        int ey = Math.min(this.getHeight(), y + input.getHeight());
+        for (int py = Math.max(0, y); py < ey; ++py) {
+            for (int px = Math.max(0, x); px < ex; ++px) {
+                Color icolor = input.getPixelColor(px - x, py - y);
+                Color origin = this.getPixelColor(px, py);
+                changed |= this.setMyPixelColor(px, py, MainUtils.addColor(origin, icolor));
+            }
+        }
+        if (changed) {
+            this.packed = null;
+            this.imageChanged();
+            this.update();
+        }
+        return changed;
+    }
+    
     public Picture getNeighborPicture(int offsetX, int offsetY) {
         if (offsetX == 0 && offsetY == 0) {
             return this;
@@ -226,11 +262,9 @@ public class Picture implements IPictureSize {
     }
     
     protected void update() {
-        this.holder.update();
-    }
-    
-    protected Image getImage() {
-        return this.image;
+        if (this.holder != null) {
+            this.holder.update();
+        }
     }
     
     public boolean hasAlpha() {

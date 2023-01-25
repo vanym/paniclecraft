@@ -10,7 +10,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
-import com.vanym.paniclecraft.client.utils.IconFlippedBugFixed;
+import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
@@ -182,33 +182,16 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
             }
             picture.imageChangeProcessed = true;
         }
-        IIcon icon = new FullTextureIcon(1, 1);
+        IIcon icon = IconUtils.full(picture.getWidth(), picture.getHeight());
         switch (side) {
             case 0:
-                icon = new IconFlippedBugFixed(icon, true, false);
+                icon = IconUtils.flip(icon, true, false);
             break;
             case 1:
-                icon = new IconFlippedBugFixed(icon, true, true);
+                icon = IconUtils.flip(icon, true, true);
             break;
         }
         return icon;
-    }
-    
-    protected static class FullTextureIcon implements IIcon {
-        // @formatter:off
-        protected int width, height;
-        public FullTextureIcon(int width, int heigh) { this.width = width; this.height = heigh; }
-        public FullTextureIcon() { this(1, 1); }
-        @Override public int getIconWidth() { return this.width; }
-        @Override public int getIconHeight() { return this.height; }
-        @Override public float getMinU() { return 0; }
-        @Override public float getMaxU() { return 1; }
-        @Override public float getInterpolatedU(double u) { return (float)u / 16; }
-        @Override public float getMinV() { return 0; }
-        @Override public float getMaxV() { return 1; }
-        @Override public float getInterpolatedV(double v) { return (float)v / 16; }
-        @Override public String getIconName() { return "fulltextureicon"; }
-        // @formatter:on
     }
     
     protected static class RenderBlocksWorldless extends RenderBlocksPainting {

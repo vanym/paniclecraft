@@ -26,8 +26,10 @@ public class CommandPaintOnBlock extends TreeCommandBase {
     public CommandPaintOnBlock() {
         this.addSubCommand(new CommandInfo());
         this.addSubCommand(new CommandClearArea());
-        this.addSubCommand(new CommandView(false));
-        this.addSubCommand(new CommandView(true));
+        this.addSubCommand(new CommandView(false, false));
+        this.addSubCommand(new CommandView(true, false));
+        this.addSubCommand(new CommandView(false, true));
+        this.addSubCommand(new CommandView(true, true));
     }
     
     @Override
@@ -145,8 +147,8 @@ public class CommandPaintOnBlock extends TreeCommandBase {
     
     protected class CommandView extends CommandPaintingView {
         
-        public CommandView(boolean to) {
-            super(to, WorldPictureProvider.PAINTONBLOCK);
+        public CommandView(boolean edit, boolean to) {
+            super(edit, to, WorldPictureProvider.PAINTONBLOCK);
         }
     }
 }

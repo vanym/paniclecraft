@@ -21,16 +21,21 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 public class CommandPaintingView extends CommandBase {
     
     protected final WorldPictureProvider[] providers;
+    protected final boolean edit;
     protected final boolean to;
     
-    public CommandPaintingView(boolean to, WorldPictureProvider... providers) {
+    public CommandPaintingView(boolean edit, boolean to, WorldPictureProvider... providers) {
         this.providers = providers;
+        this.edit = edit;
         this.to = to;
     }
     
     @Override
     public String getCommandName() {
         StringBuilder sb = new StringBuilder();
+        if (this.edit) {
+            sb.append("edit");
+        }
         sb.append("view");
         if (this.to) {
             sb.append("to");
@@ -115,6 +120,7 @@ public class CommandPaintingView extends CommandBase {
             ContainerPaintingViewServer view =
                     ContainerPaintingViewServer.makeFullView(point, maxRadius);
             if (view != null) {
+                view.setEditable(this.edit);
                 ContainerPaintingViewServer.openGui(viewer, view);
                 return;
             }

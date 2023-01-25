@@ -27,7 +27,7 @@ public abstract class ContainerPaintingViewBase extends Container {
     
     public final IPictureSize pictureSize;
     
-    public final PictureInv inv = new PictureInv();
+    protected final PictureInv inv = new PictureInv();
     
     protected ContainerPaintingViewBase(IPictureSize pictureSize, int sizeX, int sizeY) {
         this.pictureSize = pictureSize;
@@ -73,6 +73,14 @@ public abstract class ContainerPaintingViewBase extends Container {
         return this.sizeX * this.sizeY;
     }
     
+    public final int getWidth() {
+        return this.sizeX * this.pictureSize.getWidth();
+    }
+    
+    public final int getHeight() {
+        return this.sizeY * this.pictureSize.getHeight();
+    }
+    
     public IChatComponent savePainting(File file) {
         try {
             ImageUtils.savePainting(file, this.pictureSize, this.sizeX, this.sizeY,
@@ -87,6 +95,33 @@ public abstract class ContainerPaintingViewBase extends Container {
         } catch (IOException e) {
             return new ChatComponentTranslation("painting.export.failure", e.getMessage());
         }
+    }
+    
+    public boolean addPicture(int inputX, int inputY, Picture input) {
+        boolean changed = false;
+        int pictureWidth = this.pictureSize.getWidth();
+        int pictureHeight = this.pictureSize.getHeight();
+        int inputEndX = inputX + input.getWidth();
+        int inputEndY = inputY + input.getHeight();
+        int w = Math.min(this.sizeX, inputEndX / pictureWidth +
+                                     ((inputEndX % pictureWidth) == 0 ? 0 : 1));
+        int h = Math.min(this.sizeY, inputEndY / pictureHeight +
+                                     ((inputEndY % pictureHeight) == 0 ? 0 : 1));
+        for (int y = Math.max(0, inputY / pictureHeight); y < h; ++y) {
+            int paintingY = y * pictureHeight;
+            for (int x = Math.max(0, inputX / pictureWidth); x < w; ++x) {
+                Picture picture = this.getPicture(x, y);
+                if (picture == null) {
+                    continue;
+                }
+                int paintingX = x * pictureWidth;
+                changed |= picture.addPicture(inputX - paintingX, inputY - paintingY, input);
+            }
+        }
+        if (changed) {
+            this.detectAndSendChanges();
+        }
+        return changed;
     }
     
     protected class PictureInv implements IInventory {

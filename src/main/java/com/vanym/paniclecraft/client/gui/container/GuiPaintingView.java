@@ -5,6 +5,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.lwjgl.opengl.GL11;
+
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -35,8 +37,11 @@ public class GuiPaintingView extends GuiScreen {
     protected int viewY;
     protected int viewStep;
     
+    protected int controlsX;
+    protected int controlsEndX;
+    
     protected final GuiButton buttonExport =
-            new GuiButton(1, 100, 0, 80, 20, I18n.format("gui.paintingview.export"));
+            new GuiButton(1, 0, 0, 60, 20, I18n.format("gui.paintingview.export"));
     
     public GuiPaintingView(ContainerPaintingViewClient view) {
         this.view = view;
@@ -58,9 +63,10 @@ public class GuiPaintingView extends GuiScreen {
         this.viewStep = Math.min(viewMaxWidth / this.view.sizeX, viewMaxHeight / this.view.sizeY);
         this.viewX = PADDING_LEFT + (viewMaxWidth - (this.viewStep * this.view.sizeX)) / 2;
         this.viewY = PADDING_TOP + (viewMaxHeight - (this.viewStep * this.view.sizeY)) / 2;
-        int controlsX = (width / 2) - 100;
-        this.buttonExport.xPosition =
-                Math.max(controlsX + 120, this.getViewEndX() - this.buttonExport.width);
+        int center = (width / 2);
+        this.controlsX = Math.min(this.viewX, center - 100);
+        this.controlsEndX = Math.max(this.getViewEndX(), center + 100);
+        this.buttonExport.xPosition = this.controlsEndX - this.buttonExport.width;
         this.buttonExport.yPosition = height - this.buttonExport.height - 5;
     }
     
@@ -83,6 +89,20 @@ public class GuiPaintingView extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
         this.drawDefaultBackground();
+        this.drawPainting();
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(this.view.getWidth());
+            sb.append("×");
+            sb.append(this.view.getHeight());
+            this.fontRendererObj.drawString(sb.toString(), 2, 2, 0x7f7f7f);
+        }
+        super.drawScreen(mouseX, mouseY, renderPartialTicks);
+    }
+    
+    protected void drawPainting() {
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         for (int y = 0; y < this.view.sizeY; ++y) {
             for (int x = 0; x < this.view.sizeX; ++x) {
                 Picture picture = this.view.getPicture(x, y);
@@ -96,14 +116,7 @@ public class GuiPaintingView extends GuiScreen {
                                                    icon, this.viewStep, this.viewStep);
             }
         }
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.view.sizeX * this.view.pictureSize.getWidth());
-            sb.append("×");
-            sb.append(this.view.sizeY * this.view.pictureSize.getHeight());
-            this.fontRendererObj.drawString(sb.toString(), 2, 2, 0x7f7f7f);
-        }
-        super.drawScreen(mouseX, mouseY, renderPartialTicks);
+        GL11.glDisable(GL11.GL_BLEND);
     }
     
     @Override

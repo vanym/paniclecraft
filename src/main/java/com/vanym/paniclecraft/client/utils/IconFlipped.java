@@ -2,16 +2,15 @@ package com.vanym.paniclecraft.client.utils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.IconFlipped;
 import net.minecraft.util.IIcon;
 
 @SideOnly(Side.CLIENT)
-public class IconFlippedBugFixed extends IconFlipped {
+public class IconFlipped extends net.minecraft.client.renderer.IconFlipped {
     
     protected final IIcon baseIcon;
     protected final boolean flipV;
     
-    public IconFlippedBugFixed(IIcon icon, boolean flipU, boolean flipV) {
+    public IconFlipped(IIcon icon, boolean flipU, boolean flipV) {
         super(icon, flipU, flipV);
         this.baseIcon = icon;
         this.flipV = flipV;

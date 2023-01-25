@@ -13,12 +13,22 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
     
     public final WorldPicturePoint point;
     
+    protected boolean editable = false;
+    
     public ContainerPaintingViewServer(WorldPicturePoint point,
             IPictureSize pictureSize,
             int sizeX,
             int sizeY) {
         super(pictureSize, sizeX, sizeY);
         this.point = point;
+    }
+    
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+    }
+    
+    public boolean isEditable() {
+        return this.editable;
     }
     
     @Override
@@ -126,7 +136,8 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
                 view.pictureSize.getHeight(),
                 view.sizeX,
                 view.sizeY,
-                view.point.provider.hasAlpha()), player);
+                view.point.provider.hasAlpha(),
+                view.editable), player);
         player.openContainer = view;
         player.openContainer.windowId = windowId;
         player.openContainer.addCraftingToCrafters(player);
