@@ -22,6 +22,8 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
 
+import cpw.mods.fml.common.network.FMLEmbeddedChannel;
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -247,14 +249,39 @@ public class GuiPaintingEditView extends GuiPaintingView {
         if (this.importImage == null) {
             return;
         }
-        Picture picture = new Picture(convertToImage(this.importImage));
-        this.view.addPicture(this.importTextureX, this.importTextureY, picture);
-        ItemStack stack = ItemPainting.getPictureAsItem(picture);
-        Core.instance.network.sendToServer(new MessagePaintingViewAddPicture(
-                this.importTextureX,
-                this.importTextureY,
-                stack));
-        picture.unload();
+        try {
+            Picture picture = new Picture(convertToImage(this.importImage));
+            this.view.addPicture(this.importTextureX, this.importTextureY, picture);
+            ItemStack stack = ItemPainting.getPictureAsItem(picture);
+            FMLEmbeddedChannel channel = Core.instance.getChannel(Side.CLIENT);
+            MessagePaintingViewAddPicture message = new MessagePaintingViewAddPicture(
+                    this.importTextureX,
+                    this.importTextureY,
+                    stack);
+            FMLProxyPacket packet = (FMLProxyPacket)channel.generatePacketFrom(message);
+            picture.unload();
+            if (packet.payload().capacity() >= 32767) {
+                // See C17PacketCustomPayload
+                throw new IllegalArgumentException();
+            }
+            this.mc.getNetHandler().addToSendQueue(packet);
+        } catch (IllegalArgumentException e) {
+            final int step = 80; // split to pass 32k payload limit
+            for (int y = 0; y < this.importImage.getHeight(); y += step) {
+                for (int x = 0; x < this.importImage.getWidth(); x += step) {
+                    int w = Math.min(step, this.importImage.getWidth() - x);
+                    int h = Math.min(step, this.importImage.getHeight() - y);
+                    Picture picture = new Picture(convertToImage(this.importImage, x, y, w, h));
+                    this.view.addPicture(this.importTextureX + x, this.importTextureY + y, picture);
+                    ItemStack stack = ItemPainting.getPictureAsItem(picture);
+                    Core.instance.network.sendToServer(new MessagePaintingViewAddPicture(
+                            this.importTextureX + x,
+                            this.importTextureY + y,
+                            stack));
+                    picture.unload();
+                }
+            }
+        }
         this.clearImportImage();
         this.updateButtons();
     }
@@ -394,14 +421,18 @@ public class GuiPaintingEditView extends GuiPaintingView {
         return ImageIO.read(input);
     }
     
-    protected static Image convertToImage(BufferedImage img) {
-        Image image = new Image(img.getWidth(), img.getHeight(), true);
+    protected static Image convertToImage(BufferedImage img, int x, int y, int w, int h) {
+        Image image = new Image(w, h, true);
         for (int py = 0; py < image.getHeight(); ++py) {
             for (int px = 0; px < image.getWidth(); ++px) {
-                Color color = new Color(img.getRGB(px, py), true);
+                Color color = new Color(img.getRGB(px + x, py + y), true);
                 image.setPixelColor(px, py, color);
             }
         }
         return image;
+    }
+    
+    protected static Image convertToImage(BufferedImage img) {
+        return convertToImage(img, 0, 0, img.getWidth(), img.getHeight());
     }
 }

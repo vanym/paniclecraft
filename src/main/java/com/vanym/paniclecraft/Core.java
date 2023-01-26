@@ -30,9 +30,11 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.network.FMLEmbeddedChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 @Mod(
     modid = DEF.MOD_ID,
@@ -147,5 +149,9 @@ public class Core {
                 this.tab.iconitem = item;
             }
         }
+    }
+    
+    public FMLEmbeddedChannel getChannel(Side source) {
+        return NetworkRegistry.INSTANCE.getChannel(DEF.MOD_ID, source);
     }
 }
