@@ -2,6 +2,10 @@ package com.vanym.paniclecraft.client.gui.container;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -242,7 +246,6 @@ public class GuiPaintingEditView extends GuiPaintingView {
             return;
         }
         this.switchImportImage(img);
-        this.updateButtons();
     }
     
     protected void paintingImportSave() {
@@ -283,12 +286,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
             }
         }
         this.clearImportImage();
-        this.updateButtons();
     }
     
     protected void paintingImportCancel() {
         this.clearImportImage();
-        this.updateButtons();
     }
     
     protected void switchImportImage(BufferedImage img) {
@@ -297,13 +298,13 @@ public class GuiPaintingEditView extends GuiPaintingView {
             this.importTexture = null;
         }
         this.importImage = img;
-        if (img == null) {
-            return;
+        if (img != null) {
+            this.importTexture = new DynamicTexture(img);
+            this.importTextureWidth = img.getWidth();
+            this.importTextureHeight = img.getHeight();
+            this.moveCenter();
         }
-        this.importTexture = new DynamicTexture(img);
-        this.importTextureWidth = img.getWidth();
-        this.importTextureHeight = img.getHeight();
-        this.moveCenter();
+        this.updateButtons();
     }
     
     protected void clearImportImage() {
@@ -334,6 +335,12 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     @Override
     protected void keyTyped(char character, int key) {
+        if (character == 22 /* Ctrl+v */) {
+            if (this.loadClipboardImage()) {
+                return;
+            }
+            this.textImport.setFocused(true);
+        }
         if (this.textImport.textboxKeyTyped(character, key)) {
             return;
         }
@@ -399,6 +406,18 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 return;
         }
         super.keyTyped(character, key);
+    }
+    
+    protected boolean loadClipboardImage() {
+        try {
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            Transferable content = clipboard.getContents(null);
+            BufferedImage img = (BufferedImage)content.getTransferData(DataFlavor.imageFlavor);
+            this.switchImportImage(img);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     @Override
