@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.command;
 
 import java.util.UUID;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.utils.MainUtils;
@@ -149,6 +150,25 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         
         public CommandView(boolean edit, boolean to) {
             super(edit, to, WorldPictureProvider.PAINTONBLOCK);
+        }
+        
+        @Override
+        public boolean canCommandSenderUseCommand(ICommandSender sender) {
+            if (!this.edit && !this.to
+                && Core.instance.painting.config.freePaintOnBlockView) {
+                return true;
+            } else if (this.edit && !this.to
+                && Core.instance.painting.config.freePaintOnBlockEditView) {
+                return true;
+            } else if (!this.edit && this.to
+                && Core.instance.painting.config.freePaintOnBlockViewTo) {
+                return true;
+            } else if (this.edit && this.to
+                && Core.instance.painting.config.freePaintOnBlockEditViewTo) {
+                return true;
+            } else {
+                return super.canCommandSenderUseCommand(sender);
+            }
         }
     }
 }

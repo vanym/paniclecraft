@@ -477,6 +477,15 @@ public class ModComponentPainting implements ModComponent {
         protected final SortedMap<Integer, Double> iRemoverRadiuses = new TreeMap<>();
         protected final SortedMap<Integer, Double> iSmallRemoverRadiuses = new TreeMap<>();
         
+        public boolean freePaintingView = true;
+        public boolean freePaintingEditView = false;
+        public boolean freePaintingViewTo = false;
+        public boolean freePaintingEditViewTo = false;
+        public boolean freePaintOnBlockView = true;
+        public boolean freePaintOnBlockEditView = false;
+        public boolean freePaintOnBlockViewTo = false;
+        public boolean freePaintOnBlockEditViewTo = false;
+        
         protected ChangeableConfig() {
             this.brushRadiuses = Collections.unmodifiableSortedMap(this.iBrushRadiuses);
             this.smallBrushRadiuses = Collections.unmodifiableSortedMap(this.iSmallBrushRadiuses);
@@ -558,6 +567,32 @@ public class ModComponentPainting implements ModComponent {
                 this.iSmallRemoverRadiuses.clear();
                 parseRadiuses(lines, this.iSmallRemoverRadiuses);
             }
+            this.freePaintingView =
+                    config.getBoolean("freePaintingView", ModComponentPainting.this.getName(),
+                                      true, "");
+            this.freePaintingEditView =
+                    config.getBoolean("freePaintingEditView", ModComponentPainting.this.getName(),
+                                      false, "");
+            this.freePaintingViewTo =
+                    config.getBoolean("freePaintingViewTo", ModComponentPainting.this.getName(),
+                                      false, "");
+            this.freePaintingEditViewTo =
+                    config.getBoolean("freePaintingEditViewTo", ModComponentPainting.this.getName(),
+                                      false, "");
+            this.freePaintOnBlockView =
+                    config.getBoolean("freePaintOnBlockView", ModComponentPainting.this.getName(),
+                                      true, "");
+            this.freePaintOnBlockEditView =
+                    config.getBoolean("freePaintOnBlockEditView",
+                                      ModComponentPainting.this.getName(),
+                                      false, "");
+            this.freePaintOnBlockViewTo =
+                    config.getBoolean("freePaintOnBlockViewTo", ModComponentPainting.this.getName(),
+                                      false, "");
+            this.freePaintOnBlockEditViewTo =
+                    config.getBoolean("freePaintOnBlockEditViewTo",
+                                      ModComponentPainting.this.getName(),
+                                      false, "");
             config.restartlessReset();
             return this;
         }
