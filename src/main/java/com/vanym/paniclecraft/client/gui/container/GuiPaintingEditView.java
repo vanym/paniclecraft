@@ -16,6 +16,7 @@ import java.net.URLConnection;
 import javax.imageio.ImageIO;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
@@ -58,6 +59,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
     protected int importTextureY;
     protected int importTextureWidth;
     protected int importTextureHeight;
+    
+    protected boolean mouseMove;
+    protected int mouseMoveOffsetX;
+    protected int mouseMoveOffsetY;
     
     public GuiPaintingEditView(ContainerPaintingViewClient view) {
         super(view);
@@ -102,6 +107,16 @@ public class GuiPaintingEditView extends GuiPaintingView {
         this.buttonImportSave.visible = importing;
         this.buttonImportCancel.visible = importing;
         this.buttonImportSave.enabled = false; // to prevent double click
+    }
+    
+    protected void setImportTextureX(int x) {
+        this.importTextureX =
+                Math.min(Math.max(x, -this.importTextureWidth), this.view.getWidth());
+    }
+    
+    protected void setImportTextureY(int y) {
+        this.importTextureY =
+                Math.min(Math.max(y, -this.importTextureHeight), this.view.getHeight());
     }
     
     protected int getImportTextureEndX() {
@@ -213,8 +228,57 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     @Override
     protected void mouseClicked(int x, int y, int eventButton) {
+        this.mouseClickedMovingImage(x, y, eventButton);
         super.mouseClicked(x, y, eventButton);
         this.textImport.mouseClicked(x, y, eventButton);
+    }
+    
+    protected void mouseClickedMovingImage(int x, int y, int eventButton) {
+        if (eventButton != 0 || this.importImage == null) {
+            return;
+        }
+        int vmx = this.getViewMouseX();
+        int vmy = this.getViewMouseY();
+        if (vmx < this.importTextureX
+            || vmy < this.importTextureY
+            || vmx >= this.getImportTextureEndX()
+            || vmy >= this.getImportTextureEndY()) {
+            return;
+        }
+        this.mouseMoveOffsetX = this.importTextureX - vmx;
+        this.mouseMoveOffsetY = this.importTextureY - vmy;
+        this.mouseMove = true;
+    }
+    
+    @Override
+    protected void mouseMovedOrUp(int x, int y, int eventButton) {
+        super.mouseMovedOrUp(x, y, eventButton);
+        if (eventButton == 0) {
+            this.mouseMove = false;
+        }
+    }
+    
+    @Override
+    protected void mouseClickMove(int x, int y, int button, long timeSinceMouseClick) {
+        super.mouseClickMove(x, y, button, timeSinceMouseClick);
+        if (this.mouseMove) {
+            this.importTextureX = this.mouseMoveOffsetX + this.getViewMouseX();
+            this.importTextureY = this.mouseMoveOffsetY + this.getViewMouseY();
+        }
+    }
+    
+    protected int getViewMouseX() {
+        int real = Mouse.getEventX();
+        int realViewX = this.viewX * this.mc.displayWidth / this.width;
+        int realViewWidth = this.getViewWidth() * this.mc.displayWidth / this.width;
+        return (real - realViewX) * this.view.getWidth() / realViewWidth;
+    }
+    
+    protected int getViewMouseY() {
+        int real = this.mc.displayHeight - Mouse.getEventY() - 1;
+        int realViewY = this.viewY * this.mc.displayHeight / this.height;
+        int realViewHeight = this.getViewHeight() * this.mc.displayHeight / this.height;
+        return (real - realViewY) * this.view.getHeight() / realViewHeight;
     }
     
     @Override
@@ -356,7 +420,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 } else {
                     moveX = this.importTextureX + 1;
                 }
-                this.importTextureX = Math.min(moveX, this.view.getWidth());
+                this.setImportTextureX(moveX);
                 return;
             }
             case 203: { // left
@@ -369,7 +433,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 } else {
                     moveX = this.importTextureX - 1;
                 }
-                this.importTextureX = Math.max(moveX, -this.importTextureWidth);
+                this.setImportTextureX(moveX);
                 return;
             }
             case 208: { // down
@@ -382,7 +446,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 } else {
                     moveY = this.importTextureY + 1;
                 }
-                this.importTextureY = Math.min(moveY, this.view.getHeight());
+                this.setImportTextureY(moveY);
                 return;
             }
             case 200: { // up
@@ -395,7 +459,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 } else {
                     moveY = this.importTextureY - 1;
                 }
-                this.importTextureY = Math.max(moveY, -this.importTextureHeight);
+                this.setImportTextureY(moveY);
                 return;
             }
             case 57: // space
