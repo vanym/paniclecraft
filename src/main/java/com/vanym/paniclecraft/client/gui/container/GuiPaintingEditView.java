@@ -340,7 +340,6 @@ public class GuiPaintingEditView extends GuiPaintingView {
                     int w = Math.min(step, this.importImage.getWidth() - x);
                     int h = Math.min(step, this.importImage.getHeight() - y);
                     Picture picture = new Picture(convertToImage(this.importImage, x, y, w, h));
-                    this.view.addPicture(this.importTextureX + x, this.importTextureY + y, picture);
                     ItemStack stack = ItemPainting.getPictureAsItem(picture);
                     Core.instance.network.sendToServer(new MessagePaintingViewAddPicture(
                             this.importTextureX + x,
