@@ -245,6 +245,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
             this.mc.ingameGUI.getChatGUI().printChatMessage(message);
             return;
         }
+        this.textImport.setSelectionPos(0);
         this.switchImportImage(img);
     }
     
