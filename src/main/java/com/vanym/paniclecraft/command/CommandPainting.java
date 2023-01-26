@@ -1,9 +1,21 @@
 package com.vanym.paniclecraft.command;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.painting.FixedPictureSize;
+import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.item.ItemPainting;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.IChatComponent;
 
 public class CommandPainting extends TreeCommandBase {
     
@@ -12,6 +24,7 @@ public class CommandPainting extends TreeCommandBase {
         this.addSubCommand(new CommandView(true, false));
         this.addSubCommand(new CommandView(false, true));
         this.addSubCommand(new CommandView(true, true));
+        this.addSubCommand(new CommandGiveTemplate());
     }
     
     @Override
@@ -42,6 +55,79 @@ public class CommandPainting extends TreeCommandBase {
             } else {
                 return super.canCommandSenderUseCommand(sender);
             }
+        }
+    }
+    
+    protected class CommandGiveTemplate extends CommandBase {
+        
+        @Override
+        public String getCommandName() {
+            return "givetemplate";
+        }
+        
+        @Override
+        public int getRequiredPermissionLevel() {
+            return 2;
+        }
+        
+        protected SortedSet<IPictureSize> createSizesSet(IPictureSize size) {
+            SortedSet<IPictureSize> set = new TreeSet<>();
+            for (FixedPictureSize current = new FixedPictureSize(size);
+                 current.getWidth() <= Core.instance.painting.MAX_WIDTH
+                     && current.getHeight() <= Core.instance.painting.MAX_HEIGHT;
+                 current = new FixedPictureSize(current, 2)) {
+                set.add(current);
+            }
+            return set;
+        }
+        
+        protected IChatComponent createLine(Iterable<IPictureSize> sizes) {
+            IChatComponent message = new ChatComponentText("");
+            boolean f = true;
+            for (IPictureSize size : sizes) {
+                if (!f) {
+                    message = message.appendText(", ");
+                } else {
+                    f = false;
+                }
+                message.appendSibling(this.createTemplate(size));
+            }
+            return message;
+        }
+        
+        protected IChatComponent createTemplate(IPictureSize size) {
+            IChatComponent template =
+                    new ChatComponentText(
+                            String.format("%d×%d", size.getWidth(), size.getHeight()));
+            ItemStack stack = ItemPainting.getSizedItem(size);
+            stack.stackSize = stack.getMaxStackSize();
+            ChatStyle style = template.getChatStyle();
+            style.setChatClickEvent(new ClickEvent(
+                    ClickEvent.Action.RUN_COMMAND,
+                    CommandUtils.makeGiveCommand("@p", stack)));
+            style.setChatHoverEvent(CommandUtils.makeItemHover(stack));
+            return template;
+        }
+        
+        @Override
+        public void processCommand(ICommandSender sender, String[] args) {
+            SortedSet<IPictureSize> sizes = new TreeSet<>();
+            if (args.length == 0) {
+                sizes.addAll(this.createSizesSet(new FixedPictureSize(16)));
+                sizes.addAll(this.createSizesSet(Core.instance.painting.config.paintingDefaultSize));
+            } else if (args.length == 1) {
+                int row = parseInt(sender, args[0]);
+                IPictureSize size = new FixedPictureSize(row);
+                sizes.addAll(this.createSizesSet(size));
+            } else if (args.length == 2) {
+                int width = parseInt(sender, args[0]);
+                int height = parseInt(sender, args[1]);
+                IPictureSize size = new FixedPictureSize(width, height);
+                sizes.addAll(this.createSizesSet(size));
+            } else {
+                throw new WrongUsageException(this.getCommandUsage(sender));
+            }
+            sender.addChatMessage(this.createLine(sizes));
         }
     }
 }

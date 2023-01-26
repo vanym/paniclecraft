@@ -47,6 +47,8 @@ commands.paniclecraft.paintingview.nopainting=Can't find picture you looking at
 commands.paniclecraft.painting.view.usage=/paniclecraft painting view [<maxRadius>]
 commands.paniclecraft.painting.viewto.usage=/paniclecraft painting viewto <player> [<maxRadius>]
 
+commands.paniclecraft.painting.givetemplate.usage=/paniclecraft painting givetemplate [<width>] [<height>]
+
 commands.paniclecraft.paintonblock.view.usage=/paniclecraft paintonblock view [<maxRadius>]
 commands.paniclecraft.paintonblock.viewto.usage=/paniclecraft paintonblock viewto <player> [<maxRadius>]
 
