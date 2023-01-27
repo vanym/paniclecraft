@@ -16,6 +16,7 @@ import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.item.ItemMod3;
+import com.vanym.paniclecraft.recipe.RecipeDummy;
 
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -35,6 +36,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.oredict.RecipeSorter;
 
 @Mod(
     modid = DEF.MOD_ID,
@@ -96,6 +98,8 @@ public class Core {
             this.tab = new CreativeTabMod3(DEF.MOD_ID);
         }
         
+        this.preInitCommon();
+        
         for (ModComponent component : Core.instance.getComponents()) {
             component.preInit(this.config);
         }
@@ -103,6 +107,15 @@ public class Core {
         if (Loader.isModLoaded("ComputerCraft")) {
             com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.init(this.config);
         }
+    }
+    
+    protected void preInitCommon() {
+        RecipeSorter.register(DEF.MOD_ID + ":dummyshaped", RecipeDummy.Shaped.class,
+                              RecipeSorter.Category.SHAPED,
+                              "after:forge:shapedore after:forge:shapelessore");
+        RecipeSorter.register(DEF.MOD_ID + ":dummyshapeless", RecipeDummy.Shapeless.class,
+                              RecipeSorter.Category.SHAPELESS,
+                              "after:forge:shapedore after:forge:shapelessore");
     }
     
     @EventHandler

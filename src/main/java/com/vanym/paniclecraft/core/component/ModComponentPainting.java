@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.ModConfig;
@@ -61,6 +62,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
@@ -264,11 +266,15 @@ public class ModComponentPainting implements ModComponent {
         }
         if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
             RecipeColorizeByDye recipe = new RecipeColorizeByDye();
+            RecipeSorter.register(DEF.MOD_ID + ":colorizebydye", RecipeColorizeByDye.class,
+                                  RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
             GameRegistry.addRecipe(recipe);
             RecipeDummy.getColorizeByDyeDummies().forEach(GameRegistry::addRecipe);
         }
         if (config.getBoolean("craftingRecipeColorizeByFiller", this.getName(), true, "")) {
             RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
+            RecipeSorter.register(DEF.MOD_ID + ":colorizebyfiller", RecipeColorizeByFiller.class,
+                                  RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
             GameRegistry.addRecipe(recipe);
             FMLCommonHandler.instance().bus().register(recipe);
             RecipeDummy.getColorizeByFillerDummies().forEach(GameRegistry::addRecipe);
@@ -306,6 +312,11 @@ public class ModComponentPainting implements ModComponent {
                                      new String[]{"2x2"},
                                      "", new String[]{"2x1", "1x2", "2x2",
                                                       "3x1", "3x2", "1x3", "2x3", "3x3"});
+        if (paintingCombines.length > 0) {
+            RecipeSorter.register(DEF.MOD_ID + ":paintingcombine", RecipePaintingCombine.class,
+                                  RecipeSorter.Category.SHAPED,
+                                  "after:forge:shapedore before:forge:shapelessore");
+        }
         final Pattern combinePattern = Pattern.compile("(\\d+)x(\\d+)");
         Arrays.asList(paintingCombines)
               .stream()
@@ -326,13 +337,24 @@ public class ModComponentPainting implements ModComponent {
                     this.itemPainting,
                     Character.valueOf('s'),
                     "stickWood");
+            RecipeSorter.register(DEF.MOD_ID + ":paintingframe", RecipePaintingFrame.class,
+                                  RecipeSorter.Category.SHAPED,
+                                  "after:forge:shapedore before:forge:shapelessore");
             GameRegistry.addRecipe(recipe);
         }
         if (config.getBoolean("craftingRecipePaintingFrameAdd", this.getName(), true, "")) {
+            RecipeSorter.register(DEF.MOD_ID + ":paintingframeaddpainting",
+                                  RecipePaintingFrameAddPainting.class,
+                                  RecipeSorter.Category.SHAPED,
+                                  "after:forge:shapedore before:forge:shapelessore");
             RecipePaintingFrameAddPainting.createAllVariants().forEach(GameRegistry::addRecipe);
         }
         if (config.getBoolean("craftingRecipePaintingFrameRemove", this.getName(), true, "")) {
             RecipePaintingFrameRemovePainting recipe = new RecipePaintingFrameRemovePainting();
+            RecipeSorter.register(DEF.MOD_ID + ":paintingframeremovepainting",
+                                  RecipePaintingFrameRemovePainting.class,
+                                  RecipeSorter.Category.SHAPED,
+                                  "after:forge:shapelessore");
             GameRegistry.addRecipe(recipe);
             FMLCommonHandler.instance().bus().register(recipe);
         }
