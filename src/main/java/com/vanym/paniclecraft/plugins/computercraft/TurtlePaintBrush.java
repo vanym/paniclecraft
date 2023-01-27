@@ -1,8 +1,11 @@
-package com.vanym.paniclecraft.plugins.computercraft.t;
+package com.vanym.paniclecraft.plugins.computercraft;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.plugins.computercraft.t.p.PeripheralPaintBrush;
+import com.vanym.paniclecraft.DEF;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import dan200.computercraft.api.turtle.ITurtleUpgrade;
@@ -66,4 +69,13 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     @Override
     public void update(ITurtleAccess turtle, TurtleSide side) {}
     
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void textureStitchEvent(net.minecraftforge.client.event.TextureStitchEvent.Pre event) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getMinecraft();
+        if (event.map.getTextureType() == mc.getTextureMapBlocks().getTextureType()) {
+            this.iconLeft = event.map.registerIcon(DEF.MOD_ID + ":turtle.paintBrush.left");
+            this.iconRight = event.map.registerIcon(DEF.MOD_ID + ":turtle.paintBrush.right");
+        }
+    }
 }

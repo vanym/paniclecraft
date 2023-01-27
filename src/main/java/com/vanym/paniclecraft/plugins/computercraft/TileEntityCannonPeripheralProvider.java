@@ -1,6 +1,5 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
-import com.vanym.paniclecraft.plugins.computercraft.pte.TileEntityCannonPeripheral;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import dan200.computercraft.api.peripheral.IPeripheral;

@@ -1,6 +1,8 @@
 package com.vanym.paniclecraft;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.vanym.paniclecraft.client.ModConfig;
@@ -71,10 +73,13 @@ public class Core {
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
     
+    protected final List<ModComponent> components = new ArrayList<>(
+            Arrays.asList(this.broom, this.advSign, this.painting,
+                          this.deskgame, this.cannon,
+                          this.portableworkbench));
+    
     public List<ModComponent> getComponents() {
-        return Arrays.asList(this.broom, this.advSign, this.painting,
-                             this.deskgame, this.cannon,
-                             this.portableworkbench);
+        return Collections.unmodifiableList(this.components);
     }
     
     @EventHandler
@@ -98,15 +103,16 @@ public class Core {
             this.tab = new CreativeTabMod3(DEF.MOD_ID);
         }
         
+        if (Loader.isModLoaded("ComputerCraft")) {
+            this.components.add(com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.instance());
+        }
+        
         this.preInitCommon();
         
         for (ModComponent component : Core.instance.getComponents()) {
             component.preInit(this.config);
         }
         proxy.preInit(this.config);
-        if (Loader.isModLoaded("ComputerCraft")) {
-            com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.init(this.config);
-        }
     }
     
     protected void preInitCommon() {

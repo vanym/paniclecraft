@@ -1,4 +1,4 @@
-package com.vanym.paniclecraft.plugins.computercraft.t.p;
+package com.vanym.paniclecraft.plugins.computercraft;
 
 import java.awt.Color;
 

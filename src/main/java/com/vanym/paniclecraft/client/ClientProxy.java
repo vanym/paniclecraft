@@ -8,14 +8,12 @@ import com.vanym.paniclecraft.core.component.ModComponent;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraftforge.common.MinecraftForge;
 
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
     
     @Override
     public void preInit(ModConfig config) {
-        MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
         for (ModComponent component : Core.instance.getComponents()) {
             component.preInitClient(config);
         }

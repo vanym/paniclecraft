@@ -1,4 +1,4 @@
-package com.vanym.paniclecraft.plugins.computercraft.pte;
+package com.vanym.paniclecraft.plugins.computercraft;
 
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
