@@ -106,7 +106,7 @@ public class Picture implements IPictureSize {
             }
             double radius = tool.getPaintingToolRadius(itemStack, this);
             Set<Picture> changedSet = new HashSet<>();
-            boolean changed = this.setPixelsColor(x, y, radius, color, changedSet);
+            boolean changed = this.setNeighborsPixelsColor(x, y, radius, color, changedSet);
             for (Picture picture : changedSet) {
                 picture.imageChanged();
                 picture.update();
@@ -114,13 +114,7 @@ public class Picture implements IPictureSize {
             return changed;
         } else if (toolType == PaintingToolType.FILLER && this.holder != null) {
             Color color = tool.getPaintingToolColor(itemStack);
-            if (color != null
-                && this.isEditableBy(this)
-                && this.unpack()
-                && this.image.fill(color)) {
-                this.packed = null;
-                this.imageChanged();
-                this.update();
+            if (this.fill(color)) {
                 return true;
             }
         } else if (toolType == PaintingToolType.COLORPICKER) {
@@ -133,7 +127,7 @@ public class Picture implements IPictureSize {
         return false;
     }
     
-    protected boolean setPixelsColor(
+    protected boolean setNeighborsPixelsColor(
             int x,
             int y,
             double radius,
@@ -149,14 +143,14 @@ public class Picture implements IPictureSize {
                 if (ix * ix + iy * iy >= radius * radius) {
                     continue;
                 }
-                changed |= this.setPixelColor(x + ix, y + iy, color, changedSet);
+                changed |= this.setNeighborsPixelColor(x + ix, y + iy, color, changedSet);
                 if (iy > 0) {
-                    changed |= this.setPixelColor(x + ix, y - iy, color, changedSet);
+                    changed |= this.setNeighborsPixelColor(x + ix, y - iy, color, changedSet);
                 }
                 if (ix > 0) {
-                    changed |= this.setPixelColor(x - ix, y + iy, color, changedSet);
+                    changed |= this.setNeighborsPixelColor(x - ix, y + iy, color, changedSet);
                     if (iy > 0) {
-                        changed |= this.setPixelColor(x - ix, y - iy, color, changedSet);
+                        changed |= this.setNeighborsPixelColor(x - ix, y - iy, color, changedSet);
                     }
                 }
             }
@@ -164,7 +158,7 @@ public class Picture implements IPictureSize {
         return changed;
     }
     
-    protected boolean setPixelColor(int x, int y, Color color, Set<Picture> changedSet) {
+    protected boolean setNeighborsPixelColor(int x, int y, Color color, Set<Picture> changedSet) {
         int width = this.getWidth();
         int height = this.getHeight();
         int nx = x / width;
@@ -202,6 +196,28 @@ public class Picture implements IPictureSize {
         return false;
     }
     
+    public boolean setPixelColor(int x, int y, Color color) {
+        if (this.isEditableBy(this) && this.setMyPixelColor(x, y, color)) {
+            this.imageChanged();
+            this.update();
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean fill(Color color) {
+        if (this.isEditableBy(this)
+            && this.unpack()
+            && this.image.fill(color)) {
+            // packed become outdated, removing it
+            this.packed = null;
+            this.imageChanged();
+            this.update();
+            return true;
+        }
+        return false;
+    }
+    
     public boolean addPicture(int x, int y, Picture input) {
         if (!this.isEditable()) {
             return false;
@@ -229,6 +245,10 @@ public class Picture implements IPictureSize {
             return this;
         }
         return this.holder.getNeighborPicture(offsetX, offsetY);
+    }
+    
+    public String getName() {
+        return this.name;
     }
     
     public boolean isEditable() {

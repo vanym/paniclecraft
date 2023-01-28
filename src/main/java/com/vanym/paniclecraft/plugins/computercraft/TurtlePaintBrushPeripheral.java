@@ -33,21 +33,40 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return "paintbrush";
     }
     
+    protected boolean detectPicture(ForgeDirection dir) throws LuaException, InterruptedException {
+        return this.searchPicture(dir) != null;
+    }
+    
+    @PeripheralMethod(0)
+    protected boolean detectPicture() throws LuaException, InterruptedException {
+        return this.detectPicture(ForgeDirection.UNKNOWN);
+    }
+    
+    @PeripheralMethod(1)
+    protected boolean detectPictureUp() throws LuaException, InterruptedException {
+        return this.detectPicture(ForgeDirection.UP);
+    }
+    
+    @PeripheralMethod(2)
+    protected boolean hasPictureDown() throws LuaException, InterruptedException {
+        return this.detectPicture(ForgeDirection.DOWN);
+    }
+    
     protected int getWidth(ForgeDirection dir) throws LuaException, InterruptedException {
         return this.findPicture(dir).getWidth();
     }
     
-    @PeripheralMethod(0)
+    @PeripheralMethod(3)
     protected int getWidth() throws LuaException, InterruptedException {
         return this.getWidth(ForgeDirection.UNKNOWN);
     }
     
-    @PeripheralMethod(1)
+    @PeripheralMethod(4)
     protected int getWidthUp() throws LuaException, InterruptedException {
         return this.getWidth(ForgeDirection.UP);
     }
     
-    @PeripheralMethod(2)
+    @PeripheralMethod(5)
     protected int getWidthDown() throws LuaException, InterruptedException {
         return this.getWidth(ForgeDirection.DOWN);
     }
@@ -56,19 +75,38 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return this.findPicture(dir).getHeight();
     }
     
-    @PeripheralMethod(3)
+    @PeripheralMethod(6)
     protected int getHeight() throws LuaException, InterruptedException {
         return this.getHeight(ForgeDirection.UNKNOWN);
     }
     
-    @PeripheralMethod(4)
+    @PeripheralMethod(7)
     protected int getHeightUp() throws LuaException, InterruptedException {
         return this.getHeight(ForgeDirection.UP);
     }
     
-    @PeripheralMethod(5)
+    @PeripheralMethod(8)
     protected int getHeightDown() throws LuaException, InterruptedException {
         return this.getHeight(ForgeDirection.DOWN);
+    }
+    
+    protected boolean isEditable(ForgeDirection dir) throws LuaException, InterruptedException {
+        return this.findPicture(dir).isEditable();
+    }
+    
+    @PeripheralMethod(9)
+    protected boolean isEditable() throws LuaException, InterruptedException {
+        return this.isEditable(ForgeDirection.UNKNOWN);
+    }
+    
+    @PeripheralMethod(10)
+    protected boolean isEditableUp() throws LuaException, InterruptedException {
+        return this.isEditable(ForgeDirection.UP);
+    }
+    
+    @PeripheralMethod(11)
+    protected boolean isEditableDown() throws LuaException, InterruptedException {
+        return this.isEditable(ForgeDirection.DOWN);
     }
     
     protected boolean useBrush(ForgeDirection dir, int px, int py)
@@ -78,32 +116,26 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
             throw new LuaException("cannot find brush");
         }
         Picture picture = this.findPicture(dir);
-        if (px < 0 || px >= picture.getWidth()) {
-            throw new LuaException("x must be from 0 to width");
-        }
-        if (py < 0 || py >= picture.getHeight()) {
-            throw new LuaException("y must be from 0 to height");
-        }
-        picture.usePaintingTool(stack, px, py);
-        return true;
+        PicturePeripheral.checkPicturePixelCoords(picture, px, py);
+        return picture.usePaintingTool(stack, px, py);
     }
     
-    @PeripheralMethod(6)
+    @PeripheralMethod(20)
     protected boolean useBrush(int px, int py) throws LuaException, InterruptedException {
         return this.useBrush(ForgeDirection.UNKNOWN, px, py);
     }
     
-    @PeripheralMethod(7)
+    @PeripheralMethod(21)
     protected boolean useBrushUp(int px, int py) throws LuaException, InterruptedException {
         return this.useBrush(ForgeDirection.UP, px, py);
     }
     
-    @PeripheralMethod(8)
+    @PeripheralMethod(22)
     protected boolean useBrushDown(int px, int py) throws LuaException, InterruptedException {
         return this.useBrush(ForgeDirection.DOWN, px, py);
     }
     
-    @PeripheralMethod(9)
+    @PeripheralMethod(31)
     protected Object[] getBrushColor() throws LuaException, InterruptedException {
         ItemStack stack = this.getSelectedStack();
         IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
@@ -114,7 +146,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
     }
     
-    @PeripheralMethod(10)
+    @PeripheralMethod(32)
     protected boolean setBrushColor(int red, int green, int blue)
             throws LuaException, InterruptedException {
         if (!MainUtils.inventoryToStream(this.turtle.getInventory())
@@ -127,16 +159,8 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         if (colorizeable == null) {
             throw new LuaException("cannot find brush");
         }
-        if (red < 0 || red >= 256) {
-            throw new LuaException("red must be from 0 to 255");
-        }
-        if (green < 0 || green >= 256) {
-            throw new LuaException("green must be from 0 to 255");
-        }
-        if (blue < 0 || blue >= 256) {
-            throw new LuaException("blue must be from 0 to 255");
-        }
-        colorizeable.setColor(stack, MainUtils.getIntFromRGB(red, green, blue));
+        Color color = PicturePeripheral.getColor(red, green, blue);
+        colorizeable.setColor(stack, MainUtils.getAlphaless(color));
         return true;
     }
     

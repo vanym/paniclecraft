@@ -10,9 +10,11 @@ public class ComputerCraftPlugin implements ModComponent {
     
     protected static ComputerCraftPlugin instance;
     
-    public TurtlePaintBrush turtlePaintBrush;
     public TileEntityCannonPeripheralProvider tileEntityCannonPeripheralProvider;
-    public TileEntityPaintingPeripheralProvider tileEntityPaintingPeripheralProvider;
+    
+    public PaintingPeripheralProvider tileEntityPaintingPeripheralProvider;
+    public PaintingFramePeripheralProvider tileEntityPaintingFramePeripheralProvider;
+    public TurtlePaintBrush turtlePaintBrush;
     
     @Override
     public void preInit(ModConfig config) {
@@ -22,7 +24,11 @@ public class ComputerCraftPlugin implements ModComponent {
         }
         if (config.getBoolean("peripheralPainting", this.getName(), false, "")) {
             ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingPeripheralProvider =
-                    new TileEntityPaintingPeripheralProvider());
+                    new PaintingPeripheralProvider());
+        }
+        if (config.getBoolean("peripheralPaintingFrame", this.getName(), false, "")) {
+            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingFramePeripheralProvider =
+                    new PaintingFramePeripheralProvider());
         }
         if (config.getBoolean("turtleUpgradePaintBrush", this.getName(), true, "")) {
             this.turtlePaintBrush = new TurtlePaintBrush();

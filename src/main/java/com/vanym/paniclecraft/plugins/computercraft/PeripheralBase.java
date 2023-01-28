@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
@@ -22,11 +23,18 @@ public abstract class PeripheralBase implements IPeripheral {
     protected final Method[] methods;
     
     public PeripheralBase() {
-        Class<? extends PeripheralBase> clazz = this.getClass();
-        this.methods = Arrays.stream(clazz.getDeclaredMethods())
-                             .filter(m->m.isAnnotationPresent(PeripheralMethod.class))
-                             .sorted(Comparator.comparing(m->m.getAnnotation(PeripheralMethod.class)
-                                                              .value()))
+        Class<?> current = this.getClass();
+        Stream<Method> stream = Stream.empty();
+        while (current != PeripheralBase.class) {
+            stream = Stream.concat(stream, Arrays.stream(current.getDeclaredMethods()));
+            current = current.getSuperclass();
+        }
+        Comparator<Method> comparatorOrder =
+                Comparator.comparing(m->m.getAnnotation(PeripheralMethod.class).value());
+        Comparator<Method> comparatorName = Comparator.comparing(m->m.getName());
+        Comparator<Method> comparator = comparatorOrder.thenComparing(comparatorName);
+        this.methods = stream.filter(m->m.isAnnotationPresent(PeripheralMethod.class))
+                             .sorted(comparator)
                              .toArray(Method[]::new);
     }
     
@@ -112,7 +120,10 @@ public abstract class PeripheralBase implements IPeripheral {
                 }
                 ret = method.invoke(this, methodArgs.toArray());
             }
-            if (ret == null || ret.getClass().isArray()) {
+            if (method.getReturnType() == Void.TYPE) {
+                return null;
+            }
+            if (ret != null && ret.getClass().isArray()) {
                 return (Object[])ret;
             } else {
                 return new Object[]{ret};
