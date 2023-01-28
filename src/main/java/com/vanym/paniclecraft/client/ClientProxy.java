@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.CommonProxy;
+import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.ModComponent;
 
 import cpw.mods.fml.relauncher.Side;

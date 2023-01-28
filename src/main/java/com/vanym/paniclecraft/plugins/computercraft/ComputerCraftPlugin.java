@@ -1,6 +1,6 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
-import com.vanym.paniclecraft.client.ModConfig;
+import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.ModComponent;
 
 import dan200.computercraft.api.ComputerCraftAPI;

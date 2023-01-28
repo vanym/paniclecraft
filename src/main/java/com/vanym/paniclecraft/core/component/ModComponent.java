@@ -1,6 +1,6 @@
 package com.vanym.paniclecraft.core.component;
 
-import com.vanym.paniclecraft.client.ModConfig;
+import com.vanym.paniclecraft.core.ModConfig;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

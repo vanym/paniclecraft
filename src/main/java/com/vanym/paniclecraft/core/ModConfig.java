@@ -1,4 +1,4 @@
-package com.vanym.paniclecraft.client;
+package com.vanym.paniclecraft.core;
 
 import java.io.File;
 

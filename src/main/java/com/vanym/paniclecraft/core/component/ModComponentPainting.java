@@ -12,7 +12,6 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
-import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.entity.EntityPaintOnBlockRenderer;
@@ -22,6 +21,7 @@ import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrame
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.command.CommandPaintOnBlock;
 import com.vanym.paniclecraft.command.CommandPainting;
+import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
 import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;

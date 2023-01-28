@@ -1,7 +1,5 @@
 package com.vanym.paniclecraft.core;
 
-import com.vanym.paniclecraft.client.ModConfig;
-
 public interface IProxy {
     public void preInit(ModConfig config);
     

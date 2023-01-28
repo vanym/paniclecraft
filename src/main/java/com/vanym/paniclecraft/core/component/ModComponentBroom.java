@@ -1,7 +1,7 @@
 package com.vanym.paniclecraft.core.component;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.client.ModConfig;
+import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemBroom;
 
 import cpw.mods.fml.common.registry.GameRegistry;

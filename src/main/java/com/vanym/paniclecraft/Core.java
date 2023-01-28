@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.vanym.paniclecraft.client.ModConfig;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.GuiHandler;
 import com.vanym.paniclecraft.core.IProxy;
+import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.ModComponent;
 import com.vanym.paniclecraft.core.component.ModComponentAdvSign;
 import com.vanym.paniclecraft.core.component.ModComponentBroom;
