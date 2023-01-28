@@ -18,11 +18,14 @@ import net.minecraft.util.IIcon;
 
 public class TurtlePaintBrush implements ITurtleUpgrade {
     
-    public IIcon iconLeft;
-    public IIcon iconRight;
+    protected IIcon iconLeft;
+    protected IIcon iconRight;
+    
+    public TurtlePaintBrush() {}
     
     @Override
     public int getUpgradeID() {
+        // See https://computercraft.info/wiki/Turtle_Upgrade_IDs
         return 245;
     }
     
@@ -38,12 +41,12 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     
     @Override
     public ItemStack getCraftingItem() {
-        return new ItemStack(Core.instance.painting.itemPaintBrush);
+        return Core.instance.painting.itemPaintBrush.getBrush();
     }
     
     @Override
     public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
-        return new PeripheralPaintBrush(turtle);
+        return new TurtlePaintBrushPeripheral(turtle);
     }
     
     @Override

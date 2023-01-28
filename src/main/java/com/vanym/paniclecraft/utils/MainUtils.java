@@ -9,10 +9,13 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -145,6 +148,12 @@ public class MainUtils {
         rgb = (rgb << 8) + green;
         rgb = (rgb << 8) + blue;
         return rgb;
+    }
+    
+    public static Stream<ItemStack> inventoryToStream(IInventory inv) {
+        return Stream.iterate(0, i->i + 1)
+                     .limit(inv.getSizeInventory())
+                     .map(i->inv.getStackInSlot(i));
     }
     
     // public static boolean isPlayerOp(String playerName){
