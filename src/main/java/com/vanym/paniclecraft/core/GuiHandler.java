@@ -31,7 +31,7 @@ public class GuiHandler implements IGuiHandler {
             return new ContainerPalette(player.inventory);
         }
         if (ID == GUIs.PORTABLEWORKBENCH.ordinal()) {
-            return new ContainerPortableWorkbench(player.inventory, world, x, y, z);
+            return new ContainerPortableWorkbench(player, world);
         }
         if (ID == GUIs.CANNON.ordinal()) {
             TileEntity tile = world.getTileEntity(x, y, z);
@@ -64,8 +64,7 @@ public class GuiHandler implements IGuiHandler {
             return new GuiPalette(new ContainerPalette(player.inventory));
         }
         if (ID == GUIs.PORTABLEWORKBENCH.ordinal()) {
-            return new GuiPortableCrafting(
-                    new ContainerPortableWorkbench(player.inventory, world, x, y, z));
+            return new GuiPortableCrafting(player, world);
         }
         if (ID == GUIs.CANNON.ordinal()) {
             TileEntity tile = world.getTileEntity(x, y, z);

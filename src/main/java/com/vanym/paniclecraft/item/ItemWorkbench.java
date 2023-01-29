@@ -8,18 +8,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public class ItemWorkbench extends ItemMod3 {
+    
     public ItemWorkbench(int damage) {
-        this.setMaxStackSize(1);
-        this.setMaxDamage(damage);
         this.setUnlocalizedName("portableWorkbench");
+        this.setMaxDamage(damage);
+        this.setMaxStackSize(1);
     }
     
     @Override
-    public ItemStack onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3) {
-        if (!par2World.isRemote) {
-            par3.openGui(Core.instance, GUIs.PORTABLEWORKBENCH.ordinal(), par2World, (int)par3.posX,
-                         (int)par3.posY, (int)par3.posZ);
+    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+        if (!world.isRemote) {
+            player.openGui(Core.instance, GUIs.PORTABLEWORKBENCH.ordinal(), world,
+                           (int)player.posX, (int)player.posY, (int)player.posZ);
         }
-        return par1ItemStack;
+        return stack;
+    }
+    
+    public static boolean canBeWorkbench(ItemStack stack) {
+        return stack != null && stack.getItem() instanceof ItemWorkbench && stack.stackSize > 0;
     }
 }

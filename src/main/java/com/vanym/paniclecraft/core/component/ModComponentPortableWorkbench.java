@@ -20,6 +20,9 @@ public class ModComponentPortableWorkbench implements ModComponent {
     
     public ItemWorkbench itemWorkbench;
     
+    @SideOnly(Side.CLIENT)
+    public boolean renderWorkbenchItem = true;
+    
     protected boolean enabled = false;
     
     @Override
@@ -28,7 +31,7 @@ public class ModComponentPortableWorkbench implements ModComponent {
             return;
         }
         this.enabled = true;
-        int durability = config.getInt("durability", this.getName(), 8192, 0, Integer.MAX_VALUE,
+        int durability = config.getInt("durability", this.getName(), 8192, 0, Short.MAX_VALUE,
                                        "0 is infinite");
         this.itemWorkbench = new ItemWorkbench(durability);
         Core.instance.registerItem(this.itemWorkbench);
@@ -54,12 +57,17 @@ public class ModComponentPortableWorkbench implements ModComponent {
         if (!this.isEnabled()) {
             return;
         }
-        boolean renderer = config.getBoolean("portableWorkbenchItem", CLIENT_RENDER, true,
-                                             "fancy renderer for portable workbench");
-        if (renderer) {
-            MinecraftForgeClient.registerItemRenderer(this.itemWorkbench,
-                                                      new ItemRendererPortableWorkbench());
-        }
+        MinecraftForgeClient.registerItemRenderer(this.itemWorkbench,
+                                                  new ItemRendererPortableWorkbench());
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void configChangedClient(ModConfig config) {
+        config.restartless();
+        this.renderWorkbenchItem = config.getBoolean("portableWorkbenchItem", CLIENT_RENDER, true,
+                                                     "fancy renderer for portable workbench");
+        config.restartlessReset();
     }
     
     @Override

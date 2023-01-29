@@ -1,6 +1,5 @@
 package com.vanym.paniclecraft.container.slot;
 
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.item.ItemWorkbench;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -10,22 +9,22 @@ import net.minecraft.item.ItemStack;
 
 public class SlotPortableCrafting extends SlotCrafting {
     
-    public SlotPortableCrafting(EntityPlayer par1EntityPlayer,
-            IInventory par2iInventory,
-            IInventory par3iInventory,
-            int par4,
-            int par5,
-            int par6) {
-        super(par1EntityPlayer, par2iInventory, par3iInventory, par4, par5, par6);
+    public SlotPortableCrafting(EntityPlayer player,
+            IInventory craftMatrix,
+            IInventory craftResult,
+            int slotIndex,
+            int x,
+            int y) {
+        super(player, craftMatrix, craftResult, slotIndex, x, y);
     }
     
     @Override
-    public void onPickupFromSlot(EntityPlayer par1EntityPlayer, ItemStack par2ItemStack) {
-        ItemStack heldItem = par1EntityPlayer.getHeldItem();
-        if (heldItem != null && heldItem.getItem() instanceof ItemWorkbench
-            && Core.instance.portableworkbench.itemWorkbench.getMaxDamage() > 0) {
-            heldItem.damageItem(1, par1EntityPlayer);
+    public void onPickupFromSlot(EntityPlayer player, ItemStack stack) {
+        ItemStack heldStack = player.getHeldItem();
+        if (ItemWorkbench.canBeWorkbench(heldStack)
+            && heldStack.getItem().getMaxDamage() > 0) {
+            heldStack.damageItem(1, player);
         }
-        super.onPickupFromSlot(par1EntityPlayer, par2ItemStack);
+        super.onPickupFromSlot(player, stack);
     }
 }
