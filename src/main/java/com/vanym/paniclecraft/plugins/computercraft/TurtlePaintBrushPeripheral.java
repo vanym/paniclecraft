@@ -9,6 +9,7 @@ import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -149,9 +150,8 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     @PeripheralMethod(32)
     protected boolean setBrushColor(int red, int green, int blue)
             throws LuaException, InterruptedException {
-        if (!MainUtils.inventoryToStream(this.turtle.getInventory())
-                      .anyMatch(stack->stack != null && stack.stackSize > 0
-                          && stack.getItem() instanceof ItemPalette)) {
+        if (!InventoryUtils.inventoryToStream(this.turtle.getInventory())
+                           .anyMatch(ItemPalette::canBePalette)) {
             throw new LuaException("cannot find palette");
         }
         ItemStack stack = this.getSelectedStack();

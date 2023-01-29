@@ -2,10 +2,11 @@ package com.vanym.paniclecraft.container;
 
 import java.awt.Color;
 
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.container.slot.SlotWithValidCheck;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.inventory.InventoryPalette;
+import com.vanym.paniclecraft.inventory.InventoryUtils;
+import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,7 +14,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInvBasic;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ContainerPalette extends ContainerBase implements IInvBasic {
@@ -90,27 +90,12 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
     public void onContainerClosed(EntityPlayer entityPlayer) {
         super.onContainerClosed(entityPlayer);
         if (!entityPlayer.worldObj.isRemote) {
-            int size = this.inventoryPalette.getSizeInventory();
-            for (int i = 0; i < size; ++i) {
-                ItemStack itemStack = this.inventoryPalette.getStackInSlotOnClosing(i);
-                if (itemStack == null) {
-                    continue;
-                }
-                entityPlayer.dropPlayerItemWithRandomChoice(itemStack, false);
-            }
+            InventoryUtils.dropOnClosing(this.inventoryPalette, entityPlayer);
         }
     }
     
     @Override
     public boolean canInteractWith(EntityPlayer entityplayer) {
-        return canBePalette(entityplayer.getHeldItem());
-    }
-    
-    public static boolean canBePalette(ItemStack itemStack) {
-        if (itemStack == null || itemStack.stackSize == 0) {
-            return false;
-        }
-        Item item = itemStack.getItem();
-        return item == Core.instance.painting.itemPalette;
+        return ItemPalette.canBePalette(entityplayer.getHeldItem());
     }
 }

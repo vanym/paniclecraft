@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.recipe;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
@@ -26,7 +27,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
         if (!super.matches(inv, world)) {
             return false;
         }
-        ItemStack frame = RecipeUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
+        ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         if (!frame.hasTagCompound()) {
             return false;
         }
@@ -43,7 +44,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
     @Override
     public ItemStack getCraftingResult(InventoryCrafting inv) {
         ItemStack painting = super.getCraftingResult(inv);
-        ItemStack frame = RecipeUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
+        ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         if (frame == null || !frame.hasTagCompound()) {
             return painting;
         }
@@ -86,7 +87,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
         if (!this.matches(inv, world)) {
             return;
         }
-        ItemStack frame = RecipeUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
+        ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         if (frame == null || !frame.hasTagCompound()) {
             return;
         }

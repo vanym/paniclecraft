@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
+import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import net.minecraft.inventory.InventoryCrafting;
@@ -31,7 +32,7 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
         if (!super.matches(inv, world)) {
             return false;
         }
-        ItemStack frame = RecipeUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
+        ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         if (frame.hasTagCompound()) {
             NBTTagCompound itemTag = frame.getTagCompound();
             if (itemTag.hasKey(ItemPaintingFrame.getPictureTag(this.side))) {
@@ -44,8 +45,9 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
     @Override
     public ItemStack getCraftingResult(InventoryCrafting inv) {
         ItemStack frame = super.getCraftingResult(inv);
-        ItemStack inputFrame = RecipeUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        ItemStack painting = RecipeUtils.findItem(inv, Core.instance.painting.itemPainting);
+        ItemStack inputFrame =
+                InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
+        ItemStack painting = InventoryUtils.findItem(inv, Core.instance.painting.itemPainting);
         if (inputFrame.hasTagCompound()) {
             frame.setTagCompound((NBTTagCompound)inputFrame.getTagCompound().copy());
         }
