@@ -35,6 +35,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         this.addSubCommand(new CommandView(true, false));
         this.addSubCommand(new CommandView(false, true));
         this.addSubCommand(new CommandView(true, true));
+        this.addSubCommand(new CommandPictureResize(PROVIDERS));
     }
     
     @Override

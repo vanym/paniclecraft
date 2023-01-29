@@ -224,25 +224,34 @@ public class Picture implements IPictureSize {
     }
     
     public boolean addPicture(int x, int y, Picture input) {
-        if (!this.isEditable()) {
+        if (!this.isEditable() || !this.unpack() || !input.unpack()) {
             return false;
         }
-        boolean changed = false;
-        int ex = Math.min(this.getWidth(), x + input.getWidth());
-        int ey = Math.min(this.getHeight(), y + input.getHeight());
-        for (int py = Math.max(0, y); py < ey; ++py) {
-            for (int px = Math.max(0, x); px < ex; ++px) {
-                Color icolor = input.getPixelColor(px - x, py - y);
-                Color origin = this.getPixelColor(px, py);
-                changed |= this.setMyPixelColor(px, py, MainUtils.addColor(origin, icolor));
-            }
-        }
-        if (changed) {
+        if (this.image.addImage(x, y, input.image)) {
             this.packed = null;
             this.imageChanged();
             this.update();
+            return true;
         }
-        return changed;
+        return false;
+    }
+    
+    public boolean resize(int width, int height) {
+        if (!this.isEditable()) {
+            return false;
+        }
+        if (width == this.getWidth() && height == this.getHeight()) {
+            return true;
+        }
+        if (!this.unpack()) {
+            return false;
+        }
+        Image old = this.image;
+        this.setSize(width, height);
+        this.image.addImage(0, 0, old);
+        this.imageChanged();
+        this.update();
+        return true;
     }
     
     public Picture getNeighborPicture(int offsetX, int offsetY) {

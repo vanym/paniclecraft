@@ -3,6 +3,8 @@ package com.vanym.paniclecraft.core.component.painting;
 import java.awt.Color;
 import java.util.Arrays;
 
+import com.vanym.paniclecraft.utils.MainUtils;
+
 public class Image {
     
     protected int width;
@@ -153,6 +155,20 @@ public class Image {
             }
         }
         return true;
+    }
+    
+    public boolean addImage(int x, int y, Image input) {
+        boolean changed = false;
+        int ex = Math.min(this.getWidth(), x + input.getWidth());
+        int ey = Math.min(this.getHeight(), y + input.getHeight());
+        for (int py = Math.max(0, y); py < ey; ++py) {
+            for (int px = Math.max(0, x); px < ex; ++px) {
+                Color icolor = input.getPixelColor(px - x, py - y);
+                Color origin = this.getPixelColor(px, py);
+                changed |= this.setPixelColor(px, py, MainUtils.addColor(origin, icolor));
+            }
+        }
+        return changed;
     }
     
     protected void transpose() {

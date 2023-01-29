@@ -29,6 +29,7 @@ public class CommandPainting extends TreeCommandBase {
         this.addSubCommand(new CommandView(false, true));
         this.addSubCommand(new CommandView(true, true));
         this.addSubCommand(new CommandPictureInfo(PROVIDERS));
+        this.addSubCommand(new CommandPictureResize(PROVIDERS));
         this.addSubCommand(new CommandGiveTemplate());
     }
     
