@@ -1,5 +1,8 @@
 package com.vanym.paniclecraft.core.component;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPortableWorkbench;
 import com.vanym.paniclecraft.core.ModConfig;
@@ -9,6 +12,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
@@ -66,5 +70,10 @@ public class ModComponentPortableWorkbench implements ModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
+    }
+    
+    @Override
+    public List<Item> getItems() {
+        return Arrays.asList(this.itemWorkbench);
     }
 }

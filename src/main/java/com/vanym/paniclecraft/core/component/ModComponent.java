@@ -1,9 +1,12 @@
 package com.vanym.paniclecraft.core.component;
 
+import java.util.List;
+
 import com.vanym.paniclecraft.core.ModConfig;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.item.Item;
 
 public interface ModComponent {
     
@@ -30,4 +33,8 @@ public interface ModComponent {
     public String getName();
     
     public boolean isEnabled();
+    
+    default public List<Item> getItems() {
+        return null;
+    }
 }

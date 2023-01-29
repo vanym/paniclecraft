@@ -1,6 +1,10 @@
 package com.vanym.paniclecraft.core;
 
+import java.util.List;
+
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.core.component.ModComponent;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -26,4 +30,19 @@ public class CreativeTabMod3 extends CreativeTabs {
         return this.iconitem;
     }
     
+    @Override
+    @SideOnly(Side.CLIENT)
+    @SuppressWarnings("rawtypes")
+    public void displayAllReleventItems(List stacks) {
+        for (ModComponent component : Core.instance.getComponents()) {
+            if (!component.isEnabled()) {
+                continue;
+            }
+            List<Item> items = component.getItems();
+            if (items == null) {
+                continue;
+            }
+            items.forEach(item->item.getSubItems(item, this, stacks));
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.core.component;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -454,6 +455,13 @@ public class ModComponentPainting implements ModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
+    }
+    
+    @Override
+    public List<Item> getItems() {
+        return Arrays.asList(this.itemPainting, this.itemPaintingFrame,
+                             this.itemPaintBrush, this.itemPaintRemover,
+                             this.itemPalette);
     }
     
     protected static final String[] DEFAULT_BRUSH_RADIUSES = new String[]{"1: 1.5",

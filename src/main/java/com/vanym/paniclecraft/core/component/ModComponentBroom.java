@@ -1,11 +1,15 @@
 package com.vanym.paniclecraft.core.component;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemBroom;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class ModComponentBroom implements ModComponent {
@@ -49,5 +53,10 @@ public class ModComponentBroom implements ModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
+    }
+    
+    @Override
+    public List<Item> getItems() {
+        return Arrays.asList(this.itemBroom);
     }
 }
