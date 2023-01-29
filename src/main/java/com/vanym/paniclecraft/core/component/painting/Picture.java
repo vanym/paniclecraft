@@ -432,6 +432,15 @@ public class Picture implements IPictureSize {
         this.name = name;
     }
     
+    @Override
+    public String toString() {
+        return String.format("Picture[width=%d, height=%d, alpha=%s, name=%s, editable=%s, packed=%s, raw=%s, holder=%s]",
+                             this.getWidth(), this.getHeight(), this.hasAlpha,
+                             this.name == null ? null : String.format("\"%s\"", this.name),
+                             this.isEditable(), this.packed == null ? null : this.packed.length,
+                             this.image == null ? null : this.image.getData().length, this.holder);
+    }
+    
     public static final String TAG_EDITABLE = "Editable";
     public static final String TAG_NAME = "Name";
     public static final String TAG_IMAGE = "Image";

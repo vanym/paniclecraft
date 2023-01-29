@@ -1,22 +1,18 @@
 package com.vanym.paniclecraft.command;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.command.CommandUtils.NopaintingException;
 import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
-import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
-import com.vanym.paniclecraft.utils.MainUtils;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 
 public class CommandPaintingView extends CommandBase {
     
@@ -75,14 +71,7 @@ public class CommandPaintingView extends CommandBase {
     
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if (!(sender instanceof EntityPlayerMP)) {
-            ChatComponentStyle message = new ChatComponentTranslation(
-                    this.getTranslationPrefix() + ".playerless");
-            message.getChatStyle().setColor(EnumChatFormatting.RED);
-            sender.addChatMessage(message);
-            return;
-        }
-        EntityPlayerMP player = (EntityPlayerMP)sender;
+        EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
         EntityPlayerMP viewer;
         int i = 0;
         if (this.to) {
@@ -101,33 +90,18 @@ public class CommandPaintingView extends CommandBase {
         } else {
             throw new WrongUsageException(this.getCommandUsage(sender));
         }
-        MovingObjectPosition target = MainUtils.rayTraceBlocks(player, 6.0D);
-        if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
-            ChatComponentStyle message = new ChatComponentTranslation(
-                    this.getTranslationPrefix() + ".noblock");
-            message.getChatStyle().setColor(EnumChatFormatting.RED);
-            sender.addChatMessage(message);
-            return;
-        }
-        for (WorldPictureProvider provider : this.providers) {
-            WorldPicturePoint point = new WorldPicturePoint(
-                    provider,
-                    sender.getEntityWorld(),
-                    target.blockX,
-                    target.blockY,
-                    target.blockZ,
-                    target.sideHit);
+        try {
             ContainerPaintingViewServer view =
-                    ContainerPaintingViewServer.makeFullView(point, maxRadius);
-            if (view != null) {
-                view.setEditable(this.edit);
-                ContainerPaintingViewServer.openGui(viewer, view);
-                return;
-            }
+                    Arrays.stream(this.providers)
+                          .map(CommandUtils.makeProviderRayTraceMapper(player))
+                          .map(p->ContainerPaintingViewServer.makeFullView(p, maxRadius))
+                          .filter(v->v != null)
+                          .findFirst()
+                          .get();
+            view.setEditable(this.edit);
+            ContainerPaintingViewServer.openGui(viewer, view);
+        } catch (NoSuchElementException e) {
+            throw new NopaintingException();
         }
-        ChatComponentStyle message = new ChatComponentTranslation(
-                this.getTranslationPrefix() + ".nopainting");
-        message.getChatStyle().setColor(EnumChatFormatting.RED);
-        sender.addChatMessage(message);
     }
 }

@@ -19,11 +19,16 @@ import net.minecraft.util.IChatComponent;
 
 public class CommandPainting extends TreeCommandBase {
     
+    protected static final WorldPictureProvider[] PROVIDERS =
+            new WorldPictureProvider[]{WorldPictureProvider.PAINTING,
+                                       WorldPictureProvider.PAINTINGFRAME};
+    
     public CommandPainting() {
         this.addSubCommand(new CommandView(false, false));
         this.addSubCommand(new CommandView(true, false));
         this.addSubCommand(new CommandView(false, true));
         this.addSubCommand(new CommandView(true, true));
+        this.addSubCommand(new CommandPictureInfo(PROVIDERS));
         this.addSubCommand(new CommandGiveTemplate());
     }
     
@@ -35,7 +40,7 @@ public class CommandPainting extends TreeCommandBase {
     protected class CommandView extends CommandPaintingView {
         
         public CommandView(boolean edit, boolean to) {
-            super(edit, to, WorldPictureProvider.PAINTING, WorldPictureProvider.PAINTINGFRAME);
+            super(edit, to, PROVIDERS);
         }
         
         @Override

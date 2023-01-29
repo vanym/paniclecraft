@@ -24,8 +24,12 @@ import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
     
+    protected static final WorldPictureProvider[] PROVIDERS =
+            new WorldPictureProvider[]{WorldPictureProvider.PAINTONBLOCK};
+    
     public CommandPaintOnBlock() {
         this.addSubCommand(new CommandInfo());
+        this.addSubCommand(new CommandPictureInfo(PROVIDERS));
         this.addSubCommand(new CommandClearArea());
         this.addSubCommand(new CommandView(false, false));
         this.addSubCommand(new CommandView(true, false));
@@ -149,7 +153,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
     protected class CommandView extends CommandPaintingView {
         
         public CommandView(boolean edit, boolean to) {
-            super(edit, to, WorldPictureProvider.PAINTONBLOCK);
+            super(edit, to, PROVIDERS);
         }
         
         @Override

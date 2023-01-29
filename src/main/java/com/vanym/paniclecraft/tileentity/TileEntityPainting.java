@@ -9,6 +9,7 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class TileEntityPainting extends TileEntityPaintingContainer {
     
@@ -64,11 +65,23 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         super.updateEntity();
     }
     
+    @Override
+    public String toString() {
+        return String.format("Painting[x=%d, y=%d, z=%d, facing=%s]",
+                             this.xCoord, this.yCoord, this.zCoord,
+                             ForgeDirection.getOrientation(this.getBlockMetadata()));
+    }
+    
     protected class PictureHolder extends TileEntityPaintingContainer.PictureHolder {
         
         @Override
         public Picture getNeighborPicture(int offsetX, int offsetY) {
             return TileEntityPainting.this.getNeighborPicture(offsetX, offsetY);
+        }
+        
+        @Override
+        public String toString() {
+            return TileEntityPainting.this.toString();
         }
     }
     

@@ -149,6 +149,15 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         public Picture getNeighborPicture(int offsetX, int offsetY) {
             return TileEntityPaintingFrame.this.getNeighborPicture(this.side, offsetX, offsetY);
         }
+        
+        @Override
+        public String toString() {
+            return String.format("Frame[x=%d, y=%d, z=%d, side=%s]",
+                                 TileEntityPaintingFrame.this.xCoord,
+                                 TileEntityPaintingFrame.this.yCoord,
+                                 TileEntityPaintingFrame.this.zCoord,
+                                 ForgeDirection.getOrientation(this.side));
+        }
     }
     
     @Override

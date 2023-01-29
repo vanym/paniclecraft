@@ -280,6 +280,15 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 EntityPaintOnBlock.this.needProceed();
             }
         }
+        
+        @Override
+        public String toString() {
+            return String.format("PaintOnBlock[x=%d, y=%d, z=%d, side=%s]",
+                                 EntityPaintOnBlock.this.getBlockX(),
+                                 EntityPaintOnBlock.this.getBlockY(),
+                                 EntityPaintOnBlock.this.getBlockZ(),
+                                 ForgeDirection.getOrientation(this.side));
+        }
     }
     
     protected class PaintOnBlockWatcher extends DataWatcher {
