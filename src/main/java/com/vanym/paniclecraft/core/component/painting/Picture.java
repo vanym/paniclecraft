@@ -122,7 +122,12 @@ public class Picture implements IPictureSize {
                 return false;
             }
             IColorizeable colorizeable = (IColorizeable)item;
-            colorizeable.setColor(itemStack, MainUtils.getAlphaless(this.getPixelColor(x, y)));
+            Color color = this.getPixelColor(x, y);
+            if (color.getAlpha() == 0) {
+                return false;
+            }
+            colorizeable.setColor(itemStack, MainUtils.getAlphaless(color));
+            return true;
         }
         return false;
     }
