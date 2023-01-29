@@ -94,15 +94,24 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
     }
     
-    public Picture createPicture(int side) {
+    protected PictureHolder createHolder(int side) {
         if (!this.isValidSide(side)) {
             return null;
         }
         if (this.holders[side] != null) {
-            return this.holders[side].picture;
+            return this.holders[side];
         } else {
             this.needProceed(); // to remove if it will stay empty
-            return (this.holders[side] = new PictureHolder(side)).picture;
+            return this.holders[side] = new PictureHolder(side);
+        }
+    }
+    
+    public Picture createPicture(int side) {
+        PictureHolder holder = this.createHolder(side);
+        if (holder != null) {
+            return holder.picture;
+        } else {
+            return null;
         }
     }
     
@@ -130,14 +139,14 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
     protected void clearEmpty() {
         for (int i = 0; i < this.holders.length; ++i) {
-            if (this.holders[i] != null && this.holders[i].picture.isEmpty()) {
+            if (this.holders[i] != null && this.holders[i].empty) {
                 this.clearPicture(i);
             }
         }
     }
     
     protected boolean isEmpty() {
-        return Arrays.asList(this.holders).stream().allMatch(h->h == null || h.picture.isEmpty());
+        return Arrays.stream(this.holders).allMatch(h->h == null || h.empty);
     }
     
     protected boolean killIfEmpty() {
@@ -233,8 +242,9 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (nbtTag.hasKey(TAG_PICTURE_I)) {
-                Picture picture = this.createPicture(i);
-                picture.readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE_I));
+                PictureHolder holder = this.createHolder(i);
+                holder.picture.readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE_I));
+                holder.empty = false;
             } else {
                 this.clearPicture(i);
             }
@@ -247,6 +257,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         protected final Picture picture = new Picture(this, true);
         
         protected int side;
+        
+        protected boolean empty = true;
         
         public PictureHolder(int side) {
             this.side = side;
@@ -278,6 +290,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             if (this.picture.isEmpty()) {
                 EntityPaintOnBlock.this.clearPicture(this.side);
                 EntityPaintOnBlock.this.needProceed();
+            } else {
+                this.empty = false;
             }
         }
         
@@ -388,8 +402,9 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             public void setObject(Object obj) {
                 ItemStack stack = (ItemStack)obj;
                 if (stack.hasTagCompound()) {
-                    Picture picture = EntityPaintOnBlock.this.createPicture(this.side);
-                    if (ItemPainting.fillPicture(picture, stack)) {
+                    PictureHolder holder = EntityPaintOnBlock.this.createHolder(this.side);
+                    if (ItemPainting.fillPicture(holder.picture, stack)) {
+                        holder.empty = false;
                         return;
                     }
                 }
