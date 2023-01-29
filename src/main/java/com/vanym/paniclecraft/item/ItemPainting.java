@@ -18,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -135,7 +136,10 @@ public class ItemPainting extends ItemMod3 {
             NBTBase pictureTagBase = itemTag.getTag(TAG_PICTURE);
             if (pictureTagBase != null && pictureTagBase instanceof NBTTagCompound) {
                 NBTTagCompound pictureTag = (NBTTagCompound)pictureTagBase;
-                list.add(pictureInformation(pictureTag));
+                if (!pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
+                    list.add(StatCollector.translateToLocal("text.painting.uneditable"));
+                }
+                list.add(pictureSizeInformation(pictureTag));
             }
         }
     }
@@ -191,8 +195,7 @@ public class ItemPainting extends ItemMod3 {
         return stack;
     }
     
-    @SideOnly(Side.CLIENT)
-    public static String pictureInformation(NBTTagCompound pictureTag) {
+    public static String pictureSizeInformation(NBTTagCompound pictureTag) {
         StringBuilder sb = new StringBuilder();
         NBTBase imageTagBase = pictureTag.getTag(Picture.TAG_IMAGE);
         NBTTagCompound imageTag;

@@ -4,8 +4,8 @@ item.advSign.name=Advanced Sign
 text.pressShiftToSeeText=Press <shift> to see text
 
 item.paintingBlock.name=Canvas
+text.painting.uneditable=Uneditable
 tile.paintingFrame.name=Canvas Frame
-text.paintingHaveSave=Have picture inside
 item.paintBrush0.name=Paint Brush
 item.paintBrush1.name=Small Paint Brush
 item.paintBrush4.name=Paint Filler

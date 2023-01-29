@@ -660,6 +660,8 @@ public class ModComponentPainting implements ModComponent {
         
         public boolean forceUnhidePaintRemover = false;
         
+        public boolean paintingFrameInfoSideLetters = false;
+        
         public boolean renderPaintingTile = true;
         public boolean renderPaintingItem = true;
         public int renderPaintingTilePartFrameType = 1;
@@ -686,6 +688,11 @@ public class ModComponentPainting implements ModComponent {
                                       true, "");
             this.forceUnhidePaintRemover =
                     config.getBoolean("forceUnhidePaintRemover",
+                                      ModComponentPainting.this.getName(),
+                                      false, "");
+            
+            this.paintingFrameInfoSideLetters =
+                    config.getBoolean("paintingFrameInfoSideLetters",
                                       ModComponentPainting.this.getName(),
                                       false, "");
             

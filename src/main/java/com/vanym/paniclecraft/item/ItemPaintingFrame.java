@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +40,20 @@ public class ItemPaintingFrame extends ItemBlock {
         RIGHT = BACK.getRotation(ForgeDirection.UP);
         BOTTOM = ForgeDirection.DOWN;
         TOP = ForgeDirection.UP;
+        
+        TreeMap<ForgeDirection, String> letters = new TreeMap<>();
+        letters.put(FRONT, "F");
+        letters.put(LEFT, "L");
+        letters.put(BACK, "K");
+        letters.put(RIGHT, "R");
+        letters.put(BOTTOM, "B");
+        letters.put(TOP, "T");
+        SIDE_LETTERS = Collections.unmodifiableMap(letters);
     }
     
     public static final List<ForgeDirection> SIDE_ORDER =
             Arrays.asList(FRONT, RIGHT, TOP, LEFT, BACK, BOTTOM);
+    protected static final Map<ForgeDirection, String> SIDE_LETTERS;
     
     public ItemPaintingFrame(Block block) {
         super(block);
@@ -65,10 +76,12 @@ public class ItemPaintingFrame extends ItemBlock {
             List list,
             boolean advancedItemTooltips) {
         if (itemStack.hasTagCompound()) {
-            Map<String, Integer> map = new TreeMap<>();
+            Map<String, String> mapLetters = new TreeMap<>();
+            Map<String, Integer> mapCount = new TreeMap<>();
             NBTTagCompound itemTag = itemStack.getTagCompound();
-            for (int i = 0; i < ISidePictureProvider.N; ++i) {
-                final String TAG_PICTURE_I = getPictureTag(i);
+            for (int i = 0; i < SIDE_ORDER.size(); ++i) {
+                ForgeDirection side = SIDE_ORDER.get(i);
+                final String TAG_PICTURE_I = getPictureTag(side.ordinal());
                 if (!itemTag.hasKey(TAG_PICTURE_I)) {
                     continue;
                 }
@@ -77,11 +90,18 @@ public class ItemPaintingFrame extends ItemBlock {
                 if (pictureTag.hasNoTags()) {
                     info = "";
                 } else {
-                    info = ItemPainting.pictureInformation(pictureTag);
+                    info = ItemPainting.pictureSizeInformation(pictureTag);
                 }
-                map.put(info, map.getOrDefault(info, 0) + 1);
+                mapCount.put(info, mapCount.getOrDefault(info, 0) + 1);
+                mapLetters.put(info, mapLetters.getOrDefault(info, "") + SIDE_LETTERS.get(side));
             }
-            map.forEach((info, count)-> {
+            Map mapInfo;
+            if (Core.instance.painting.clientConfig.paintingFrameInfoSideLetters) {
+                mapInfo = mapLetters;
+            } else {
+                mapInfo = mapCount;
+            }
+            mapInfo.forEach((info, count)-> {
                 StringBuilder sb = new StringBuilder();
                 sb.append(info);
                 sb.append("×");
