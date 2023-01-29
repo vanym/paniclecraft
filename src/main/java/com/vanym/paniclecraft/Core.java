@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
-import com.vanym.paniclecraft.core.GuiHandler;
+import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.ModComponent;
@@ -34,10 +34,13 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLEmbeddedChannel;
+import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 import net.minecraftforge.oredict.RecipeSorter;
 
 @Mod(
@@ -45,7 +48,7 @@ import net.minecraftforge.oredict.RecipeSorter;
     name = DEF.MOD_NAME,
     version = DEF.VERSION,
     guiFactory = "com.vanym.paniclecraft.client.gui.config.GuiModConfigFactory")
-public class Core {
+public class Core implements IGuiHandler {
     
     @Instance(DEF.MOD_ID)
     public static Core instance;
@@ -126,7 +129,7 @@ public class Core {
     
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        NetworkRegistry.INSTANCE.registerGuiHandler(instance, new GuiHandler());
+        NetworkRegistry.INSTANCE.registerGuiHandler(instance, instance);
         for (ModComponent component : Core.instance.getComponents()) {
             component.init(this.config);
         }
@@ -172,5 +175,35 @@ public class Core {
     
     public FMLEmbeddedChannel getChannel(Side source) {
         return NetworkRegistry.INSTANCE.getChannel(DEF.MOD_ID, source);
+    }
+    
+    @Override
+    public Object getServerGuiElement(
+            int ID,
+            EntityPlayer player,
+            World world,
+            int x,
+            int y,
+            int z) {
+        if (ID >= 0 && ID < GUIs.values().length) {
+            return GUIs.values()[ID].getServerGuiElement(ID, player, world, x, y, z);
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public Object getClientGuiElement(
+            int ID,
+            EntityPlayer player,
+            World world,
+            int x,
+            int y,
+            int z) {
+        if (ID >= 0 && ID < GUIs.values().length) {
+            return GUIs.values()[ID].getClientGuiElement(ID, player, world, x, y, z);
+        } else {
+            return null;
+        }
     }
 }
