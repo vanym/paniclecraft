@@ -27,7 +27,12 @@ public class ItemPainting extends ItemMod3 {
     
     public ItemPainting() {
         super();
-        this.setUnlocalizedName("painting");
+        this.setUnlocalizedName("paintingBlock");
+    }
+    
+    @Override
+    public String getName() {
+        return "painting";
     }
     
     @Override

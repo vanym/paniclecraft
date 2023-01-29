@@ -3,7 +3,7 @@ item.broom.name=Broom
 item.advSign.name=Advanced Sign
 text.pressShiftToSeeText=Press <shift> to see text
 
-item.painting.name=Canvas
+item.paintingBlock.name=Canvas
 tile.paintingFrame.name=Canvas Frame
 text.paintingHaveSave=Have picture inside
 item.paintBrush0.name=Paint Brush
