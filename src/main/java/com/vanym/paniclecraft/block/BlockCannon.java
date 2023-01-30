@@ -1,7 +1,5 @@
 package com.vanym.paniclecraft.block;
 
-import java.util.Random;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
@@ -10,9 +8,10 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
@@ -30,39 +29,29 @@ public class BlockCannon extends BlockContainerMod3 {
     
     @Override
     public boolean onBlockActivated(
-            World par1World,
-            int par2,
-            int par3,
-            int par4,
-            EntityPlayer par5EntityPlayer,
-            int par6,
-            float par7,
-            float par8,
-            float par9) {
-        par5EntityPlayer.openGui(Core.instance, GUIs.CANNON.ordinal(), par1World, par2, par3, par4);
+            World world,
+            int x,
+            int y,
+            int z,
+            EntityPlayer player,
+            int side,
+            float hitX,
+            float hitY,
+            float hitZ) {
+        if (!world.isRemote) {
+            player.openGui(Core.instance, GUIs.CANNON.ordinal(), world, x, y, z);
+        }
         return true;
     }
     
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return Core.instance.cannon.itemCannon;
-    }
-    
-    @Override
-    public TileEntity createNewTileEntity(World world, int md) {
+    public TileEntity createNewTileEntity(World world, int meta) {
         return new TileEntityCannon();
     }
     
     @Override
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(
-            World par1World,
-            int par2,
-            int par3,
-            int par4) {
-        return null;// TODO
-        // return AxisAlignedBB.getBoundingBox((double)par2 + 0.0F, (double)par3
-        // + 0.0F, (double)par4 + 0.0F, (double)par2 + 1.0F, (double)par3 +
-        // 0.0625F, (double)par4 + 1.0F);
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+        return null;
     }
     
     @Override
@@ -82,7 +71,26 @@ public class BlockCannon extends BlockContainerMod3 {
     
     @Override
     public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
-        return ForgeDirection.getOrientation(world.getBlockMetadata(x, y, z)) == side.getOpposite();
+        return side == ForgeDirection.DOWN;
+    }
+    
+    @Override
+    public void onBlockPlacedBy(
+            World world,
+            int x,
+            int y,
+            int z,
+            EntityLivingBase entity,
+            ItemStack stack) {
+        super.onBlockPlacedBy(world, x, y, z, entity, stack);
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile != null && tile instanceof TileEntityCannon) {
+            TileEntityCannon tileCannon = (TileEntityCannon)tile;
+            double direction = Math.round(180.0D + entity.rotationYaw);
+            tileCannon.setDirection(direction);
+            double height = Math.round(entity.rotationPitch);
+            tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
+        }
     }
     
     @Override
@@ -91,7 +99,7 @@ public class BlockCannon extends BlockContainerMod3 {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public IIcon getIcon(int par1, int par2) {
-        return Blocks.anvil.getBlockTextureFromSide(par1);
+    public IIcon getIcon(int side, int meta) {
+        return Blocks.anvil.getBlockTextureFromSide(side);
     }
 }

@@ -3,6 +3,9 @@ package com.vanym.paniclecraft.inventory;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
@@ -34,6 +37,15 @@ public class InventoryUtils {
                                          .get();
         } catch (NoSuchElementException e) {
             return null;
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public static String getTranslatedName(IInventory inv, Object... params) {
+        if (inv.hasCustomInventoryName()) {
+            return inv.getInventoryName();
+        } else {
+            return I18n.format(inv.getInventoryName(), params);
         }
     }
 }

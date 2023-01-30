@@ -74,7 +74,7 @@ public class ModConfig extends Configuration {
                                      comment, minValue, maxValue, defaultValue);
         prop.setMinValue(minValue);
         prop.setMaxValue(maxValue);
-        if (prop.isDoubleValue()) {
+        if (!prop.isDoubleValue()) {
             prop.setValue(defaultValue);
         }
         return Math.min(maxValue, Math.max(minValue, prop.getDouble(defaultValue)));

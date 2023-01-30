@@ -59,6 +59,7 @@ public class ModComponentPortableWorkbench implements ModComponent {
         }
         MinecraftForgeClient.registerItemRenderer(this.itemWorkbench,
                                                   new ItemRendererPortableWorkbench());
+        this.configChangedClient(config);
     }
     
     @Override

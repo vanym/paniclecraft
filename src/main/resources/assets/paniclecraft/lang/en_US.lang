@@ -14,7 +14,7 @@ item.paintRemover0.name=Paint Chipper
 item.paintRemover1.name=Paint Knife
 text.paintingtool.radius=Radius
 item.palette.name=Palette
-item.palette.inv.name=Palette
+item.palette.inv=Palette
 
 gui.paintingview.export=Export
 painting.export.success=Saved painting as %s
@@ -24,11 +24,11 @@ gui.paintingview.importsave=Save
 gui.paintingview.importcancel=Cancel
 painting.import.failure=Couldn't import image: %s
 
-item.cannon.name=Cannon
-tile.cannon.inv.name=Cannon
-gui.cannon.direction=Direction:
-gui.cannon.height=Height:
-gui.cannon.strength=Strength:
+tile.cannon.name=Cannon
+tile.cannon.inv=Cannon
+gui.cannon.direction=Direction: %s
+gui.cannon.height=Height: %s
+gui.cannon.strength=Strength: %s
 
 item.chessDesk.name=Chess board
 gui.chess.newGame=New game

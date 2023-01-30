@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+import com.vanym.paniclecraft.Core;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.item.EntityItem;
@@ -8,60 +9,68 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
-public class TileEntityCannon extends TileEntity implements IInventory {
+public class TileEntityCannon extends TileEntityBase implements IInventory {
     
-    public static double defMaxStrength = 10;
+    public static final double MAX_HEIGHT = 90.0D;
+    public static final double MIN_HEIGHT = 0.0D;
     
-    public double maxStrength = defMaxStrength;
+    protected double direction = 0.0D;
+    protected double height = 0.0D;
+    protected double strength = 1.0D;
     
-    public double direction = 0;
+    protected ItemStack stack;
     
-    public double height = 0;
+    protected Vec3 vector;
     
-    public double strength = 1;
-    
-    public ItemStack item;
-    
-    public Vec3 vector;
+    protected static final String TAG_DIRECTION = "Direction";
+    protected static final String TAG_HEIGHT = "Height";
+    protected static final String TAG_STRENGTH = "Strength";
+    protected static final String TAG_STACK = "Item";
     
     @Override
-    public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
-        super.writeToNBT(par1NBTTagCompound);
-        par1NBTTagCompound.setDouble("direction", this.direction);
-        par1NBTTagCompound.setDouble("height", this.height);
-        par1NBTTagCompound.setDouble("strength", this.strength);
-        par1NBTTagCompound.setDouble("maxStrength", this.maxStrength);
-        NBTTagCompound nbttag = new NBTTagCompound();
-        if (this.item != null) {
-            this.item.writeToNBT(nbttag);
+    public void writeToNBT(NBTTagCompound nbtTag) {
+        super.writeToNBT(nbtTag);
+        nbtTag.setDouble(TAG_DIRECTION, this.direction);
+        nbtTag.setDouble(TAG_HEIGHT, this.height);
+        nbtTag.setDouble(TAG_STRENGTH, this.strength);
+        if (this.stack != null) {
+            NBTTagCompound itemTag = new NBTTagCompound();
+            this.stack.writeToNBT(itemTag);
+            nbtTag.setTag(TAG_STACK, itemTag);
+        } else {
+            nbtTag.removeTag(TAG_STACK);
         }
-        par1NBTTagCompound.setTag("item", nbttag);
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
-        super.readFromNBT(par1NBTTagCompound);
-        this.direction = par1NBTTagCompound.getDouble("direction");
-        this.height = par1NBTTagCompound.getDouble("height");
-        this.strength = par1NBTTagCompound.getDouble("strength");
-        this.maxStrength = par1NBTTagCompound.getDouble("maxStrength");
-        NBTTagCompound nbttag = par1NBTTagCompound.getCompoundTag("item");
-        this.item = ItemStack.loadItemStackFromNBT(nbttag);
+    public void readFromNBT(NBTTagCompound nbtTag) {
+        super.readFromNBT(nbtTag);
+        this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
+        this.height = nbtTag.getDouble(TAG_HEIGHT);
+        this.strength = nbtTag.getDouble(TAG_STRENGTH);
         this.vector = null;
+        if (nbtTag.hasKey(TAG_STACK, 10)) {
+            this.stack = ItemStack.loadItemStackFromNBT(nbtTag.getCompoundTag(TAG_STACK));
+        } else {
+            this.stack = null;
+        }
     }
     
     @Override
     public void updateEntity() {
         if (!this.worldObj.isRemote) {
-            this.shot(this.item);
-            this.item = null;
+            if (this.stack != null) {
+                this.shot(this.stack);
+                this.setInventorySlotContents(0, null);
+            }
+        } else {
+            this.stack = null;
         }
     }
     
@@ -69,31 +78,16 @@ public class TileEntityCannon extends TileEntity implements IInventory {
     public Packet getDescriptionPacket() {
         NBTTagCompound dataTag = new NBTTagCompound();
         this.writeToNBT(dataTag);
-        dataTag.removeTag("item");
-        return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 1, dataTag);
+        dataTag.removeTag(TAG_STACK);
+        return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, dataTag);
     }
     
-    @Override
-    public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
-        NBTTagCompound nbtData = packet.func_148857_g();
-        this.readFromNBT(nbtData);
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            net.minecraft.client.gui.GuiScreen gui =
-                    net.minecraft.client.Minecraft.getMinecraft().currentScreen;
-            if (gui != null) {
-                if (gui instanceof com.vanym.paniclecraft.client.gui.container.GuiCannon) {
-                    com.vanym.paniclecraft.client.gui.container.GuiCannon guiCannon =
-                            (com.vanym.paniclecraft.client.gui.container.GuiCannon)gui;
-                    if (guiCannon.cannon.equals(this)) {
-                        guiCannon.checkHeight();
-                    }
-                }
-            }
+    public void setDirection(double direction) {
+        direction = MathHelper.wrapAngleTo180_double(direction);
+        if (direction < 0) {
+            direction += 360.0D;
         }
-    }
-    
-    public void setDirection(double par1) {
-        this.direction = par1;
+        this.direction = direction;
         this.vector = null;
     }
     
@@ -101,63 +95,72 @@ public class TileEntityCannon extends TileEntity implements IInventory {
         return this.direction;
     }
     
-    public void setHeight(double par1) {
-        this.height = par1;
-        this.vector = null;
+    public boolean setHeight(double height) {
+        height = MathHelper.wrapAngleTo180_double(height);
+        if (height >= MIN_HEIGHT && height <= MAX_HEIGHT) {
+            this.height = height;
+            this.vector = null;
+            return true;
+        } else {
+            return false;
+        }
     }
     
     public double getHeight() {
         return this.height;
     }
     
-    public void setStrength(double par1) {
-        this.strength = par1;
-        // vector = null;
+    public boolean setStrength(double strength) {
+        if (strength >= 0 && strength <= Core.instance.cannon.config.maxStrength) {
+            this.strength = strength;
+            this.vector = null;
+            return true;
+        } else {
+            return false;
+        }
     }
     
     public double getStrength() {
         return this.strength;
     }
     
-    public Vec3 getVector() {
+    protected Vec3 getVector() {
         if (this.vector == null) {
-            double hc = Math.cos(Math.toRadians((double)this.height));
-            double hs = Math.sin(Math.toRadians((double)this.height));
-            int d = (int)this.direction;
-            double rd = (Math.sin(Math.toRadians(d)));
-            double ld = (Math.cos(Math.toRadians(d)));
-            this.vector = Vec3.createVectorHelper(-hc * rd, hs, hc * ld);
+            double heightRadians = Math.toRadians(this.height);
+            double hSin = Math.sin(heightRadians);
+            double hCos = Math.cos(heightRadians);
+            double dirRadians = Math.toRadians(this.direction);
+            double dirSin = Math.sin(dirRadians);
+            double dirCos = Math.cos(dirRadians);
+            this.vector = Vec3.createVectorHelper(-dirSin * hCos, hSin, dirCos * hCos);
+            this.vector.xCoord *= this.strength;
+            this.vector.yCoord *= this.strength;
+            this.vector.zCoord *= this.strength;
         }
         return this.vector;
     }
     
-    public void shot(ItemStack shotItem) {
-        if (shotItem == null) {
-            return;
-        }
-        EntityItem entityitem = new EntityItem(
+    protected void shot(ItemStack stack) {
+        EntityItem entityItem = new EntityItem(
                 this.worldObj,
-                (double)this.xCoord + 0.5D,
-                (double)this.yCoord + 0.4D,
-                (double)this.zCoord + 0.5D,
-                shotItem);
-        // entityitem.lifespan = 72000;
-        entityitem.delayBeforeCanPickup = 15;
-        double s = this.strength;
-        Vec3 m = this.getVector();
-        entityitem.motionX = m.xCoord * s;
-        entityitem.motionZ = m.zCoord * s;
-        entityitem.motionY = m.yCoord * s;
-        this.worldObj.spawnEntityInWorld(entityitem);
-        shotItem = null;
+                this.xCoord + 0.5D,
+                this.yCoord + 0.4D,
+                this.zCoord + 0.5D,
+                stack);
+        entityItem.delayBeforeCanPickup = 25;
+        Vec3 motion = this.getVector();
+        entityItem.motionX = motion.xCoord;
+        entityItem.motionZ = motion.zCoord;
+        entityItem.motionY = motion.yCoord;
+        this.worldObj.spawnEntityInWorld(entityItem);
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return AxisAlignedBB.getBoundingBox((double)this.xCoord - 0.5F, (double)this.yCoord + 0.0F,
-                                            (double)this.zCoord - 0.5F, (double)this.xCoord + 1.5F,
-                                            (double)this.yCoord + 1.5F, (double)this.zCoord + 1.5F);
+        return AxisAlignedBB.getBoundingBox(this.xCoord - 0.5D, this.yCoord - 0.5D,
+                                            this.zCoord - 0.5D, this.xCoord + 1.5D,
+                                            this.yCoord + 1.5D, this.zCoord + 1.5D);
     }
     
     @Override
@@ -172,43 +175,35 @@ public class TileEntityCannon extends TileEntity implements IInventory {
     }
     
     @Override
-    public ItemStack getStackInSlot(int i) {
-        if (i == 0) {
-            return this.item;
-        }
-        return null;
+    public ItemStack getStackInSlot(int slot) {
+        return this.stack;
     }
     
     @Override
-    public ItemStack decrStackSize(int par1, int par2) {
-        if (this.item != null) {
-            ItemStack itemstack;
-            
-            if (this.item.stackSize <= par2) {
-                itemstack = this.item;
-                this.item = null;
-                this.markDirty();
-                return itemstack;
-            } else {
-                itemstack = this.item.splitStack(par2);
-                
-                if (this.item.stackSize == 0) {
-                    this.item = null;
-                }
-                
-                this.markDirty();
-                return itemstack;
-            }
-        } else {
+    public ItemStack decrStackSize(int slot, int size) {
+        if (this.stack == null) {
             return null;
         }
+        if (this.stack.stackSize <= size) {
+            ItemStack stack = this.stack;
+            this.stack = null;
+            this.markDirty();
+            return stack;
+        } else {
+            ItemStack stack = this.stack.splitStack(size);
+            if (this.stack.stackSize <= 0) {
+                this.stack = null;
+            }
+            this.markDirty();
+            return stack;
+        }
     }
     
     @Override
-    public ItemStack getStackInSlotOnClosing(int par1) {
-        if (this.item != null) {
-            ItemStack itemstack = this.item;
-            this.item = null;
+    public ItemStack getStackInSlotOnClosing(int slot) {
+        if (this.stack != null) {
+            ItemStack itemstack = this.stack;
+            this.stack = null;
             return itemstack;
         } else {
             return null;
@@ -216,19 +211,14 @@ public class TileEntityCannon extends TileEntity implements IInventory {
     }
     
     @Override
-    public void setInventorySlotContents(int par1, ItemStack par2ItemStack) {
-        this.item = par2ItemStack;
-        
-        if (par2ItemStack != null && par2ItemStack.stackSize > this.getInventoryStackLimit()) {
-            par2ItemStack.stackSize = this.getInventoryStackLimit();
-        }
-        
+    public void setInventorySlotContents(int slot, ItemStack stack) {
+        this.stack = stack;
         this.markDirty();
     }
     
     @Override
     public String getInventoryName() {
-        return "tile.cannon.inv";
+        return Core.instance.cannon.blockCannon.getUnlocalizedName() + ".inv";
     }
     
     @Override
@@ -237,22 +227,14 @@ public class TileEntityCannon extends TileEntity implements IInventory {
     }
     
     @Override
-    public boolean isUseableByPlayer(EntityPlayer entityplayer) {
-        return this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord) == this
-            && entityplayer.getDistanceSq((double)this.xCoord + 0.5D, (double)this.yCoord + 0.5D,
-                                          (double)this.zCoord + 0.5D) <= 64.0D;
-    }
-    
-    public void openChest() {}
-    
-    public void closeChest() {}
-    
-    public boolean isInvNameLocalized() {
-        return false;
+    public boolean isUseableByPlayer(EntityPlayer player) {
+        return this == player.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord)
+            && player.getDistanceSq(this.xCoord + 0.5D, this.yCoord + 0.5D,
+                                    this.zCoord + 0.5D) <= 64.0D;
     }
     
     @Override
-    public boolean isItemValidForSlot(int i, ItemStack itemstack) {
+    public boolean isItemValidForSlot(int slot, ItemStack stack) {
         return true;
     }
     
@@ -265,7 +247,5 @@ public class TileEntityCannon extends TileEntity implements IInventory {
     public void openInventory() {}
     
     @Override
-    public void closeInventory() {
-        
-    }
+    public void closeInventory() {}
 }

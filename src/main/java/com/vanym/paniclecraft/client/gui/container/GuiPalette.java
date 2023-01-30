@@ -13,6 +13,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.ColorChartTexture;
 import com.vanym.paniclecraft.container.ContainerPalette;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
+import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.utils.MainUtils;
 
@@ -23,12 +24,10 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 
 @SideOnly(Side.CLIENT)
 public class GuiPalette extends GuiContainer implements ICrafting {
@@ -44,7 +43,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     protected GuiColorChart chart;
     protected GuiColorPicker picker;
     
-    protected ContainerPalette container;
+    protected final ContainerPalette container;
     
     public GuiPalette(ContainerPalette container) {
         super(container);
@@ -100,7 +99,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     public void updateScreen() {
         super.updateScreen();
         this.textHex.updateCursorCounter();
-        Arrays.asList(this.textColor).forEach(t->t.updateCursorCounter());
+        Arrays.stream(this.textColor).forEach(t->t.updateCursorCounter());
     }
     
     @Override
@@ -223,7 +222,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     protected void mouseClicked(int x, int y, int eventButton) {
         super.mouseClicked(x, y, eventButton);
         this.textHex.mouseClicked(x, y, eventButton);
-        Arrays.asList(this.textColor).forEach(t->t.mouseClicked(x, y, eventButton));
+        Arrays.stream(this.textColor).forEach(t->t.mouseClicked(x, y, eventButton));
         this.chart.mouseClicked(x, y, eventButton);
         this.picker.mouseClicked(x, y, eventButton);
     }
@@ -234,21 +233,10 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     }
     
     protected void drawInventoriesNames() {
-        String palette;
-        if (this.container.inventoryPalette.hasCustomInventoryName()) {
-            palette = this.container.inventoryPalette.getInventoryName();
-        } else {
-            String translate = this.container.inventoryPalette.getInventoryName() + ".name";
-            palette = StatCollector.translateToLocal(translate).trim();
-        }
-        this.fontRendererObj.drawString(palette, 8, 6, 4210752);
-        String player;
-        if (this.container.inventoryPlayer.hasCustomInventoryName()) {
-            player = this.container.inventoryPlayer.getInventoryName();
-        } else {
-            player = I18n.format(this.container.inventoryPlayer.getInventoryName(), new Object[0]);
-        }
-        this.fontRendererObj.drawString(player, 8, this.ySize - 96 + 2, 4210752);
+        String palette = InventoryUtils.getTranslatedName(this.container.inventoryPalette);
+        this.fontRendererObj.drawString(palette, 8, 6, 0x404040);
+        String player = InventoryUtils.getTranslatedName(this.container.inventoryPlayer);
+        this.fontRendererObj.drawString(player, 8, this.ySize - 96 + 2, 0x404040);
     }
     
     protected void drawRGBLabels() {
@@ -258,12 +246,12 @@ public class GuiPalette extends GuiContainer implements ICrafting {
             this.fontRendererObj.drawString(letters.charAt(i) + ": ",
                                             -this.guiLeft + this.textColor[i].xPosition - 11,
                                             -this.guiTop + this.textColor[i].yPosition + yoffset,
-                                            4210752);
+                                            0x404040);
         }
     }
     
     @Override
-    public void drawGuiContainerForegroundLayer(int par1, int par2) {
+    public void drawGuiContainerForegroundLayer(int x, int y) {
         this.drawInventoriesNames();
         this.drawRGBLabels();
     }
@@ -272,19 +260,20 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     public void drawGuiContainerBackgroundLayer(float f, int i, int j) {
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.renderEngine.bindTexture(GUI_TEXTURE);
-        int k = (this.width - this.xSize) / 2;
-        int l = (this.height - this.ySize) / 2;
-        this.drawTexturedModalRect(k, l, 0, 0, this.xSize, 3 * 18 + 17 + 96);
+        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
         this.chart.drawChart(this.mc);
         Color color = this.getColor();
         if (color == null) {
             color = new Color(0);
         }
-        drawRect(k + 8, l + 38, k + 8 + 16, l + 38 + 16, color.getRGB());
+        drawRect(this.picker.xPosition, this.picker.yPosition,
+                 this.picker.xPosition + this.picker.width,
+                 this.picker.yPosition + this.picker.height,
+                 color.getRGB());
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_BLEND);
         this.textHex.drawTextBox();
-        Arrays.asList(this.textColor).forEach(t->t.drawTextBox());
+        Arrays.stream(this.textColor).forEach(t->t.drawTextBox());
     }
     
     protected void setColor(Color color) {

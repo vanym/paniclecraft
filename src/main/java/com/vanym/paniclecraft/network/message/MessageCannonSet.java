@@ -11,26 +11,58 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class MessageCannonSet implements IMessage, IMessageHandler<MessageCannonSet, IMessage> {
     
-    byte bt;
-    double to;
+    public static enum Field {
+        DIRECTION {
+            @Override
+            public void set(TileEntityCannon tileCannon, double data) {
+                tileCannon.setDirection(data);
+            }
+        },
+        HEIGHT {
+            @Override
+            public void set(TileEntityCannon tileCannon, double data) {
+                tileCannon.setHeight(data);
+            }
+        },
+        STRENGTH {
+            @Override
+            public void set(TileEntityCannon tileCannon, double data) {
+                tileCannon.setStrength(data);
+            }
+        };
+        
+        public abstract void set(TileEntityCannon tileCannon, double data);
+    }
+    
+    Field field;
+    double data;
     
     public MessageCannonSet() {}
     
-    public MessageCannonSet(byte parBt, double parTo) {
-        this.bt = parBt;
-        this.to = parTo;
+    public MessageCannonSet(Field field, double data) {
+        this.field = field;
+        this.data = data;
     }
     
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.bt = buf.readByte();
-        this.to = buf.readDouble();
+        byte fieldByte = buf.readByte();
+        if (fieldByte >= 0 && fieldByte < Field.values().length) {
+            this.field = Field.values()[fieldByte];
+        } else {
+            this.field = null;
+        }
+        this.data = buf.readDouble();
     }
     
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeByte(this.bt);
-        buf.writeDouble(this.to);
+        if (this.field != null) {
+            buf.writeByte(this.field.ordinal());
+        } else {
+            buf.writeByte(-1);
+        }
+        buf.writeDouble(this.data);
     }
     
     @Override
@@ -38,34 +70,11 @@ public class MessageCannonSet implements IMessage, IMessageHandler<MessageCannon
         EntityPlayer playerEntity = ctx.getServerHandler().playerEntity;
         if (playerEntity.openContainer instanceof ContainerCannon) {
             ContainerCannon containerCannon = (ContainerCannon)playerEntity.openContainer;
-            TileEntityCannon tileCannon = containerCannon.tileCannon;
-            switch (message.bt) {
-                case 0: {
-                    while (message.to >= 360) {
-                        message.to -= 360;
-                    }
-                    
-                    while (message.to < 0) {
-                        message.to += 360;
-                    }
-                    tileCannon.setDirection(message.to);
-                }
-                break;
-                case 1: {
-                    if (message.to <= 90 && message.to >= -90) {
-                        tileCannon.setHeight(message.to);
-                    }
-                }
-                break;
-                case 2: {
-                    if (message.to >= 0 && message.to <= tileCannon.maxStrength) {
-                        tileCannon.setStrength(message.to);
-                    }
-                }
-                break;
+            TileEntityCannon tileCannon = containerCannon.cannon;
+            if (message.field != null) {
+                message.field.set(tileCannon, message.data);
+                tileCannon.markForUpdate();
             }
-            tileCannon.getWorldObj()
-                      .markBlockForUpdate(tileCannon.xCoord, tileCannon.yCoord, tileCannon.zCoord);
         }
         return null;
     }

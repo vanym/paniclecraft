@@ -3,52 +3,37 @@ package com.vanym.paniclecraft.container;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class ContainerCannon extends Container {
+public class ContainerCannon extends ContainerBase {
     
-    public TileEntityCannon tileCannon;
+    public final InventoryPlayer playerInv;
+    public final TileEntityCannon cannon;
     
-    public ContainerCannon(IInventory par1IInventory, TileEntityCannon par2TileEntityCannon) {
-        this.tileCannon = par2TileEntityCannon;
-        par2TileEntityCannon.openChest();
-        int i = -18;
-        int j;
-        int k;
-        this.addSlotToContainer(new Slot(par2TileEntityCannon, 0, 8, 18));
-        for (j = 0; j < 3; ++j) {
-            for (k = 0; k < 9; ++k) {
-                this.addSlotToContainer(new Slot(
-                        par1IInventory,
-                        k + j * 9 + 9,
-                        8 + k * 18,
-                        103 + j * 18 + i));
-            }
-        }
-        
-        for (j = 0; j < 9; ++j) {
-            this.addSlotToContainer(new Slot(par1IInventory, j, 8 + j * 18, 161 + i));
-        }
+    public ContainerCannon(InventoryPlayer playerInv, TileEntityCannon cannon) {
+        this.playerInv = playerInv;
+        this.cannon = cannon;
+        cannon.openInventory();
+        this.addSlotToContainer(new Slot(cannon, 0, 8, 18));
+        this.addPlayerInventorySlots(playerInv);
     }
     
     @Override
     public boolean canInteractWith(EntityPlayer entityplayer) {
-        return this.tileCannon.isUseableByPlayer(entityplayer);
+        return this.cannon.isUseableByPlayer(entityplayer);
     }
     
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2) {
+    public ItemStack transferStackInSlot(EntityPlayer player, int slotIndex) {
         ItemStack itemstack = null;
-        Slot slot = (Slot)this.inventorySlots.get(par2);
-        
+        Slot slot = (Slot)this.inventorySlots.get(slotIndex);
         if (slot != null && slot.getHasStack()) {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
             
-            if (par2 == 0) {
+            if (slotIndex == 0) {
                 if (!this.mergeItemStack(itemstack1, 1, 37, true)) {
                     return null;
                 }
@@ -57,21 +42,22 @@ public class ContainerCannon extends Container {
             }
             
             if (itemstack1.stackSize == 0) {
-                slot.putStack((ItemStack)null);
+                slot.putStack(null);
             } else {
                 slot.onSlotChanged();
             }
+            
+            if (itemstack1.stackSize == itemstack.stackSize) {
+                return null;
+            }
+            
+            slot.onPickupFromSlot(player, itemstack1);
         }
-        
         return itemstack;
     }
     
-    public void onCraftGuiClosed(EntityPlayer par1EntityPlayer) {
-        super.onContainerClosed(par1EntityPlayer);
-        this.tileCannon.closeChest();
-    }
-    
-    public IInventory getLowerChestInventory() {
-        return this.tileCannon;
+    public void onCraftGuiClosed(EntityPlayer player) {
+        super.onContainerClosed(player);
+        this.cannon.closeInventory();
     }
 }

@@ -18,42 +18,41 @@ import net.minecraft.util.ResourceLocation;
 @SideOnly(Side.CLIENT)
 public class TileEntityCannonRenderer extends TileEntitySpecialRenderer {
     
-    final ResourceLocation Texture = new ResourceLocation(DEF.MOD_ID, "textures/models/cannon.png");
+    protected static final ResourceLocation TEXTURE =
+            new ResourceLocation(DEF.MOD_ID, "textures/models/cannon.png");
     
-    ModelCannonBody body = new ModelCannonBody();
-    ModelCannonBody2 body2 = new ModelCannonBody2();
-    ModelCannonBody3 body3 = new ModelCannonBody3();
+    protected final ModelCannonBody body = new ModelCannonBody();
+    protected final ModelCannonBody2 body2 = new ModelCannonBody2();
+    protected final ModelCannonBody3 body3 = new ModelCannonBody3();
     
     public void renderTileEntityAt(
-            TileEntityCannon par1,
-            double par2,
-            double par4,
-            double par6,
-            float par8) {
+            TileEntityCannon tileCannon,
+            double x,
+            double y,
+            double z,
+            float f) {
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        float var10 = 0.6666667F;
-        GL11.glTranslatef((float)par2 + 0.5F, (float)par4 + 0.75F * var10, (float)par6 + 0.5F);
+        GL11.glTranslatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
         GL11.glRotatef(180.0F, 1.0F, 0.0F, 0.0F);
         GL11.glTranslatef(0.0F, 0.5F, 0.0F);
-        this.bindTexture(this.Texture);
+        this.bindTexture(TEXTURE);
         this.body.render(0.0625F);
-        GL11.glRotatef((float)par1.direction, 0.0F, 1.0F, 0.0F);
+        GL11.glRotatef((float)tileCannon.getDirection(), 0.0F, 1.0F, 0.0F);
         this.body2.render(0.075F);
         GL11.glTranslatef(0.0F, -0.4F, 0.0F);
-        GL11.glRotatef(90F - (float)par1.height, 1.0F, 0.0F, 0.0F);
+        GL11.glRotatef(90.0F - (float)tileCannon.getHeight(), 1.0F, 0.0F, 0.0F);
         this.body3.render(0.075F);
         GL11.glPopMatrix();
     }
     
     @Override
     public void renderTileEntityAt(
-            TileEntity par1,
-            double par2,
-            double par4,
-            double par6,
-            float par8) {
-        this.renderTileEntityAt((TileEntityCannon)par1, par2, par4, par6, par8);
+            TileEntity tile,
+            double x,
+            double y,
+            double z,
+            float f) {
+        this.renderTileEntityAt((TileEntityCannon)tile, x, y, z, f);
     }
-    
 }

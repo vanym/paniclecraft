@@ -10,7 +10,7 @@ public class ComputerCraftPlugin implements ModComponent {
     
     protected static ComputerCraftPlugin instance;
     
-    public TileEntityCannonPeripheralProvider tileEntityCannonPeripheralProvider;
+    public CannonPeripheralProvider tileEntityCannonPeripheralProvider;
     
     public PaintingPeripheralProvider tileEntityPaintingPeripheralProvider;
     public PaintingFramePeripheralProvider tileEntityPaintingFramePeripheralProvider;
@@ -20,7 +20,7 @@ public class ComputerCraftPlugin implements ModComponent {
     public void preInit(ModConfig config) {
         if (config.getBoolean("peripheralCannon", this.getName(), true, "")) {
             ComputerCraftAPI.registerPeripheralProvider(this.tileEntityCannonPeripheralProvider =
-                    new TileEntityCannonPeripheralProvider());
+                    new CannonPeripheralProvider());
         }
         if (config.getBoolean("peripheralPainting", this.getName(), false, "")) {
             ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingPeripheralProvider =

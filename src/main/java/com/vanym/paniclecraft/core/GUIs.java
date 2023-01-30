@@ -119,7 +119,7 @@ public enum GUIs implements IGuiHandler {
                 int z) {
             TileEntity tile = world.getTileEntity(x, y, z);
             if (tile instanceof TileEntityCannon) {
-                return new GuiCannon(player.inventory, (TileEntityCannon)tile);
+                return new GuiCannon(new ContainerCannon(player.inventory, (TileEntityCannon)tile));
             } else {
                 return null;
             }
