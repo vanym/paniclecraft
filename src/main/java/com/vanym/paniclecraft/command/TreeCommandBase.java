@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -69,10 +70,10 @@ public abstract class TreeCommandBase extends CommandBase {
     }
     
     protected List<String> getPossibleCommandsNames(ICommandSender sender) {
-        return Arrays.asList(this.getPossibleCommands(sender)
-                                 .stream()
-                                 .map(c->c.getCommandName())
-                                 .toArray(String[]::new));
+        return this.getPossibleCommands(sender)
+                   .stream()
+                   .map(c->c.getCommandName())
+                   .collect(Collectors.toList());
     }
     
     @Override
@@ -96,7 +97,12 @@ public abstract class TreeCommandBase extends CommandBase {
     @Override
     @SuppressWarnings("rawtypes")
     public List addTabCompletionOptions(ICommandSender sender, String[] args) {
-        if (args.length > 1) {
+        if (args.length == 1 && !args[0].isEmpty()) {
+            return this.getPossibleCommandsNames(sender)
+                       .stream()
+                       .filter(s->s.startsWith(args[0]))
+                       .collect(Collectors.toList());
+        } else if (args.length > 1) {
             ICommand command = this.subCommands.get(args[0]);
             if (command != null) {
                 return command.addTabCompletionOptions(sender, dropFirstString(args));
