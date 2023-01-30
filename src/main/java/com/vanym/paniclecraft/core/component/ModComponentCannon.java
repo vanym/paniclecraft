@@ -126,13 +126,19 @@ public class ModComponentCannon implements ModComponent {
     public class ChangeableConfig {
         
         public double maxStrength = 5.0D;
+        public int pickupDelay = 25;
+        public int shootTimeout = 2;
         
         protected ChangeableConfig() {}
         
         public ChangeableConfig read(ModConfig config) {
             config.restartless();
-            this.maxStrength = config.getDouble("maxStrength", ModComponentCannon.this.getName(),
-                                                5.0D, 0.0D, 16.0D, "");
+            final String category = ModComponentCannon.this.getName();
+            this.maxStrength = config.getDouble("maxStrength", category, 5.0D, 0.0D, 16.0D, "");
+            this.shootTimeout = config.getInt("shootTimeout", category, 2, 0, Short.MAX_VALUE,
+                                              "shoot timeout in game ticks");
+            this.pickupDelay = config.getInt("pickupDelay", category, 25, 0, Short.MAX_VALUE,
+                                             "shooted items pickup delay in game ticks");
             config.restartlessReset();
             return this;
         }

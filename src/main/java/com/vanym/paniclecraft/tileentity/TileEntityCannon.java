@@ -24,6 +24,8 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     protected double height = 0.0D;
     protected double strength = 1.0D;
     
+    protected int timeout;
+    
     protected ItemStack stack;
     
     protected Vec3 vector;
@@ -31,14 +33,27 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     protected static final String TAG_DIRECTION = "Direction";
     protected static final String TAG_HEIGHT = "Height";
     protected static final String TAG_STRENGTH = "Strength";
+    protected static final String TAG_TIMEOUT = "Timeout";
     protected static final String TAG_STACK = "Item";
     
     @Override
     public void writeToNBT(NBTTagCompound nbtTag) {
+        this.writeToNBT(nbtTag, false);
+    }
+    
+    protected void writeToNBT(NBTTagCompound nbtTag, boolean forClient) {
         super.writeToNBT(nbtTag);
         nbtTag.setDouble(TAG_DIRECTION, this.direction);
         nbtTag.setDouble(TAG_HEIGHT, this.height);
         nbtTag.setDouble(TAG_STRENGTH, this.strength);
+        if (forClient) {
+            return;
+        }
+        if (this.timeout > 0) {
+            nbtTag.setInteger(TAG_TIMEOUT, this.timeout);
+        } else {
+            nbtTag.removeTag(TAG_TIMEOUT);
+        }
         if (this.stack != null) {
             NBTTagCompound itemTag = new NBTTagCompound();
             this.stack.writeToNBT(itemTag);
@@ -55,6 +70,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
         this.height = nbtTag.getDouble(TAG_HEIGHT);
         this.strength = nbtTag.getDouble(TAG_STRENGTH);
         this.vector = null;
+        this.timeout = nbtTag.getInteger(TAG_TIMEOUT);
         if (nbtTag.hasKey(TAG_STACK, 10)) {
             this.stack = ItemStack.loadItemStackFromNBT(nbtTag.getCompoundTag(TAG_STACK));
         } else {
@@ -64,20 +80,25 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     
     @Override
     public void updateEntity() {
-        if (!this.worldObj.isRemote) {
-            if (this.stack != null) {
-                this.shot(this.stack);
-                this.setInventorySlotContents(0, null);
-            }
-        } else {
+        if (this.worldObj.isRemote) {
+            return;
+        }
+        this.timeout = Math.min(this.timeout, Core.instance.cannon.config.shootTimeout);
+        if (this.timeout <= 0 && this.stack != null) {
+            this.shoot(this.stack);
             this.stack = null;
+            this.timeout = Core.instance.cannon.config.shootTimeout;
+            this.markDirty();
+        }
+        if (this.timeout > 0) {
+            --this.timeout;
         }
     }
     
     @Override
     public Packet getDescriptionPacket() {
         NBTTagCompound dataTag = new NBTTagCompound();
-        this.writeToNBT(dataTag);
+        this.writeToNBT(dataTag, true);
         dataTag.removeTag(TAG_STACK);
         return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, dataTag);
     }
@@ -140,14 +161,14 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
         return this.vector;
     }
     
-    protected void shot(ItemStack stack) {
+    protected void shoot(ItemStack stack) {
         EntityItem entityItem = new EntityItem(
                 this.worldObj,
                 this.xCoord + 0.5D,
                 this.yCoord + 0.4D,
                 this.zCoord + 0.5D,
                 stack);
-        entityItem.delayBeforeCanPickup = 25;
+        entityItem.delayBeforeCanPickup = Core.instance.cannon.config.pickupDelay;
         Vec3 motion = this.getVector();
         entityItem.motionX = motion.xCoord;
         entityItem.motionZ = motion.zCoord;
@@ -212,8 +233,12 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     
     @Override
     public void setInventorySlotContents(int slot, ItemStack stack) {
-        this.stack = stack;
-        this.markDirty();
+        if (Core.instance.cannon.config.shootTimeout > 0) {
+            this.stack = stack;
+            this.markDirty();
+        } else if (!this.worldObj.isRemote && stack != null) {
+            this.shoot(stack);
+        }
     }
     
     @Override

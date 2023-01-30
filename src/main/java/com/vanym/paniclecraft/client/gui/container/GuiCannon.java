@@ -33,6 +33,12 @@ public class GuiCannon extends GuiContainer {
     }
     
     @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+        this.container.cannon.getStackInSlotOnClosing(0);
+    }
+    
+    @Override
     public void initGui() {
         super.initGui();
         this.textDirection =
