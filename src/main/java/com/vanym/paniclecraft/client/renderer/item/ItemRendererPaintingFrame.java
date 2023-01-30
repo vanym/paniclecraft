@@ -13,6 +13,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -48,11 +49,11 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
     }
     
     @Override
-    public void renderItem(ItemRenderType type, ItemStack itemS, Object... data) {
+    public void renderItem(ItemRenderType type, ItemStack stack, Object... data) {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
         tilePF.blockType = Core.instance.painting.blockPaintingFrame;
         int[] obtainedTextures = new int[ISidePictureProvider.N];
-        NBTTagCompound itemTag = itemS.getTagCompound();
+        NBTTagCompound itemTag = stack.getTagCompound();
         if (itemTag == null) {
             itemTag = new NBTTagCompound();
         }
@@ -85,6 +86,15 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
                 GL11.glTranslatef(-1.0F, 0.0F, 0.0F);
             break;
             case EQUIPPED:
+                try {
+                    EntityLivingBase entity = (EntityLivingBase)data[1];
+                    if (stack != entity.getEquipmentInSlot(4)) {
+                        GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
+                        GL11.glTranslatef(-1.0F, 0.0F, 0.0F);
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException | NullPointerException | ClassCastException e) {
+                }
                 GL11.glRotatef(270.0F, 0.0F, 1.0F, 0.0F);
                 GL11.glTranslatef(0.0F, 0.0F, -1.0F);
             break;
