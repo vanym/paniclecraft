@@ -136,7 +136,8 @@ public class ItemPainting extends ItemMod3 {
             NBTBase pictureTagBase = itemTag.getTag(TAG_PICTURE);
             if (pictureTagBase != null && pictureTagBase instanceof NBTTagCompound) {
                 NBTTagCompound pictureTag = (NBTTagCompound)pictureTagBase;
-                if (!pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
+                if (pictureTag.hasKey(TAG_PICTURE) &&
+                    !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
                     list.add(StatCollector.translateToLocal("text.painting.uneditable"));
                 }
                 list.add(pictureSizeInformation(pictureTag));
