@@ -100,7 +100,7 @@ public abstract class TreeCommandBase extends CommandBase {
         if (args.length == 1 && !args[0].isEmpty()) {
             return this.getPossibleCommandsNames(sender)
                        .stream()
-                       .filter(s->s.startsWith(args[0]))
+                       .filter(s->s.toLowerCase().startsWith(args[0].toLowerCase()))
                        .collect(Collectors.toList());
         } else if (args.length > 1) {
             ICommand command = this.subCommands.get(args[0]);
