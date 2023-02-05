@@ -26,9 +26,9 @@ painting.import.failure=Couldn't import image: %s
 
 tile.cannon.name=Cannon
 tile.cannon.inv=Cannon
-gui.cannon.direction=Direction: %s
-gui.cannon.height=Height: %s
-gui.cannon.strength=Strength: %s
+gui.cannon.direction=Direction
+gui.cannon.height=Height
+gui.cannon.strength=Strength
 
 item.chessDesk.name=Chess board
 gui.chess.newGame=New game

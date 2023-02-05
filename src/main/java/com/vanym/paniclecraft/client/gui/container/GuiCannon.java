@@ -1,16 +1,18 @@
 package com.vanym.paniclecraft.client.gui.container;
 
+import java.util.stream.Stream;
+
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
 import com.vanym.paniclecraft.container.ContainerCannon;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.network.message.MessageCannonSet;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
@@ -21,9 +23,9 @@ public class GuiCannon extends GuiContainer {
     protected static final ResourceLocation GUI_TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/guis/cannonGui.png");
     
-    protected GuiTextField textDirection;
-    protected GuiTextField textHeight;
-    protected GuiTextField textStrength;
+    protected GuiCircularSlider sliderDir;
+    protected GuiCircularSlider sliderHeight;
+    protected GuiCircularSlider sliderStrength;
     
     protected final ContainerCannon container;
     
@@ -38,30 +40,43 @@ public class GuiCannon extends GuiContainer {
         this.container.cannon.getStackInSlotOnClosing(0);
     }
     
+    protected void sendDirection(double value) {
+        Core.instance.network.sendToServer(MessageCannonSet.Field.DIRECTION.message(value));
+    }
+    
+    protected void sendStrength(double value) {
+        Core.instance.network.sendToServer(MessageCannonSet.Field.STRENGTH.message(value));
+    }
+    
+    protected void sendHeight(double value) {
+        Core.instance.network.sendToServer(MessageCannonSet.Field.HEIGHT.message(value));
+    }
+    
     @Override
+    @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
-        this.textDirection =
-                new GuiTextField(
-                        this.fontRendererObj,
-                        this.guiLeft + 132,
-                        this.guiTop + 18,
-                        35,
-                        15);
-        this.textHeight =
-                new GuiTextField(
-                        this.fontRendererObj,
-                        this.guiLeft + 132,
-                        this.guiTop + 18 + 15,
-                        35,
-                        15);
-        this.textStrength =
-                new GuiTextField(
-                        this.fontRendererObj,
-                        this.guiLeft + 132,
-                        this.guiTop + 18 + 30,
-                        35,
-                        15);
+        this.sliderDir =
+                new GuiCircularSlider(1, this.guiLeft + this.xSize - 72, this.guiTop + 12, 60, 60);
+        this.sliderDir.setGetter(()->this.container.cannon.getDirection() / 360.0D);
+        this.sliderDir.setSetter(v->this.sendDirection(v * 360.0D));
+        this.sliderDir.setOffset(0.25D);
+        this.buttonList.add(this.sliderDir);
+        this.sliderHeight =
+                new GuiCircularSlider(2, this.guiLeft + 8 - 30, this.guiTop + 38, 60, 60);
+        this.sliderHeight.setGetter(()->0.25D - this.container.cannon.getHeight() / 90.0D * 0.25D);
+        this.sliderHeight.setSetter(v->this.sendHeight((0.25D - v) / 0.25D * 90.0D));
+        this.sliderHeight.setOffset(-0.25D);
+        this.sliderHeight.setMax(0.25D);
+        this.buttonList.add(this.sliderHeight);
+        this.sliderStrength = new GuiCircularSlider(3, this.guiLeft + 75, this.guiTop + 20, 50, 50);
+        final double maxStrength = Core.instance.cannon.config.maxStrength;
+        this.sliderStrength.setGetter(()->this.container.cannon.getStrength() /
+                                          maxStrength * 0.125D);
+        this.sliderStrength.setSetter(v->this.sendStrength(v / 0.125D * maxStrength));
+        this.sliderStrength.setOffset(0.5D);
+        this.sliderStrength.setMax(0.125D);
+        this.buttonList.add(this.sliderStrength);
     }
     
     @Override
@@ -70,72 +85,49 @@ public class GuiCannon extends GuiContainer {
                                         8, 6, 0x404040);
         this.fontRendererObj.drawString(InventoryUtils.getTranslatedName(this.container.playerInv),
                                         8, this.ySize - 96 + 2, 0x404040);
-        
-        this.fontRendererObj.drawString(I18n.format("gui.cannon.direction",
-                                                    this.container.cannon.getDirection()),
-                                        35, 22, 0x404040);
-        this.fontRendererObj.drawString(I18n.format("gui.cannon.height",
-                                                    this.container.cannon.getHeight()),
-                                        35, 22 + 15, 0x404040);
-        this.fontRendererObj.drawString(I18n.format("gui.cannon.strength",
-                                                    this.container.cannon.getStrength()),
-                                        35, 22 + 30, 0x404040);
+        this.fontRendererObj.drawString(I18n.format("gui.cannon.direction"),
+                                        62, 8, 0x404040);
+        double dir = this.container.cannon.getDirection();
+        this.fontRendererObj.drawString(String.format("%.4f", dir),
+                                        62, 18, 0x404040);
+        this.fontRendererObj.drawString(I18n.format("gui.cannon.height"), 40, 48, 0x404040);
+        double height = this.container.cannon.getHeight();
+        this.fontRendererObj.drawString(String.format("%.4f", height), 40, 58, 0x404040);
+        this.fontRendererObj.drawString(I18n.format("gui.cannon.strength"),
+                                        30, 28, 0x404040);
+        double strength = this.container.cannon.getStrength();
+        this.fontRendererObj.drawString(String.format("%.4f", strength),
+                                        30, 38, 0x404040);
     }
     
     @Override
     public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
         super.drawScreen(mouseX, mouseY, renderPartialTicks);
-        this.textDirection.drawTextBox();
-        this.textHeight.drawTextBox();
-        this.textStrength.drawTextBox();
     }
     
     @Override
     public void updateScreen() {
         super.updateScreen();
-        this.textDirection.updateCursorCounter();
-        this.textHeight.updateCursorCounter();
-        this.textStrength.updateCursorCounter();
     }
     
     @Override
     public void keyTyped(char character, int key) {
         super.keyTyped(character, key);
-        this.textDirection.textboxKeyTyped(character, key);
-        this.textHeight.textboxKeyTyped(character, key);
-        this.textStrength.textboxKeyTyped(character, key);
-        if (key == 28 /* enter */ || key == 156 /* enter numpad */) {
-            String text = null;
-            MessageCannonSet.Field bt = null;
-            if (this.textDirection.isFocused()) {
-                text = this.textDirection.getText();
-                bt = MessageCannonSet.Field.DIRECTION;
-            }
-            if (this.textHeight.isFocused()) {
-                text = this.textHeight.getText();
-                bt = MessageCannonSet.Field.HEIGHT;
-            }
-            if (this.textStrength.isFocused()) {
-                text = this.textStrength.getText();
-                bt = MessageCannonSet.Field.STRENGTH;
-            }
-            if (bt != null) {
-                double amount = 0;
-                try {
-                    amount = Double.parseDouble(text);
-                    Core.instance.network.sendToServer(new MessageCannonSet(bt, amount));
-                } catch (NumberFormatException e) {
-                }
-            }
-        }
     }
     
     @Override
     public void mouseClicked(int x, int y, int eventButton) {
         super.mouseClicked(x, y, eventButton);
-        this.textDirection.mouseClicked(x, y, eventButton);
-        this.textHeight.mouseClicked(x, y, eventButton);
-        this.textStrength.mouseClicked(x, y, eventButton);
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void mouseClickMove(int x, int y, int button, long timeSinceMouseClick) {
+        super.mouseClickMove(x, y, button, timeSinceMouseClick);
+        Stream<GuiCircularSlider> sliders = this.buttonList.stream()
+                                                           .filter(GuiCircularSlider.class::isInstance)
+                                                           .map(GuiCircularSlider.class::cast);
+        sliders.forEach(s->s.mouseDragged(this.mc, x, y));
     }
     
     @Override

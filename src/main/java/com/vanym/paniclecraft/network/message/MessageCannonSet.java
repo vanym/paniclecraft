@@ -14,34 +14,38 @@ public class MessageCannonSet implements IMessage, IMessageHandler<MessageCannon
     public static enum Field {
         DIRECTION {
             @Override
-            public void set(TileEntityCannon tileCannon, double data) {
-                tileCannon.setDirection(data);
+            public void set(TileEntityCannon tileCannon, double value) {
+                tileCannon.setDirection(value);
             }
         },
         HEIGHT {
             @Override
-            public void set(TileEntityCannon tileCannon, double data) {
-                tileCannon.setHeight(data);
+            public void set(TileEntityCannon tileCannon, double value) {
+                tileCannon.setHeight(value);
             }
         },
         STRENGTH {
             @Override
-            public void set(TileEntityCannon tileCannon, double data) {
-                tileCannon.setStrength(data);
+            public void set(TileEntityCannon tileCannon, double value) {
+                tileCannon.setStrength(value);
             }
         };
         
-        public abstract void set(TileEntityCannon tileCannon, double data);
+        public abstract void set(TileEntityCannon tileCannon, double value);
+        
+        public final MessageCannonSet message(double value) {
+            return new MessageCannonSet(this, value);
+        }
     }
     
     Field field;
-    double data;
+    double value;
     
     public MessageCannonSet() {}
     
-    public MessageCannonSet(Field field, double data) {
+    public MessageCannonSet(Field field, double value) {
         this.field = field;
-        this.data = data;
+        this.value = value;
     }
     
     @Override
@@ -52,7 +56,7 @@ public class MessageCannonSet implements IMessage, IMessageHandler<MessageCannon
         } else {
             this.field = null;
         }
-        this.data = buf.readDouble();
+        this.value = buf.readDouble();
     }
     
     @Override
@@ -62,7 +66,7 @@ public class MessageCannonSet implements IMessage, IMessageHandler<MessageCannon
         } else {
             buf.writeByte(-1);
         }
-        buf.writeDouble(this.data);
+        buf.writeDouble(this.value);
     }
     
     @Override
@@ -72,7 +76,7 @@ public class MessageCannonSet implements IMessage, IMessageHandler<MessageCannon
             ContainerCannon containerCannon = (ContainerCannon)playerEntity.openContainer;
             TileEntityCannon tileCannon = containerCannon.cannon;
             if (message.field != null) {
-                message.field.set(tileCannon, message.data);
+                message.field.set(tileCannon, message.value);
                 tileCannon.markForUpdate();
             }
         }
