@@ -25,6 +25,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -90,6 +91,9 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     public static MessagePaintingToolUse makeBrushUseMessage(
             World world,
             MovingObjectPosition target) {
+        if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
+            return null;
+        }
         int x = target.blockX;
         int y = target.blockY;
         int z = target.blockZ;
