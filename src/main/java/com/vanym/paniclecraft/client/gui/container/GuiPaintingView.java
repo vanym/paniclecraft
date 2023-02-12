@@ -1,6 +1,11 @@
 package com.vanym.paniclecraft.client.gui.container;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,6 +13,7 @@ import java.util.Date;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
@@ -17,6 +23,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -130,12 +140,43 @@ public class GuiPaintingView extends GuiScreen {
         File dir = new File(this.mc.mcDataDir, "paintings");
         dir.mkdir();
         File file = getTimestampedPNGFileForDirectory(dir);
-        IChatComponent message = this.view.savePainting(file);
+        IChatComponent message;
+        try {
+            FileOutputStream output = new FileOutputStream(file);
+            this.view.savePainting(output);
+            ChatComponentText link = new ChatComponentText(file.getName());
+            ChatStyle style = link.getChatStyle();
+            style.setChatClickEvent(new ClickEvent(
+                    ClickEvent.Action.OPEN_FILE,
+                    file.getAbsolutePath()));
+            style.setUnderlined(true);
+            message = new ChatComponentTranslation("painting.export.success", link);
+        } catch (IOException e) {
+            message = new ChatComponentTranslation("painting.export.failure", e.getMessage());
+        }
+        this.mc.ingameGUI.getChatGUI().printChatMessage(message);
+    }
+    
+    protected void paintingCopy() {
+        IChatComponent message;
+        try {
+            BufferedImage img = this.view.getPaintingAsImage();
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            ImageSelection selection = new ImageSelection(img);
+            clipboard.setContents(selection, null);
+            message = new ChatComponentTranslation("painting.export.copy.success");
+        } catch (Exception e) {
+            message = new ChatComponentTranslation("painting.export.copy.failure", e.getMessage());
+        }
         this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }
     
     @Override
     protected void keyTyped(char character, int key) {
+        if (character == 3 /* Ctrl+c */) {
+            this.paintingCopy();
+            return;
+        }
         if (key == 1 || key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
             this.mc.thePlayer.closeScreen();
         }

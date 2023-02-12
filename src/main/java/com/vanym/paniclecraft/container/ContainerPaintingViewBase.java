@@ -1,7 +1,7 @@
 package com.vanym.paniclecraft.container;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -9,16 +9,13 @@ import com.vanym.paniclecraft.core.component.painting.ImageUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.event.ClickEvent;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.IChatComponent;
 
 public abstract class ContainerPaintingViewBase extends Container {
     
@@ -81,20 +78,15 @@ public abstract class ContainerPaintingViewBase extends Container {
         return this.sizeY * this.pictureSize.getHeight();
     }
     
-    public IChatComponent savePainting(File file) {
-        try {
-            ImageUtils.savePainting(file, this.pictureSize, this.sizeX, this.sizeY,
-                                    (x, y)->this.getPicture(x, y));
-            ChatComponentText message = new ChatComponentText(file.getName());
-            ChatStyle style = message.getChatStyle();
-            style.setChatClickEvent(new ClickEvent(
-                    ClickEvent.Action.OPEN_FILE,
-                    file.getAbsolutePath()));
-            style.setUnderlined(true);
-            return new ChatComponentTranslation("painting.export.success", message);
-        } catch (IOException e) {
-            return new ChatComponentTranslation("painting.export.failure", e.getMessage());
-        }
+    public void savePainting(OutputStream output) throws IOException {
+        ImageUtils.savePainting(output, this.pictureSize, this.sizeX, this.sizeY,
+                                (x, y)->this.getPicture(x, y));
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public java.awt.image.BufferedImage getPaintingAsImage() {
+        return ImageUtils.getPaintingAsImage(this.pictureSize, this.sizeX, this.sizeY,
+                                             (x, y)->this.getPicture(x, y));
     }
     
     public boolean addPicture(int inputX, int inputY, Picture input) {

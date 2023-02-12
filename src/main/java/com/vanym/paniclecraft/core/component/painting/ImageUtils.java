@@ -12,7 +12,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,6 +20,9 @@ import java.nio.ByteOrder;
 import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class ImageUtils {
     
@@ -134,18 +136,27 @@ public class ImageUtils {
         }
     }
     
-    public static void savePainting(File file, Picture picture) throws IOException {
-        savePainting(file, picture, 1, 1, (x, y)->picture);
+    public static void savePainting(OutputStream output, Picture picture) throws IOException {
+        savePainting(output, picture, 1, 1, (x, y)->picture);
     }
     
     public static void savePainting(
-            File file,
+            OutputStream output,
             IPictureSize elementSize,
             int sizeX,
             int sizeY,
             BiFunction<Integer, Integer, Picture> getter) throws IOException {
         BufferedImage img = makePaintingImage(elementSize, sizeX, sizeY, getter);
-        ImageIO.write(img, "png", file);
+        ImageIO.write(img, "png", output);
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public static BufferedImage getPaintingAsImage(
+            IPictureSize elementSize,
+            int sizeX,
+            int sizeY,
+            BiFunction<Integer, Integer, Picture> getter) {
+        return makePaintingImage(elementSize, sizeX, sizeY, getter);
     }
     
     protected static BufferedImage makePaintingImage(
