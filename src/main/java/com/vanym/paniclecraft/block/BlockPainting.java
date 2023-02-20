@@ -31,7 +31,7 @@ public class BlockPainting extends BlockPaintingContainer {
     }
     
     @Override
-    public TileEntity createNewTileEntity(World world, int md) {
+    public TileEntity createNewTileEntity(World world, int meta) {
         return new TileEntityPainting();
     }
     

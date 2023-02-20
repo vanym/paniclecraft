@@ -1,88 +1,119 @@
 package com.vanym.paniclecraft.tileentity;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 
-public class TileEntityAdvSign extends TileEntity {
-    public static char separatorChar = '\n';
+public class TileEntityAdvSign extends TileEntityBase {
     
-    public static String separator = Character.toString(separatorChar);
+    public static final int MAX_LINES = 32;
+    public static final int MIN_LINES = 1;
     
-    public static boolean isAddedToTileMap = false;
+    public static final List<String> DEFAULT_LINES = Collections.nCopies(5, "");
     
-    /** An array of four strings storing the lines of text on the sign. */
-    public String signText = separator + separator + separator + separator;
+    public final List<String> lines = new ArrayList<>(DEFAULT_LINES);
     
-    /**
-     * The index of the line currently being edited. Only used on client side, but defined on both.
-     * Note this is only really used when the > < are going to be visible.
-     */
-    // @SideOnly(Side.CLIENT)
-    public int lineBeingEdited = -1;
+    protected Color color = Color.WHITE;
     
-    public boolean isEditable = true;
+    protected double direction = 0.0D;
+    protected boolean onStick = false;
     
-    public boolean canBeEdit;
+    protected EntityPlayer editor = null;
     
-    public byte red = 127;
+    public static final String TAG_LINES = "Lines";
+    public static final String TAG_COLOR = "Color";
     
-    public byte green = 127;
+    protected static final String TAG_DIRECTION = "Direction";
+    protected static final String TAG_ONSTICK = "OnStick";
     
-    public byte blue = 127;
-    
-    public TileEntityAdvSign() {
-        this(true);
+    @Override
+    public void writeToNBT(NBTTagCompound nbtTag) {
+        this.writeToNBT(nbtTag, false);
     }
     
-    public TileEntityAdvSign(boolean par1) {
-        this.canBeEdit = par1;
+    public void writeToNBT(NBTTagCompound nbtTag, boolean toStack) {
+        NBTTagList linesTag = new NBTTagList();
+        this.lines.stream().map(NBTTagString::new).forEachOrdered(linesTag::appendTag);
+        nbtTag.setTag(TAG_LINES, linesTag);
+        nbtTag.setInteger(TAG_COLOR, this.color.getRGB());
+        if (toStack) {
+            return;
+        }
+        super.writeToNBT(nbtTag);
+        nbtTag.setDouble(TAG_DIRECTION, this.direction);
+        nbtTag.setBoolean(TAG_ONSTICK, this.onStick);
     }
     
     @Override
-    public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
-        super.writeToNBT(par1NBTTagCompound);
-        par1NBTTagCompound.setString("SignText", this.signText);
-        par1NBTTagCompound.setBoolean("canBeEdit", this.canBeEdit);
-        par1NBTTagCompound.setByte("red", this.red);
-        par1NBTTagCompound.setByte("green", this.green);
-        par1NBTTagCompound.setByte("blue", this.blue);
+    public void readFromNBT(NBTTagCompound nbtTag) {
+        this.readFromNBT(nbtTag, false);
     }
     
-    /**
-     * Reads a tile entity from NBT.
-     */
-    @Override
-    public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
-        this.isEditable = false;
-        super.readFromNBT(par1NBTTagCompound);
-        this.signText = par1NBTTagCompound.getString("SignText");
-        this.canBeEdit = par1NBTTagCompound.getBoolean("canBeEdit");
-        this.red = par1NBTTagCompound.getByte("red");
-        this.green = par1NBTTagCompound.getByte("green");
-        this.blue = par1NBTTagCompound.getByte("blue");
+    public void readFromNBT(NBTTagCompound nbtTag, boolean fromStack) {
+        this.color = new Color(nbtTag.getInteger(TAG_COLOR), true);
+        this.lines.clear();
+        NBTTagList linesTag = nbtTag.getTagList(TAG_LINES, 8);
+        for (int i = 0; i < linesTag.tagCount(); ++i) {
+            this.lines.add(linesTag.getStringTagAt(i));
+        }
+        if (fromStack) {
+            return;
+        }
+        super.readFromNBT(nbtTag);
+        this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
+        this.onStick = nbtTag.getBoolean(TAG_ONSTICK);
     }
     
-    @Override
-    public Packet getDescriptionPacket() {
-        NBTTagCompound dataTag = new NBTTagCompound();
-        this.writeToNBT(dataTag);
-        return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 1, dataTag);
+    public void setColor(Color color) {
+        Objects.requireNonNull(color);
+        this.color = color;
     }
     
-    @Override
-    public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
-        NBTTagCompound nbtData = packet.func_148857_g();
-        this.readFromNBT(nbtData);
+    public Color getColor() {
+        return this.color;
     }
     
-    public boolean isEditable() {
-        return this.isEditable;
+    public void setStick(boolean stick) {
+        this.onStick = stick;
+    }
+    
+    public boolean onStick() {
+        return this.onStick;
+    }
+    
+    public void setDirection(double direction) {
+        direction = MathHelper.wrapAngleTo180_double(direction);
+        if (direction < 0) {
+            direction += 360.0D;
+        }
+        this.direction = direction;
+    }
+    
+    public double getDirection() {
+        return this.direction;
+    }
+    
+    public void setEditor(EntityPlayer editor) {
+        this.editor = editor;
+    }
+    
+    public void resetEditor() {
+        this.setEditor(null);
+    }
+    
+    public boolean isEditor(EntityPlayer player) {
+        return this.editor != null && this.editor == player;
     }
     
     @Override
@@ -91,36 +122,6 @@ public class TileEntityAdvSign extends TileEntity {
         return AxisAlignedBB.getBoundingBox((double)this.xCoord - 0.0F, (double)this.yCoord + 0.0F,
                                             (double)this.zCoord - 0.0F, (double)this.xCoord + 1.0F,
                                             (double)this.yCoord + 1.0F, (double)this.zCoord + 1.0F);
-    }
-    
-    public void setEditable(boolean par1) {
-        this.isEditable = par1;
-    }
-    
-    public void editLine(int par1, String par2) {
-        String[] var1 = this.signText.split(separator, this.getLines());
-        var1[par1] = par2;
-        String var3 = "";
-        for (int var2 = 0; var2 < this.getLines(); ++var2) {
-            var3 = var3 + var1[var2];
-            if (var2 != this.getLines() - 1) {
-                var3 = var3 + separator;
-            }
-        }
-        this.signText = var3;
-    }
-    
-    public String getLine(int par1) {
-        String[] var1 = this.signText.split(separator, this.getLines());
-        return var1[par1];
-    }
-    
-    public boolean canBeEdit() {
-        return this.canBeEdit;
-    }
-    
-    public int getLines() {
-        return (this.signText + '\u0000').split(separator).length;
     }
     
     @Override

@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
@@ -9,190 +10,138 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class ItemAdvSign extends ItemMod3 {
     
-    public Block wall;
+    public static final String TAG_SIGN = "Sign";
     
-    public Block post;
-    
-    public ItemAdvSign(Block par2Post, Block par3Wall) {
+    public ItemAdvSign() {
         this.setMaxStackSize(16);
         this.setUnlocalizedName("advSign");
-        this.post = par2Post;
-        this.wall = par3Wall;
     }
     
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
-            ItemStack par1ItemStack,
-            EntityPlayer par2EntityPlayer,
-            List par3List,
-            boolean par4) {
-        if (par1ItemStack.hasTagCompound()) {
-            NBTTagCompound tag = par1ItemStack.getTagCompound();
-            if (tag.hasKey("SignText")) {
+            ItemStack itemStack,
+            EntityPlayer entityPlayer,
+            List list,
+            boolean advancedItemTooltips) {
+        if (itemStack.hasTagCompound()) {
+            NBTTagCompound tag = itemStack.getTagCompound();
+            if (tag.hasKey(TAG_SIGN, 10)) {
                 if (GuiScreen.isShiftKeyDown()) {
-                    String text = tag.getString("SignText");
-                    String[] textAr =
-                            text.split(TileEntityAdvSign.separator,
-                                       (text + '\u0000').split(TileEntityAdvSign.separator).length);
-                    par3List.addAll(Arrays.asList(textAr));
+                    NBTTagCompound signTag = tag.getCompoundTag(TAG_SIGN);
+                    NBTTagList tagLines = signTag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
+                    IntStream.range(0, tagLines.tagCount())
+                             .mapToObj(tagLines::getStringTagAt)
+                             .forEachOrdered(list::add);
                 } else {
-                    par3List.add(StatCollector.translateToLocal("text.pressShiftToSeeText").trim());
+                    list.add(StatCollector.translateToLocal("text.pressShiftToSeeText"));
                 }
             }
         }
     }
     
     @Override
-    public ItemStack onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3) {
-        if (par1ItemStack.hasTagCompound() && par3.isSneaking()) {
-            NBTTagCompound tag = par1ItemStack.getTagCompound();
-            if (tag.hasKey("SignText")) {
-                tag.removeTag("SignText");
-            }
-            if (tag.hasKey("red")) {
-                tag.removeTag("red");
-            }
-            if (tag.hasKey("green")) {
-                tag.removeTag("green");
-            }
-            if (tag.hasKey("blue")) {
-                tag.removeTag("blue");
-            }
+    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+        if (stack.hasTagCompound() && player.isSneaking()) {
+            NBTTagCompound tag = stack.getTagCompound();
+            tag.removeTag(TAG_SIGN);
             if (tag.hasNoTags()) {
-                par1ItemStack.setTagCompound(null);
+                stack.setTagCompound(null);
             }
         }
-        return par1ItemStack;
+        return stack;
     }
     
     @Override
     public boolean onItemUse(
-            ItemStack par1ItemStack,
-            EntityPlayer par2EntityPlayer,
-            World par3World,
-            int par4,
-            int par5,
-            int par6,
-            int par7,
-            float par8,
-            float par9,
-            float par10) {
-        if (!par2EntityPlayer.isSneaking()) {
-            TileEntity tile = par3World.getTileEntity(par4, par5, par6);
+            ItemStack stack,
+            EntityPlayer player,
+            World world,
+            int x,
+            int y,
+            int z,
+            int side,
+            float hitX,
+            float hitY,
+            float hitZ) {
+        if (!player.isSneaking()) {
+            TileEntity tile = world.getTileEntity(x, y, z);
             if (tile != null) {
+                NBTTagCompound signTag = null;
                 if (tile instanceof TileEntitySign) {
                     TileEntitySign tileS = (TileEntitySign)tile;
-                    if (!par1ItemStack.hasTagCompound()) {
-                        NBTTagCompound var1 = new NBTTagCompound();
-                        par1ItemStack.setTagCompound(var1);
-                    }
-                    NBTTagCompound tag = par1ItemStack.getTagCompound();
-                    tag.setString("SignText",
-                                  tileS.signText[0] + TileEntityAdvSign.separator +
-                                              tileS.signText[1] + TileEntityAdvSign.separator +
-                                              tileS.signText[2] + TileEntityAdvSign.separator +
-                                              tileS.signText[3]);
-                    tag.setByte("red", (byte)127);
-                    tag.setByte("green", (byte)127);
-                    tag.setByte("blue", (byte)127);
-                    return true;
+                    signTag = new NBTTagCompound();
+                    NBTTagList linesTag = new NBTTagList();
+                    Arrays.stream(tileS.signText)
+                          .map(NBTTagString::new)
+                          .forEachOrdered(linesTag::appendTag);
+                    signTag.setTag(TileEntityAdvSign.TAG_LINES, linesTag);
                 } else if (tile instanceof TileEntityAdvSign) {
                     TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                    if (!par1ItemStack.hasTagCompound()) {
-                        NBTTagCompound var1 = new NBTTagCompound();
-                        par1ItemStack.setTagCompound(var1);
+                    signTag = new NBTTagCompound();
+                    tileAS.writeToNBT(signTag, true);
+                }
+                if (signTag != null) {
+                    if (!stack.hasTagCompound()) {
+                        stack.setTagCompound(new NBTTagCompound());
                     }
-                    NBTTagCompound tag = par1ItemStack.getTagCompound();
-                    tag.setString("SignText", tileAS.signText);
-                    tag.setByte("red", tileAS.red);
-                    tag.setByte("green", tileAS.green);
-                    tag.setByte("blue", tileAS.blue);
+                    NBTTagCompound tag = stack.getTagCompound();
+                    tag.setTag(TAG_SIGN, signTag);
                     return true;
                 }
             }
         }
-        if (par7 == 0) {
+        if (!world.getBlock(x, y, z).getMaterial().isSolid()) {
             return false;
-        } else if (!par3World.getBlock(par4, par5, par6).getMaterial().isSolid()) {
-            return false;
-        } else {
-            if (par7 == 1) {
-                ++par5;
-            }
-            
-            if (par7 == 2) {
-                --par6;
-            }
-            
-            if (par7 == 3) {
-                ++par6;
-            }
-            
-            if (par7 == 4) {
-                --par4;
-            }
-            
-            if (par7 == 5) {
-                ++par4;
-            }
-            
-            if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack)) {
-                return false;
-            } else if (!this.post.canPlaceBlockAt(par3World, par4, par5, par6)) {
-                return false;
-            } else {
-                if (par7 == 1) {
-                    int var11 = MathHelper.floor_double((double)((par2EntityPlayer.rotationYaw +
-                                                                  180.0F) *
-                                                                 16.0F / 360.0F) +
-                                                        0.5D)
-                                & 15;
-                    par3World.setBlock(par4, par5, par6, this.post, var11, 3);
-                } else {
-                    par3World.setBlock(par4, par5, par6, this.wall, par7, 3);
-                }
-                
-                --par1ItemStack.stackSize;
-                TileEntityAdvSign var12 =
-                        (TileEntityAdvSign)par3World.getTileEntity(par4, par5, par6);
-                
-                if (var12 != null) {
-                    if (par1ItemStack.hasTagCompound()) {
-                        NBTTagCompound tag = par1ItemStack.getTagCompound();
-                        if (tag.hasKey("SignText")) {
-                            var12.signText = tag.getString("SignText");
-                        }
-                        if (tag.hasKey("red")) {
-                            var12.red = tag.getByte("red");
-                        }
-                        if (tag.hasKey("green")) {
-                            var12.green = tag.getByte("green");
-                        }
-                        if (tag.hasKey("blue")) {
-                            var12.blue = tag.getByte("blue");
-                        }
-                    }
-                    par2EntityPlayer.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), par3World, par4,
-                                             par5, par6);
-                }
-                
-                return true;
-            }
         }
+        ForgeDirection pside = ForgeDirection.getOrientation(side);
+        x += pside.offsetX;
+        y += pside.offsetY;
+        z += pside.offsetZ;
+        if (!player.canPlayerEdit(x, y, z, side, stack)
+            || !Core.instance.advSign.blockAdvSign.canPlaceBlockAt(world, x, y, z)
+            || !world.setBlock(x, y, z, Core.instance.advSign.blockAdvSign, side, 3)) {
+            return false;
+        }
+        --stack.stackSize;
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile != null && tile instanceof TileEntityAdvSign) {
+            TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+            if (stack.hasTagCompound()) {
+                NBTTagCompound tag = stack.getTagCompound();
+                if (tag.hasKey(TAG_SIGN, 10)) {
+                    NBTTagCompound signTag = tag.getCompoundTag(TAG_SIGN);
+                    tileAS.readFromNBT(signTag, true);
+                }
+            }
+            if (pside == ForgeDirection.UP) {
+                tileAS.setStick(true);
+                double direction = Math.round(180.0D + player.rotationYaw);
+                tileAS.setDirection(direction);
+            }
+            if (pside == ForgeDirection.DOWN) {
+                int rot = MathHelper.floor_double((player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+                tileAS.setDirection(rot * 90.0D);
+            }
+            tileAS.setEditor(player);
+            player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), world, x, y, z);
+        }
+        return true;
     }
 }

@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.inventory;
 
 import java.util.NoSuchElementException;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import cpw.mods.fml.relauncher.Side;
@@ -19,9 +20,8 @@ public class InventoryUtils {
     }
     
     public static Stream<ItemStack> inventoryToStream(IInventory inv, boolean onClosing) {
-        return Stream.iterate(0, i->i + 1)
-                     .limit(inv.getSizeInventory())
-                     .map(onClosing ? inv::getStackInSlotOnClosing : inv::getStackInSlot);
+        return IntStream.range(0, inv.getSizeInventory())
+                        .mapToObj(onClosing ? inv::getStackInSlotOnClosing : inv::getStackInSlot);
     }
     
     public static void dropOnClosing(IInventory inv, EntityPlayer player) {

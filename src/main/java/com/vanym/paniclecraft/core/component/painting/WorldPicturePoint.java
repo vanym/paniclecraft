@@ -35,9 +35,9 @@ public final class WorldPicturePoint {
     
     public WorldPicturePoint getNeighborPoint(int xOffset, int yOffset) {
         PaintingSide pside = PaintingSide.getSide(this.side);
-        int x = this.x + pside.xDir.offsetX * xOffset + pside.yDir.offsetX * yOffset;
-        int y = this.y + pside.xDir.offsetY * xOffset + pside.yDir.offsetY * yOffset;
-        int z = this.z + pside.xDir.offsetZ * xOffset + pside.yDir.offsetZ * yOffset;
+        int x = this.x + pside.axes.xDir.offsetX * xOffset + pside.axes.yDir.offsetX * yOffset;
+        int y = this.y + pside.axes.xDir.offsetY * xOffset + pside.axes.yDir.offsetY * yOffset;
+        int z = this.z + pside.axes.xDir.offsetZ * xOffset + pside.axes.yDir.offsetZ * yOffset;
         return new WorldPicturePoint(this.provider, this.world, x, y, z, this.side);
     }
 }

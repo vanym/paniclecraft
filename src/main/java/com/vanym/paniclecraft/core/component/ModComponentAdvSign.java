@@ -25,8 +25,7 @@ import net.minecraftforge.client.MinecraftForgeClient;
 public class ModComponentAdvSign implements ModComponent {
     
     public ItemAdvSign itemAdvSign;
-    public BlockAdvSign blockAdvSignPost;
-    public BlockAdvSign blockAdvSignWall;
+    public BlockAdvSign blockAdvSign;
     
     @SideOnly(Side.CLIENT)
     public TileEntityAdvSignRenderer tileAdvSignRenderer = new TileEntityAdvSignRenderer();
@@ -39,13 +38,9 @@ public class ModComponentAdvSign implements ModComponent {
             return;
         }
         this.enabled = true;
-        this.blockAdvSignPost = new BlockAdvSign(true);
-        this.blockAdvSignWall = new BlockAdvSign(false);
-        this.itemAdvSign = new ItemAdvSign(this.blockAdvSignPost, this.blockAdvSignWall);
-        GameRegistry.registerBlock(this.blockAdvSignPost, null,
-                                   this.blockAdvSignPost.getName() + ".post");
-        GameRegistry.registerBlock(this.blockAdvSignWall, null,
-                                   this.blockAdvSignWall.getName() + ".wall");
+        this.blockAdvSign = new BlockAdvSign();
+        this.itemAdvSign = new ItemAdvSign();
+        GameRegistry.registerBlock(this.blockAdvSign, null, this.blockAdvSign.getName());
         Core.instance.registerItem(this.itemAdvSign);
         GameRegistry.registerTileEntity(TileEntityAdvSign.class, DEF.MOD_ID + ".advSign");
         boolean craftingRecipeEasy = config.getBoolean("craftingRecipeEasy", this.getName(), true,

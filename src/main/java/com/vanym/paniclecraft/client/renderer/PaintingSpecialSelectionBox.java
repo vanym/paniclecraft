@@ -84,7 +84,7 @@ public class PaintingSpecialSelectionBox {
         int width = picture.getWidth();
         int height = picture.getHeight();
         Vec3 inBlockVec = MainUtils.getInBlockVec(target);
-        Vec3 inPictureVec = pside.toPaintingCoords(inBlockVec);
+        Vec3 inPictureVec = pside.axes.toSideCoords(inBlockVec);
         double outline = 0.002D;
         double zOutline = inPictureVec.zCoord + outline;
         int px = (int)(inPictureVec.xCoord * width);
@@ -134,11 +134,11 @@ public class PaintingSpecialSelectionBox {
                     (event.player.posY - event.player.lastTickPosY) * (double)event.partialTicks;
         double dz = event.player.lastTickPosZ +
                     (event.player.posZ - event.player.lastTickPosZ) * (double)event.partialTicks;
-        Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.fromPaintingCoords(b)
-                                                                    .offset(target.blockX,
-                                                                            target.blockY,
-                                                                            target.blockZ)
-                                                                    .offset(-dx, -dy, -dz));
+        Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.axes.fromSideCoords(b)
+                                                                         .offset(target.blockX,
+                                                                                 target.blockY,
+                                                                                 target.blockZ)
+                                                                         .offset(-dx, -dy, -dz));
         this.drawLines(frameLines);
     }
     
