@@ -67,7 +67,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
         GL11.glEnable(GL11.GL_BLEND);
         OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
                                  GL11.GL_TRUE, GL11.GL_FALSE);
-        Color color = tileAS.getColor();
+        Color color = tileAS.getStandColor();
         float[] colorf = color.getRGBComponents(null);
         GL11.glColor4f(colorf[0], colorf[1], colorf[2], colorf[3]);
         this.modelSign.renderSign();
@@ -79,7 +79,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
         GL11.glScalef(textScale, -textScale, textScale);
         GL11.glNormal3f(0.0F, 0.0F, -1.0F * textScale);
         GL11.glDepthMask(false);
-        Color textColor = Color.BLACK;
+        Color textColor = tileAS.getTextColor();
         for (int i = 0; i < size; ++i) {
             String line = tileAS.lines.get(i);
             if (selectLine == i) {

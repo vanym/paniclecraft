@@ -24,7 +24,8 @@ public class TileEntityAdvSign extends TileEntityBase {
     
     public final List<String> lines = new ArrayList<>(DEFAULT_LINES);
     
-    protected Color color = Color.WHITE;
+    protected Color standColor = Color.WHITE;
+    protected Color textColor = Color.BLACK;
     
     protected double direction = 0.0D;
     protected boolean onStick = false;
@@ -32,7 +33,8 @@ public class TileEntityAdvSign extends TileEntityBase {
     protected EntityPlayer editor = null;
     
     public static final String TAG_LINES = "Lines";
-    public static final String TAG_COLOR = "Color";
+    public static final String TAG_STANDCOLOR = "StandColor";
+    public static final String TAG_TEXTCOLOR = "TextColor";
     
     protected static final String TAG_DIRECTION = "Direction";
     protected static final String TAG_ONSTICK = "OnStick";
@@ -46,7 +48,8 @@ public class TileEntityAdvSign extends TileEntityBase {
         NBTTagList linesTag = new NBTTagList();
         this.lines.stream().map(NBTTagString::new).forEachOrdered(linesTag::appendTag);
         nbtTag.setTag(TAG_LINES, linesTag);
-        nbtTag.setInteger(TAG_COLOR, this.color.getRGB());
+        nbtTag.setInteger(TAG_STANDCOLOR, this.standColor.getRGB());
+        nbtTag.setInteger(TAG_TEXTCOLOR, this.textColor.getRGB());
         if (toStack) {
             return;
         }
@@ -61,7 +64,8 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void readFromNBT(NBTTagCompound nbtTag, boolean fromStack) {
-        this.color = new Color(nbtTag.getInteger(TAG_COLOR), true);
+        this.standColor = new Color(nbtTag.getInteger(TAG_STANDCOLOR), true);
+        this.textColor = new Color(nbtTag.getInteger(TAG_TEXTCOLOR), true);
         this.lines.clear();
         NBTTagList linesTag = nbtTag.getTagList(TAG_LINES, 8);
         for (int i = 0; i < linesTag.tagCount(); ++i) {
@@ -75,13 +79,22 @@ public class TileEntityAdvSign extends TileEntityBase {
         this.onStick = nbtTag.getBoolean(TAG_ONSTICK);
     }
     
-    public void setColor(Color color) {
+    public void setStandColor(Color color) {
         Objects.requireNonNull(color);
-        this.color = color;
+        this.standColor = color;
     }
     
-    public Color getColor() {
-        return this.color;
+    public Color getStandColor() {
+        return this.standColor;
+    }
+    
+    public void setTextColor(Color color) {
+        Objects.requireNonNull(color);
+        this.textColor = color;
+    }
+    
+    public Color getTextColor() {
+        return this.textColor;
     }
     
     public void setStick(boolean stick) {
