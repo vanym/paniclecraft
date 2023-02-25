@@ -3,13 +3,17 @@ package com.vanym.paniclecraft.client.gui;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
+import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
+import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -32,8 +36,11 @@ public class GuiEditAdvSign extends GuiScreen {
     protected GuiButton buttonAddSect;
     protected GuiButton buttonAddLine;
     protected GuiButton buttonRemoveLine;
-    protected GuiButton buttonClearText;
-    protected GuiButton buttonClearColor;
+    protected GuiButton buttonToggleStick;
+    
+    protected GuiCircularSlider sliderDir;
+    
+    protected GuiHexColorField standColorHex;
     
     public GuiEditAdvSign(TileEntityAdvSign tileAS) {
         this.tileAS = tileAS;
@@ -45,33 +52,46 @@ public class GuiEditAdvSign extends GuiScreen {
         int xCenter = this.width / 2;
         this.buttonDone =
                 new GuiButton(0, xCenter - 100, this.height / 4 + 120, I18n.format("gui.done"));
-        this.buttonAddLine = new GuiButton(1, xCenter + 59, this.height / 4 + 99, 20, 20, "+");
-        this.buttonRemoveLine = new GuiButton(2, xCenter + 80, this.height / 4 + 99, 20, 20, "-");
+        this.buttonAddLine = new GuiButton(1, xCenter + 59, this.height / 4 + 83, 20, 20, "+");
+        this.buttonRemoveLine = new GuiButton(2, xCenter + 80, this.height / 4 + 83, 20, 20, "-");
         this.buttonAddSect =
                 new GuiButton(3, xCenter - 100, this.height / 4 + 99, 20, 20, "+\u00a7");
         this.buttonCopy =
                 new GuiButton(4, xCenter - 79, this.height / 4 + 99, 30, 20, "Copy");
         this.buttonPaste =
                 new GuiButton(5, xCenter - 48, this.height / 4 + 99, 30, 20, "Paste");
-        this.buttonClearColor =
-                new GuiButton(12, xCenter + 80 + 30, this.height / 4 + 15, 20, 20, "CC");
-        this.buttonClearText =
-                new GuiButton(13, xCenter + 59 + 30, this.height / 4 + 15, 20, 20, "CT");
-        if (this.tileAS.lines.size() <= 1) {
-            this.buttonRemoveLine.enabled = false;
-        } else if (this.tileAS.lines.size() >= 32) {
-            this.buttonAddLine.enabled = false;
-        }
+        this.buttonToggleStick =
+                new GuiButton(14, xCenter - 100, this.height / 4 + 77, 70, 20, "Toggle Stick");
+        this.lineButtonsUpdate();
+        this.sliderDir = new GuiCircularSlider(15, xCenter + 59, this.height / 4 + 41, 40, 40);
+        this.sliderDir.setGetter(()->this.tileAS.getDirection() / 360.0D);
+        this.sliderDir.setSetter(v-> {
+            v *= 16.0D;
+            if (GuiScreen.isShiftKeyDown()) {
+                v = (double)Math.round(v);
+            }
+            v *= 22.5D;
+            v = (double)Math.round(v);
+            this.tileAS.setDirection(v);
+        });
+        this.sliderDir.setOffset(-0.25D);
+        this.standColorHex =
+                new GuiHexColorField(
+                        this.fontRendererObj,
+                        xCenter + 48,
+                        this.height / 4 + 105);
+        this.standColorHex.setRGB(MainUtils.getAlphaless(this.tileAS.getColor()));
+        this.standColorHex.setSetter(rgb->this.tileAS.setColor(new Color(rgb)));
         this.buttonList.clear();
         Keyboard.enableRepeatEvents(true);
         this.buttonList.add(this.buttonDone);
         this.buttonList.add(this.buttonRemoveLine);
         this.buttonList.add(this.buttonAddLine);
-        this.buttonList.add(this.buttonClearColor);
-        this.buttonList.add(this.buttonClearText);
         this.buttonList.add(this.buttonAddSect);
         this.buttonList.add(this.buttonCopy);
         this.buttonList.add(this.buttonPaste);
+        this.buttonList.add(this.buttonToggleStick);
+        this.buttonList.add(this.sliderDir);
     }
     
     @Override
@@ -83,6 +103,7 @@ public class GuiEditAdvSign extends GuiScreen {
     @Override
     public void updateScreen() {
         ++this.updateCounter;
+        this.standColorHex.updateCursorCounter();
     }
     
     @Override
@@ -114,15 +135,16 @@ public class GuiEditAdvSign extends GuiScreen {
         } else if (button.id == this.buttonPaste.id) {
             this.pasteFull(GuiScreen.getClipboardString());
             this.lineButtonsUpdate();
-        } else if (button.id == this.buttonClearText.id) {
-            IntStream.range(0, this.tileAS.lines.size()).forEach(i->this.tileAS.lines.set(i, ""));
-        } else if (button.id == this.buttonClearColor.id) {
-            this.tileAS.setColor(Color.WHITE);
+        } else if (button.id == this.buttonToggleStick.id) {
+            this.tileAS.setStick(!this.tileAS.onStick());
         }
     }
     
     @Override
     protected void keyTyped(char character, int key) {
+        if (this.standColorHex.textboxKeyTyped(character, key)) {
+            return;
+        }
         if (key == 1) {
             this.actionPerformed(this.buttonDone);
             return;
@@ -186,19 +208,46 @@ public class GuiEditAdvSign extends GuiScreen {
     }
     
     @Override
+    protected void mouseClicked(int x, int y, int eventButton) {
+        super.mouseClicked(x, y, eventButton);
+        this.standColorHex.mouseClicked(x, y, eventButton);
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void mouseClickMove(int x, int y, int button, long timeSinceMouseClick) {
+        super.mouseClickMove(x, y, button, timeSinceMouseClick);
+        Stream<GuiCircularSlider> sliders = this.buttonList.stream()
+                                                           .filter(GuiCircularSlider.class::isInstance)
+                                                           .map(GuiCircularSlider.class::cast);
+        sliders.forEach(s->s.mouseDragged(this.mc, x, y));
+    }
+    
+    @Override
     public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
-        this.drawDefaultBackground();
+        if (!this.sliderDir.isPressed()) {
+            this.drawDefaultBackground();
+        }
         this.drawCenteredString(this.fontRendererObj, I18n.format("sign.edit"), this.width / 2, 40,
                                 0xffffff);
-        this.drawString(this.fontRendererObj, "Lines:" + this.tileAS.lines.size(),
-                        this.width / 2 + 19, this.height / 4 + 110, 0xffffff);
-        Color color = this.tileAS.getColor();
-        this.drawString(this.fontRendererObj, "R:" + color.getRed(),
-                        this.width / 2 + 29 + 30, this.height / 4 + 47, 0xffffff);
-        this.drawString(this.fontRendererObj, "G:" + color.getGreen(),
-                        this.width / 2 + 29 + 30, this.height / 4 + 68, 0xffffff);
-        this.drawString(this.fontRendererObj, "B:" + color.getBlue(),
-                        this.width / 2 + 29 + 30, this.height / 4 + 89, 0xffffff);
+        if (this.sliderDir.isPressed()) {
+            this.sliderDir.drawButton(this.mc, mouseX, mouseY);
+            return;
+        }
+        this.drawSign();
+        String linesText = String.format("Lines:%2d", this.tileAS.lines.size());
+        this.drawString(this.fontRendererObj, linesText,
+                        this.width / 2 + 57 - this.fontRendererObj.getStringWidth(linesText),
+                        this.height / 4 + 93, 0xffffff);
+        String standText = "Stand:";
+        this.drawString(this.fontRendererObj, standText,
+                        this.width / 2 + 46 - this.fontRendererObj.getStringWidth(standText),
+                        this.height / 4 + 108, 0xffffff);
+        this.standColorHex.drawTextBox();
+        super.drawScreen(mouseX, mouseY, renderPartialTicks);
+    }
+    
+    protected void drawSign() {
         GL11.glPushMatrix();
         GL11.glTranslatef(this.width / 2, 0.0F, 50.0F);
         float scale = 93.75F;
@@ -215,7 +264,6 @@ public class GuiEditAdvSign extends GuiScreen {
                                                                      -0.5D, 0.0F, true,
                                                                      selectLine);
         GL11.glPopMatrix();
-        super.drawScreen(mouseX, mouseY, renderPartialTicks);
     }
     
     protected void lineButtonsUpdate() {

@@ -147,6 +147,10 @@ public class GuiCircularSlider extends GuiButton {
         this.setter.accept(value);
     }
     
+    public boolean isPressed() {
+        return this.pressed;
+    }
+    
     protected double toRadians(double value) {
         return (value + this.offset) * (2 * Math.PI);
     }
