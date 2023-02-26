@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.client.renderer.tileentity;
 import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
@@ -30,6 +31,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
             double z,
             float f,
             boolean statik,
+            boolean inWorld,
             int selectLine) {
         GL11.glPushMatrix();
         float scale = 0.6666667F;
@@ -62,6 +64,9 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
             }
         }
         this.bindTexture(TEXTURE);
+        if (inWorld) {
+            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        }
         GL11.glPushMatrix();
         GL11.glScalef(scale, -scale, -scale);
         GL11.glEnable(GL11.GL_BLEND);
@@ -97,6 +102,6 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
     
     @Override
     public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
-        this.renderTileEntityAt((TileEntityAdvSign)tile, x, y, z, f, false, -1);
+        this.renderTileEntityAt((TileEntityAdvSign)tile, x, y, z, f, false, true, -1);
     }
 }

@@ -283,7 +283,7 @@ public class GuiEditAdvSign extends GuiScreen {
         }
         
         Core.instance.advSign.tileAdvSignRenderer.renderTileEntityAt(this.tileAS, -0.5D, -0.75D,
-                                                                     -0.5D, 0.0F, true,
+                                                                     -0.5D, 0.0F, true, false,
                                                                      selectLine);
         GL11.glPopMatrix();
     }
