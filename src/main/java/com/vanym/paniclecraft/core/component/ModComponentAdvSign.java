@@ -8,9 +8,11 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererAdvSign;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityAdvSignRenderer;
+import com.vanym.paniclecraft.command.CommandAdvSign;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
+import com.vanym.paniclecraft.network.message.MessageAdvSignOpenGui;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
@@ -62,9 +64,14 @@ public class ModComponentAdvSign implements ModComponent {
             GameRegistry.addShapelessRecipe(new ItemStack(this.itemAdvSign, 1), this.itemAdvSign);
         }
         
+        Core.instance.command.addSubCommand(new CommandAdvSign());
+        
         Core.instance.network.registerMessage(MessageAdvSignChange.class,
                                               MessageAdvSignChange.class, 20,
                                               Side.SERVER);
+        Core.instance.network.registerMessage(MessageAdvSignOpenGui.class,
+                                              MessageAdvSignOpenGui.class, 21,
+                                              Side.CLIENT);
     }
     
     @Override
