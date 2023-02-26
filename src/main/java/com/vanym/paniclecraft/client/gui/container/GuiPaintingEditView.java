@@ -409,6 +409,12 @@ public class GuiPaintingEditView extends GuiPaintingView {
             return;
         }
         switch (key) {
+            case 28: // enter
+            case 156: // enter numpad
+                if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
+                    this.paintingImport();
+                    return;
+                }
             case 205: { // right
                 int moveX;
                 if (GuiScreen.isCtrlKeyDown()) {
