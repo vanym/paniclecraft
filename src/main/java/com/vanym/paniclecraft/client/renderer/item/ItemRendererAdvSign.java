@@ -39,9 +39,17 @@ public class ItemRendererAdvSign implements IItemRenderer {
                 GL11.glTranslatef(-0.25F, -0.2F, -0.25F);
                 float scale = 0.55F;
                 GL11.glScalef(scale, scale, scale);
+                tileAS.setDirection(270.0D);
             }
             break;
-            case EQUIPPED:
+            case EQUIPPED: {
+                float scale = 1.25F;
+                GL11.glScalef(scale, scale, scale);
+                GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+                GL11.glRotatef(-60.0F, 1.0F, 0.0F, -0.2F);
+                GL11.glTranslatef(-0.5F, -0.75F, 0.30F);
+            }
+            break;
             case EQUIPPED_FIRST_PERSON:
                 tileAS.setDirection(135.0D);
             break;
