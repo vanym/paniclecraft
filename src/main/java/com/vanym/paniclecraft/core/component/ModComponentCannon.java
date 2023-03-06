@@ -84,17 +84,15 @@ public class ModComponentCannon implements ModComponent {
         this.tileCannonRenderer = new TileEntityCannonRenderer();
         this.itemCannonRenderer = new ItemRendererCannon();
         MinecraftForgeClient.registerItemRenderer(this.itemCannon, this.itemCannonRenderer);
-        boolean cannonTile = config.getBoolean("cannonTile", CLIENT_RENDER, true, "");
-        if (cannonTile) {
-            ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCannon.class,
-                                                         this.tileCannonRenderer);
-        }
         this.configChangedClient(config);
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public void configChangedClient(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
         config.restartless();
         this.renderCannonItem = config.getBoolean("cannonItem", CLIENT_RENDER, true, "");
         boolean cannonTile = config.getBoolean("cannonTile", CLIENT_RENDER, true, "");

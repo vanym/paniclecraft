@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.block;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
@@ -101,5 +102,11 @@ public class BlockCannon extends BlockContainerMod3 {
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int side, int meta) {
         return Blocks.anvil.getBlockTextureFromSide(side);
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public String getItemIconName() {
+        return DEF.MOD_ID + ":" + this.getName();
     }
 }
