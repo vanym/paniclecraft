@@ -32,12 +32,7 @@ gui.cannon.direction=Direction
 gui.cannon.height=Height
 gui.cannon.strength=Strength
 
-item.chessDesk.name=Chess board
-gui.chess.newGame=New game
-gui.chess.aboutGame=About game
-gui.chess.whitePlayer=White Player
-gui.chess.blackPlayer=Black Player
-gui.chess.startGame=Start Game
+tile.chessDesk.name=Chess Board
 text.chessGameHaveSave=Have saved game
 
 item.portableWorkbench.name=Portable Workbench

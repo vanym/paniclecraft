@@ -1,9 +1,7 @@
 package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
-import com.vanym.paniclecraft.utils.ChessDesk;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
@@ -17,41 +15,29 @@ public class MessageChessNewGame
             IMessageHandler<MessageChessNewGame, IMessage> {
     
     int x;
-    short y;
+    int y;
     int z;
-    String whitePlayer;
-    String blackPlayer;
     
     public MessageChessNewGame() {}
     
-    public MessageChessNewGame(int parX,
-            short parY,
-            int parZ,
-            String parWhitePlayer,
-            String parBlackPlayer) {
-        this.x = parX;
-        this.y = parY;
-        this.z = parZ;
-        this.whitePlayer = parWhitePlayer;
-        this.blackPlayer = parBlackPlayer;
+    public MessageChessNewGame(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
     
     @Override
     public void fromBytes(ByteBuf buf) {
         this.x = buf.readInt();
-        this.y = buf.readShort();
+        this.y = buf.readInt();
         this.z = buf.readInt();
-        this.whitePlayer = ByteBufUtils.readUTF8String(buf);
-        this.blackPlayer = ByteBufUtils.readUTF8String(buf);
     }
     
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.x);
-        buf.writeShort(this.y);
+        buf.writeInt(this.y);
         buf.writeInt(this.z);
-        ByteBufUtils.writeUTF8String(buf, this.whitePlayer);
-        ByteBufUtils.writeUTF8String(buf, this.blackPlayer);
     }
     
     @Override
@@ -62,10 +48,8 @@ public class MessageChessNewGame
             && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
                                           message.z + 0.5D) <= 64.0D) {
             TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
-            tileCD.desk = new ChessDesk();
-            tileCD.whitePlayer = message.whitePlayer;
-            tileCD.blackPlayer = message.blackPlayer;
-            tileCD.getWorldObj().markBlockForUpdate(tileCD.xCoord, tileCD.yCoord, tileCD.zCoord);
+            tileCD.resetGame();
+            tileCD.markForUpdate();
         }
         return null;
     }

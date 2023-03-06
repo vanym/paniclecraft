@@ -3,20 +3,24 @@ package com.vanym.paniclecraft.client.renderer.item;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.client.IItemRenderer;
-import net.minecraftforge.common.ForgeVersion;
 
 @SideOnly(Side.CLIENT)
 public class ItemRendererChessDesk implements IItemRenderer {
     
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        if (!Core.instance.deskgame.renderChessDeskItem) {
+            return false;
+        }
         return true;
     }
     
@@ -32,25 +36,31 @@ public class ItemRendererChessDesk implements IItemRenderer {
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         TileEntityChessDesk tileChessDesk = new TileEntityChessDesk();
         tileChessDesk.blockMetadata = 0;
-        if (type.equals(ItemRenderType.ENTITY)) {
-            GL11.glTranslatef(-0.25F, -0.2F, -0.25F);
-            float var11 = 0.55F;
-            GL11.glScalef(var11, var11, var11);
-        } else if (type.equals(ItemRenderType.EQUIPPED)
-            || (ForgeVersion.getBuildVersion() >= 687 ? type.equals(ItemRenderType.EQUIPPED_FIRST_PERSON)
-                                                      : false)) {
-            GL11.glTranslatef(0.0F, 0.7F, -0.2F);
-        } else if (type.equals(ItemRenderType.INVENTORY)) {
-            tileChessDesk.blockMetadata = 2;
-            float var12 = 1.07F;
-            GL11.glScalef(var12, var12, var12);
-        } else if (type.equals(ItemRenderType.FIRST_PERSON_MAP)) {
-            
+        switch (type) {
+            case ENTITY: {
+                GL11.glTranslatef(-0.25F, -0.2F, -0.25F);
+                float scale = 0.55F;
+                GL11.glScalef(scale, scale, scale);
+            }
+            break;
+            case EQUIPPED:
+            case EQUIPPED_FIRST_PERSON:
+                GL11.glTranslatef(0.0F, 0.7F, -0.2F);
+            break;
+            case INVENTORY: {
+                tileChessDesk.blockMetadata = 2;
+                float scale = 1.07F;
+                GL11.glScalef(scale, scale, scale);
+            }
+            break;
+            default:
+            break;
         }
         if (item.hasTagCompound()) {
             NBTTagCompound tag = item.getTagCompound();
-            if (tag.hasKey("ChessData")) {
-                tileChessDesk.readFromNBT(tag.getCompoundTag("ChessData"));
+            if (tag.hasKey(ItemChessDesk.TAG_MOVES, 9)) {
+                NBTTagList list = tag.getTagList(ItemChessDesk.TAG_MOVES, 10);
+                tileChessDesk.readMovesFromNBT(list);
             }
         }
         Core.instance.deskgame.tileChessDeskRenderer.renderTileEntityAt(tileChessDesk, 0, 0, 0, 0);

@@ -10,7 +10,6 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererChessDesk;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRenderer;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemChessDesk;
-import com.vanym.paniclecraft.network.message.MessageChessChoose;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
 import com.vanym.paniclecraft.network.message.MessageChessNewGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
@@ -19,6 +18,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -31,7 +31,12 @@ public class ModComponentDeskGame implements ModComponent {
     public ItemChessDesk itemChessDesk;
     
     @SideOnly(Side.CLIENT)
-    public TileEntityChessDeskRenderer tileChessDeskRenderer = new TileEntityChessDeskRenderer();
+    public TileEntityChessDeskRenderer tileChessDeskRenderer;
+    @SideOnly(Side.CLIENT)
+    public ItemRendererChessDesk itemChessDeskRenderer;
+    
+    @SideOnly(Side.CLIENT)
+    public boolean renderChessDeskItem = true;
     
     protected boolean enabled = false;
     
@@ -41,10 +46,10 @@ public class ModComponentDeskGame implements ModComponent {
             return;
         }
         this.enabled = true;
-        this.itemChessDesk = new ItemChessDesk();
         this.blockChessDesk = new BlockChessDesk();
-        Core.instance.registerItem(this.itemChessDesk);
-        GameRegistry.registerBlock(this.blockChessDesk, null, this.blockChessDesk.getName());
+        GameRegistry.registerBlock(this.blockChessDesk, ItemChessDesk.class,
+                                   this.blockChessDesk.getName());
+        this.itemChessDesk = (ItemChessDesk)Item.getItemFromBlock(this.blockChessDesk);
         GameRegistry.registerTileEntity(TileEntityChessDesk.class, DEF.MOD_ID + ".chessDesk");
         boolean craftingRecipeChessDesk =
                 config.getBoolean("craftingRecipeChessDesk", this.getName(), true, "");
@@ -81,9 +86,6 @@ public class ModComponentDeskGame implements ModComponent {
         Core.instance.network.registerMessage(MessageChessMove.class,
                                               MessageChessMove.class, 40,
                                               Side.SERVER);
-        Core.instance.network.registerMessage(MessageChessChoose.class,
-                                              MessageChessChoose.class, 41,
-                                              Side.SERVER);
         Core.instance.network.registerMessage(MessageChessNewGame.class,
                                               MessageChessNewGame.class, 42,
                                               Side.SERVER);
@@ -95,16 +97,29 @@ public class ModComponentDeskGame implements ModComponent {
         if (!this.isEnabled()) {
             return;
         }
+        this.tileChessDeskRenderer = new TileEntityChessDeskRenderer();
+        this.itemChessDeskRenderer = new ItemRendererChessDesk();
+        MinecraftForgeClient.registerItemRenderer(this.itemChessDesk, this.itemChessDeskRenderer);
+        this.configChangedClient(config);
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void configChangedClient(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
+        config.restartless();
+        this.renderChessDeskItem = config.getBoolean("chessDeskItem", CLIENT_RENDER, true, "");
         boolean chessDeskTile = config.getBoolean("chessDeskTile", CLIENT_RENDER, true, "");
         if (chessDeskTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChessDesk.class,
                                                          this.tileChessDeskRenderer);
+        } else {
+            TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(TileEntityChessDesk.class,
+                                                                             this.tileChessDeskRenderer);
         }
-        boolean chessDeskItem = config.getBoolean("chessDeskItem", CLIENT_RENDER, true, "");
-        if (chessDeskItem) {
-            MinecraftForgeClient.registerItemRenderer(this.itemChessDesk,
-                                                      new ItemRendererChessDesk());
-        }
+        config.restartlessReset();
     }
     
     @Override

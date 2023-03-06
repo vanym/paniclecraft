@@ -1,252 +1,141 @@
 package com.vanym.paniclecraft.client.gui;
 
-import org.lwjgl.input.Keyboard;
+import java.util.Arrays;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.network.message.MessageChessChoose;
+import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
-import com.vanym.paniclecraft.network.message.MessageChessNewGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
-import com.vanym.paniclecraft.utils.ChessDesk;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 
 @SideOnly(Side.CLIENT)
 public class GuiChess extends GuiScreen {
     
-    public static final ResourceLocation ButtonsTexture =
+    protected static final ResourceLocation BUTTONS_TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/guis/chessButtons.png");
     
-    private GuiButtonForChess1[] Buttons = new GuiButtonForChess1[64];
+    protected final GuiSquareButton[] fieldButtons = new GuiSquareButton[64];
+    protected final GuiChooseButton[] chooseButtons = new GuiChooseButton[4];
     
-    private TileEntityChessDesk tileChess;
+    protected final TileEntityChessDesk tileChess;
     
-    public int select = -1;
-    
-    public int menuMode = 0;
-    
-    private GuiTextField whitePlayer;
-    
-    private GuiTextField blackPlayer;
+    protected int select = -1;
     
     public GuiChess(TileEntityChessDesk tile) {
         this.tileChess = tile;
     }
     
     @Override
-    public void onGuiClosed() {
-        Keyboard.enableRepeatEvents(false);
-    }
-    
-    @Override
     @SuppressWarnings("unchecked")
     public void initGui() {
-        int var1 = this.width / 2;
-        int var2 = this.height / 2;
-        int var3 = var1 - 80;
-        int var4 = var2 + 60;
+        int centerX = this.width / 2;
+        int centerY = this.height / 2;
+        int left = centerX - 80;
+        int bottom = centerY + 60;
         this.buttonList.clear();
-        this.whitePlayer = null;
-        this.blackPlayer = null;
-        Keyboard.enableRepeatEvents(false);
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                this.Buttons[i * 8 + j] = new GuiButtonForChess1(
-                        i * 8 + j,
-                        var3 + 20 * j,
-                        var4 - 20 * i,
-                        this.tileChess.desk);
-                this.buttonList.add(this.Buttons[i * 8 + j]);
-            }
+        for (int i = 0; i < this.fieldButtons.length; ++i) {
+            int x = i % 8;
+            int y = i / 8;
+            this.buttonList.add(this.fieldButtons[i] =
+                    new GuiSquareButton(i, left + 20 * x, bottom - 20 * y));
         }
-        if (this.tileChess.desk.needChoose() > 0
-            && (this.tileChess.whitePlayer.equalsIgnoreCase(this.mc.thePlayer.getGameProfile()
-                                                                             .getName())
-                || this.tileChess.whitePlayer.equalsIgnoreCase(TileEntityChessDesk.ChessPublicPlayer))) {
-            this.addWhiteChoose(this.tileChess.desk.needChoose());
-        }
-        if (this.tileChess.desk.needChoose() < 0
-            && (this.tileChess.blackPlayer.equalsIgnoreCase(this.mc.thePlayer.getGameProfile()
-                                                                             .getName())
-                || this.tileChess.blackPlayer.equalsIgnoreCase(TileEntityChessDesk.ChessPublicPlayer))) {
-            this.addBlackChoose(-this.tileChess.desk.needChoose());
-        }
-        this.buttonList.add(new GuiButtonForChess3(
-                1,
-                var1 + 80,
-                var2 - 80,
-                this.fontRendererObj,
-                this.menuMode,
-                StatCollector.translateToLocal("gui.chess.newGame").trim()));
-        this.buttonList.add(new GuiButtonForChess3(
-                2,
-                var1 + 80,
-                var2 - 60,
-                this.fontRendererObj,
-                this.menuMode,
-                StatCollector.translateToLocal("gui.chess.aboutGame").trim()));
-        switch (this.menuMode) {
-            case 1:
-                Keyboard.enableRepeatEvents(true);
-                this.whitePlayer =
-                        new GuiTextField(this.fontRendererObj, var1 + 110, var2 - 60, 75, 20);
-                this.whitePlayer.setFocused(false);
-                this.whitePlayer.setText(TileEntityChessDesk.ChessPublicPlayer);
-                this.blackPlayer =
-                        new GuiTextField(this.fontRendererObj, var1 + 110, var2 - 20, 75, 20);
-                this.blackPlayer.setFocused(false);
-                this.blackPlayer.setText(TileEntityChessDesk.ChessPublicPlayer);
-                this.buttonList.add(new GuiButton(
-                        0,
-                        var1 + 110,
-                        var2 + 10,
-                        75,
-                        20,
-                        StatCollector.translateToLocal("gui.chess.startGame").trim()));
-        }
-        this.reDraw();
+        this.buttonList.add(this.chooseButtons[0] = new GuiChooseButton(70, ChessGame.KNIGHT));
+        this.buttonList.add(this.chooseButtons[1] = new GuiChooseButton(71, ChessGame.BISHOP));
+        this.buttonList.add(this.chooseButtons[2] = new GuiChooseButton(72, ChessGame.ROOK));
+        this.buttonList.add(this.chooseButtons[3] = new GuiChooseButton(73, ChessGame.QUEEN));
+        this.updateButtons();
     }
     
     @Override
-    public void keyTyped(char par1, int par2) {
-        if (this.menuMode == 1) {
-            this.whitePlayer.textboxKeyTyped(par1, par2);
-            this.blackPlayer.textboxKeyTyped(par1, par2);
-        }
-        super.keyTyped(par1, par2);
-    }
-    
-    @Override
-    public void mouseClicked(int par1, int par2, int par3) {
-        super.mouseClicked(par1, par2, par3);
-        if (this.menuMode == 1) {
-            this.whitePlayer.mouseClicked(par1, par2, par3);
-            this.blackPlayer.mouseClicked(par1, par2, par3);
-        }
-    }
-    
-    @SuppressWarnings("unchecked")
-    public void addWhiteChoose(int par1) {
-        int var1 = this.width / 2;
-        int var2 = this.height / 2;
-        int var3 = var1 - 130 + par1 * 20;
-        int var4 = var2 - 100;
-        for (int i = 0; i < 4; i++) {
-            this.buttonList.add(new GuiButtonForChess2(100 + i, var3 + 20 * i, var4));
-        }
-    }
-    
-    @SuppressWarnings("unchecked")
-    public void addBlackChoose(int par1) {
-        int var1 = this.width / 2;
-        int var2 = this.height / 2;
-        int var3 = var1 - 130 + par1 * 20;
-        int var4 = var2 + 80;
-        for (int i = 0; i < 4; i++) {
-            this.buttonList.add(new GuiButtonForChess2(-(100 + i), var3 + 20 * i, var4));
-        }
-    }
-    
-    @Override
-    public void actionPerformed(GuiButton par1) {
-        if (par1 instanceof GuiButtonForChess1) {
-            GuiButtonForChess1 var1 = (GuiButtonForChess1)par1;
-            if (!var1.cbs) {
-                return;
-            }
+    public void actionPerformed(GuiButton button) {
+        ChessGame game = this.tileChess.getGame();
+        if (button instanceof GuiSquareButton) {
+            int y = button.id / 8;
             if (this.select == -1) {
-                this.select = var1.id;
-            } else if (var1.id == this.select) {
+                this.select = button.id;
+                this.updateButtons();
+            } else if (button.id == this.select) {
                 this.select = -1;
+                this.updateButtons();
             } else {
-                this.tileChess.desk.make((byte)this.select, (byte)var1.id);
-                int var2 = this.select;
-                this.select = -1;
-                Core.instance.network.sendToServer(new MessageChessMove(
-                        this.tileChess.xCoord,
-                        (short)this.tileChess.yCoord,
-                        this.tileChess.zCoord,
-                        (byte)var2,
-                        (byte)var1.id));
+                byte fromP = game.getPiece(this.select);
+                byte fromA = (byte)Math.abs(fromP);
+                boolean fromW = fromP > 0;
+                if (fromA == ChessGame.PAWN && (y == 0 || y == 7)) {
+                    this.addChoose(fromW, button.id);
+                } else {
+                    ChessGame.Move move = new ChessGame.Move(this.select, button.id);
+                    this.sendMove(move);
+                }
             }
-            if (this.tileChess.desk.needChoose() > 0) {
-                this.addWhiteChoose(this.tileChess.desk.needChoose());
-            }
-            if (this.tileChess.desk.needChoose() < 0) {
-                this.addBlackChoose(-this.tileChess.desk.needChoose());
-            }
-            this.reDraw();
-        } else if (par1 instanceof GuiButtonForChess2) {
-            int var1 = this.tileChess.desk.needChoose();
-            this.tileChess.desk.desk[ChessDesk.getFromXY(Math.abs(var1) - 1, (var1 > 0 ? 7 : 0))] =
-                    (byte)(var1 > 0 ? (Math.abs(par1.id) - 98) : -(Math.abs(par1.id) - 98));
-            Core.instance.network.sendToServer(new MessageChessChoose(
-                    this.tileChess.xCoord,
-                    (short)this.tileChess.yCoord,
-                    this.tileChess.zCoord,
-                    (byte)((Math.abs(par1.id) - 98))));
-            this.initGui();
-        } else if (par1 instanceof GuiButtonForChess3) {
-            if (this.menuMode == par1.id) {
-                this.menuMode = 0;
+        } else if (button instanceof GuiChooseButton) {
+            GuiChooseButton buttonChoose = (GuiChooseButton)button;
+            byte fromP = game.getPiece(this.select);
+            ChessGame.Move move = new ChessGame.Move(
+                    this.select,
+                    buttonChoose.chooseSelect,
+                    fromP,
+                    buttonChoose.getPiece());
+            this.sendMove(move);
+        }
+    }
+    
+    protected void sendMove(ChessGame.Move move) {
+        Core.instance.network.sendToServer(new MessageChessMove(
+                this.tileChess.xCoord,
+                this.tileChess.yCoord,
+                this.tileChess.zCoord,
+                move));
+    }
+    
+    protected void updateButtons() {
+        ChessGame game = this.tileChess.getGame();
+        for (int i = 0; i < this.fieldButtons.length; ++i) {
+            GuiSquareButton button = this.fieldButtons[i];
+            if (this.select == -1) {
+                byte piece = button.getPiece();
+                button.enabled = game.isWhiteTurn() ? piece > 0 : piece < 0;
             } else {
-                this.menuMode = par1.id;
+                button.enabled = (this.select == i || game.canMove(this.select, i));
             }
-            this.initGui();
-        } else {
-            if (par1.id == 0) {
-                this.select = -1;
-                this.menuMode = 0;
-                this.tileChess.desk = new ChessDesk();
-                this.tileChess.whitePlayer = this.whitePlayer.getText();
-                this.tileChess.blackPlayer = this.blackPlayer.getText();
-                Core.instance.network.sendToServer(new MessageChessNewGame(
-                        this.tileChess.xCoord,
-                        (short)this.tileChess.yCoord,
-                        this.tileChess.zCoord,
-                        this.whitePlayer.getText(),
-                        this.blackPlayer.getText()));
-                this.initGui();
-            }
+        }
+        Arrays.stream(this.chooseButtons).forEach(b->b.visible = false);
+    }
+    
+    public void updateGui(TileEntityChessDesk tile) {
+        if (this.tileChess == tile) {
+            this.select = -1;
+            this.updateButtons();
+        }
+    }
+    
+    protected void addChoose(boolean white, int id) {
+        int centerX = this.width / 2;
+        int centerY = this.height / 2;
+        int x = id % 8;
+        int left = centerX - 110 + x * 20;
+        int top = white ? centerY - 100 : centerY + 80;
+        for (int i = 0; i < this.chooseButtons.length; ++i) {
+            GuiChooseButton chooseButton = this.chooseButtons[i];
+            chooseButton.chooseSelect = id;
+            chooseButton.white = white;
+            chooseButton.visible = true;
+            chooseButton.yPosition = top;
+            chooseButton.xPosition = left + i * 20;
         }
     }
     
     @Override
-    public void drawScreen(int par1, int par2, float par3) {
+    public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
         this.drawDefaultBackground();
-        if (this.menuMode == 1) {
-            this.whitePlayer.drawTextBox();
-            this.blackPlayer.drawTextBox();
-            int var1 = this.width / 2;
-            int var2 = this.height / 2;
-            this.drawString(this.fontRendererObj,
-                            StatCollector.translateToLocal("gui.chess.whitePlayer").trim(),
-                            var1 + 110, var2 - 74, 16777215);
-            this.drawString(this.fontRendererObj,
-                            StatCollector.translateToLocal("gui.chess.blackPlayer").trim(),
-                            var1 + 110, var2 - 34, 16777215);
-        } else if (this.menuMode == 2) {
-            int var1 = this.width / 2;
-            int var2 = this.height / 2;
-            this.drawString(this.fontRendererObj,
-                            StatCollector.translateToLocal("gui.chess.whitePlayer").trim(),
-                            var1 + 110, var2 - 74, 16777215);
-            this.drawString(this.fontRendererObj, this.tileChess.whitePlayer, var1 + 110, var2 - 64,
-                            16777215);
-            this.drawString(this.fontRendererObj,
-                            StatCollector.translateToLocal("gui.chess.blackPlayer").trim(),
-                            var1 + 110, var2 - 34, 16777215);
-            this.drawString(this.fontRendererObj, this.tileChess.blackPlayer, var1 + 110, var2 - 24,
-                            16777215);
-        }
-        super.drawScreen(par1, par2, par3);
+        super.drawScreen(mouseX, mouseY, renderPartialTicks);
     }
     
     @Override
@@ -254,35 +143,12 @@ public class GuiChess extends GuiScreen {
         return false;
     }
     
-    public void reDrawButton(int i) {
-        GuiButtonForChess1 var1 = this.Buttons[i];
-        if (this.select == -1) {
-            var1.cbs = (this.tileChess.desk.isWhiteTurn ? this.tileChess.desk.desk[i] > 0
-                && (this.tileChess.whitePlayer.equalsIgnoreCase(this.mc.thePlayer.getGameProfile()
-                                                                                 .getName())
-                    || this.tileChess.whitePlayer.equalsIgnoreCase(TileEntityChessDesk.ChessPublicPlayer))
-                                                        : this.tileChess.desk.desk[i] < 0
-                                                            && (this.tileChess.blackPlayer.equalsIgnoreCase(this.mc.thePlayer.getGameProfile()
-                                                                                                                             .getName())
-                                                                || this.tileChess.blackPlayer.equalsIgnoreCase(TileEntityChessDesk.ChessPublicPlayer)))
-                && this.tileChess.desk.needChoose() == 0;
-            var1.mode = 0;
-        } else if (i == this.select) {
-            var1.mode = 3;
-            var1.cbs = true;
-        } else if (this.tileChess.desk.canGoTo((byte)this.select, (byte)i)) {
-            var1.mode = 2;
-            var1.cbs = true;
-        } else {
-            var1.mode = 0;
-            var1.cbs = false;
+    @Override
+    protected void keyTyped(char character, int key) {
+        if (key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
+            key = 1;
         }
-    }
-    
-    public void reDraw() {
-        for (int i = 0; i < 64; i++) {
-            this.reDrawButton(i);
-        }
+        super.keyTyped(character, key);
     }
     
     @Override
@@ -293,12 +159,120 @@ public class GuiChess extends GuiScreen {
             || this.mc.thePlayer.getDistanceSq(this.tileChess.xCoord + 0.5D,
                                                this.tileChess.yCoord + 0.5D,
                                                this.tileChess.zCoord + 0.5D) > 64.0D) {
-            this.mc.displayGuiScreen((GuiScreen)null);
-            this.mc.setIngameFocus();
+            this.keyTyped((char)0, 1); // close
         }
-        if (this.menuMode == 1) {
-            this.whitePlayer.updateCursorCounter();
-            this.blackPlayer.updateCursorCounter();
+    }
+    
+    protected class GuiSquareButton extends GuiChessButton {
+        
+        public GuiSquareButton(int id, int x, int y) {
+            super(id, x, y);
+            this.enabled = false;
+        }
+        
+        @Override
+        protected byte getPiece() {
+            return GuiChess.this.tileChess.getGame().getPiece(this.id);
+        }
+        
+        @Override
+        public int getHoverState(boolean hovered) {
+            if (this.enabled && hovered) {
+                return 1;
+            }
+            boolean lastFrom = (this.id == GuiChess.this.tileChess.getGame().lastFrom());
+            boolean lastTo = (this.id == GuiChess.this.tileChess.getGame().lastTo());
+            boolean selected = (this.id == GuiChess.this.select);
+            if (selected) {
+                return 3;
+            } else if (this.enabled) {
+                if (lastFrom) {
+                    return 6;
+                } else if (lastTo) {
+                    return 7;
+                } else if (GuiChess.this.select != -1) {
+                    return 2;
+                } else {
+                    return 0;
+                }
+            } else {
+                if (lastFrom) {
+                    return 4;
+                } else if (lastTo) {
+                    return 5;
+                } else {
+                    return 0;
+                }
+            }
+        }
+    }
+    
+    protected class GuiChooseButton extends GuiChessButton {
+        
+        protected final byte piece;
+        
+        protected boolean white;
+        protected int chooseSelect = -1;
+        
+        public GuiChooseButton(int id, byte piece) {
+            super(id, 0, 0);
+            this.piece = piece;
+            this.visible = false;
+        }
+        
+        @Override
+        protected byte getPiece() {
+            if (this.white) {
+                return this.piece;
+            } else {
+                return (byte)-this.piece;
+            }
+        }
+    }
+    
+    protected static abstract class GuiChessButton extends GuiButton {
+        
+        public GuiChessButton(int id, int x, int y) {
+            super(id, x, y, 20, 20, "");
+        }
+        
+        protected abstract byte getPiece();
+        
+        @Override
+        public int getHoverState(boolean hovered) {
+            if (!this.enabled) {
+                return 0;
+            } else if (hovered) {
+                return 1;
+            }
+            return 2;
+        }
+        
+        @Override
+        public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+            if (!this.visible) {
+                return;
+            }
+            mc.renderEngine.bindTexture(BUTTONS_TEXTURE);
+            this.field_146123_n = mouseX >= this.xPosition
+                && mouseY >= this.yPosition
+                && mouseX < this.xPosition + this.width
+                && mouseY < this.yPosition + this.height;
+            int mode = this.getHoverState(this.field_146123_n);
+            this.drawTexturedModalRect(this.xPosition, this.yPosition,
+                                       mode * this.width, 0,
+                                       this.width, this.height);
+            byte piece = this.getPiece();
+            byte pieceA = (byte)Math.abs(piece);
+            if (piece != ChessGame.EMPTY && pieceA <= ChessGame.KING_UNMOVED) {
+                boolean pieceW = piece > 0;
+                if (pieceA > 6) {
+                    pieceA -= 3;
+                }
+                this.drawTexturedModalRect(this.xPosition, this.yPosition, pieceA * this.width,
+                                           (pieceW ? this.height : this.height * 2),
+                                           this.width, this.height);
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ import com.vanym.paniclecraft.client.renderer.model.ModelChessKnight;
 import com.vanym.paniclecraft.client.renderer.model.ModelChessPawn;
 import com.vanym.paniclecraft.client.renderer.model.ModelChessQueen;
 import com.vanym.paniclecraft.client.renderer.model.ModelChessRook;
+import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import cpw.mods.fml.relauncher.Side;
@@ -22,152 +23,73 @@ import net.minecraft.util.ResourceLocation;
 @SideOnly(Side.CLIENT)
 public class TileEntityChessDeskRenderer extends TileEntitySpecialRenderer {
     
-    private final ResourceLocation Texture =
+    protected static final ResourceLocation TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/models/chessDesk.png");
-    private final ResourceLocation TextureW =
+    protected static final ResourceLocation TEXTURE_W =
             new ResourceLocation(DEF.MOD_ID, "textures/models/chessW.png");
-    private final ResourceLocation TextureB =
+    protected static final ResourceLocation TEXTURE_B =
             new ResourceLocation(DEF.MOD_ID, "textures/models/chessB.png");
     
-    private ModelChessPawn pawn = new ModelChessPawn();
-    private ModelChessBishop bishop = new ModelChessBishop();
-    private ModelChessKnight knight = new ModelChessKnight();
-    private ModelChessRook rook = new ModelChessRook();
-    private ModelChessQueen queen = new ModelChessQueen();
-    private ModelChessKing king = new ModelChessKing();
-    private ModelChessDesk desk = new ModelChessDesk();
+    protected ModelChessPawn pawn = new ModelChessPawn();
+    protected ModelChessBishop bishop = new ModelChessBishop();
+    protected ModelChessKnight knight = new ModelChessKnight();
+    protected ModelChessRook rook = new ModelChessRook();
+    protected ModelChessQueen queen = new ModelChessQueen();
+    protected ModelChessKing king = new ModelChessKing();
+    protected ModelChessDesk desk = new ModelChessDesk();
     
     public void renderTileEntityAt(
-            TileEntityChessDesk par1,
-            double par2,
-            double par4,
-            double par6,
-            float par8) {
+            TileEntityChessDesk tileCD,
+            double x,
+            double y,
+            double z,
+            float f) {
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        float var10 = 0.6666667F;
-        GL11.glTranslatef((float)par2 + 0.5F, (float)par4 + 0.75F * var10, (float)par6 + 0.5F);
+        GL11.glTranslatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
         GL11.glRotatef(180.0F, 1.0F, 0.0F, 0.0F);
         GL11.glTranslatef(0.0F, 0.5F, 0.0F);
-        GL11.glRotatef(90.0F * par1.getBlockMetadata(), 0.0F, 1.0F, 0.0F);
-        float var11 = 0.0625F;
-        this.bindTexture(this.Texture);
-        this.desk.render(var11);
+        GL11.glRotatef(90.0F * tileCD.getBlockMetadata(), 0.0F, 1.0F, 0.0F);
+        float scale = 0.0625F;
+        this.bindTexture(TEXTURE);
+        this.desk.render(scale);
         GL11.glTranslatef(0.5F - 0.0625F, -0.25F + 0.05F, 0.5F - 0.0625F);
-        float var9 = .25F;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (par1.desk.desk[i * 8 + j] < 0) {
-                    GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
-                }
-                switch (par1.desk.desk[i * 8 + j]) {
-                    case 1:
-                        this.bindTexture(this.TextureW);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.pawn.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case 2:
-                        this.bindTexture(this.TextureW);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.bishop.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case 3:
-                        this.bindTexture(this.TextureW);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.knight.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case 7:
-                    case 4:
-                        this.bindTexture(this.TextureW);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.rook.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case 5:
-                        this.bindTexture(this.TextureW);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.queen.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case 9:
-                    case 6:
-                        this.bindTexture(this.TextureW);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.king.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case -1:
-                        this.bindTexture(this.TextureB);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.pawn.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case -2:
-                        this.bindTexture(this.TextureB);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.bishop.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case -3:
-                        this.bindTexture(this.TextureB);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.knight.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case -7:
-                    case -4:
-                        this.bindTexture(this.TextureB);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.rook.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case -5:
-                        this.bindTexture(this.TextureB);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.queen.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                    case -9:
-                    case -6:
-                        this.bindTexture(this.TextureB);
-                        GL11.glPushMatrix();
-                        GL11.glScalef(var11, var11, var11);
-                        this.king.render(var9);
-                        GL11.glPopMatrix();
-                    break;
-                }
-                if (par1.desk.desk[i * 8 + j] < 0) {
-                    GL11.glRotatef(-180.0F, 0.0F, 1.0F, 0.0F);
-                }
-                GL11.glTranslatef(-0.125F, 0.0F, 0.0F);
+        float scalePiece = 0.25F;
+        ChessGame game = tileCD.getGame();
+        for (int i = 0; i < game.size(); ++i) {
+            int px = i % 8;
+            int py = i / 8;
+            byte piece = game.getPiece(i);
+            byte pieceA = (byte)Math.abs(piece);
+            GL11.glPushMatrix();
+            GL11.glTranslatef(-0.125F * px, 0.0F, -0.125F * py);
+            if (piece > 0) {
+                this.bindTexture(TEXTURE_W);
+            } else if (piece < 0) {
+                GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
+                this.bindTexture(TEXTURE_B);
             }
-            GL11.glTranslatef(0.125F * 8, 0.0F, -0.125F);
+            GL11.glScalef(scale, scale, scale);
+            if (pieceA == ChessGame.PAWN) {
+                this.pawn.render(scalePiece);
+            } else if (pieceA == ChessGame.BISHOP) {
+                this.bishop.render(scalePiece);
+            } else if (pieceA == ChessGame.KNIGHT) {
+                this.knight.render(scalePiece);
+            } else if (pieceA == ChessGame.ROOK || pieceA == ChessGame.ROOK_UNMOVED) {
+                this.rook.render(scalePiece);
+            } else if (pieceA == ChessGame.QUEEN) {
+                this.queen.render(scalePiece);
+            } else if (pieceA == ChessGame.KING || pieceA == ChessGame.KING_UNMOVED) {
+                this.king.render(scalePiece);
+            }
+            GL11.glPopMatrix();
         }
         GL11.glPopMatrix();
     }
     
     @Override
-    public void renderTileEntityAt(
-            TileEntity var1,
-            double var2,
-            double var4,
-            double var6,
-            float var8) {
-        this.renderTileEntityAt((TileEntityChessDesk)var1, var2, var4, var6, var8);
+    public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
+        this.renderTileEntityAt((TileEntityChessDesk)tile, x, y, z, f);
     }
-    
 }
