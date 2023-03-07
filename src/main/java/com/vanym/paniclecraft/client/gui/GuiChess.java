@@ -60,7 +60,7 @@ public class GuiChess extends GuiScreen {
         ChessGame game = this.tileChess.getGame();
         if (button instanceof GuiSquareButton) {
             int y = button.id / 8;
-            if (this.select == -1) {
+            if (this.select == -1 || game.isCurrentSide(button.id)) {
                 this.select = button.id;
                 this.updateButtons();
             } else if (button.id == this.select) {
@@ -101,12 +101,9 @@ public class GuiChess extends GuiScreen {
         ChessGame game = this.tileChess.getGame();
         for (int i = 0; i < this.fieldButtons.length; ++i) {
             GuiSquareButton button = this.fieldButtons[i];
-            if (this.select == -1) {
-                byte piece = button.getPiece();
-                button.enabled = game.isWhiteTurn() ? piece > 0 : piece < 0;
-            } else {
-                button.enabled = (this.select == i || game.canMove(this.select, i));
-            }
+            button.enabled = (this.select == i)
+                || game.isCurrentSide(button.id)
+                || (this.select != -1 && game.canMove(this.select, i));
         }
         Arrays.stream(this.chooseButtons).forEach(b->b.visible = false);
     }
@@ -213,8 +210,9 @@ public class GuiChess extends GuiScreen {
             if (this.enabled && hovered) {
                 return 1;
             }
-            boolean lastFrom = (this.id == GuiChess.this.tileChess.getGame().lastFrom());
-            boolean lastTo = (this.id == GuiChess.this.tileChess.getGame().lastTo());
+            ChessGame game = GuiChess.this.tileChess.getGame();
+            boolean lastFrom = (this.id == game.lastFrom());
+            boolean lastTo = (this.id == game.lastTo());
             boolean selected = (this.id == GuiChess.this.select);
             if (selected) {
                 return 3;
@@ -223,7 +221,7 @@ public class GuiChess extends GuiScreen {
                     return 6;
                 } else if (lastTo) {
                     return 7;
-                } else if (GuiChess.this.select != -1) {
+                } else if (GuiChess.this.select != -1 && !game.isCurrentSide(this.id)) {
                     return 2;
                 } else {
                     return 0;

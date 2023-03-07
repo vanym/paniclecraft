@@ -309,6 +309,10 @@ public class ChessGame {
         return white ? t > 0 : t < 0;
     }
     
+    public boolean isCurrentSide(int pos) {
+        return this.isSide(pos, this.isWhiteTurn);
+    }
+    
     protected static int getPos(int x, int y) {
         return y * 8 + x;
     }
