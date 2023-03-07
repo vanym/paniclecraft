@@ -13,6 +13,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 
 @SideOnly(Side.CLIENT)
@@ -145,6 +147,10 @@ public class GuiChess extends GuiScreen {
     
     @Override
     protected void keyTyped(char character, int key) {
+        if (character == 3 /* Ctrl+c */) {
+            this.movesCopy();
+            return;
+        }
         if (key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
             key = 1;
         }
@@ -161,6 +167,33 @@ public class GuiChess extends GuiScreen {
                                                this.tileChess.zCoord + 0.5D) > 64.0D) {
             this.keyTyped((char)0, 1); // close
         }
+    }
+    
+    protected void movesCopy() {
+        String moves = this.getMovesString();
+        if (!moves.isEmpty()) {
+            GuiScreen.setClipboardString(moves);
+            IChatComponent message = new ChatComponentTranslation("chess.export.copy.success");
+            this.mc.ingameGUI.getChatGUI().printChatMessage(message);
+        }
+    }
+    
+    protected String getMovesString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.tileChess.moves.size(); ++i) {
+            TileEntityChessDesk.Move m = this.tileChess.moves.get(i);
+            if (i % 2 == 0) {
+                int line = i / 2;
+                if (line != 0) {
+                    sb.append(System.lineSeparator());
+                }
+                sb.append(line + 1);
+                sb.append('.');
+            }
+            sb.append(' ');
+            sb.append(m.move.toString());
+        }
+        return sb.toString();
     }
     
     protected class GuiSquareButton extends GuiChessButton {

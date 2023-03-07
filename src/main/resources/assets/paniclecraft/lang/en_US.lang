@@ -34,6 +34,7 @@ gui.cannon.strength=Strength
 
 tile.chessDesk.name=Chess Board
 text.chessGameHaveSave=Have saved game
+chess.export.copy.success=Copy chess notation to clipboard
 
 item.portableWorkbench.name=Portable Workbench
 

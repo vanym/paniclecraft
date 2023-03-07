@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +22,9 @@ import net.minecraft.util.AxisAlignedBB;
 public class TileEntityChessDesk extends TileEntityBase {
     
     protected ChessGame game = new ChessGame();
-    protected List<Move> moves = new ArrayList<>();
+    protected final List<Move> imoves = new ArrayList<>();
+    
+    public final List<Move> moves = Collections.unmodifiableList(this.imoves);
     
     public static final String TAG_MOVES = "Moves";
     public static final String TAG_MOVE = "Move";
@@ -45,7 +48,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     public void writeMovesToNBT(NBTTagList listTag) {
-        for (Move move : this.moves) {
+        for (Move move : this.imoves) {
             NBTTagCompound moveTag = new NBTTagCompound();
             move.writeToNBT(moveTag);
             listTag.appendTag(moveTag);
@@ -61,7 +64,7 @@ public class TileEntityChessDesk extends TileEntityBase {
             if (move.move == null || this.game.move(move.move) == null) {
                 return;
             }
-            this.moves.add(move);
+            this.imoves.add(move);
         }
     }
     
@@ -84,7 +87,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     
     public void resetGame() {
         this.game = new ChessGame();
-        this.moves.clear();
+        this.imoves.clear();
     }
     
     public boolean move(EntityPlayer player, ChessGame.Move move) {
@@ -92,7 +95,7 @@ public class TileEntityChessDesk extends TileEntityBase {
         if (move == null) {
             return false;
         }
-        this.moves.add(new Move(move, player.getUniqueID(), player.getCommandSenderName()));
+        this.imoves.add(new Move(move, player.getUniqueID(), player.getCommandSenderName()));
         return true;
     }
     
@@ -116,7 +119,7 @@ public class TileEntityChessDesk extends TileEntityBase {
         return 16384.0D;
     }
     
-    protected static class Move {
+    public static class Move {
         public ChessGame.Move move;
         public UUID playerUUID;
         public String playerName;
