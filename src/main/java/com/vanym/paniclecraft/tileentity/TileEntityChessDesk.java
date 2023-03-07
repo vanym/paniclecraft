@@ -59,12 +59,13 @@ public class TileEntityChessDesk extends TileEntityBase {
         this.resetGame();
         for (int i = 0; i < listTag.tagCount(); i++) {
             NBTTagCompound tag = listTag.getCompoundTagAt(i);
-            Move move = new Move();
-            move.readFromNBT(tag, i % 2 == 0);
-            if (move.move == null || this.game.move(move.move) == null) {
+            Move wrap = new Move();
+            wrap.readFromNBT(tag, i % 2 == 0);
+            ChessGame.Move move;
+            if (wrap.move == null || (move = this.game.move(wrap.move)) == null) {
                 return;
             }
-            this.imoves.add(move);
+            this.imoves.add(new Move(wrap, move));
         }
     }
     
@@ -130,6 +131,12 @@ public class TileEntityChessDesk extends TileEntityBase {
             this.move = move;
             this.playerUUID = playerUUID;
             this.playerName = playerName;
+        }
+        
+        public Move(Move wrap, ChessGame.Move move) {
+            this.move = move;
+            this.playerUUID = wrap.playerUUID;
+            this.playerName = wrap.playerName;
         }
         
         public void writeToNBT(NBTTagCompound nbtTag) {

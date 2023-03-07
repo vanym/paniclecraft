@@ -103,17 +103,19 @@ public class ChessGame {
     public boolean canMove(int from, int to) {
         return this.isSide(from, this.isWhiteTurn)
             && this.canMoveCheckless(from, to)
-            && !this.isLethal(from, to, this.isWhiteTurn);
+            && !this.isCheckAfterMove(from, to, this.isWhiteTurn);
     }
     
-    protected boolean isLethal(int from, int to, boolean forWhite) {
-        ChessGame next = new ChessGame(this);
-        next.moveCheckless(from, to, (byte)PAWN);
+    protected boolean isCheck() {
+        return this.isCheck(this.isWhiteTurn);
+    }
+    
+    protected boolean isCheck(boolean forWhite) {
         int kingPos;
         try {
-            kingPos = IntStream.range(0, next.desk.length)
+            kingPos = IntStream.range(0, this.desk.length)
                                .filter(i-> {
-                                   byte piece = next.getPiece(i);
+                                   byte piece = this.getPiece(i);
                                    return forWhite ? (piece == KING || piece == KING_UNMOVED)
                                                    : (piece == -KING || piece == -KING_UNMOVED);
                                })
@@ -122,7 +124,22 @@ public class ChessGame {
         } catch (NoSuchElementException e) {
             return false;
         }
-        return next.isAttackedBy(kingPos, !forWhite);
+        return this.isAttackedBy(kingPos, !forWhite);
+    }
+    
+    protected boolean isCheckAfterMove(int from, int to, boolean forWhite) {
+        ChessGame next = new ChessGame(this);
+        next.moveCheckless(from, to, (byte)PAWN);
+        return next.isCheck(forWhite);
+    }
+    
+    protected boolean isStuck() {
+        return !IntStream.range(0, this.desk.length).anyMatch(this::canMove);
+    }
+    
+    protected boolean canMove(int from) {
+        return this.isSide(from, this.isWhiteTurn)
+            && IntStream.range(0, this.desk.length).anyMatch(i->this.canMove(from, i));
     }
     
     protected boolean isAttackedBy(int x, int y, boolean white) {
@@ -251,7 +268,14 @@ public class ChessGame {
         this.lastFrom = from;
         this.lastTo = to;
         this.isWhiteTurn = !this.isWhiteTurn;
-        return new Move(from, to, fromP, kill, promo ? piece : 0);
+        boolean check = false, mate = false;
+        if (this.isCheck()) {
+            check = true;
+            if (this.isStuck()) {
+                mate = true;
+            }
+        }
+        return new Move(from, to, fromP, kill, promo ? piece : 0, check, mate);
     }
     
     public Move move(int from, int to, byte promotion) {
@@ -367,7 +391,7 @@ public class ChessGame {
     public static class Move {
         
         protected static final Pattern PATTERN =
-                Pattern.compile(String.format("^(%s)([a-hA-H][1-8])([-xX]?)([a-hA-H][1-8])[/=]?(%s)?$",
+                Pattern.compile(String.format("^(%s)([a-hA-H][1-8])([-xX]?)([a-hA-H][1-8])[/=]?(%s)?([+#])?$",
                                               String.join("|",
                                                           Stream.of(PieceType.PAWN,
                                                                     PieceType.BISHOP,
@@ -391,6 +415,8 @@ public class ChessGame {
         public final byte type;
         public final boolean kill;
         public final byte promotion;
+        public final boolean check;
+        public final boolean mate;
         
         public Move(String move) throws IllegalArgumentException {
             this(move, null);
@@ -399,6 +425,7 @@ public class ChessGame {
         public Move(String move, Boolean white) throws IllegalArgumentException {
             Matcher m = PATTERN.matcher(move);
             Matcher castl;
+            boolean check = false, mate = false;
             if (m.matches()) {
                 PieceType t = PieceType.getPieceType(m.group(1));
                 this.type = (byte)t.ordinal();
@@ -411,6 +438,15 @@ public class ChessGame {
                     this.promotion = (byte)p.ordinal();
                 } else {
                     this.promotion = 0;
+                }
+                String g6 = m.group(6);
+                if (g6 != null) {
+                    if ("#".equals(g6)) {
+                        check = true;
+                        mate = true;
+                    } else if ("+".equals(g6)) {
+                        check = true;
+                    }
                 }
             } else if ((castl = CASTLING.matcher(move)).matches()) {
                 if (white == null) {
@@ -430,6 +466,8 @@ public class ChessGame {
             } else {
                 throw new IllegalArgumentException(String.format("Illegal move: %s", move));
             }
+            this.check = check;
+            this.mate = mate;
         }
         
         public Move(int from, int to) {
@@ -449,11 +487,23 @@ public class ChessGame {
         }
         
         public Move(int from, int to, byte type, boolean kill, byte promotion) {
+            this(from, to, type, kill, promotion, false, false);
+        }
+        
+        public Move(int from,
+                int to,
+                byte type,
+                boolean kill,
+                byte promotion,
+                boolean check,
+                boolean mate) {
             this.from = from;
             this.to = to;
             this.type = type;
             this.kill = kill;
             this.promotion = promotion;
+            this.check = check;
+            this.mate = mate;
         }
         
         @Override
@@ -482,6 +532,11 @@ public class ChessGame {
             PieceType p = PieceType.getPieceType(this.promotion);
             if (p != PieceType.NONE) {
                 sb.append(p.toString());
+            }
+            if (this.mate) {
+                sb.append('#');
+            } else if (this.check) {
+                sb.append('+');
             }
             return sb.toString();
         }
