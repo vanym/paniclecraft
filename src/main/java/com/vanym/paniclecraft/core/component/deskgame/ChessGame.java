@@ -268,14 +268,7 @@ public class ChessGame {
         this.lastFrom = from;
         this.lastTo = to;
         this.isWhiteTurn = !this.isWhiteTurn;
-        boolean check = false, mate = false;
-        if (this.isCheck()) {
-            check = true;
-            if (this.isStuck()) {
-                mate = true;
-            }
-        }
-        return new Move(from, to, fromP, kill, promo ? piece : 0, check, mate);
+        return new Move(from, to, fromP, kill, promo ? piece : 0);
     }
     
     public Move move(int from, int to, byte promotion) {
@@ -293,7 +286,15 @@ public class ChessGame {
         if (!this.canMove(from, to)) {
             return null;
         }
-        return this.moveCheckless(from, to, promotion);
+        Move move = this.moveCheckless(from, to, promotion);
+        boolean check = false, mate = false;
+        if (this.isCheck()) {
+            check = true;
+            if (this.isStuck()) {
+                mate = true;
+            }
+        }
+        return new Move(move, check, mate);
     }
     
     public Move move(Move move) {
@@ -492,6 +493,10 @@ public class ChessGame {
         
         public Move(int from, int to, byte type, boolean kill, byte promotion) {
             this(from, to, type, kill, promotion, false, false);
+        }
+        
+        public Move(Move move, boolean check, boolean mate) {
+            this(move.from, move.to, move.type, move.kill, move.promotion, check, mate);
         }
         
         public Move(int from,
