@@ -33,7 +33,11 @@ gui.cannon.height=Height
 gui.cannon.strength=Strength
 
 tile.chessDesk.name=Chess Board
-text.chessGameHaveSave=Have saved game
+item.chessDesk.moves=Moves: %d
+item.chessDesk.player.white.one=W: %s
+item.chessDesk.player.white.many=W: %s (%d)
+item.chessDesk.player.black.one=B: %s
+item.chessDesk.player.black.many=B: %s (%d)
 chess.export.copy.success=Copy chess notation to clipboard
 
 item.portableWorkbench.name=Portable Workbench
