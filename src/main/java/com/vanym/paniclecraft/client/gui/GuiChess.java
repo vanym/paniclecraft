@@ -60,11 +60,11 @@ public class GuiChess extends GuiScreen {
         ChessGame game = this.tileChess.getGame();
         if (button instanceof GuiSquareButton) {
             int y = button.id / 8;
-            if (this.select == -1 || game.isCurrentSide(button.id)) {
-                this.select = button.id;
-                this.updateButtons();
-            } else if (button.id == this.select) {
+            if (button.id == this.select) {
                 this.select = -1;
+                this.updateButtons();
+            } else if (this.select == -1 || game.isCurrentSide(button.id)) {
+                this.select = button.id;
                 this.updateButtons();
             } else {
                 byte fromP = game.getPiece(this.select);
