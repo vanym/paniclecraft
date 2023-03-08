@@ -100,7 +100,7 @@ public class ItemChessDesk extends ItemBlock {
     
     public static ItemStack getSavedDesk(TileEntityChessDesk tileCD) {
         ItemStack stack = new ItemStack(Core.instance.deskgame.itemChessDesk);
-        if (tileCD == null) {
+        if (tileCD == null || tileCD.moves.isEmpty()) {
             return stack;
         }
         NBTTagCompound tag = new NBTTagCompound();

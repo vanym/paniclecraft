@@ -92,6 +92,9 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     public boolean move(EntityPlayer player, ChessGame.Move move) {
+        if (this.imoves.size() >= 0xFFFF) {
+            return false;
+        }
         move = this.game.move(move);
         if (move == null) {
             return false;
