@@ -1,9 +1,11 @@
 package com.vanym.paniclecraft.command;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.network.message.MessageAdvSignOpenGui;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
@@ -45,6 +47,9 @@ public class CommandAdvSign extends TreeCommandBase {
                         tileAS.xCoord,
                         tileAS.yCoord,
                         tileAS.zCoord), player);
+            } else {
+                throw new CommandException(
+                        String.format("commands.%s.exception.noadvsign", DEF.MOD_ID));
             }
         }
     }

@@ -44,6 +44,7 @@ item.portableWorkbench.name=Portable Workbench
 
 commands.paniclecraft.exception.playerless=Only players can use this command
 commands.paniclecraft.exception.noblock=Can't find block you looking at
+commands.paniclecraft.exception.noadvsign=Can't find advsign you looking at
 commands.paniclecraft.exception.nopainting=Can't find picture you looking at
 
 commands.paniclecraft.pictureresize.success=Picture successfully resized from %d×%d to %d×%d
