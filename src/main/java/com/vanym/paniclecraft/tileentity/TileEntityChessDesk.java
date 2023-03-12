@@ -29,8 +29,10 @@ public class TileEntityChessDesk extends TileEntityBase {
     public static final String TAG_MOVES = "Moves";
     public static final String TAG_MOVE = "Move";
     public static final String TAG_PLAYER = "Player";
-    public static final String TAG_PLAYERUUID = "UUID";
     public static final String TAG_PLAYERNAME = "Name";
+    public static final String TAG_PLAYERUUID = "UUID";
+    public static final String TAG_PLAYERUUIDMOST = "UUIDMost";
+    public static final String TAG_PLAYERUUIDLEAST = "UUIDLeast";
     
     @Override
     public void writeToNBT(NBTTagCompound nbtTag) {
@@ -146,7 +148,8 @@ public class TileEntityChessDesk extends TileEntityBase {
             nbtTag.setString(TAG_MOVE, this.move.toString(false));
             NBTTagCompound playerTag = new NBTTagCompound();
             if (this.playerUUID != null) {
-                playerTag.setString(TAG_PLAYERUUID, this.playerUUID.toString());
+                playerTag.setLong(TAG_PLAYERUUIDMOST, this.playerUUID.getMostSignificantBits());
+                playerTag.setLong(TAG_PLAYERUUIDLEAST, this.playerUUID.getLeastSignificantBits());
             }
             if (this.playerName != null) {
                 playerTag.setString(TAG_PLAYERNAME, this.playerName);
@@ -165,6 +168,11 @@ public class TileEntityChessDesk extends TileEntityBase {
                 NBTTagCompound playerTag = nbtTag.getCompoundTag(TAG_PLAYER);
                 if (playerTag.hasKey(TAG_PLAYERUUID, 8)) {
                     this.playerUUID = UUID.fromString(playerTag.getString(TAG_PLAYERUUID));
+                } else if (playerTag.hasKey(TAG_PLAYERUUIDMOST, 4)
+                    && playerTag.hasKey(TAG_PLAYERUUIDLEAST, 4)) {
+                    this.playerUUID = new UUID(
+                            playerTag.getLong(TAG_PLAYERUUIDMOST),
+                            playerTag.getLong(TAG_PLAYERUUIDLEAST));
                 }
                 if (playerTag.hasKey(TAG_PLAYERNAME, 8)) {
                     this.playerName = playerTag.getString(TAG_PLAYERNAME);
