@@ -114,7 +114,7 @@ public class ModComponentAdvSign implements ModComponent {
     
     @Override
     public String getName() {
-        return "advSign";
+        return "advsign";
     }
     
     @Override
