@@ -98,6 +98,7 @@ public class ModComponentDeskGame implements ModComponent {
             return;
         }
         this.tileChessDeskRenderer = new TileEntityChessDeskRenderer();
+        this.tileChessDeskRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
         this.itemChessDeskRenderer = new ItemRendererChessDesk();
         MinecraftForgeClient.registerItemRenderer(this.itemChessDesk, this.itemChessDeskRenderer);
         this.configChangedClient(config);

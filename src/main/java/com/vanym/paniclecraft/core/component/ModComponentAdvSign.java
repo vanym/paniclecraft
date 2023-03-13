@@ -87,6 +87,7 @@ public class ModComponentAdvSign implements ModComponent {
             return;
         }
         this.tileAdvSignRenderer = new TileEntityAdvSignRenderer();
+        this.tileAdvSignRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
         this.itemAdvSignRenderer = new ItemRendererAdvSign();
         MinecraftForgeClient.registerItemRenderer(this.itemAdvSign, this.itemAdvSignRenderer);
         this.configChangedClient(config);

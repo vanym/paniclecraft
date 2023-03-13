@@ -82,6 +82,7 @@ public class ModComponentCannon implements ModComponent {
             return;
         }
         this.tileCannonRenderer = new TileEntityCannonRenderer();
+        this.tileCannonRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
         this.itemCannonRenderer = new ItemRendererCannon();
         MinecraftForgeClient.registerItemRenderer(this.itemCannon, this.itemCannonRenderer);
         this.configChangedClient(config);
