@@ -17,6 +17,9 @@ public class ItemRendererAdvSign implements IItemRenderer {
     
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        if (!Core.instance.advSign.renderAdvSignItem) {
+            return false;
+        }
         return true;
     }
     

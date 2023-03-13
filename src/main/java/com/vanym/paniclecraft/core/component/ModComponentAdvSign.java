@@ -19,6 +19,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -30,7 +31,12 @@ public class ModComponentAdvSign implements ModComponent {
     public BlockAdvSign blockAdvSign;
     
     @SideOnly(Side.CLIENT)
-    public TileEntityAdvSignRenderer tileAdvSignRenderer = new TileEntityAdvSignRenderer();
+    public TileEntityAdvSignRenderer tileAdvSignRenderer;
+    @SideOnly(Side.CLIENT)
+    public ItemRendererAdvSign itemAdvSignRenderer;
+    
+    @SideOnly(Side.CLIENT)
+    public boolean renderAdvSignItem = true;
     
     protected boolean enabled = false;
     
@@ -80,15 +86,29 @@ public class ModComponentAdvSign implements ModComponent {
         if (!this.isEnabled()) {
             return;
         }
+        this.tileAdvSignRenderer = new TileEntityAdvSignRenderer();
+        this.itemAdvSignRenderer = new ItemRendererAdvSign();
+        MinecraftForgeClient.registerItemRenderer(this.itemAdvSign, this.itemAdvSignRenderer);
+        this.configChangedClient(config);
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void configChangedClient(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
+        config.restartless();
+        this.renderAdvSignItem = config.getBoolean("advSignItem", CLIENT_RENDER, true, "");
         boolean advSignTile = config.getBoolean("advSignTile", CLIENT_RENDER, true, "");
         if (advSignTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAdvSign.class,
                                                          this.tileAdvSignRenderer);
+        } else {
+            TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(TileEntityAdvSign.class,
+                                                                             this.tileAdvSignRenderer);
         }
-        boolean advSignItem = config.getBoolean("advSignItem", CLIENT_RENDER, true, "");
-        if (advSignItem) {
-            MinecraftForgeClient.registerItemRenderer(this.itemAdvSign, new ItemRendererAdvSign());
-        }
+        config.restartlessReset();
     }
     
     @Override
