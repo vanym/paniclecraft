@@ -2,8 +2,11 @@ package com.vanym.paniclecraft.tileentity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import com.vanym.paniclecraft.client.gui.GuiChess;
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
@@ -25,6 +28,8 @@ public class TileEntityChessDesk extends TileEntityBase {
     protected final List<Move> imoves = new ArrayList<>();
     
     public final List<Move> moves = Collections.unmodifiableList(this.imoves);
+    
+    public final Set<BiConsumer<String, Object[]>> listeners = new HashSet<>();
     
     public static final String TAG_MOVES = "Moves";
     public static final String TAG_MOVE = "Move";
@@ -58,7 +63,8 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     public void readMovesFromNBT(NBTTagList listTag) {
-        this.resetGame();
+        this.game = new ChessGame();
+        this.imoves.clear();
         for (int i = 0; i < listTag.tagCount(); i++) {
             NBTTagCompound tag = listTag.getCompoundTagAt(i);
             Move wrap = new Move();
@@ -91,6 +97,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     public void resetGame() {
         this.game = new ChessGame();
         this.imoves.clear();
+        this.sendEvent("chess_reset");
     }
     
     public boolean move(ChessGame.Move move, EntityPlayer player) {
@@ -107,11 +114,16 @@ public class TileEntityChessDesk extends TileEntityBase {
         }
         this.imoves.add(new Move(move, playerUUID, playerName));
         this.markForUpdate();
+        this.sendEvent("chess_move", move.toString(), this.imoves.size());
         return true;
     }
     
     public ChessGame getGame() {
         return this.game;
+    }
+    
+    protected void sendEvent(String name, Object... args) {
+        this.listeners.forEach(b->b.accept(name, args));
     }
     
     @Override

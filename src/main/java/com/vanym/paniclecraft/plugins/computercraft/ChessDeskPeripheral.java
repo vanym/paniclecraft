@@ -44,10 +44,14 @@ public class ChessDeskPeripheral extends PeripheralBase {
     }
     
     @Override
-    public void attach(IComputerAccess computer) {}
+    public void attach(IComputerAccess computer) {
+        this.desk.listeners.add(new ComputerEventListener(computer));
+    }
     
     @Override
-    public void detach(IComputerAccess computer) {}
+    public void detach(IComputerAccess computer) {
+        this.desk.listeners.remove(new ComputerEventListener(computer));
+    }
     
     @Override
     public boolean equals(IPeripheral other) {
