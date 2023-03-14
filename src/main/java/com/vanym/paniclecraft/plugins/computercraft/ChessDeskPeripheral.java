@@ -1,8 +1,6 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
@@ -25,12 +23,7 @@ public class ChessDeskPeripheral extends PeripheralBase {
     
     @PeripheralMethod(1)
     protected Map<Integer, String> getMoves() {
-        Map<Integer, String> map = new TreeMap<>();
-        Iterator<TileEntityChessDesk.Move> it = this.desk.moves.iterator();
-        for (int i = 1; it.hasNext(); ++i) {
-            map.put(i, it.next().move.toString());
-        }
-        return map;
+        return toLuaArray(this.desk.moves.stream().map(m->m.move.toString())::iterator);
     }
     
     @PeripheralMethod(11)
