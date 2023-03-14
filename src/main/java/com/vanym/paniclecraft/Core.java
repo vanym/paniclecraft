@@ -11,6 +11,7 @@ import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.ModComponent;
+import com.vanym.paniclecraft.core.component.ModComponent.IServerSideConfig;
 import com.vanym.paniclecraft.core.component.ModComponentAdvSign;
 import com.vanym.paniclecraft.core.component.ModComponentBroom;
 import com.vanym.paniclecraft.core.component.ModComponentCannon;
@@ -18,6 +19,7 @@ import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.item.ItemMod3;
+import com.vanym.paniclecraft.network.message.MessageComponentConfig;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
 
 import cpw.mods.fml.client.event.ConfigChangedEvent;
@@ -34,12 +36,14 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLEmbeddedChannel;
+import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.Packet;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.RecipeSorter;
 
@@ -125,6 +129,8 @@ public class Core implements IGuiHandler {
         RecipeSorter.register(DEF.MOD_ID + ":dummyshapeless", RecipeDummy.Shapeless.class,
                               RecipeSorter.Category.SHAPELESS,
                               "after:forge:shapedore after:forge:shapelessore");
+        Core.instance.network.registerMessage(MessageComponentConfig.class,
+                                              MessageComponentConfig.class, 5, Side.CLIENT);
     }
     
     @EventHandler
@@ -175,6 +181,24 @@ public class Core implements IGuiHandler {
     
     public FMLEmbeddedChannel getChannel(Side source) {
         return NetworkRegistry.INSTANCE.getChannel(DEF.MOD_ID, source);
+    }
+    
+    @SubscribeEvent
+    public void onConnectionFromClient(FMLNetworkEvent.ServerConnectionFromClientEvent event) {
+        Core.instance.getComponents().forEach(event.isLocal ? component-> {
+            IServerSideConfig config = component.getServerSideConfig();
+            if (config != null) {
+                component.setServerSideConfig(config);
+            }
+        } : component-> {
+            MessageComponentConfig message = new MessageComponentConfig(component);
+            if (message.isEmpty()) {
+                return;
+            }
+            FMLEmbeddedChannel channel = Core.instance.getChannel(Side.SERVER);
+            Packet packet = channel.generatePacketFrom(message);
+            event.manager.scheduleOutboundPacket(packet);
+        });
     }
     
     @Override

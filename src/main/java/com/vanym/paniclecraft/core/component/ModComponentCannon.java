@@ -16,6 +16,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -28,7 +29,8 @@ public class ModComponentCannon implements ModComponent {
     public BlockCannon blockCannon;
     public ItemBlock itemCannon;
     
-    public ChangeableConfig config = new ChangeableConfig();
+    protected ChangeableConfig myServerConfig = new ChangeableConfig();
+    public ChangeableConfig config = this.myServerConfig;
     
     @SideOnly(Side.CLIENT)
     public TileEntityCannonRenderer tileCannonRenderer;
@@ -67,12 +69,12 @@ public class ModComponentCannon implements ModComponent {
         Core.instance.network.registerMessage(MessageCannonSet.class, MessageCannonSet.class, 51,
                                               Side.SERVER);
         
-        this.config = new ChangeableConfig().read(config);
+        this.configChanged(config);
     }
     
     @Override
     public void configChanged(ModConfig config) {
-        this.config.read(config);
+        this.myServerConfig.read(config);
     }
     
     @Override
@@ -122,13 +124,29 @@ public class ModComponentCannon implements ModComponent {
         return Arrays.asList(this.itemCannon);
     }
     
-    public class ChangeableConfig {
+    @Override
+    public void setServerSideConfig(IServerSideConfig config) {
+        this.config = (ChangeableConfig)config;
+    }
+    
+    @Override
+    public IServerSideConfig getServerSideConfig() {
+        return this.myServerConfig;
+    }
+    
+    public class ChangeableConfig implements IServerSideConfig {
         
         public double maxStrength = 5.0D;
         public int pickupDelay = 25;
         public int shootTimeout = 2;
         
         protected ChangeableConfig() {}
+        
+        protected ChangeableConfig(ChangeableConfig config) {
+            this.maxStrength = config.maxStrength;
+            this.pickupDelay = config.pickupDelay;
+            this.shootTimeout = config.shootTimeout;
+        }
         
         public ChangeableConfig read(ModConfig config) {
             config.restartless();
@@ -140,6 +158,25 @@ public class ModComponentCannon implements ModComponent {
                                              "shooted items pickup delay in game ticks");
             config.restartlessReset();
             return this;
+        }
+        
+        @Override
+        public void fromBytes(ByteBuf buf) {
+            this.maxStrength = buf.readDouble();
+            this.pickupDelay = buf.readInt();
+            this.shootTimeout = buf.readInt();
+        }
+        
+        @Override
+        public void toBytes(ByteBuf buf) {
+            buf.writeDouble(this.maxStrength);
+            buf.writeInt(this.pickupDelay);
+            buf.writeInt(this.shootTimeout);
+        }
+        
+        @Override
+        public IServerSideConfig copy() {
+            return new ChangeableConfig(this);
         }
     }
 }

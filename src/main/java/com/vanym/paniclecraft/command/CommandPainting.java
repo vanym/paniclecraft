@@ -47,16 +47,16 @@ public class CommandPainting extends TreeCommandBase {
         @Override
         public boolean canCommandSenderUseCommand(ICommandSender sender) {
             if (!this.edit && !this.to
-                && Core.instance.painting.config.freePaintingView) {
+                && Core.instance.painting.server.freePaintingView) {
                 return true;
             } else if (this.edit && !this.to
-                && Core.instance.painting.config.freePaintingEditView) {
+                && Core.instance.painting.server.freePaintingEditView) {
                 return true;
             } else if (!this.edit && this.to
-                && Core.instance.painting.config.freePaintingViewTo) {
+                && Core.instance.painting.server.freePaintingViewTo) {
                 return true;
             } else if (this.edit && this.to
-                && Core.instance.painting.config.freePaintingEditViewTo) {
+                && Core.instance.painting.server.freePaintingEditViewTo) {
                 return true;
             } else {
                 return super.canCommandSenderUseCommand(sender);

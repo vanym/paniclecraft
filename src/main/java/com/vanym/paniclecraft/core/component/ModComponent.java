@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.vanym.paniclecraft.core.ModConfig;
 
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.Item;
@@ -36,5 +37,15 @@ public interface ModComponent {
     
     default public List<Item> getItems() {
         return null;
+    }
+    
+    default public void setServerSideConfig(IServerSideConfig config) {}
+    
+    default public IServerSideConfig getServerSideConfig() {
+        return null;
+    }
+    
+    public interface IServerSideConfig extends IMessage {
+        public IServerSideConfig copy();
     }
 }

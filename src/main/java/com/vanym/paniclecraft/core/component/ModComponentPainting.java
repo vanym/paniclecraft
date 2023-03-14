@@ -4,10 +4,12 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -55,6 +57,7 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -81,7 +84,10 @@ public class ModComponentPainting implements ModComponent {
     public BlockPainting blockPainting;
     public BlockPaintingFrame blockPaintingFrame;
     
-    public ChangeableConfig config = new ChangeableConfig();
+    protected ChangeableConfig myServerConfig = new ChangeableConfig();
+    public ChangeableConfig config = this.myServerConfig;
+    
+    public ChangeableServerConfig server = new ChangeableServerConfig();
     
     @SideOnly(Side.CLIENT)
     protected TileEntityPaintingRenderer paintingTileRenderer;
@@ -152,14 +158,14 @@ public class ModComponentPainting implements ModComponent {
                                               MessagePaintingViewAddPicture.class, 34,
                                               Side.SERVER);
         this.initRecipe(config);
-        this.config = new ChangeableConfig().read(config);
+        this.configChanged(config);
         this.applyConfig();
     }
     
     @Override
     public void configChanged(ModConfig config) {
-        this.config.read(config);
-        this.applyConfig();
+        this.myServerConfig.read(config);
+        this.server.read(config);
     }
     
     protected void applyConfig() {
@@ -464,6 +470,16 @@ public class ModComponentPainting implements ModComponent {
                              this.itemPalette);
     }
     
+    @Override
+    public void setServerSideConfig(IServerSideConfig config) {
+        this.config = (ChangeableConfig)config;
+    }
+    
+    @Override
+    public IServerSideConfig getServerSideConfig() {
+        return this.myServerConfig;
+    }
+    
     protected static final String[] DEFAULT_BRUSH_RADIUSES = new String[]{"1: 1.5",
                                                                           "12: 2.5",
                                                                           "16: 3.5",
@@ -474,7 +490,7 @@ public class ModComponentPainting implements ModComponent {
     
     protected static final String[] DEFAULT_SMALL_BRUSH_RADIUSES = new String[]{"1: 0.1"};
     
-    public class ChangeableConfig {
+    public class ChangeableConfig implements IServerSideConfig {
         
         public int paintingPlaceStack = 2;
         public final IPictureSize paintingDefaultSize = new DefaultPictureSize();
@@ -507,15 +523,6 @@ public class ModComponentPainting implements ModComponent {
         protected final SortedMap<Integer, Double> iRemoverRadiuses = new TreeMap<>();
         protected final SortedMap<Integer, Double> iSmallRemoverRadiuses = new TreeMap<>();
         
-        public boolean freePaintingView = true;
-        public boolean freePaintingEditView = false;
-        public boolean freePaintingViewTo = false;
-        public boolean freePaintingEditViewTo = false;
-        public boolean freePaintOnBlockView = true;
-        public boolean freePaintOnBlockEditView = false;
-        public boolean freePaintOnBlockViewTo = false;
-        public boolean freePaintOnBlockEditViewTo = false;
-        
         protected ChangeableConfig() {
             this.brushRadiuses = Collections.unmodifiableSortedMap(this.iBrushRadiuses);
             this.smallBrushRadiuses = Collections.unmodifiableSortedMap(this.iSmallBrushRadiuses);
@@ -533,96 +540,70 @@ public class ModComponentPainting implements ModComponent {
             this.iSmallRemoverRadiuses.putAll(this.iSmallBrushRadiuses);
         }
         
+        protected ChangeableConfig(ChangeableConfig config) {
+            this();
+            this.paintingPlaceStack = config.paintingPlaceStack;
+            this.allowPaintOnBlock = config.allowPaintOnBlock;
+            this.anyBlockValidForPaint = config.anyBlockValidForPaint;
+            this.copyOnAnvil = config.copyOnAnvil;
+            this.copyOnAnvilCost = config.copyOnAnvilCost;
+            this.paintingMaxCraftableWidth = config.paintingMaxCraftableWidth;
+            this.paintingMaxCraftableHeight = config.paintingMaxCraftableHeight;
+            this.paintingDefaultWidth = config.paintingDefaultWidth;
+            this.paintingDefaultHeight = config.paintingDefaultHeight;
+            this.paintOnBlockDefaultWidth = config.paintOnBlockDefaultWidth;
+            this.paintOnBlockDefaultHeight = config.paintOnBlockDefaultHeight;
+            
+            this.iBrushRadiuses.clear();
+            this.iBrushRadiuses.putAll(config.iBrushRadiuses);
+            this.iSmallBrushRadiuses.clear();
+            this.iSmallBrushRadiuses.putAll(config.iSmallBrushRadiuses);
+            
+            this.iRemoverRadiuses.clear();
+            this.iRemoverRadiuses.putAll(config.iRemoverRadiuses);
+            this.iSmallRemoverRadiuses.clear();
+            this.iSmallRemoverRadiuses.putAll(config.iSmallRemoverRadiuses);
+        }
+        
         public ChangeableConfig read(ModConfig config) {
+            String name = ModComponentPainting.this.getName();
             config.restartless();
-            this.paintingPlaceStack =
-                    config.getInt("paintingPlaceStack", ModComponentPainting.this.getName(),
-                                  2, 0, 64, "");
+            this.paintingPlaceStack = config.getInt("paintingPlaceStack", name, 2, 0, 64, "");
             this.paintingDefaultWidth =
-                    config.getInt("paintingDefaultWidth", ModComponentPainting.this.getName(),
-                                  16, 1, ModComponentPainting.this.MAX_WIDTH, "");
+                    config.getInt("paintingDefaultWidth", name, 16, 1,
+                                  ModComponentPainting.this.MAX_WIDTH, "");
             this.paintingDefaultHeight =
-                    config.getInt("paintingDefaultHeight", ModComponentPainting.this.getName(),
-                                  16, 1, ModComponentPainting.this.MAX_HEIGHT,
+                    config.getInt("paintingDefaultHeight", name, 16, 1,
+                                  ModComponentPainting.this.MAX_HEIGHT,
                                   "(recommended to equals width)");
-            this.allowPaintOnBlock =
-                    config.getBoolean("allowPaintOnBlock", ModComponentPainting.this.getName(),
-                                      false, "");
+            this.allowPaintOnBlock = config.getBoolean("allowPaintOnBlock", name, false, "");
             this.paintOnBlockDefaultWidth =
-                    config.getInt("paintOnBlockDefaultWidth", ModComponentPainting.this.getName(),
-                                  16, 1, ModComponentPainting.this.MAX_WIDTH, "");
+                    config.getInt("paintOnBlockDefaultWidth", name, 16, 1,
+                                  ModComponentPainting.this.MAX_WIDTH, "");
             this.paintOnBlockDefaultHeight =
-                    config.getInt("paintOnBlockDefaultHeight", ModComponentPainting.this.getName(),
-                                  16, 1, ModComponentPainting.this.MAX_HEIGHT,
+                    config.getInt("paintOnBlockDefaultHeight", name, 16, 1,
+                                  ModComponentPainting.this.MAX_HEIGHT,
                                   "(highly recommended to equals width)");
             this.anyBlockValidForPaint =
-                    config.getBoolean("anyBlockValidForPaint", ModComponentPainting.this.getName(),
-                                      false, "");
+                    config.getBoolean("anyBlockValidForPaint", name, false, "");
             this.paintingMaxCraftableWidth =
-                    config.getInt("paintingMaxCraftableWidth", ModComponentPainting.this.getName(),
-                                  64, 1, ModComponentPainting.this.MAX_WIDTH, "");
+                    config.getInt("paintingMaxCraftableWidth", name, 64, 1,
+                                  ModComponentPainting.this.MAX_WIDTH, "");
             this.paintingMaxCraftableHeight =
-                    config.getInt("paintingMaxCraftableHeight", ModComponentPainting.this.getName(),
-                                  64, 1, ModComponentPainting.this.MAX_HEIGHT, "");
-            this.copyOnAnvil =
-                    config.getBoolean("copyOnAnvil", ModComponentPainting.this.getName(), true, "");
-            this.copyOnAnvilCost =
-                    config.getInt("copyOnAnvilCost", ModComponentPainting.this.getName(), 5, 0, 40,
-                                  "");
-            {
-                String[] lines = config.getStringList("brushRadiuses",
-                                                      ModComponentPainting.this.getName(),
-                                                      DEFAULT_BRUSH_RADIUSES, "");
-                this.iBrushRadiuses.clear();
-                parseRadiuses(lines, this.iBrushRadiuses);
-            }
-            {
-                String[] lines = config.getStringList("smallBrushRadiuses",
-                                                      ModComponentPainting.this.getName(),
-                                                      DEFAULT_SMALL_BRUSH_RADIUSES, "");
-                this.iSmallBrushRadiuses.clear();
-                parseRadiuses(lines, this.iSmallBrushRadiuses);
-            }
-            {
-                String[] lines = config.getStringList("removerRadiuses",
-                                                      ModComponentPainting.this.getName(),
-                                                      DEFAULT_BRUSH_RADIUSES, "");
-                this.iRemoverRadiuses.clear();
-                parseRadiuses(lines, this.iRemoverRadiuses);
-            }
-            {
-                String[] lines = config.getStringList("smallRemoverRadiuses",
-                                                      ModComponentPainting.this.getName(),
-                                                      DEFAULT_SMALL_BRUSH_RADIUSES, "");
-                this.iSmallRemoverRadiuses.clear();
-                parseRadiuses(lines, this.iSmallRemoverRadiuses);
-            }
-            this.freePaintingView =
-                    config.getBoolean("freePaintingView", ModComponentPainting.this.getName(),
-                                      true, "");
-            this.freePaintingEditView =
-                    config.getBoolean("freePaintingEditView", ModComponentPainting.this.getName(),
-                                      false, "");
-            this.freePaintingViewTo =
-                    config.getBoolean("freePaintingViewTo", ModComponentPainting.this.getName(),
-                                      false, "");
-            this.freePaintingEditViewTo =
-                    config.getBoolean("freePaintingEditViewTo", ModComponentPainting.this.getName(),
-                                      false, "");
-            this.freePaintOnBlockView =
-                    config.getBoolean("freePaintOnBlockView", ModComponentPainting.this.getName(),
-                                      true, "");
-            this.freePaintOnBlockEditView =
-                    config.getBoolean("freePaintOnBlockEditView",
-                                      ModComponentPainting.this.getName(),
-                                      false, "");
-            this.freePaintOnBlockViewTo =
-                    config.getBoolean("freePaintOnBlockViewTo", ModComponentPainting.this.getName(),
-                                      false, "");
-            this.freePaintOnBlockEditViewTo =
-                    config.getBoolean("freePaintOnBlockEditViewTo",
-                                      ModComponentPainting.this.getName(),
-                                      false, "");
+                    config.getInt("paintingMaxCraftableHeight", name, 64, 1,
+                                  ModComponentPainting.this.MAX_HEIGHT, "");
+            this.copyOnAnvil = config.getBoolean("copyOnAnvil", name, true, "");
+            this.copyOnAnvilCost = config.getInt("copyOnAnvilCost", name, 5, 0, 40, "");
+            parseRadiuses(config.getStringList("brushRadiuses", name, DEFAULT_BRUSH_RADIUSES, ""),
+                          this.iBrushRadiuses);
+            parseRadiuses(config.getStringList("smallBrushRadiuses", name,
+                                               DEFAULT_SMALL_BRUSH_RADIUSES, ""),
+                          this.iSmallBrushRadiuses);
+            parseRadiuses(config.getStringList("removerRadiuses", name, DEFAULT_BRUSH_RADIUSES, ""),
+                          this.iRemoverRadiuses);
+            parseRadiuses(config.getStringList("smallRemoverRadiuses", name,
+                                               DEFAULT_SMALL_BRUSH_RADIUSES, ""),
+                          this.iSmallRemoverRadiuses);
             config.restartlessReset();
             return this;
         }
@@ -651,6 +632,82 @@ public class ModComponentPainting implements ModComponent {
             public int getHeight() {
                 return ChangeableConfig.this.paintOnBlockDefaultHeight;
             }
+        }
+        
+        @Override
+        public void fromBytes(ByteBuf buf) {
+            this.paintingPlaceStack = buf.readInt();
+            this.allowPaintOnBlock = buf.readBoolean();
+            this.anyBlockValidForPaint = buf.readBoolean();
+            this.copyOnAnvil = buf.readBoolean();
+            this.copyOnAnvilCost = buf.readInt();
+            this.paintingMaxCraftableWidth = buf.readInt();
+            this.paintingMaxCraftableHeight = buf.readInt();
+            this.paintingDefaultWidth = buf.readInt();
+            this.paintingDefaultHeight = buf.readInt();
+            this.paintOnBlockDefaultWidth = buf.readInt();
+            this.paintOnBlockDefaultHeight = buf.readInt();
+            readMap(buf, this.iBrushRadiuses);
+            readMap(buf, this.iSmallBrushRadiuses);
+            readMap(buf, this.iRemoverRadiuses);
+            readMap(buf, this.iSmallRemoverRadiuses);
+        }
+        
+        @Override
+        public void toBytes(ByteBuf buf) {
+            buf.writeInt(this.paintingPlaceStack);
+            buf.writeBoolean(this.allowPaintOnBlock);
+            buf.writeBoolean(this.anyBlockValidForPaint);
+            buf.writeBoolean(this.copyOnAnvil);
+            buf.writeInt(this.copyOnAnvilCost);
+            buf.writeInt(this.paintingMaxCraftableWidth);
+            buf.writeInt(this.paintingMaxCraftableHeight);
+            buf.writeInt(this.paintingDefaultWidth);
+            buf.writeInt(this.paintingDefaultHeight);
+            buf.writeInt(this.paintOnBlockDefaultWidth);
+            buf.writeInt(this.paintOnBlockDefaultHeight);
+            writeMap(buf, this.iBrushRadiuses);
+            writeMap(buf, this.iSmallBrushRadiuses);
+            writeMap(buf, this.iRemoverRadiuses);
+            writeMap(buf, this.iSmallRemoverRadiuses);
+        }
+        
+        @Override
+        public IServerSideConfig copy() {
+            return new ChangeableConfig(this);
+        }
+    }
+    
+    public class ChangeableServerConfig {
+        
+        public boolean freePaintingView = true;
+        public boolean freePaintingEditView = false;
+        public boolean freePaintingViewTo = false;
+        public boolean freePaintingEditViewTo = false;
+        public boolean freePaintOnBlockView = true;
+        public boolean freePaintOnBlockEditView = false;
+        public boolean freePaintOnBlockViewTo = false;
+        public boolean freePaintOnBlockEditViewTo = false;
+        
+        protected ChangeableServerConfig() {}
+        
+        public ChangeableServerConfig read(ModConfig config) {
+            String name = ModComponentPainting.this.getName();
+            config.restartless();
+            this.freePaintingView = config.getBoolean("freePaintingView", name, true, "");
+            this.freePaintingEditView = config.getBoolean("freePaintingEditView", name, false, "");
+            this.freePaintingViewTo = config.getBoolean("freePaintingViewTo", name, false, "");
+            this.freePaintingEditViewTo =
+                    config.getBoolean("freePaintingEditViewTo", name, false, "");
+            this.freePaintOnBlockView = config.getBoolean("freePaintOnBlockView", name, true, "");
+            this.freePaintOnBlockEditView =
+                    config.getBoolean("freePaintOnBlockEditView", name, false, "");
+            this.freePaintOnBlockViewTo =
+                    config.getBoolean("freePaintOnBlockViewTo", name, false, "");
+            this.freePaintOnBlockEditViewTo =
+                    config.getBoolean("freePaintOnBlockEditViewTo", name, false, "");
+            config.restartlessReset();
+            return this;
         }
     }
     
@@ -745,13 +802,14 @@ public class ModComponentPainting implements ModComponent {
         }
     }
     
-    protected static void parseRadiuses(String[] lines, SortedMap<Integer, Double> radiuses) {
+    protected static void parseRadiuses(String[] lines, Map<Integer, Double> radiuses) {
+        radiuses.clear();
         for (String line : lines) {
             parseRadius(line, radiuses);
         }
     }
     
-    protected static void parseRadius(String line, SortedMap<Integer, Double> radiuses) {
+    protected static void parseRadius(String line, Map<Integer, Double> radiuses) {
         int cut = line.indexOf(':');
         if (cut == -1) {
             return;
@@ -762,5 +820,22 @@ public class ModComponentPainting implements ModComponent {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
+    }
+    
+    protected static void readMap(ByteBuf buf, Map<Integer, Double> map) {
+        map.clear();
+        IntStream.range(0, buf.readInt()).forEach(i-> {
+            int size = buf.readInt();
+            double radius = buf.readDouble();
+            map.put(size, radius);
+        });
+    }
+    
+    protected static void writeMap(ByteBuf buf, Map<Integer, Double> map) {
+        buf.writeInt(map.size());
+        map.forEach((s, r)-> {
+            buf.writeInt(s);
+            buf.writeDouble(r);
+        });
     }
 }
