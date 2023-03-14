@@ -93,7 +93,11 @@ public class TileEntityChessDesk extends TileEntityBase {
         this.imoves.clear();
     }
     
-    public boolean move(EntityPlayer player, ChessGame.Move move) {
+    public boolean move(ChessGame.Move move, EntityPlayer player) {
+        return this.move(move, player.getCommandSenderName(), player.getUniqueID());
+    }
+    
+    public boolean move(ChessGame.Move move, String playerName, UUID playerUUID) {
         if (this.imoves.size() >= 0xFFFF) {
             return false;
         }
@@ -101,7 +105,8 @@ public class TileEntityChessDesk extends TileEntityBase {
         if (move == null) {
             return false;
         }
-        this.imoves.add(new Move(move, player.getUniqueID(), player.getCommandSenderName()));
+        this.imoves.add(new Move(move, playerUUID, playerName));
+        this.markForUpdate();
         return true;
     }
     

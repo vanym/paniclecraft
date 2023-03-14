@@ -54,8 +54,7 @@ public class MessageChessMove implements IMessage, IMessageHandler<MessageChessM
             && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
                                           message.z + 0.5D) <= 64.0D) {
             TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
-            tileCD.move(playerEntity, message.move);
-            tileCD.markForUpdate();
+            tileCD.move(message.move, playerEntity);
         }
         return null;
     }

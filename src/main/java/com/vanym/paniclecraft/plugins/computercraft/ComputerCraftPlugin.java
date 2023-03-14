@@ -12,6 +12,8 @@ public class ComputerCraftPlugin implements ModComponent {
     
     public CannonPeripheralProvider tileEntityCannonPeripheralProvider;
     
+    public ChessDeskPeripheralProvider tileEntityChessDeskPeripheralProvider;
+    
     public PaintingPeripheralProvider tileEntityPaintingPeripheralProvider;
     public PaintingFramePeripheralProvider tileEntityPaintingFramePeripheralProvider;
     public TurtlePaintBrush turtlePaintBrush;
@@ -21,6 +23,10 @@ public class ComputerCraftPlugin implements ModComponent {
         if (config.getBoolean("peripheralCannon", this.getName(), true, "")) {
             ComputerCraftAPI.registerPeripheralProvider(this.tileEntityCannonPeripheralProvider =
                     new CannonPeripheralProvider());
+        }
+        if (config.getBoolean("peripheralChessDesk", this.getName(), true, "")) {
+            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityChessDeskPeripheralProvider =
+                    new ChessDeskPeripheralProvider());
         }
         if (config.getBoolean("peripheralPainting", this.getName(), false, "")) {
             ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingPeripheralProvider =
