@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.client.gui.element;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -110,9 +111,10 @@ public class GuiCircularSlider extends GuiButton {
     
     @Override
     public boolean mousePressed(Minecraft mc, int x, int y) {
+        Point2D.Double p = GuiUtils.getMousePoint();
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.xPosition + raduish, ycenter = this.yPosition + raduisv;
-        double dx = x - xcenter, dy = y - ycenter;
+        double dx = p.x - xcenter, dy = p.y - ycenter;
         this.pressed = Math.pow(dx, 2) / Math.pow(raduish, 2) +
                        Math.pow(dy, 2) / Math.pow(raduisv, 2) <= 1.0D
             && this.fromRadians(Math.atan2(dy, dx)) <= this.max;
@@ -133,9 +135,10 @@ public class GuiCircularSlider extends GuiButton {
         if (!this.pressed || this.setter == null) {
             return;
         }
+        Point2D.Double p = GuiUtils.getMousePoint();
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.xPosition + raduish, ycenter = this.yPosition + raduisv;
-        double value = this.fromRadians(Math.atan2(y - ycenter, x - xcenter));
+        double value = this.fromRadians(Math.atan2(p.y - ycenter, p.x - xcenter));
         if (value > this.max) {
             double left = 1.0D - this.max;
             if (value - this.max > left / 2.0D) {

@@ -1,12 +1,19 @@
 package com.vanym.paniclecraft.client.gui;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 
+@SideOnly(Side.CLIENT)
 public class GuiUtils {
     
     public static void drawLine(double x1, double y1, double x2, double y2, Color color) {
@@ -29,5 +36,13 @@ public class GuiUtils {
         tessellator.draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
+    }
+    
+    public static Point2D.Double getMousePoint() {
+        Minecraft mc = Minecraft.getMinecraft();
+        GuiScreen screen = mc.currentScreen;
+        double x = Mouse.getEventX() * screen.width / (double)mc.displayWidth;
+        double y = screen.height - Mouse.getEventY() * screen.height / (double)mc.displayHeight - 1;
+        return new Point2D.Double(x, y);
     }
 }
