@@ -29,6 +29,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool {
     
@@ -39,13 +40,22 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
     
     @SideOnly(Side.CLIENT)
-    protected Set<MessagePaintingToolUse> brushUseMessages = new HashSet<>();
+    protected Set<MessagePaintingToolUse> brushUseMessages;
+    
+    @SideOnly(Side.CLIENT)
+    public void initClient() {
+        this.brushUseMessages = new HashSet<>();
+    }
     
     @Override
     public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-        if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            return;
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            this.onUsingTickClient(stack, player, count);
         }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected void onUsingTickClient(ItemStack stack, EntityPlayer player, int count) {
         Minecraft mc = Minecraft.getMinecraft();
         MessagePaintingToolUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
         if (mes != null) {
@@ -55,20 +65,15 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     }
     
     @Override
-    public void onPlayerStoppedUsing(
-            ItemStack itemStack,
-            World world,
-            EntityPlayer player,
-            int count) {
-        if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            return;
+    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int count) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            this.flashBrushUseMessages();
         }
-        this.flashBrushUseMessages();
     }
     
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    public void renderWorldLast(net.minecraftforge.client.event.RenderWorldLastEvent event) {
+    public void renderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         ItemStack itemStack = mc.thePlayer.getItemInUse();
         if (itemStack != null && itemStack.getItem() == this) {

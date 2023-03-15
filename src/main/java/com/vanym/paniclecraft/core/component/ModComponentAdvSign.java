@@ -36,7 +36,7 @@ public class ModComponentAdvSign implements ModComponent {
     public ItemRendererAdvSign itemAdvSignRenderer;
     
     @SideOnly(Side.CLIENT)
-    public boolean renderAdvSignItem = true;
+    public boolean renderAdvSignItem;
     
     protected boolean enabled = false;
     

@@ -13,12 +13,16 @@ import dan200.computercraft.api.turtle.TurtleCommandResult;
 import dan200.computercraft.api.turtle.TurtleSide;
 import dan200.computercraft.api.turtle.TurtleUpgradeType;
 import dan200.computercraft.api.turtle.TurtleVerb;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
+import net.minecraftforge.client.event.TextureStitchEvent;
 
 public class TurtlePaintBrush implements ITurtleUpgrade {
     
+    @SideOnly(Side.CLIENT)
     protected IIcon iconLeft;
+    @SideOnly(Side.CLIENT)
     protected IIcon iconRight;
     
     public TurtlePaintBrush() {}
@@ -59,6 +63,7 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     }
     
     @Override
+    @SideOnly(Side.CLIENT)
     public IIcon getIcon(ITurtleAccess turtle, TurtleSide side) {
         switch (side) {
             default:
@@ -74,8 +79,8 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    public void textureStitchEvent(net.minecraftforge.client.event.TextureStitchEvent.Pre event) {
-        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getMinecraft();
+    public void textureStitchEvent(TextureStitchEvent.Pre event) {
+        Minecraft mc = Minecraft.getMinecraft();
         if (event.map.getTextureType() == mc.getTextureMapBlocks().getTextureType()) {
             this.iconLeft = event.map.registerIcon(DEF.MOD_ID + ":turtle.paintBrush.left");
             this.iconRight = event.map.registerIcon(DEF.MOD_ID + ":turtle.paintBrush.right");

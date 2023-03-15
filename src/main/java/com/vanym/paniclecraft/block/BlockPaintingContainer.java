@@ -27,7 +27,7 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     }
     
     @SideOnly(Side.CLIENT)
-    protected SpecialRendererPhase specialRendererPhase = SpecialRendererPhase.NONE;
+    protected SpecialRendererPhase specialRendererPhase;
     
     @SideOnly(Side.CLIENT)
     protected AxisAlignedBB specialRendererBox;
@@ -41,6 +41,11 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
     public double getPaintingOutlineSize() {
         return this.paintingOutlineSize;
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public void initClient() {
+        this.setRendererPhase(SpecialRendererPhase.NONE);
     }
     
     @SideOnly(Side.CLIENT)

@@ -2,11 +2,10 @@ package com.vanym.paniclecraft.client.renderer;
 
 import java.util.HashMap;
 
-import com.vanym.paniclecraft.client.ClientProxy;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
@@ -44,7 +43,7 @@ public class PictureTextureCache {
     }
     
     protected void clearTexture(int texture) {
-        ClientProxy.deleteTexture(texture);
+        TextureUtil.deleteTexture(texture);
     }
     
     @SubscribeEvent

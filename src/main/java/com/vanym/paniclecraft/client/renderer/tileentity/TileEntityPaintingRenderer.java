@@ -158,7 +158,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     
     public static IIcon bindTexture(Picture picture, int side) {
         boolean newtexture = false;
-        if (picture.texture < 0) {
+        if (picture.texture == null) {
             picture.texture = GL11.glGenTextures();
             newtexture = true;
         }

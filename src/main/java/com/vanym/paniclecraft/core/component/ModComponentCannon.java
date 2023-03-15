@@ -38,7 +38,7 @@ public class ModComponentCannon implements ModComponent {
     public ItemRendererCannon itemCannonRenderer;
     
     @SideOnly(Side.CLIENT)
-    public boolean renderCannonItem = true;
+    public boolean renderCannonItem;
     
     protected boolean enabled = false;
     

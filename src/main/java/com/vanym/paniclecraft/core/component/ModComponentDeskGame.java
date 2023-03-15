@@ -36,7 +36,7 @@ public class ModComponentDeskGame implements ModComponent {
     public ItemRendererChessDesk itemChessDeskRenderer;
     
     @SideOnly(Side.CLIENT)
-    public boolean renderChessDeskItem = true;
+    public boolean renderChessDeskItem;
     
     protected boolean enabled = false;
     

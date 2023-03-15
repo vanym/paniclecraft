@@ -10,6 +10,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -62,6 +64,7 @@ public class MessageOpenPaintingView
     }
     
     @Override
+    @SideOnly(Side.CLIENT)
     public IMessage onMessage(MessageOpenPaintingView message, MessageContext ctx) {
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
         ContainerPaintingViewClient view = new ContainerPaintingViewClient(

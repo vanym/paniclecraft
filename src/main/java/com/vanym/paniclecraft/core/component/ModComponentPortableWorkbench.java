@@ -21,7 +21,7 @@ public class ModComponentPortableWorkbench implements ModComponent {
     public ItemWorkbench itemWorkbench;
     
     @SideOnly(Side.CLIENT)
-    public boolean renderWorkbenchItem = true;
+    public boolean renderWorkbenchItem;
     
     protected boolean enabled = false;
     

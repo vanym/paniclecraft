@@ -37,7 +37,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class BlockPaintingFrame extends BlockPaintingContainer {
     
     @SideOnly(Side.CLIENT)
-    protected int specialRendererSide = -1;
+    protected int specialRendererSide;
     
     protected final double frameOutlineSize;
     
@@ -49,6 +49,13 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         this.setHardness(0.6F);
         this.frameOutlineSize = (1.0D / 16D) * 2.0D;
         this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameOutlineSize));
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void initClient() {
+        super.initClient();
+        this.specialRendererSide = -1;
     }
     
     @SideOnly(Side.CLIENT)

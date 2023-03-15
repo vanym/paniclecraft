@@ -1,7 +1,5 @@
 package com.vanym.paniclecraft.client;
 
-import org.lwjgl.opengl.GL11;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.CommonProxy;
 import com.vanym.paniclecraft.core.ModConfig;
@@ -35,10 +33,5 @@ public class ClientProxy extends CommonProxy {
         for (ModComponent component : Core.instance.getComponents()) {
             component.configChangedClient(config);
         }
-    }
-    
-    public static void deleteTexture(int texID) {
-        GL11.glDeleteTextures(texID);
-        // System.out.println(texID);
     }
 }

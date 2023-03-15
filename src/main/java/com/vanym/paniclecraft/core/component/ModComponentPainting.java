@@ -100,12 +100,12 @@ public class ModComponentPainting implements ModComponent {
     @SideOnly(Side.CLIENT)
     protected ItemRendererPaintingFrame paintingFrameItemRenderer;
     @SideOnly(Side.CLIENT)
-    protected PaintingSpecialSelectionBox paintingSpecialSelectionBox = null;
+    protected PaintingSpecialSelectionBox paintingSpecialSelectionBox;
     @SideOnly(Side.CLIENT)
     protected EntityPaintOnBlockRenderer paintOnBlockRenderer;
     
     @SideOnly(Side.CLIENT)
-    public ChangeableClientConfig clientConfig = new ChangeableClientConfig();
+    public ChangeableClientConfig clientConfig;
     
     protected boolean enabled = false;
     
@@ -369,7 +369,14 @@ public class ModComponentPainting implements ModComponent {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void preInitClient(ModConfig config) {}
+    public void preInitClient(ModConfig config) {
+        this.paintingSpecialSelectionBox = null;
+        this.clientConfig = new ChangeableClientConfig();
+        this.blockPainting.initClient();
+        this.blockPaintingFrame.initClient();
+        this.itemPaintBrush.initClient();
+        this.itemPaintRemover.initClient();
+    }
     
     @Override
     @SideOnly(Side.CLIENT)

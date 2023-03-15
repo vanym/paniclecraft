@@ -17,6 +17,7 @@ import com.vanym.paniclecraft.utils.MainUtils;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -39,7 +40,7 @@ public class Picture implements IPictureSize {
     protected int packedHeight;
     
     @SideOnly(Side.CLIENT)
-    public int texture = -1;
+    public Integer texture;
     // unused on server side
     public boolean imageChangeProcessed = false;
     
@@ -560,9 +561,16 @@ public class Picture implements IPictureSize {
     }
     
     public void unload() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient() && this.texture >= 0) {
-            com.vanym.paniclecraft.client.ClientProxy.deleteTexture(this.texture);
-            this.texture = -1;
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            this.unloadClient();
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected void unloadClient() {
+        if (this.texture != null) {
+            TextureUtil.deleteTexture(this.texture);
+            this.texture = null;
         }
     }
     
