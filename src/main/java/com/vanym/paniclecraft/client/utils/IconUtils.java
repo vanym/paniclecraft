@@ -1,7 +1,10 @@
 package com.vanym.paniclecraft.client.utils;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.util.IIcon;
 
+@SideOnly(Side.CLIENT)
 public class IconUtils {
     
     public static IIcon flip(IIcon icon, boolean flipU, boolean flipV) {

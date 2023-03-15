@@ -5,9 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
 
+@SideOnly(Side.CLIENT)
 public class GuiHexColorField extends GuiTextField {
     
     protected static final String NUM_CHARS = "0123456789ABCDEFabcdef";

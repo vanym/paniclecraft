@@ -1,7 +1,10 @@
 package com.vanym.paniclecraft.client.utils;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
+@SideOnly(Side.CLIENT)
 public class IconSubRect extends TextureAtlasSprite {
     
     public IconSubRect(

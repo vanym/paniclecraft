@@ -14,6 +14,8 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.MainUtils;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.Item;
@@ -23,6 +25,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 
+@SideOnly(Side.CLIENT)
 public class PaintingSpecialSelectionBox {
     
     protected boolean onlyCancel = false;
