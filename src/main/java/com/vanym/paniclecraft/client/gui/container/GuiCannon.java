@@ -13,6 +13,7 @@ import com.vanym.paniclecraft.network.message.MessageCannonSet;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
@@ -59,13 +60,28 @@ public class GuiCannon extends GuiContainer {
         this.sliderDir =
                 new GuiCircularSlider(1, this.guiLeft + this.xSize - 72, this.guiTop + 12, 60, 60);
         this.sliderDir.setGetter(()->this.container.cannon.getDirection() / 360.0D);
-        this.sliderDir.setSetter(v->this.sendDirection(v * 360.0D));
+        this.sliderDir.setSetter(v-> {
+            v *= 32.0D;
+            if (GuiScreen.isShiftKeyDown()) {
+                v = (double)Math.round(v);
+            }
+            v *= 11.25D;
+            this.sendDirection(v);
+        });
         this.sliderDir.setOffset(0.25D);
         this.buttonList.add(this.sliderDir);
         this.sliderHeight =
                 new GuiCircularSlider(2, this.guiLeft + 8 - 30, this.guiTop + 38, 60, 60);
         this.sliderHeight.setGetter(()->0.25D - this.container.cannon.getHeight() / 90.0D * 0.25D);
-        this.sliderHeight.setSetter(v->this.sendHeight((0.25D - v) / 0.25D * 90.0D));
+        this.sliderHeight.setSetter(v-> {
+            v = (0.25D - v) / 0.25D;
+            v *= 18.0D;
+            if (GuiScreen.isShiftKeyDown()) {
+                v = (double)Math.round(v);
+            }
+            v *= 5.0D;
+            this.sendHeight(v);
+        });
         this.sliderHeight.setOffset(-0.25D);
         this.sliderHeight.setMax(0.25D);
         this.buttonList.add(this.sliderHeight);
@@ -73,7 +89,16 @@ public class GuiCannon extends GuiContainer {
         final double maxStrength = Core.instance.cannon.config.maxStrength;
         this.sliderStrength.setGetter(()->this.container.cannon.getStrength() /
                                           maxStrength * 0.125D);
-        this.sliderStrength.setSetter(v->this.sendStrength(v / 0.125D * maxStrength));
+        this.sliderStrength.setSetter(v-> {
+            v /= 0.125D;
+            v *= 10.0D;
+            if (GuiScreen.isShiftKeyDown()) {
+                v = (double)Math.round(v);
+            }
+            v /= 10.0D;
+            v *= maxStrength;
+            this.sendStrength(v);
+        });
         this.sliderStrength.setOffset(0.5D);
         this.sliderStrength.setMax(0.125D);
         this.buttonList.add(this.sliderStrength);
