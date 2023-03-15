@@ -11,7 +11,7 @@ import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
@@ -86,7 +86,7 @@ public class PaintingSpecialSelectionBox {
         double radius = tool.getPaintingToolRadius(event.currentItem, picture);
         int width = picture.getWidth();
         int height = picture.getHeight();
-        Vec3 inBlockVec = MainUtils.getInBlockVec(target);
+        Vec3 inBlockVec = GeometryUtils.getInBlockVec(target);
         Vec3 inPictureVec = pside.axes.toSideCoords(inBlockVec);
         double outline = 0.002D;
         double zOutline = inPictureVec.zCoord + outline;

@@ -1,6 +1,5 @@
 package com.vanym.paniclecraft.utils;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,140 +11,11 @@ import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import net.minecraftforge.common.util.ForgeDirection;
-
 public class MainUtils {
-    
-    public static AxisAlignedBB getBoundsBySide(int side, double width) {
-        double minX = 0.0D, maxX = 1.0D, minY = 0.0D, maxY = 1.0D, minZ = 0.0D, maxZ = 1.0D;
-        switch (side) {
-            case 0:
-                maxY = width;
-            break;
-            case 1:
-                minY = 1.0D - width;
-            break;
-            case 2:
-                maxZ = width;
-            break;
-            case 3:
-                minZ = 1.0D - width;
-            break;
-            case 4:
-                maxX = width;
-            break;
-            case 5:
-                minX = 1.0D - width;
-            break;
-        }
-        return AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
-    }
-    
-    public static boolean isTouchingSide(int side, AxisAlignedBB box) {
-        if (box == null) {
-            return false;
-        }
-        switch (side) {
-            case 0:
-                return box.minY <= 0.0D;
-            case 1:
-                return box.maxY >= 1.0D;
-            case 2:
-                return box.minZ <= 0.0D;
-            case 3:
-                return box.maxZ >= 1.0D;
-            case 4:
-                return box.minX <= 0.0D;
-            case 5:
-                return box.maxX >= 1.0D;
-        }
-        return false;
-    }
-    
-    public static Vec3 getInBlockVec(MovingObjectPosition target) {
-        return Vec3.createVectorHelper(target.blockX, target.blockY, target.blockZ)
-                   .subtract(target.hitVec);
-    }
-    
-    public static Vec3 getVecByDirection(ForgeDirection dir) {
-        return Vec3.createVectorHelper(dir.offsetX, dir.offsetY, dir.offsetZ);
-    }
-    
-    public static ForgeDirection getDirectionRoration(double yaw, double pitch) {
-        ForgeDirection south = ForgeDirection.SOUTH; // +Z
-        ForgeDirection up = ForgeDirection.UP; // +Y
-        ForgeDirection pitchRotator = south.getRotation(up);
-        ForgeDirection current = south;
-        int pitchRot = MathHelper.floor_double((pitch * 4.0F / 360.0F) + 0.5D) & 3;
-        int yawRot = MathHelper.floor_double((yaw * 4.0F / 360.0F) + 0.5D) & 3;
-        for (int i = 0; i < pitchRot; ++i) {
-            current = current.getRotation(pitchRotator);
-        }
-        for (int i = 0; i < yawRot; ++i) {
-            current = current.getRotation(up);
-        }
-        return current;
-    }
-    
-    public static ForgeDirection getDirectionByVec(Vec3 lookVec) {
-        double lookXZ = lookVec.addVector(0, -lookVec.yCoord, 0).lengthVector();
-        double pitch = -Math.atan2(lookVec.yCoord, lookXZ) * 180.0D / Math.PI;
-        double yaw = -Math.atan2(lookVec.xCoord, lookVec.zCoord) * 180.0D / Math.PI;
-        return getDirectionRoration(yaw, pitch);
-    }
-    
-    public static int getAlphaless(Color color) {
-        if (color == null) {
-            return 0;
-        }
-        return color.getRGB() & 0xffffff;
-    }
-    
-    public static Color addColor(Color b, Color s) {
-        // https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators_srcover
-        float[] Cs = s.getRGBComponents(null);
-        float[] Cb = b.getRGBComponents(null);
-        float[] co = new float[3];
-        float as = Cs[3];
-        float ab = Cb[3];
-        float Fb = (1 - as);
-        for (int i = 0; i < co.length; ++i) {
-            co[i] = as * Cs[i] + ab * Cb[i] * Fb;
-        }
-        float ao = as + ab * Fb;
-        return new Color(co[0], co[1], co[2], ao);
-    }
-    
-    public static MovingObjectPosition rayTraceBlocks(EntityPlayer player, double distance) {
-        Vec3 pos = Vec3.createVectorHelper(player.posX,
-                                           player.posY + player.getEyeHeight(),
-                                           player.posZ);
-        Vec3 look = player.getLookVec();
-        Vec3 posTo = pos.addVector(look.xCoord * distance,
-                                   look.yCoord * distance,
-                                   look.zCoord * distance);
-        return player.worldObj.rayTraceBlocks(pos, posTo);
-    }
     
     // public static int[] getRGBFromInt(int par1){
     // return new int[]{((par1 >> 16) & 0xFF), ((par1 >> 8) & 0xFF), (par1 & 0xFF)};
     // }
-    
-    public static Color getColorFromInt(int par1) {
-        return new Color(par1);
-    }
-    
-    public static int getIntFromRGB(int red, int green, int blue) {
-        int rgb = red;
-        rgb = (rgb << 8) + green;
-        rgb = (rgb << 8) + blue;
-        return rgb;
-    }
     
     // public static boolean isPlayerOp(String playerName){
     // return true;

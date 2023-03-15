@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -179,9 +180,9 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return AxisAlignedBB.getBoundingBox(this.xCoord - 0.5D, this.yCoord - 0.5D,
-                                            this.zCoord - 0.5D, this.xCoord + 1.5D,
-                                            this.yCoord + 1.5D, this.zCoord + 1.5D);
+        return GeometryUtils.getFullBlockBox()
+                            .expand(0.5D, 0.5D, 0.5D)
+                            .getOffsetBoundingBox(this.xCoord, this.yCoord, this.zCoord);
     }
     
     @Override

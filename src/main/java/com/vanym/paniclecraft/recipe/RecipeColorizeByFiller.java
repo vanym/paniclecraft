@@ -5,7 +5,7 @@ import java.awt.Color;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
@@ -80,7 +80,7 @@ public class RecipeColorizeByFiller implements IRecipe {
             IPaintingTool tool = (IPaintingTool)fillerItem;
             IColorizeable colorizeable = (IColorizeable)colorizeableItem;
             Color color = tool.getPaintingToolColor(fillerStack);
-            colorizeable.setColor(colorizeableStack, MainUtils.getAlphaless(color));
+            colorizeable.setColor(colorizeableStack, ColorUtils.getAlphaless(color));
             return colorizeableStack;
         }
         return null;

@@ -14,7 +14,7 @@ import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -118,7 +118,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             return null;
         }
         PaintingSide pside = PaintingSide.getSide(side);
-        Vec3 inBlock = MainUtils.getInBlockVec(target);
+        Vec3 inBlock = GeometryUtils.getInBlockVec(target);
         Vec3 inPainting = pside.axes.toSideCoords(inBlock);
         int px = (int)(inPainting.xCoord * picture.getWidth());
         int py = (int)(inPainting.yCoord * picture.getHeight());

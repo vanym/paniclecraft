@@ -10,7 +10,7 @@ import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -99,7 +99,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
                 if (picture == null) {
                     continue;
                 }
-                AxisAlignedBB box = MainUtils.getBoundsBySide(side, paintingWidth);
+                AxisAlignedBB box = GeometryUtils.getBoundsBySide(side, paintingWidth);
                 render.overrideBlockBounds(box.minX, box.minY, box.minZ,
                                            box.maxX, box.maxY, box.maxZ);
                 block.setRendererBox(box);
@@ -134,7 +134,7 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
                 if (theProfiler != null) {
                     theProfiler.endSection();
                 }
-                AxisAlignedBB box = MainUtils.getBoundsBySide(side, paintingWidth);
+                AxisAlignedBB box = GeometryUtils.getBoundsBySide(side, paintingWidth);
                 render.overrideBlockBounds(box.minX, box.minY, box.minZ,
                                            box.maxX, box.maxY, box.maxZ);
                 block.setRendererBox(box);

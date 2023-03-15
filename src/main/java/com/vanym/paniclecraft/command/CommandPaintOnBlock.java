@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -19,7 +19,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
@@ -72,11 +71,9 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                 coords.set(x, y, z);
             }
             World world = sender.getEntityWorld();
-            Vec3 vec = Vec3.createVectorHelper(coords.posX + 0.5D,
-                                               coords.posY + 0.5D,
-                                               coords.posZ + 0.5D);
-            AxisAlignedBB box = AxisAlignedBB.getBoundingBox(vec.xCoord, vec.yCoord, vec.zCoord,
-                                                             vec.xCoord, vec.yCoord, vec.zCoord)
+            AxisAlignedBB box = GeometryUtils.getPointBox(coords.posX + 0.5D,
+                                                          coords.posY + 0.5D,
+                                                          coords.posZ + 0.5D)
                                              .expand(radius, radius, radius);
             int count = EntityPaintOnBlock.clearArea(world, box);
             String name = world.provider.getDimensionName();
@@ -111,7 +108,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                     return;
                 }
                 EntityPlayer player = (EntityPlayer)sender;
-                MovingObjectPosition target = MainUtils.rayTraceBlocks(player, 6.0D);
+                MovingObjectPosition target = GeometryUtils.rayTraceBlocks(player, 6.0D);
                 if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
                     ChatComponentStyle message = new ChatComponentTranslation(
                             this.getTranslationPrefix() + ".noblock");

@@ -7,7 +7,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -86,10 +86,10 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
             boolean advancedItemTooltips) {
         super.addInformation(itemStack, entityPlayer, list, advancedItemTooltips);
         if (GuiScreen.isShiftKeyDown()) {
-            Color rgbColor = MainUtils.getColorFromInt(this.getColor(itemStack));
-            list.add("R: \u00a7c" + rgbColor.getRed());
-            list.add("G: \u00a7a" + rgbColor.getGreen());
-            list.add("B: \u00a79" + rgbColor.getBlue());
+            Color color = new Color(this.getColor(itemStack));
+            list.add("R: \u00a7c" + color.getRed());
+            list.add("G: \u00a7a" + color.getGreen());
+            list.add("B: \u00a79" + color.getBlue());
         }
     }
     
@@ -159,7 +159,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
                 return itemTag.getInteger(TAG_COLOR);
             }
         }
-        return MainUtils.getAlphaless(Core.instance.painting.DEFAULT_COLOR);
+        return ColorUtils.getAlphaless(Core.instance.painting.DEFAULT_COLOR);
     }
     
     @Override

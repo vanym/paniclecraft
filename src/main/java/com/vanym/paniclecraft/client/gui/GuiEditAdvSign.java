@@ -13,7 +13,7 @@ import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -87,11 +87,11 @@ public class GuiEditAdvSign extends GuiScreen {
                         this.fontRendererObj,
                         xCenter + 48,
                         this.height / 4 + 106);
-        this.standColorHex.setRGB(MainUtils.getAlphaless(this.tileAS.getStandColor()));
+        this.standColorHex.setRGB(ColorUtils.getAlphaless(this.tileAS.getStandColor()));
         this.standColorHex.setSetter(rgb->this.tileAS.setStandColor(new Color(rgb)));
         this.textColorHex =
                 new GuiHexColorField(this.fontRendererObj, xCenter + 48, this.height / 4 + 90);
-        this.textColorHex.setRGB(MainUtils.getAlphaless(this.tileAS.getTextColor()));
+        this.textColorHex.setRGB(ColorUtils.getAlphaless(this.tileAS.getTextColor()));
         this.textColorHex.setSetter(rgb->this.tileAS.setTextColor(new Color(rgb)));
         this.buttonList.clear();
         Keyboard.enableRepeatEvents(true);

@@ -8,7 +8,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -53,7 +53,7 @@ public class CommandUtils {
     }
     
     public static MovingObjectPosition rayTraceBlocks(EntityPlayer player, double distance) {
-        MovingObjectPosition target = MainUtils.rayTraceBlocks(player, distance);
+        MovingObjectPosition target = GeometryUtils.rayTraceBlocks(player, distance);
         if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
             throw new CommandException(String.format("commands.%s.exception.noblock", DEF.MOD_ID));
         }

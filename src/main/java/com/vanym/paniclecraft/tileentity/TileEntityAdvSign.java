@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.vanym.paniclecraft.utils.GeometryUtils;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
@@ -132,9 +134,8 @@ public class TileEntityAdvSign extends TileEntityBase {
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return AxisAlignedBB.getBoundingBox((double)this.xCoord - 0.0F, (double)this.yCoord + 0.0F,
-                                            (double)this.zCoord - 0.0F, (double)this.xCoord + 1.0F,
-                                            (double)this.yCoord + 1.0F, (double)this.zCoord + 1.0F);
+        return GeometryUtils.getFullBlockBox()
+                            .getOffsetBoundingBox(this.xCoord, this.yCoord, this.zCoord);
     }
     
     @Override

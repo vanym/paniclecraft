@@ -3,7 +3,7 @@ package com.vanym.paniclecraft.core.component.painting;
 import java.awt.Color;
 import java.util.Arrays;
 
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 public class Image {
     
@@ -165,7 +165,7 @@ public class Image {
             for (int px = Math.max(0, x); px < ex; ++px) {
                 Color icolor = input.getPixelColor(px - x, py - y);
                 Color origin = this.getPixelColor(px, py);
-                changed |= this.setPixelColor(px, py, MainUtils.addColor(origin, icolor));
+                changed |= this.setPixelColor(px, py, ColorUtils.addColor(origin, icolor));
             }
         }
         return changed;

@@ -11,7 +11,7 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPalette;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -143,7 +143,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         if (colorizeable == null) {
             throw new LuaException("cannot find brush");
         }
-        Color color = MainUtils.getColorFromInt(colorizeable.getColor(stack));
+        Color color = new Color(colorizeable.getColor(stack));
         return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
     }
     
@@ -160,7 +160,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
             throw new LuaException("cannot find brush");
         }
         Color color = PicturePeripheral.getColor(red, green, blue);
-        colorizeable.setColor(stack, MainUtils.getAlphaless(color));
+        colorizeable.setColor(stack, ColorUtils.getAlphaless(color));
         return true;
     }
     

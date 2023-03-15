@@ -3,6 +3,8 @@ package com.vanym.paniclecraft.item;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.vanym.paniclecraft.utils.GeometryUtils;
+
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -37,10 +39,9 @@ public class ItemBroom extends ItemMod3 {
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void collectItems(ItemStack stack, World world, EntityPlayer player) {
         final double distance = this.distance;
-        AxisAlignedBB box = AxisAlignedBB.getBoundingBox(player.posX, player.posY, player.posZ,
-                                                         player.posX, player.posY, player.posZ)
+        AxisAlignedBB box = GeometryUtils.getPointBox(player.posX, player.posY, player.posZ)
                                          .expand(distance, distance, distance)
-                                         .expand(2, 2, 2);
+                                         .expand(2.0D, 2.0D, 2.0D);
         List list = world.getEntitiesWithinAABB(EntityItem.class, box);
         Stream<EntityItem> items = list.stream().map(EntityItem.class::cast);
         Stream<EntityItem> matches =

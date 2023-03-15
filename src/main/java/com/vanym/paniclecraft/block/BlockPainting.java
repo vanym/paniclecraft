@@ -6,7 +6,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -165,7 +165,7 @@ public class BlockPainting extends BlockPaintingContainer {
     
     public AxisAlignedBB getBlockBoundsBasedOnState(int meta) {
         int side = ForgeDirection.getOrientation(meta).getOpposite().ordinal();
-        return MainUtils.getBoundsBySide(side, this.getPaintingOutlineSize());
+        return GeometryUtils.getBoundsBySide(side, this.getPaintingOutlineSize());
     }
     
     @Override

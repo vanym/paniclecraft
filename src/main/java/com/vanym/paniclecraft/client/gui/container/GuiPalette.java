@@ -15,7 +15,7 @@ import com.vanym.paniclecraft.container.ContainerPalette;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -180,7 +180,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         if (color == previousColor) {
             return true;
         }
-        int rgb = MainUtils.getAlphaless(this.getColor());
+        int rgb = ColorUtils.getAlphaless(this.getColor());
         rgb &= ~(0xff << (i * 8));
         rgb |= color << (i * 8);
         this.setColor(new Color(rgb));
@@ -259,7 +259,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         if (color == null) {
             color = new Color(0);
         }
-        int rgb = MainUtils.getAlphaless(this.container.getColor());
+        int rgb = ColorUtils.getAlphaless(this.container.getColor());
         this.textHex.setEnabled(!empty);
         if (empty || !this.textHex.isFocused()) {
             this.textHex.setRGB(rgb);

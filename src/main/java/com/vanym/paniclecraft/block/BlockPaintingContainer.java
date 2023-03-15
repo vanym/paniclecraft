@@ -1,7 +1,7 @@
 package com.vanym.paniclecraft.block;
 
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -63,7 +63,7 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
         if (!this.specialRendererPhase.isNone()) {
             // Have to use distinct rendering box to avoid glitches
-            if (MainUtils.isTouchingSide(side, this.specialRendererBox)
+            if (GeometryUtils.isTouchingSide(side, this.specialRendererBox)
                 && world.getBlock(x, y, z).isOpaqueCube()) {
                 return false;
             } else {
@@ -98,12 +98,12 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
     public static ForgeDirection getStackDirection(EntityPlayer player, ForgeDirection side) {
         ForgeDirection dir = side.getOpposite();
-        Vec3 dirvec = MainUtils.getVecByDirection(dir);
-        Vec3 lookvec = MainUtils.getVecByDirection(ForgeDirection.SOUTH);
+        Vec3 dirvec = GeometryUtils.getVecByDirection(dir);
+        Vec3 lookvec = GeometryUtils.getVecByDirection(ForgeDirection.SOUTH);
         lookvec.rotateAroundX(-(player.rotationPitch * 0.999F) * (float)Math.PI / 180.0F);
         lookvec.rotateAroundY(-player.rotationYaw * (float)Math.PI / 180.0F);
         Vec3 stackvec = dirvec.subtract(lookvec);
-        ForgeDirection stackdir = MainUtils.getDirectionByVec(stackvec);
+        ForgeDirection stackdir = GeometryUtils.getDirectionByVec(stackvec);
         if (stackdir == dir || stackdir == side) {
             return ForgeDirection.UNKNOWN;
         }

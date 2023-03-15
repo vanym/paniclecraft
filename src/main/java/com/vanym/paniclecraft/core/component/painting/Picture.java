@@ -12,7 +12,7 @@ import java.util.Set;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -127,7 +127,7 @@ public class Picture implements IPictureSize {
             if (color.getAlpha() == 0) {
                 return false;
             }
-            colorizeable.setColor(itemStack, MainUtils.getAlphaless(color));
+            colorizeable.setColor(itemStack, ColorUtils.getAlphaless(color));
             return true;
         }
         return false;

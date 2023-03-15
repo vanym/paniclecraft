@@ -13,7 +13,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -204,7 +204,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         if (this.specialRendererPhase == SpecialRendererPhase.PICTURE) {
             return contains && side == this.specialRendererSide;
         } else if (this.specialRendererPhase == SpecialRendererPhase.FRAME && contains) {
-            return !MainUtils.isTouchingSide(side, this.specialRendererBox);
+            return !GeometryUtils.isTouchingSide(side, this.specialRendererBox);
         } else if (this.specialRendererPhase == SpecialRendererPhase.FRAMEINSIDE) {
             return ForgeDirection.OPPOSITES[side] == this.specialRendererSide;
         }
@@ -249,7 +249,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         Builder<AxisAlignedBB> facades = Stream.builder();
         for (int i = 0; i < 6; ++i) {
             if (tile.getPicture(i) != null) {
-                AxisAlignedBB box = MainUtils.getBoundsBySide(i, this.getPaintingOutlineSize());
+                AxisAlignedBB box = GeometryUtils.getBoundsBySide(i, this.getPaintingOutlineSize());
                 facades.add(box);
             }
         }

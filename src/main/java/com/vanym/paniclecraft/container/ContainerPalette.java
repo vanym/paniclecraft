@@ -7,7 +7,7 @@ import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.inventory.InventoryPalette;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPalette;
-import com.vanym.paniclecraft.utils.MainUtils;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -45,7 +45,7 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
         if (colorizeable == null) {
             return false;
         }
-        colorizeable.setColor(stack, MainUtils.getAlphaless(color));
+        colorizeable.setColor(stack, ColorUtils.getAlphaless(color));
         return true;
     }
     
