@@ -111,7 +111,7 @@ public class GuiCircularSlider extends GuiButton {
     
     @Override
     public boolean mousePressed(Minecraft mc, int x, int y) {
-        Point2D.Double p = GuiUtils.getMousePoint();
+        Point2D.Double p = GuiUtils.getMousePoint(x, y);
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.xPosition + raduish, ycenter = this.yPosition + raduisv;
         double dx = p.x - xcenter, dy = p.y - ycenter;
@@ -135,7 +135,7 @@ public class GuiCircularSlider extends GuiButton {
         if (!this.pressed || this.setter == null) {
             return;
         }
-        Point2D.Double p = GuiUtils.getMousePoint();
+        Point2D.Double p = GuiUtils.getMousePoint(x, y);
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.xPosition + raduish, ycenter = this.yPosition + raduisv;
         double value = this.fromRadians(Math.atan2(p.y - ycenter, p.x - xcenter));

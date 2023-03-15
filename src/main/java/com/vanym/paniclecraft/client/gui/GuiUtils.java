@@ -41,8 +41,20 @@ public class GuiUtils {
     public static Point2D.Double getMousePoint() {
         Minecraft mc = Minecraft.getMinecraft();
         GuiScreen screen = mc.currentScreen;
+        if (screen == null) {
+            return null;
+        }
         double x = Mouse.getEventX() * screen.width / (double)mc.displayWidth;
         double y = screen.height - Mouse.getEventY() * screen.height / (double)mc.displayHeight - 1;
         return new Point2D.Double(x, y);
+    }
+    
+    public static Point2D.Double getMousePoint(double x, double y) {
+        Point2D.Double p = getMousePoint();
+        if (p != null) {
+            return p;
+        } else {
+            return new Point2D.Double(x, y);
+        }
     }
 }
