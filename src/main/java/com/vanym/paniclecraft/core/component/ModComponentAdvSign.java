@@ -64,7 +64,7 @@ public class ModComponentAdvSign implements ModComponent {
                                             Items.book);
         }
         boolean craftingRecipeClear =
-                config.getBoolean("craftingRecipeClear", "AdvSign", true,
+                config.getBoolean("craftingRecipeClear", this.getName(), true,
                                   "clear adv sign using crafting");
         if (craftingRecipeClear) {
             GameRegistry.addShapelessRecipe(new ItemStack(this.itemAdvSign, 1), this.itemAdvSign);

@@ -25,7 +25,7 @@ public class ModComponentBroom implements ModComponent {
         }
         this.enabled = true;
         int durability = config.getInt("durability", this.getName(), 3072, 0, Short.MAX_VALUE,
-                                       "0 is infinite");
+                                       "\'0\' is infinite");
         double radius = config.getDouble("radius", this.getName(), 6.0D, 1.0D, 64.0D, "");
         this.itemBroom = new ItemBroom(durability, radius);
         boolean craftingRecipe = config.getBoolean("craftingRecipeBroom", this.getName(), true, "");

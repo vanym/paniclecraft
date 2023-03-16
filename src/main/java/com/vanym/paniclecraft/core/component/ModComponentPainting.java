@@ -22,6 +22,7 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandPaintOnBlock;
 import com.vanym.paniclecraft.command.CommandPainting;
 import com.vanym.paniclecraft.core.ModConfig;
@@ -66,6 +67,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -314,27 +316,33 @@ public class ModComponentPainting implements ModComponent {
         if (config.getBoolean("craftingRecipePaintingClear", this.getName(), true, "")) {
             GameRegistry.addShapelessRecipe(new ItemStack(this.itemPainting), this.itemPainting);
         }
-        String[] paintingCombines =
-                config.getStringList("craftingRecipePaintingCombine", this.getName(),
-                                     new String[]{"2x2"},
-                                     "", new String[]{"2x1", "1x2", "2x2",
-                                                      "3x1", "3x2", "1x3", "2x3", "3x3"});
-        if (paintingCombines.length > 0) {
-            RecipeSorter.register(DEF.MOD_ID + ":paintingcombine", RecipePaintingCombine.class,
-                                  RecipeSorter.Category.SHAPED,
-                                  "after:forge:shapedore before:forge:shapelessore");
+        {
+            final Pattern combinePattern =
+                    Pattern.compile("^(?:(0*([2-3])x0*([2-3]))|(0*(1)x0*([2-3]))|(0*([2-3])x0*(1)))$");
+            Property prop = config.get(this.getName(), "craftingRecipePaintingCombine",
+                                       new String[]{"2x2"}, null, combinePattern);
+            prop.setValidValues(new String[]{"2x1", "1x2", "2x2",
+                                             "3x1", "3x2", "1x3", "2x3", "3x3"});
+            prop.comment = "" + prop.getDefault();
+            String[] paintingCombines = prop.getStringList();
+            if (paintingCombines.length > 0) {
+                RecipeSorter.register(DEF.MOD_ID + ":paintingcombine", RecipePaintingCombine.class,
+                                      RecipeSorter.Category.SHAPED,
+                                      "after:forge:shapedore before:forge:shapelessore");
+            }
+            Arrays.stream(paintingCombines)
+                  .map(combinePattern::matcher)
+                  .filter(Matcher::matches)
+                  .map(m-> {
+                      int i = 7;
+                      for (; i > 3 && m.group(i) == null; i -= 3) {
+                      } // formatter does not understand ';' beauty :(
+                      int x = Integer.parseInt(m.group(i + 1));
+                      int y = Integer.parseInt(m.group(i + 2));
+                      return new RecipePaintingCombine(x, y);
+                  })
+                  .forEach(GameRegistry::addRecipe);
         }
-        final Pattern combinePattern = Pattern.compile("(\\d+)x(\\d+)");
-        Arrays.asList(paintingCombines)
-              .stream()
-              .map(combinePattern::matcher)
-              .filter(Matcher::matches)
-              .map(m-> {
-                  int x = Integer.parseInt(m.group(1));
-                  int y = Integer.parseInt(m.group(2));
-                  return new RecipePaintingCombine(x, y);
-              })
-              .forEach(GameRegistry::addRecipe);
         if (config.getBoolean("craftingRecipePaintingFrame", this.getName(), true, "")) {
             RecipePaintingFrame recipe = new RecipePaintingFrame(
                     "sss",
@@ -573,44 +581,51 @@ public class ModComponentPainting implements ModComponent {
         }
         
         public ChangeableConfig read(ModConfig config) {
-            String name = ModComponentPainting.this.getName();
+            final String category = ModComponentPainting.this.getName();
             config.restartless();
-            this.paintingPlaceStack = config.getInt("paintingPlaceStack", name, 2, 0, 64, "");
+            this.paintingPlaceStack = config.getInt("paintingPlaceStack", category, 2, 0, 64, "");
             this.paintingDefaultWidth =
-                    config.getInt("paintingDefaultWidth", name, 16, 1,
+                    config.getInt("paintingDefaultWidth", category, 16, 1,
                                   ModComponentPainting.this.MAX_WIDTH, "");
             this.paintingDefaultHeight =
-                    config.getInt("paintingDefaultHeight", name, 16, 1,
+                    config.getInt("paintingDefaultHeight", category, 16, 1,
                                   ModComponentPainting.this.MAX_HEIGHT,
                                   "(recommended to equals width)");
-            this.allowPaintOnBlock = config.getBoolean("allowPaintOnBlock", name, false, "");
+            this.allowPaintOnBlock = config.getBoolean("allowPaintOnBlock", category, false, "");
             this.paintOnBlockDefaultWidth =
-                    config.getInt("paintOnBlockDefaultWidth", name, 16, 1,
+                    config.getInt("paintOnBlockDefaultWidth", category, 16, 1,
                                   ModComponentPainting.this.MAX_WIDTH, "");
             this.paintOnBlockDefaultHeight =
-                    config.getInt("paintOnBlockDefaultHeight", name, 16, 1,
+                    config.getInt("paintOnBlockDefaultHeight", category, 16, 1,
                                   ModComponentPainting.this.MAX_HEIGHT,
                                   "(highly recommended to equals width)");
             this.anyBlockValidForPaint =
-                    config.getBoolean("anyBlockValidForPaint", name, false, "");
+                    config.getBoolean("anyBlockValidForPaint", category, false, "");
             this.paintingMaxCraftableWidth =
-                    config.getInt("paintingMaxCraftableWidth", name, 64, 1,
+                    config.getInt("paintingMaxCraftableWidth", category, 64, 1,
                                   ModComponentPainting.this.MAX_WIDTH, "");
             this.paintingMaxCraftableHeight =
-                    config.getInt("paintingMaxCraftableHeight", name, 64, 1,
+                    config.getInt("paintingMaxCraftableHeight", category, 64, 1,
                                   ModComponentPainting.this.MAX_HEIGHT, "");
-            this.copyOnAnvil = config.getBoolean("copyOnAnvil", name, true, "");
-            this.copyOnAnvilCost = config.getInt("copyOnAnvilCost", name, 5, 0, 40, "");
-            parseRadiuses(config.getStringList("brushRadiuses", name, DEFAULT_BRUSH_RADIUSES, ""),
-                          this.iBrushRadiuses);
-            parseRadiuses(config.getStringList("smallBrushRadiuses", name,
-                                               DEFAULT_SMALL_BRUSH_RADIUSES, ""),
-                          this.iSmallBrushRadiuses);
-            parseRadiuses(config.getStringList("removerRadiuses", name, DEFAULT_BRUSH_RADIUSES, ""),
-                          this.iRemoverRadiuses);
-            parseRadiuses(config.getStringList("smallRemoverRadiuses", name,
-                                               DEFAULT_SMALL_BRUSH_RADIUSES, ""),
-                          this.iSmallRemoverRadiuses);
+            this.copyOnAnvil = config.getBoolean("copyOnAnvil", category, true, "");
+            this.copyOnAnvilCost = config.getInt("copyOnAnvilCost", category, 5, 0, 40, "");
+            
+            final String RADIUSES_COMMENT = "radius depending on picture size\n";
+            
+            this.iBrushRadiuses.clear();
+            this.iBrushRadiuses.putAll(getRadiuses(config, "brushRadiuses", category,
+                                                   DEFAULT_BRUSH_RADIUSES, RADIUSES_COMMENT));
+            this.iSmallBrushRadiuses.clear();
+            this.iSmallBrushRadiuses.putAll(getRadiuses(config, "smallBrushRadiuses", category,
+                                                        DEFAULT_SMALL_BRUSH_RADIUSES,
+                                                        RADIUSES_COMMENT));
+            this.iRemoverRadiuses.clear();
+            this.iRemoverRadiuses.putAll(getRadiuses(config, "removerRadiuses", category,
+                                                     DEFAULT_BRUSH_RADIUSES, RADIUSES_COMMENT));
+            this.iSmallRemoverRadiuses.clear();
+            this.iSmallRemoverRadiuses.putAll(getRadiuses(config, "smallRemoverRadiuses", category,
+                                                          DEFAULT_SMALL_BRUSH_RADIUSES,
+                                                          RADIUSES_COMMENT));
             config.restartlessReset();
             return this;
         }
@@ -699,20 +714,34 @@ public class ModComponentPainting implements ModComponent {
         protected ChangeableServerConfig() {}
         
         public ChangeableServerConfig read(ModConfig config) {
-            String name = ModComponentPainting.this.getName();
+            final String category = ModComponentPainting.this.getName();
             config.restartless();
-            this.freePaintingView = config.getBoolean("freePaintingView", name, true, "");
-            this.freePaintingEditView = config.getBoolean("freePaintingEditView", name, false, "");
-            this.freePaintingViewTo = config.getBoolean("freePaintingViewTo", name, false, "");
+            final String COMMENT_PREFIX =
+                    String.format("allow any player use command:\n/%s ", CommandMod3.NAME);
+            this.freePaintingView =
+                    config.getBoolean("freePaintingView", category, true,
+                                      COMMENT_PREFIX + "painting view" + "\n");
+            this.freePaintingEditView =
+                    config.getBoolean("freePaintingEditView", category, false,
+                                      COMMENT_PREFIX + "painting editview" + "\n");
+            this.freePaintingViewTo =
+                    config.getBoolean("freePaintingViewTo", category, false,
+                                      COMMENT_PREFIX + "painting viewto" + "\n");
             this.freePaintingEditViewTo =
-                    config.getBoolean("freePaintingEditViewTo", name, false, "");
-            this.freePaintOnBlockView = config.getBoolean("freePaintOnBlockView", name, true, "");
+                    config.getBoolean("freePaintingEditViewTo", category, false,
+                                      COMMENT_PREFIX + "painting editviewto" + "\n");
+            this.freePaintOnBlockView =
+                    config.getBoolean("freePaintOnBlockView", category, true,
+                                      COMMENT_PREFIX + "paintonblock view" + "\n");
             this.freePaintOnBlockEditView =
-                    config.getBoolean("freePaintOnBlockEditView", name, false, "");
+                    config.getBoolean("freePaintOnBlockEditView", category, false,
+                                      COMMENT_PREFIX + "paintonblock editview" + "\n");
             this.freePaintOnBlockViewTo =
-                    config.getBoolean("freePaintOnBlockViewTo", name, false, "");
+                    config.getBoolean("freePaintOnBlockViewTo", category, false,
+                                      COMMENT_PREFIX + "paintonblock viewto" + "\n");
             this.freePaintOnBlockEditViewTo =
-                    config.getBoolean("freePaintOnBlockEditViewTo", name, false, "");
+                    config.getBoolean("freePaintOnBlockEditViewTo", category, false,
+                                      COMMENT_PREFIX + "paintonblock editviewto" + "\n");
             config.restartlessReset();
             return this;
         }
@@ -747,25 +776,27 @@ public class ModComponentPainting implements ModComponent {
         
         public ChangeableClientConfig read(ModConfig config) {
             config.restartless();
-            this.perFrameBrushUse =
-                    config.getBoolean("perFrameBrushUse", ModComponentPainting.this.getName(),
-                                      true, "");
+            final String category = ModComponentPainting.this.getName();
+            this.perFrameBrushUse = config.getBoolean("perFrameBrushUse", category, true, "");
             this.forceUnhidePaintRemover =
-                    config.getBoolean("forceUnhidePaintRemover",
-                                      ModComponentPainting.this.getName(),
-                                      false, "");
-            
+                    config.getBoolean("forceUnhidePaintRemover", category, false,
+                                      "show paint remover in creative tab even\n if paint on block is not allowed");
             this.paintingFrameInfoSideLetters =
-                    config.getBoolean("paintingFrameInfoSideLetters",
-                                      ModComponentPainting.this.getName(),
-                                      false, "");
+                    config.getBoolean("paintingFrameInfoSideLetters", category, false, "");
+            
+            final String PART_RENDER_TYPE = String.join("\n", "render type of specific part",
+                                                        "-1: disable", "0: smooth lighting off",
+                                                        "1: smooth lighting minimum",
+                                                        "2: smooth lighting maximum", "");
             
             this.renderPaintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
             this.renderPaintingItem = config.getBoolean("paintingItem", CLIENT_RENDER, true, "");
             this.renderPaintingTilePartFrameType =
-                    config.getInt("paintingTilePartFrameType", CLIENT_RENDER, 1, -1, 2, "");
+                    config.getInt("paintingTilePartFrameType", CLIENT_RENDER,
+                                  1, -1, 2, PART_RENDER_TYPE);
             this.renderPaintingTilePartPictureType =
-                    config.getInt("paintingTilePartPictureType", CLIENT_RENDER, 2, -1, 2, "");
+                    config.getInt("paintingTilePartPictureType", CLIENT_RENDER,
+                                  2, -1, 2, PART_RENDER_TYPE);
             this.renderPaintingTileMaxRenderDistanceSquared =
                     Math.pow(config.getFloat("renderPaintingTileMaxRenderDistance", CLIENT_RENDER,
                                              128.0F, 0.0F, 1024.0F, ""),
@@ -775,15 +806,18 @@ public class ModComponentPainting implements ModComponent {
             this.renderPaintingFrameItem =
                     config.getBoolean("paintingFrameItem", CLIENT_RENDER, true, "");
             this.renderPaintingFrameTilePartFrameType =
-                    config.getInt("paintingFrameTilePartFrameType", CLIENT_RENDER, 0, -1, 2, "");
+                    config.getInt("paintingFrameTilePartFrameType", CLIENT_RENDER,
+                                  0, -1, 2, PART_RENDER_TYPE);
             this.renderPaintingFrameTilePartPictureType =
-                    config.getInt("paintingFrameTilePartPictureType", CLIENT_RENDER, 2, -1, 2, "");
+                    config.getInt("paintingFrameTilePartPictureType", CLIENT_RENDER,
+                                  2, -1, 2, PART_RENDER_TYPE);
             this.renderPaintOnBlockMaxRenderDistanceSquared =
                     Math.pow(config.getFloat("renderPaintOnBlockMaxRenderDistance", CLIENT_RENDER,
                                              256.0F, 0.0F, 1024.0F, ""),
                              2);
             this.renderPaintOnBlockPartPictureType =
-                    config.getInt("paintOnBlockPartPictureType", CLIENT_RENDER, 2, -1, 2, "");
+                    config.getInt("paintOnBlockPartPictureType", CLIENT_RENDER,
+                                  2, -1, 2, PART_RENDER_TYPE);
             this.renderPaintingFrameTileMaxRenderDistanceSquared =
                     Math.pow(config.getFloat("renderPaintingFrameTileMaxRenderDistance",
                                              CLIENT_RENDER,
@@ -807,6 +841,22 @@ public class ModComponentPainting implements ModComponent {
             config.restartlessReset();
             return this;
         }
+    }
+    
+    protected static final Pattern RADIUS_LINE =
+            Pattern.compile("^\\d+: *(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+))[dDfF]?$");
+    
+    protected static SortedMap<Integer, Double> getRadiuses(
+            ModConfig config,
+            String name,
+            String category,
+            String[] defaultValues,
+            String comment) {
+        Property prop = config.get(category, name, defaultValues, null, RADIUS_LINE);
+        prop.comment = comment + " [default: " + prop.getDefault() + "]";
+        SortedMap<Integer, Double> map = new TreeMap<>();
+        parseRadiuses(prop.getStringList(), map);
+        return map;
     }
     
     protected static void parseRadiuses(String[] lines, Map<Integer, Double> radiuses) {

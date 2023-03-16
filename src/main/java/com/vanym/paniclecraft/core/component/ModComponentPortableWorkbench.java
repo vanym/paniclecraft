@@ -32,7 +32,7 @@ public class ModComponentPortableWorkbench implements ModComponent {
         }
         this.enabled = true;
         int durability = config.getInt("durability", this.getName(), 8192, 0, Short.MAX_VALUE,
-                                       "0 is infinite");
+                                       "\'0\' is infinite");
         this.itemWorkbench = new ItemWorkbench(durability);
         Core.instance.registerItem(this.itemWorkbench);
         boolean craftingRecipePortableWorkbench =
