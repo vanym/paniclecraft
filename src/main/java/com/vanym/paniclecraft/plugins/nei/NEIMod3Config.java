@@ -23,6 +23,6 @@ public class NEIMod3Config implements IConfigureNEI {
     
     @Override
     public String getVersion() {
-        return "0.4";
+        return DEF.VERSION;
     }
 }
