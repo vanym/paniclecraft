@@ -56,7 +56,7 @@ public class MessageAdvSignChange
         int z = message.tag.getInteger("z");
         NBTTagList linesTag = message.tag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
         int size = linesTag.tagCount();
-        if (size > TileEntityAdvSign.MAX_LINES) {
+        if (size > TileEntityAdvSign.MAX_LINES || size < TileEntityAdvSign.MIN_LINES) {
             return null;
         }
         for (int i = 0; i < size; ++i) {

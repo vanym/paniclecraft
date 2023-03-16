@@ -132,7 +132,7 @@ public class GuiEditAdvSign extends GuiScreen {
             this.tileAS.lines.add("");
             this.lineButtonsUpdate();
         } else if (button.id == this.buttonRemoveLine.id) {
-            if (this.tileAS.lines.size() <= 1) {
+            if (this.tileAS.lines.size() <= TileEntityAdvSign.MIN_LINES) {
                 return;
             }
             int last = this.tileAS.lines.size() - 1;
@@ -290,7 +290,7 @@ public class GuiEditAdvSign extends GuiScreen {
     
     protected void lineButtonsUpdate() {
         this.buttonAddLine.enabled = (this.tileAS.lines.size() < TileEntityAdvSign.MAX_LINES);
-        this.buttonRemoveLine.enabled = (this.tileAS.lines.size() > 1);
+        this.buttonRemoveLine.enabled = (this.tileAS.lines.size() > TileEntityAdvSign.MIN_LINES);
     }
     
     protected void pasteFull(String text) {
