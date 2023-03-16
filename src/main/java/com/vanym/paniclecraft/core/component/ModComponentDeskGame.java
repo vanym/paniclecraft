@@ -11,7 +11,6 @@ import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRend
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
-import com.vanym.paniclecraft.network.message.MessageChessNewGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
@@ -85,9 +84,6 @@ public class ModComponentDeskGame implements ModComponent {
         
         Core.instance.network.registerMessage(MessageChessMove.class,
                                               MessageChessMove.class, 40,
-                                              Side.SERVER);
-        Core.instance.network.registerMessage(MessageChessNewGame.class,
-                                              MessageChessNewGame.class, 42,
                                               Side.SERVER);
     }
     

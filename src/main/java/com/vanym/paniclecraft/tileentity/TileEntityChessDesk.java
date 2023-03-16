@@ -97,6 +97,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     public void resetGame() {
         this.game = new ChessGame();
         this.imoves.clear();
+        this.markForUpdate();
         this.sendEvent("chess_reset");
     }
     
