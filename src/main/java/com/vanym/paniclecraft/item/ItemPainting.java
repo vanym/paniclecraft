@@ -133,10 +133,9 @@ public class ItemPainting extends ItemMod3 {
             boolean advancedItemTooltips) {
         if (itemStack.hasTagCompound()) {
             NBTTagCompound itemTag = itemStack.getTagCompound();
-            NBTBase pictureTagBase = itemTag.getTag(TAG_PICTURE);
-            if (pictureTagBase != null && pictureTagBase instanceof NBTTagCompound) {
-                NBTTagCompound pictureTag = (NBTTagCompound)pictureTagBase;
-                if (pictureTag.hasKey(TAG_PICTURE) &&
+            if (itemTag.hasKey(TAG_PICTURE, 10)) {
+                NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
+                if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                     !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
                     list.add(StatCollector.translateToLocal("text.painting.uneditable"));
                 }
