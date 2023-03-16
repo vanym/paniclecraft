@@ -56,7 +56,8 @@ public class ContainerCannon extends ContainerBase {
         return itemstack;
     }
     
-    public void onCraftGuiClosed(EntityPlayer player) {
+    @Override
+    public void onContainerClosed(EntityPlayer player) {
         super.onContainerClosed(player);
         this.cannon.closeInventory();
     }
