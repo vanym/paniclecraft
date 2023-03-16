@@ -144,4 +144,17 @@ public class ItemAdvSign extends ItemMod3 {
         }
         return true;
     }
+    
+    public static ItemStack getSavedSign(TileEntityAdvSign tileAS) {
+        ItemStack stack = new ItemStack(Core.instance.advSign.itemAdvSign);
+        if (tileAS == null || tileAS.lines.stream().allMatch(String::isEmpty)) {
+            return stack;
+        }
+        NBTTagCompound tag = new NBTTagCompound();
+        NBTTagCompound signTag = new NBTTagCompound();
+        tileAS.writeToNBT(signTag, true);
+        tag.setTag(ItemAdvSign.TAG_SIGN, signTag);
+        stack.setTagCompound(tag);
+        return stack;
+    }
 }

@@ -9,13 +9,13 @@ import com.vanym.paniclecraft.utils.TileOnSide;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
@@ -123,13 +123,20 @@ public class BlockAdvSign extends BlockContainerMod3 {
     }
     
     @Override
-    public boolean getBlocksMovement(IBlockAccess world, int x, int y, int z) {
-        return true;
+    public boolean isOpaqueCube() {
+        return false;
     }
     
     @Override
-    public boolean isOpaqueCube() {
-        return false;
+    public int quantityDropped(Random rand) {
+        return 0;
+    }
+    
+    @Override
+    public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
+        TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getTileEntity(x, y, z);
+        this.dropBlockAsItem(world, x, y, z, ItemAdvSign.getSavedSign(tileAS));
+        super.breakBlock(world, x, y, z, block, meta);
     }
     
     @Override
@@ -151,21 +158,9 @@ public class BlockAdvSign extends BlockContainerMod3 {
             int y,
             int z,
             EntityPlayer player) {
-        ItemStack stack = new ItemStack(Core.instance.advSign.itemAdvSign);
         TileEntity tile = world.getTileEntity(x, y, z);
-        if (!TileEntityAdvSign.class.isInstance(tile)) {
-            return stack;
-        }
-        TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-        if (tileAS.lines.stream().allMatch(String::isEmpty)) {
-            return stack;
-        }
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagCompound signTag = new NBTTagCompound();
-        tileAS.writeToNBT(signTag, true);
-        tag.setTag(ItemAdvSign.TAG_SIGN, signTag);
-        stack.setTagCompound(tag);
-        return stack;
+        return ItemAdvSign.getSavedSign(tile instanceof TileEntityAdvSign ? (TileEntityAdvSign)tile
+                                                                          : null);
     }
     
     protected static enum SignSide {
