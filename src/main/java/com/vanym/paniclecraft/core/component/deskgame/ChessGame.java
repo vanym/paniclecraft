@@ -552,7 +552,8 @@ public class ChessGame {
         
         @Override
         public int hashCode() {
-            return Objects.hash(this.from, this.to, this.type, this.kill, this.promotion);
+            return Objects.hash(this.from, this.to, this.type, this.kill,
+                                this.promotion, this.check, this.mate);
         }
         
         @Override
@@ -566,7 +567,9 @@ public class ChessGame {
                 && this.to == m.to
                 && this.type == m.type
                 && this.kill == m.kill
-                && this.promotion == m.promotion;
+                && this.promotion == m.promotion
+                && this.check == m.check
+                && this.mate == m.mate;
         }
     }
 }
