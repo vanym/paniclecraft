@@ -182,7 +182,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
     @Override
     public void onUpdate() {
-        if (!this.proceeded) {
+        if (!this.worldObj.isRemote && !this.proceeded) {
             this.clearEmpty();
             this.killIfEmpty();
             this.proceeded = true;
