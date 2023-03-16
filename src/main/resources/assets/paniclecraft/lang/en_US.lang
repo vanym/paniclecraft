@@ -1,7 +1,7 @@
 item.broom.name=Broom
 
 item.advSign.name=Advanced Sign
-text.pressShiftToSeeText=Press <shift> to see text
+text.advSign.showtext=Press <shift> to see text
 
 item.paintingBlock.name=Canvas
 text.painting.uneditable=Uneditable

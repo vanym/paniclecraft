@@ -50,7 +50,7 @@ public class ItemAdvSign extends ItemMod3 {
                              .mapToObj(tagLines::getStringTagAt)
                              .forEachOrdered(list::add);
                 } else {
-                    list.add(StatCollector.translateToLocal("text.pressShiftToSeeText"));
+                    list.add(StatCollector.translateToLocal("text.advSign.showtext"));
                 }
             }
         }
