@@ -51,6 +51,7 @@ import net.minecraftforge.oredict.RecipeSorter;
     modid = DEF.MOD_ID,
     name = DEF.MOD_NAME,
     version = DEF.VERSION,
+    acceptedMinecraftVersions = "[1.7.10]",
     guiFactory = "com.vanym.paniclecraft.client.gui.config.GuiModConfigFactory")
 public class Core implements IGuiHandler {
     
