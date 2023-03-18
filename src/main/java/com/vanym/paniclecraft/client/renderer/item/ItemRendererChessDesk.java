@@ -8,6 +8,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -33,22 +34,33 @@ public class ItemRendererChessDesk implements IItemRenderer {
     }
     
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+    public void renderItem(ItemRenderType type, ItemStack stack, Object... data) {
         TileEntityChessDesk tileChessDesk = new TileEntityChessDesk();
         tileChessDesk.blockMetadata = 0;
         switch (type) {
-            case ENTITY: {
-                GL11.glTranslatef(-0.25F, -0.2F, -0.25F);
-                float scale = 0.55F;
-                GL11.glScalef(scale, scale, scale);
-            }
+            case ENTITY:
+                GL11.glTranslatef(-0.5F, -0.4F, -0.5F);
             break;
             case EQUIPPED:
+                try {
+                    EntityLivingBase entity = (EntityLivingBase)data[1];
+                    if (stack != entity.getEquipmentInSlot(4)) {
+                        GL11.glRotatef(125.0F, 0.0F, 1.0F, 0.0F);
+                        GL11.glRotatef(20.0F, 0.0F, 0.0F, 1.0F);
+                        GL11.glTranslatef(-0.8F, 0.67F, -0.34F);
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException | NullPointerException | ClassCastException e) {
+                }
+                GL11.glTranslatef(0.0F, 0.775F, 0.0F);
+            break;
             case EQUIPPED_FIRST_PERSON:
-                GL11.glTranslatef(0.0F, 0.7F, -0.2F);
+                GL11.glRotatef(20.0F, 0.0F, 0.9F, 1.0F);
+                GL11.glTranslatef(0.15F, 0.7F, 0.05F);
             break;
             case INVENTORY: {
                 tileChessDesk.blockMetadata = 2;
+                GL11.glTranslatef(0.0F, 0.1F, 0.0F);
                 float scale = 1.07F;
                 GL11.glScalef(scale, scale, scale);
             }
@@ -56,8 +68,8 @@ public class ItemRendererChessDesk implements IItemRenderer {
             default:
             break;
         }
-        if (item.hasTagCompound()) {
-            NBTTagCompound tag = item.getTagCompound();
+        if (stack.hasTagCompound()) {
+            NBTTagCompound tag = stack.getTagCompound();
             if (tag.hasKey(ItemChessDesk.TAG_MOVES, 9)) {
                 NBTTagList list = tag.getTagList(ItemChessDesk.TAG_MOVES, 10);
                 tileChessDesk.readMovesFromNBT(list);
