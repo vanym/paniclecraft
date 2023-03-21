@@ -43,7 +43,11 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.RecipeSorter;
 
@@ -165,6 +169,7 @@ public class Core implements IGuiHandler {
             component.configChanged(this.config);
         }
         proxy.configChanged(this.config);
+        this.sendConfigToAllPlayers();
         if (this.config.hasChanged()) {
             this.config.save();
         }
@@ -186,7 +191,23 @@ public class Core implements IGuiHandler {
     
     @SubscribeEvent
     public void onConnectionFromClient(FMLNetworkEvent.ServerConnectionFromClientEvent event) {
-        Core.instance.getComponents().forEach(event.isLocal ? component-> {
+        this.sendConfigToPlayer(event.manager);
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected void sendConfigToAllPlayers() {
+        MinecraftServer server = MinecraftServer.getServer();
+        if (server != null && server.isServerRunning()) {
+            ServerConfigurationManager manager = server.getConfigurationManager();
+            List<EntityPlayerMP> players = manager.playerEntityList;
+            players.stream()
+                   .map(p->p.playerNetServerHandler.netManager)
+                   .forEach(this::sendConfigToPlayer);
+        }
+    }
+    
+    protected void sendConfigToPlayer(NetworkManager manager) {
+        Core.instance.getComponents().forEach(manager.isLocalChannel() ? component-> {
             IServerSideConfig config = component.getServerSideConfig();
             if (config != null) {
                 component.setServerSideConfig(config);
@@ -198,7 +219,7 @@ public class Core implements IGuiHandler {
             }
             FMLEmbeddedChannel channel = Core.instance.getChannel(Side.SERVER);
             Packet packet = channel.generatePacketFrom(message);
-            event.manager.scheduleOutboundPacket(packet);
+            manager.scheduleOutboundPacket(packet);
         });
     }
     
