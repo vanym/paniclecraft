@@ -42,6 +42,8 @@ public class RecipeColorizeByFiller implements IRecipe {
                     return false;
                 }
                 colorizeable = true;
+            } else {
+                return false;
             }
         }
         return filler && colorizeable;
