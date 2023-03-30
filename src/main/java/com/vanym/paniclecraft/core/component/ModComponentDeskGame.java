@@ -55,17 +55,8 @@ public class ModComponentDeskGame implements ModComponent {
         if (craftingRecipeChessDesk) {
             GameRegistry.addRecipe(new ShapedOreRecipe(
                     this.itemChessDesk,
+                    true,
                     "w b",
-                    "ppp",
-                    Character.valueOf('w'),
-                    new ItemStack(Blocks.wool, 1, 0),
-                    Character.valueOf('b'),
-                    new ItemStack(Blocks.wool, 1, 15),
-                    Character.valueOf('p'),
-                    "plankWood"));
-            GameRegistry.addRecipe(new ShapedOreRecipe(
-                    this.itemChessDesk,
-                    "b w",
                     "ppp",
                     Character.valueOf('w'),
                     new ItemStack(Blocks.wool, 1, 0),
