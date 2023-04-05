@@ -9,12 +9,13 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class TileEntityPainting extends TileEntityPaintingContainer {
     
     public static final String IN_MOD_ID = "painting";
-    public static final String ID = DEF.MOD_ID + "." + IN_MOD_ID;
+    public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
     protected final Picture picture = new Picture(new PictureHolder());
     

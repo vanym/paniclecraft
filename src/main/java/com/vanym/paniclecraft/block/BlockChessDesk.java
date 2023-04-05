@@ -26,7 +26,7 @@ public class BlockChessDesk extends BlockContainerMod3 {
     public BlockChessDesk() {
         super(Material.wood);
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 3.0F / 16.0F, 1.0F);
-        this.setBlockName("chessDesk");
+        this.setBlockName("chess_desk");
         this.setHardness(0.5F);
     }
     

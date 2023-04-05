@@ -82,8 +82,8 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     public void textureStitchEvent(TextureStitchEvent.Pre event) {
         Minecraft mc = Minecraft.getMinecraft();
         if (event.map.getTextureType() == mc.getTextureMapBlocks().getTextureType()) {
-            this.iconLeft = event.map.registerIcon(DEF.MOD_ID + ":turtle.paintBrush.left");
-            this.iconRight = event.map.registerIcon(DEF.MOD_ID + ":turtle.paintBrush.right");
+            this.iconLeft = event.map.registerIcon(DEF.MOD_ID + ":turtle_paintbrush_left");
+            this.iconRight = event.map.registerIcon(DEF.MOD_ID + ":turtle_paintbrush_right");
         }
     }
 }

@@ -48,7 +48,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
     public ItemPaintBrush() {
         super();
-        this.setUnlocalizedName("paintBrush");
+        this.setUnlocalizedName("paintbrush");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);

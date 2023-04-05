@@ -45,7 +45,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     public BlockPaintingFrame() {
         super(Material.wood);
-        this.setBlockName("paintingFrame");
+        this.setBlockName("paintingframe");
         this.setHardness(0.6F);
         this.frameOutlineSize = (1.0D / 16D) * 2.0D;
         this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameOutlineSize));

@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 public class ItemWorkbench extends ItemMod3 {
     
     public ItemWorkbench(int damage) {
-        this.setUnlocalizedName("portableWorkbench");
+        this.setUnlocalizedName("portable_workbench");
         this.setMaxDamage(damage);
         this.setMaxStackSize(1);
     }

@@ -17,7 +17,7 @@ import net.minecraftforge.client.IItemRenderer;
 public class ItemRendererPortableWorkbench implements IItemRenderer {
     
     protected static final ResourceLocation TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/models/portableWorkbench.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/models/portable_workbench.png");
     
     ModelPortableWorkbench model = new ModelPortableWorkbench();
     

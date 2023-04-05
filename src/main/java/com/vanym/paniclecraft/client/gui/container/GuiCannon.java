@@ -22,7 +22,7 @@ import net.minecraft.util.ResourceLocation;
 public class GuiCannon extends GuiContainer {
     
     protected static final ResourceLocation GUI_TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/guis/cannonGui.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/guis/cannon.png");
     
     protected GuiCircularSlider sliderDir;
     protected GuiCircularSlider sliderHeight;

@@ -70,7 +70,7 @@ public class ItemChessDesk extends ItemBlock {
         NBTTagCompound tag = stack.getTagCompound();
         if (tag.hasKey(TAG_MOVES)) {
             NBTTagList movesTag = tag.getTagList(TAG_MOVES, 10);
-            list.add(StatCollector.translateToLocalFormatted("item.chessDesk.moves",
+            list.add(StatCollector.translateToLocalFormatted("item.chess_desk.moves",
                                                              movesTag.tagCount()));
             if (GuiScreen.isShiftKeyDown()) {
                 Map<NBTTagCompound, Integer> white = new HashMap<>(), black = new HashMap<>();
@@ -88,7 +88,7 @@ public class ItemChessDesk extends ItemBlock {
                     Map<NBTTagCompound, Integer> map = side ? white : black;
                     boolean many = map.size() > 1;
                     String translate =
-                            String.format("item.chessDesk.player.%s.%s",
+                            String.format("item.chess_desk.player.%s.%s",
                                           side ? "white" : "black", many ? "many" : "one");
                     map.entrySet()
                        .stream()

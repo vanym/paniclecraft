@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockCannon;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererCannon;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityCannonRenderer;
@@ -51,7 +50,7 @@ public class ModComponentCannon implements ModComponent {
         this.blockCannon = new BlockCannon();
         GameRegistry.registerBlock(this.blockCannon, this.blockCannon.getName());
         this.itemCannon = (ItemBlock)Item.getItemFromBlock(this.blockCannon);
-        GameRegistry.registerTileEntity(TileEntityCannon.class, DEF.MOD_ID + ".cannon");
+        GameRegistry.registerTileEntity(TileEntityCannon.class, TileEntityCannon.ID.toString());
         boolean craftingRecipeCannon =
                 config.getBoolean("craftingRecipeCannon", this.getName(), true, "");
         if (craftingRecipeCannon) {

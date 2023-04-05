@@ -30,7 +30,7 @@ public class BlockAdvSign extends BlockContainerMod3 {
     public BlockAdvSign() {
         super(Material.wood);
         this.setHardness(1.0F);
-        this.setBlockName("advSign");
+        this.setBlockName("advanced_sign");
         this.setBlockBounds(0.25F, 0.25F, 0.25F, 0.75F, 0.75F, 0.75F);
     }
     

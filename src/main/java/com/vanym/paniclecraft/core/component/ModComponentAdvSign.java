@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererAdvSign;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityAdvSignRenderer;
@@ -50,7 +49,7 @@ public class ModComponentAdvSign implements ModComponent {
         this.itemAdvSign = new ItemAdvSign();
         GameRegistry.registerBlock(this.blockAdvSign, null, this.blockAdvSign.getName());
         Core.instance.registerItem(this.itemAdvSign);
-        GameRegistry.registerTileEntity(TileEntityAdvSign.class, DEF.MOD_ID + ".advSign");
+        GameRegistry.registerTileEntity(TileEntityAdvSign.class, TileEntityAdvSign.ID.toString());
         boolean craftingRecipeEasy = config.getBoolean("craftingRecipeEasy", this.getName(), true,
                                                        "crafting using just one regular sign");
         if (craftingRecipeEasy) {

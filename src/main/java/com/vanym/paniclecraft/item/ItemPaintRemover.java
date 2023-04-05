@@ -27,7 +27,7 @@ public class ItemPaintRemover extends ItemPaintingTool {
     
     public ItemPaintRemover() {
         super();
-        this.setUnlocalizedName("paintRemover");
+        this.setUnlocalizedName("paintremover");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);

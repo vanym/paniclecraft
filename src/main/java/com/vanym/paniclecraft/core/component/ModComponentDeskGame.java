@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockChessDesk;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererChessDesk;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRenderer;
@@ -49,7 +48,8 @@ public class ModComponentDeskGame implements ModComponent {
         GameRegistry.registerBlock(this.blockChessDesk, ItemChessDesk.class,
                                    this.blockChessDesk.getName());
         this.itemChessDesk = (ItemChessDesk)Item.getItemFromBlock(this.blockChessDesk);
-        GameRegistry.registerTileEntity(TileEntityChessDesk.class, DEF.MOD_ID + ".chessDesk");
+        GameRegistry.registerTileEntity(TileEntityChessDesk.class,
+                                        TileEntityChessDesk.ID.toString());
         boolean craftingRecipeChessDesk =
                 config.getBoolean("craftingRecipeChessDesk", this.getName(), true, "");
         if (craftingRecipeChessDesk) {

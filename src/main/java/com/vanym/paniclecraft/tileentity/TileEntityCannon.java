@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -14,9 +15,13 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 
 public class TileEntityCannon extends TileEntityBase implements IInventory {
+    
+    public static final String IN_MOD_ID = "cannon";
+    public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
     public static final double MAX_HEIGHT = 90.0D;
     public static final double MIN_HEIGHT = 0.0D;

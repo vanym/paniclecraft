@@ -129,13 +129,14 @@ public class ModComponentPainting implements ModComponent {
         
         this.blockPainting = new BlockPainting();
         GameRegistry.registerBlock(this.blockPainting, null, this.blockPainting.getName());
-        GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID);
+        GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID.toString());
         
         this.blockPaintingFrame = new BlockPaintingFrame();
         GameRegistry.registerBlock(this.blockPaintingFrame, ItemPaintingFrame.class,
                                    this.blockPaintingFrame.getName());
         this.itemPaintingFrame = (ItemPaintingFrame)Item.getItemFromBlock(this.blockPaintingFrame);
-        GameRegistry.registerTileEntity(TileEntityPaintingFrame.class, TileEntityPaintingFrame.ID);
+        GameRegistry.registerTileEntity(TileEntityPaintingFrame.class,
+                                        TileEntityPaintingFrame.ID.toString());
         
         EntityRegistry.registerModEntity(EntityPaintOnBlock.class,
                                          EntityPaintOnBlock.IN_MOD_ID, 33,
