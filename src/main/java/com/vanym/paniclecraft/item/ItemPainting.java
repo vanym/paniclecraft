@@ -201,6 +201,7 @@ public class ItemPainting extends ItemMod3 {
         return stack;
     }
     
+    @SideOnly(Side.CLIENT)
     public static String pictureSizeInformation(NBTTagCompound pictureTag) {
         StringBuilder sb = new StringBuilder();
         NBTBase imageTagBase = pictureTag.getTag(Picture.TAG_IMAGE);

@@ -25,6 +25,6 @@ public enum PaintingSide {
     }
     
     public static PaintingSide getSide(int side) {
-        return values()[side % values().length];
+        return values()[Math.abs(side) % values().length];
     }
 }

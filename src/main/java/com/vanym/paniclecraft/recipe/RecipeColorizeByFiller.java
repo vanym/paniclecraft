@@ -40,6 +40,8 @@ public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> im
                     return false;
                 }
                 colorizeable = true;
+            } else {
+                return false;
             }
         }
         return filler && colorizeable;
