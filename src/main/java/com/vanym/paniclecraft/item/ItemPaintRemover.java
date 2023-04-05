@@ -52,6 +52,9 @@ public class ItemPaintRemover extends ItemPaintingTool {
     
     @Override
     public void getSubItems(CreativeTabs creativetab, NonNullList<ItemStack> list) {
+        if (!this.isInCreativeTab(creativetab)) {
+            return;
+        }
         if (!Core.instance.painting.clientConfig.forceUnhidePaintRemover
             && !Core.instance.painting.config.allowPaintOnBlock
             && creativetab != null

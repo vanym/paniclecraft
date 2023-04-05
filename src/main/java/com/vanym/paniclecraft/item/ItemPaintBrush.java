@@ -96,6 +96,9 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubItems(CreativeTabs creativetab, NonNullList<ItemStack> list) {
+        if (!this.isInCreativeTab(creativetab)) {
+            return;
+        }
         ItemPaintBrush brush = (ItemPaintBrush)this;
         list.add(brush.getBrush());
         list.add(brush.getSmallBrush());
