@@ -179,7 +179,7 @@ public class BlockAdvSign extends BlockContainerMod3 {
         }
         
         public static SignSide getSide(int side) {
-            return values()[side % values().length];
+            return values()[Math.abs(side) % values().length];
         }
     }
 }
