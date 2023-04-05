@@ -1,13 +1,15 @@
 package com.vanym.paniclecraft.block;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
-import com.vanym.paniclecraft.Core;
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
@@ -15,11 +17,10 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -27,14 +28,23 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockPaintingFrame extends BlockPaintingContainer {
+    
+    protected static final PropertyBool[] SIDES = Arrays.stream(EnumFacing.VALUES)
+                                                        .map(EnumFacing::getName2)
+                                                        .map(PropertyBool::create)
+                                                        .toArray(PropertyBool[]::new);
     
     @SideOnly(Side.CLIENT)
     protected int specialRendererSide;
@@ -44,11 +54,16 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     protected final List<AxisAlignedBB> frameBoxes;
     
     public BlockPaintingFrame() {
-        super(Material.wood);
-        this.setBlockName("paintingFrame");
+        super(Material.WOOD);
+        this.setUnlocalizedName("paintingFrame");
         this.setHardness(0.6F);
         this.frameOutlineSize = (1.0D / 16D) * 2.0D;
         this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameOutlineSize));
+        IBlockState state = this.blockState.getBaseState();
+        for (PropertyBool side : SIDES) {
+            state = state.withProperty(side, false);
+        }
+        this.setDefaultState(state);
     }
     
     @Override
@@ -69,44 +84,51 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
+    protected BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, SIDES);
+    }
+    
+    @Override
+    public int getMetaFromState(IBlockState state) {
+        return 0;
+    }
+    
+    @Override
     public boolean onBlockActivated(
             World world,
-            int x,
-            int y,
-            int z,
+            BlockPos pos,
+            IBlockState state,
             EntityPlayer entityPlayer,
-            int side,
+            EnumHand hand,
+            EnumFacing side,
             float hitX,
             float hitY,
             float hitZ) {
         if (!entityPlayer.isSneaking()) {
             return false;
         }
-        TileEntityPaintingFrame tileP = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+        TileEntityPaintingFrame tileP = (TileEntityPaintingFrame)world.getTileEntity(pos);
         if (tileP == null) {
             return false;
         }
-        Picture picture = tileP.getPicture(side);
+        Picture picture = tileP.getPicture(side.getIndex());
         if (picture == null) {
             return false;
         }
         if (world.isRemote) {
             return true;
         }
-        ForgeDirection dir = ForgeDirection.getOrientation(side);
         if (entityPlayer != null) {
-            rotatePicture(entityPlayer, picture, dir, false);
+            rotatePicture(entityPlayer, picture, side, false);
         }
-        double ex = x + 0.5D + (dir.offsetX * 0.6);
-        double ey = y + 0.5D + (dir.offsetY * 0.6);
-        double ez = z + 0.5D + (dir.offsetZ * 0.6);
+        Vec3d ePos = new Vec3d(pos).addVector(0.5, 0.5, 0.5)
+                                   .add(new Vec3d(side.getDirectionVec()).scale(0.6D));
         ItemStack itemStack = ItemPainting.getPictureAsItem(picture);
-        EntityItem entityItem = new EntityItem(world, ex, ey, ez, itemStack);
-        entityItem.delayBeforeCanPickup = 3;
-        world.spawnEntityInWorld(entityItem);
-        tileP.clearPicture(side);
+        EntityItem entityItem = new EntityItem(world, ePos.x, ePos.y, ePos.z, itemStack);
+        entityItem.setPickupDelay(3);
+        world.spawnEntity(entityItem);
+        tileP.clearPicture(side.getIndex());
         tileP.markForUpdate();
-        world.notifyBlockChange(x, y, z, this);
         return true;
     }
     
@@ -117,47 +139,45 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     @Override
     public boolean removedByPlayer(
+            IBlockState state,
             World world,
+            BlockPos pos,
             EntityPlayer player,
-            int x,
-            int y,
-            int z,
             boolean willHarvest) {
         if (player != null) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(pos);
             if (tile != null && tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-                int rot = getRotate(player, ForgeDirection.UP, false);
+                int rot = getRotate(player, EnumFacing.UP, false);
                 tilePF.rotateY(rot);
             }
         }
-        return super.removedByPlayer(world, player, x, y, z, willHarvest);
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
     
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+        TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame timePF = (TileEntityPaintingFrame)tile;
             ItemStack itemStack = ItemPaintingFrame.getFrameAsItem(timePF);
-            this.dropBlockAsItem(world, x, y, z, itemStack);
+            spawnAsEntity(world, pos, itemStack);
         }
-        super.breakBlock(world, x, y, z, block, meta);
+        super.breakBlock(world, pos, state);
     }
     
     @Override
     public void onBlockPlacedBy(
             World world,
-            int x,
-            int y,
-            int z,
+            BlockPos pos,
+            IBlockState state,
             EntityLivingBase entity,
             ItemStack itemStack) {
-        super.onBlockPlacedBy(world, x, y, z, entity, itemStack);
+        super.onBlockPlacedBy(world, pos, state, entity, itemStack);
         if (!itemStack.hasTagCompound()) {
             return;
         }
-        TileEntity tile = world.getTileEntity(x, y, z);
+        TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
             NBTTagCompound itemTag = itemStack.getTagCompound();
@@ -169,31 +189,42 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                 Picture picture = tilePF.createPicture(i);
                 picture.readFromNBT(itemTag.getCompoundTag(TAG_PICTURE_I));
             }
-            int rot = getRotate(entity, ForgeDirection.UP, true);
+            int rot = getRotate(entity, EnumFacing.UP, true);
             tilePF.rotateY(rot);
         }
     }
     
     @Override
-    public int getRenderType() {
-        return -1;
+    public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+        TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)world.getTileEntity(pos);
+        return this.getActualState(state, tilePF);
+    }
+    
+    public IBlockState getActualState(IBlockState state, TileEntityPaintingFrame tilePF) {
+        for (int i = 0; i < SIDES.length; ++i) {
+            state = state.withProperty(SIDES[i], tilePF.getPicture(i) != null);
+        }
+        return state;
     }
     
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
+    public boolean shouldSideBeRendered(
+            IBlockState state,
+            IBlockAccess world,
+            BlockPos pos,
+            EnumFacing side) {
         if (!this.specialRendererPhase.isNone()) {
-            ForgeDirection dir = ForgeDirection.getOrientation(side);
-            TileEntity tile =
-                    world.getTileEntity(x - dir.offsetX, y - dir.offsetY, z - dir.offsetZ);
+            TileEntity tile = world.getTileEntity(pos);
             if (tile != null) {
-                boolean flag = this.shouldSideBeRendered(side, tile.getBlockMetadata(), tile);
+                boolean flag = this.shouldSideBeRendered(side.getIndex(),
+                                                         this.getMetaFromState(state), tile);
                 if (!flag) {
                     return false;
                 }
             }
         }
-        return super.shouldSideBeRendered(world, x, y, z, side);
+        return super.shouldSideBeRendered(state, world, pos, side);
     }
     
     @Override
@@ -206,7 +237,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         } else if (this.specialRendererPhase == SpecialRendererPhase.FRAME && contains) {
             return !GeometryUtils.isTouchingSide(side, this.specialRendererBox);
         } else if (this.specialRendererPhase == SpecialRendererPhase.FRAMEINSIDE) {
-            return ForgeDirection.OPPOSITES[side] == this.specialRendererSide;
+            return EnumFacing.getFront(side).getOpposite().getIndex() == this.specialRendererSide;
         }
         return true;
     }
@@ -216,13 +247,28 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
-    public boolean isOpaqueCube() {
+    @SideOnly(Side.CLIENT)
+    public boolean hasCustomBreakingProgress(IBlockState state) {
+        return true;
+    }
+    
+    @Override
+    public boolean isFullCube(IBlockState state) {
         return false;
     }
     
     @Override
-    public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
-        TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+    public boolean isOpaqueCube(IBlockState state) {
+        return false;
+    }
+    
+    @Override
+    public boolean isSideSolid(
+            IBlockState state,
+            IBlockAccess world,
+            BlockPos pos,
+            EnumFacing side) {
+        TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(pos);
         if (tile.getPicture(side.ordinal()) != null) {
             return true;
         } else {
@@ -231,32 +277,28 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
-    public boolean renderAsNormalBlock() {
-        return false;
-    }
-    
-    @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public void addCollisionBoxesToList(
+    public void addCollisionBoxToList(
+            IBlockState state,
             World world,
-            int x,
-            int y,
-            int z,
+            BlockPos pos,
             AxisAlignedBB mask,
-            List list,
-            Entity entity) {
-        TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+            List<AxisAlignedBB> list,
+            @Nullable Entity entity,
+            boolean isActualState) {
+        if (!isActualState) {
+            state = this.getActualState(state, world, pos);
+        }
         Builder<AxisAlignedBB> facades = Stream.builder();
         for (int i = 0; i < 6; ++i) {
-            if (tile.getPicture(i) != null) {
+            if (state.getValue(SIDES[i])) {
                 AxisAlignedBB box = GeometryUtils.getBoundsBySide(i, this.getPaintingOutlineSize());
                 facades.add(box);
             }
         }
         List<AxisAlignedBB> boxes = this.getFrameBoxes();
         Stream.concat(boxes.stream(), facades.build()).forEach(box-> {
-            AxisAlignedBB absoluteBox = box.getOffsetBoundingBox(x, y, z);
-            if (mask.intersectsWith(absoluteBox)) {
+            AxisAlignedBB absoluteBox = box.offset(pos);
+            if (mask.intersects(absoluteBox)) {
                 list.add(absoluteBox);
             }
         });
@@ -264,18 +306,13 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerBlockIcons(IIconRegister iconRegister) {}
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IIcon getIcon(int side, int meta) {
-        return Core.instance.painting.blockPainting.getIcon(side, meta);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-        TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
+    public ItemStack getPickBlock(
+            IBlockState state,
+            RayTraceResult target,
+            World world,
+            BlockPos pos,
+            EntityPlayer player) {
+        TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)world.getTileEntity(pos);
         return ItemPaintingFrame.getFrameAsItem(tilePF);
     }
     
@@ -318,7 +355,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                 }
                 break;
             }
-            AxisAlignedBB box = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+            AxisAlignedBB box = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
             list.add(box);
         }
         return list;

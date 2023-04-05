@@ -12,9 +12,8 @@ import com.vanym.paniclecraft.item.ItemPainting;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class RecipePaintingCombine extends ShapedOreRecipe {
+public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
     
     protected int sizeX;
     protected int sizeY;

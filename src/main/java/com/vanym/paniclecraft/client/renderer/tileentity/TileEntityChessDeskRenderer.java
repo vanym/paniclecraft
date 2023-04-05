@@ -14,14 +14,13 @@ import com.vanym.paniclecraft.client.renderer.model.ModelChessRook;
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TileEntityChessDeskRenderer extends TileEntitySpecialRenderer {
+public class TileEntityChessDeskRenderer extends TileEntitySpecialRenderer<TileEntityChessDesk> {
     
     protected static final ResourceLocation TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/models/chessDesk.png");
@@ -38,18 +37,22 @@ public class TileEntityChessDeskRenderer extends TileEntitySpecialRenderer {
     protected ModelChessKing king = new ModelChessKing();
     protected ModelChessDesk desk = new ModelChessDesk();
     
-    public void renderTileEntityAt(
+    @Override
+    public void render(
             TileEntityChessDesk tileCD,
             double x,
             double y,
             double z,
-            float f) {
+            float partialTicks,
+            int destroyStage,
+            float alpha) {
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         GL11.glTranslatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
         GL11.glRotatef(180.0F, 1.0F, 0.0F, 0.0F);
         GL11.glTranslatef(0.0F, 0.5F, 0.0F);
-        GL11.glRotatef(90.0F * tileCD.getBlockMetadata(), 0.0F, 1.0F, 0.0F);
+        GL11.glRotatef(90.0F * (tileCD.getWorld() == null ? 0 : tileCD.getBlockMetadata()),
+                       0.0F, 1.0F, 0.0F);
         float scale = 0.0625F;
         this.bindTexture(TEXTURE);
         this.desk.render(scale);
@@ -86,10 +89,5 @@ public class TileEntityChessDeskRenderer extends TileEntitySpecialRenderer {
             GL11.glPopMatrix();
         }
         GL11.glPopMatrix();
-    }
-    
-    @Override
-    public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
-        this.renderTileEntityAt((TileEntityChessDesk)tile, x, y, z, f);
     }
 }

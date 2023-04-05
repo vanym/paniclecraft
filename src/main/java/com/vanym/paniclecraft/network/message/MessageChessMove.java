@@ -3,13 +3,14 @@ package com.vanym.paniclecraft.network.message;
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageChessMove implements IMessage, IMessageHandler<MessageChessMove, IMessage> {
     
@@ -48,8 +49,9 @@ public class MessageChessMove implements IMessage, IMessageHandler<MessageChessM
     
     @Override
     public IMessage onMessage(MessageChessMove message, MessageContext ctx) {
-        EntityPlayer playerEntity = ctx.getServerHandler().playerEntity;
-        TileEntity tile = playerEntity.worldObj.getTileEntity(message.x, message.y, message.z);
+        EntityPlayer playerEntity = ctx.getServerHandler().player;
+        BlockPos pos = new BlockPos(message.x, message.y, message.z);
+        TileEntity tile = playerEntity.world.getTileEntity(pos);
         if (message.move != null && tile instanceof TileEntityChessDesk
             && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
                                           message.z + 0.5D) <= 64.0D) {

@@ -27,20 +27,22 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
 
-import cpw.mods.fml.common.network.FMLEmbeddedChannel;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiPaintingEditView extends GuiPaintingView {
@@ -71,7 +73,6 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
         this.buttonList.add(this.buttonImport);
@@ -84,20 +85,19 @@ public class GuiPaintingEditView extends GuiPaintingView {
     @Override
     public void setWorldAndResolution(Minecraft mc, int width, int height) {
         if (this.textImport == null) {
-            this.textImport = new GuiTextField(mc.fontRenderer, 0, 0, 60, 20);
+            this.textImport = new GuiTextField(1, mc.fontRenderer, 0, 0, 60, 20);
             this.textImport.setMaxStringLength(65536);
         }
         super.setWorldAndResolution(mc, width, height);
-        this.buttonImport.xPosition = this.buttonExport.xPosition - 5 - this.buttonImport.width;
-        this.buttonImport.yPosition = this.buttonExport.yPosition;
-        this.textImport.xPosition = Math.min(this.controlsX, this.viewX);
-        this.textImport.yPosition = this.buttonImport.yPosition;
-        this.textImport.width = this.buttonImport.xPosition - 5 - this.textImport.xPosition;
-        this.buttonImportSave.xPosition = this.buttonImport.xPosition;
-        this.buttonImportSave.yPosition = this.buttonImport.yPosition;
-        this.buttonImportCancel.xPosition =
-                this.buttonImportSave.xPosition - 5 - this.buttonImportCancel.width;
-        this.buttonImportCancel.yPosition = this.buttonImportSave.yPosition;
+        this.buttonImport.x = this.buttonExport.x - 5 - this.buttonImport.width;
+        this.buttonImport.y = this.buttonExport.y;
+        this.textImport.x = Math.min(this.controlsX, this.viewX);
+        this.textImport.y = this.buttonImport.y;
+        this.textImport.width = this.buttonImport.x - 5 - this.textImport.x;
+        this.buttonImportSave.x = this.buttonImport.x;
+        this.buttonImportSave.y = this.buttonImport.y;
+        this.buttonImportCancel.x = this.buttonImportSave.x - 5 - this.buttonImportCancel.width;
+        this.buttonImportCancel.y = this.buttonImportSave.y;
     }
     
     protected void updateButtons() {
@@ -145,7 +145,6 @@ public class GuiPaintingEditView extends GuiPaintingView {
         }
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        Tessellator tessellator = Tessellator.instance;
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.importTexture.getGlTextureId());
         int pictureWidth = this.view.pictureSize.getWidth();
         int pictureHeight = this.view.pictureSize.getHeight();
@@ -198,21 +197,28 @@ public class GuiPaintingEditView extends GuiPaintingView {
                     canvasEndX -= offset * this.viewStep;
                     iconWidth -= cut;
                 }
-                IIcon icon = IconUtils.sub(Math.max(paintingX - this.importTextureX, 0),
-                                           Math.max(paintingY - this.importTextureY, 0),
-                                           iconWidth, iconHeight,
-                                           this.importTextureWidth,
-                                           this.importTextureHeight);
-                // based on drawTexturedModelRectFromIcon
-                tessellator.startDrawingQuads();
-                tessellator.addVertexWithUV(canvasX, canvasEndY, (double)this.zLevel,
-                                            icon.getMinU(), icon.getMaxV());
-                tessellator.addVertexWithUV(canvasEndX, canvasEndY, (double)this.zLevel,
-                                            icon.getMaxU(), icon.getMaxV());
-                tessellator.addVertexWithUV(canvasEndX, canvasY, (double)this.zLevel,
-                                            icon.getMaxU(), icon.getMinV());
-                tessellator.addVertexWithUV(canvasX, canvasY, (double)this.zLevel,
-                                            icon.getMinU(), icon.getMinV());
+                TextureAtlasSprite icon =
+                        IconUtils.sub(Math.max(paintingX - this.importTextureX, 0),
+                                      Math.max(paintingY - this.importTextureY, 0),
+                                      iconWidth, iconHeight,
+                                      this.importTextureWidth,
+                                      this.importTextureHeight);
+                // based on drawTexturedModelRect
+                Tessellator tessellator = Tessellator.getInstance();
+                BufferBuilder buf = tessellator.getBuffer();
+                buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+                buf.pos(canvasX, canvasEndY, (double)this.zLevel)
+                   .tex(icon.getMinU(), icon.getMaxV())
+                   .endVertex();
+                buf.pos(canvasEndX, canvasEndY, (double)this.zLevel)
+                   .tex(icon.getMaxU(), icon.getMaxV())
+                   .endVertex();
+                buf.pos(canvasEndX, canvasY, (double)this.zLevel)
+                   .tex(icon.getMaxU(), icon.getMinV())
+                   .endVertex();
+                buf.pos(canvasX, canvasY, (double)this.zLevel)
+                   .tex(icon.getMinU(), icon.getMinV())
+                   .endVertex();
                 tessellator.draw();
             }
         }
@@ -227,7 +233,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    protected void mouseClicked(int x, int y, int eventButton) {
+    protected void mouseClicked(int x, int y, int eventButton) throws IOException {
         this.mouseClickedMovingImage(x, y, eventButton);
         super.mouseClicked(x, y, eventButton);
         this.textImport.mouseClicked(x, y, eventButton);
@@ -251,8 +257,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    protected void mouseMovedOrUp(int x, int y, int eventButton) {
-        super.mouseMovedOrUp(x, y, eventButton);
+    protected void mouseReleased(int x, int y, int eventButton) {
+        super.mouseReleased(x, y, eventButton);
         if (eventButton == 0) {
             this.mouseMove = false;
         }
@@ -304,8 +310,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 img = readfile(text);
             }
         } catch (Exception e) {
-            ChatComponentTranslation message =
-                    new ChatComponentTranslation("painting.import.failure", e.getMessage());
+            TextComponentTranslation message =
+                    new TextComponentTranslation("painting.import.failure", e.getMessage());
             this.mc.ingameGUI.getChatGUI().printChatMessage(message);
             return;
         }
@@ -332,7 +338,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 // See C17PacketCustomPayload
                 throw new IllegalArgumentException();
             }
-            this.mc.getNetHandler().addToSendQueue(packet);
+            this.mc.getConnection().sendPacket(packet);
         } catch (IllegalArgumentException e) {
             final int step = 80; // split to pass 32k payload limit
             for (int y = 0; y < this.importImage.getHeight(); y += step) {

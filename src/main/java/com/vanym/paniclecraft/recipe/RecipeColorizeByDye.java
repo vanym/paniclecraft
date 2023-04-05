@@ -1,36 +1,18 @@
 package com.vanym.paniclecraft.recipe;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 
-import net.minecraft.block.BlockColored;
-import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.DyeUtils;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class RecipeColorizeByDye implements IRecipe {
-    
-    public static final String DYE = "dye";
-    protected static final String[] DYES_SUFFIX = // from OreDictionary
-            {"Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan", "LightGray", "Gray",
-             "Pink", "Lime", "Yellow", "LightBlue", "Magenta", "Orange", "White"};
-    
-    protected final List<List<ItemStack>> dyesByColor;
-    
-    public RecipeColorizeByDye() {
-        ArrayList<List<ItemStack>> list = new ArrayList<>();
-        for (String suffix : DYES_SUFFIX) {
-            List<ItemStack> dyeColor = OreDictionary.getOres(DYE + suffix);
-            list.add(dyeColor);
-        }
-        this.dyesByColor = Collections.unmodifiableList(list);
-    }
+public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
     
     @Override
     public boolean matches(InventoryCrafting inv, World world) {
@@ -43,7 +25,7 @@ public class RecipeColorizeByDye implements IRecipe {
             }
             if (slot.getItem() instanceof IColorizeable) {
                 ++items;
-            } else if (this.isAnyDye(slot)) {
+            } else if (DyeUtils.isDye(slot)) {
                 ++dyes;
             }
         }
@@ -78,7 +60,7 @@ public class RecipeColorizeByDye implements IRecipe {
                 }
                 
                 itemstack = slot.copy();
-                itemstack.stackSize = 1;
+                itemstack.setCount(1);
                 
                 if (itemcolored.hasCustomColor(slot)) {
                     l = itemcolored.getColor(itemstack);
@@ -92,12 +74,11 @@ public class RecipeColorizeByDye implements IRecipe {
                     ++j;
                 }
             } else {
-                int index = this.getDyeIndex(slot);
-                if (index < 0) {
-                    return null;
+                Optional<EnumDyeColor> color = DyeUtils.colorFromStack(slot);
+                if (!color.isPresent()) {
+                    return ItemStack.EMPTY;
                 }
-                
-                float[] afloat = EntitySheep.fleeceColorTable[BlockColored.func_150032_b(index)];
+                float[] afloat = color.get().getColorComponentValues();
                 int j1 = (int)(afloat[0] * 255.0F);
                 int k1 = (int)(afloat[1] * 255.0F);
                 l1 = (int)(afloat[2] * 255.0F);
@@ -127,38 +108,18 @@ public class RecipeColorizeByDye implements IRecipe {
         }
     }
     
-    protected int getDyeIndex(ItemStack slot) {
-        int i = 0;
-        for (List<ItemStack> color : this.dyesByColor) {
-            if (listMatches(slot, color)) {
-                return i;
-            }
-            ++i;
-        }
-        return -1;
-    }
-    
-    protected boolean isAnyDye(ItemStack slot) {
-        return this.getDyeIndex(slot) >= 0;
-    }
-    
-    protected static boolean listMatches(ItemStack slot, List<ItemStack> list) {
-        // NOTE: OreDictionary.UnmodifiableArrayList (1.7.10-10.13.4.1614) does not support stream()
-        for (ItemStack itemStack : list) {
-            if (OreDictionary.itemMatches(itemStack, slot, false)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    @Override
-    public int getRecipeSize() {
-        return 2;
-    }
-    
     @Override
     public ItemStack getRecipeOutput() {
-        return null;
+        return ItemStack.EMPTY;
+    }
+    
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
+    
+    @Override
+    public boolean canFit(int width, int height) {
+        return width * height >= 2;
     }
 }

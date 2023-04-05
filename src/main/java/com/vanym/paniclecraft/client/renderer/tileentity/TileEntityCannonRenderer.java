@@ -9,14 +9,13 @@ import com.vanym.paniclecraft.client.renderer.model.ModelCannonBody2;
 import com.vanym.paniclecraft.client.renderer.model.ModelCannonBody3;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TileEntityCannonRenderer extends TileEntitySpecialRenderer {
+public class TileEntityCannonRenderer extends TileEntitySpecialRenderer<TileEntityCannon> {
     
     protected static final ResourceLocation TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/models/cannon.png");
@@ -25,12 +24,15 @@ public class TileEntityCannonRenderer extends TileEntitySpecialRenderer {
     protected final ModelCannonBody2 body2 = new ModelCannonBody2();
     protected final ModelCannonBody3 body3 = new ModelCannonBody3();
     
-    public void renderTileEntityAt(
+    @Override
+    public void render(
             TileEntityCannon tileCannon,
             double x,
             double y,
             double z,
-            float f) {
+            float partialTicks,
+            int destroyStage,
+            float alpha) {
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         GL11.glTranslatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
@@ -44,15 +46,5 @@ public class TileEntityCannonRenderer extends TileEntitySpecialRenderer {
         GL11.glRotatef(90.0F - (float)tileCannon.getHeight(), 1.0F, 0.0F, 0.0F);
         this.body3.render(0.075F);
         GL11.glPopMatrix();
-    }
-    
-    @Override
-    public void renderTileEntityAt(
-            TileEntity tile,
-            double x,
-            double y,
-            double z,
-            float f) {
-        this.renderTileEntityAt((TileEntityCannon)tile, x, y, z, f);
     }
 }

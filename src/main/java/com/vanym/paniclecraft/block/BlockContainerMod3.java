@@ -3,11 +3,9 @@ package com.vanym.paniclecraft.block;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
 
 public abstract class BlockContainerMod3 extends BlockContainer {
     
@@ -17,9 +15,9 @@ public abstract class BlockContainerMod3 extends BlockContainer {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
-    public void registerBlockIcons(IIconRegister iconRegister) {
-        this.blockIcon = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getName());
+    public Block setUnlocalizedName(String name) {
+        this.setRegistryName(DEF.MOD_ID, name);
+        return super.setUnlocalizedName(name);
     }
     
     public String getName() {

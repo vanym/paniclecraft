@@ -14,20 +14,18 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.event.HoverEvent;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.event.HoverEvent;
 
 public class CommandUtils {
     
     public static String makeGiveCommand(String player, ItemStack stack) {
         return String.format("/give %s %s %d %d %s",
-                             player, Item.itemRegistry.getNameForObject(stack.getItem()),
-                             stack.stackSize, stack.getItemDamage(),
+                             player, stack.getItem().getRegistryName(),
+                             stack.getCount(), stack.getItemDamage(),
                              !stack.hasTagCompound() ? "" : stack.getTagCompound()
                                                                  .toString())
                      .trim();
@@ -36,10 +34,10 @@ public class CommandUtils {
     public static HoverEvent makeItemHover(ItemStack stack) {
         return new HoverEvent(
                 HoverEvent.Action.SHOW_ITEM,
-                new ChatComponentText(stack.writeToNBT(new NBTTagCompound()).toString()));
+                new TextComponentString(stack.writeToNBT(new NBTTagCompound()).toString()));
     }
     
-    public static EntityPlayerMP getSenderAsPlayer(ICommandSender sender) {
+    public static EntityPlayerMP getSenderAsPlayer(ICommandSender sender) throws CommandException {
         if (sender instanceof EntityPlayerMP) {
             return (EntityPlayerMP)sender;
         } else {
@@ -48,33 +46,34 @@ public class CommandUtils {
         }
     }
     
-    public static MovingObjectPosition rayTraceBlocks(EntityPlayer player) {
+    public static RayTraceResult rayTraceBlocks(EntityPlayer player) throws CommandException {
         return rayTraceBlocks(player, 6.0D);
     }
     
-    public static MovingObjectPosition rayTraceBlocks(EntityPlayer player, double distance) {
-        MovingObjectPosition target = GeometryUtils.rayTraceBlocks(player, distance);
-        if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
+    public static RayTraceResult rayTraceBlocks(EntityPlayer player, double distance)
+            throws CommandException {
+        RayTraceResult target = GeometryUtils.rayTraceBlocks(player, distance);
+        if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
             throw new CommandException(String.format("commands.%s.exception.noblock", DEF.MOD_ID));
         }
         return target;
     }
     
     public static Function<WorldPictureProvider, WorldPicturePoint> makeProviderRayTraceMapper(
-            EntityPlayer player) {
-        MovingObjectPosition target = rayTraceBlocks(player);
+            EntityPlayer player) throws CommandException {
+        RayTraceResult target = rayTraceBlocks(player);
         return (provider)->new WorldPicturePoint(
                 provider,
                 player.getEntityWorld(),
-                target.blockX,
-                target.blockY,
-                target.blockZ,
-                target.sideHit);
+                target.getBlockPos().getX(),
+                target.getBlockPos().getY(),
+                target.getBlockPos().getZ(),
+                target.sideHit.getIndex());
     }
     
     public static Picture rayTracePicture(
             EntityPlayer player,
-            Stream<WorldPictureProvider> providers) {
+            Stream<WorldPictureProvider> providers) throws CommandException {
         try {
             return providers.map(makeProviderRayTraceMapper(player))
                             .map(p->p.getPicture())

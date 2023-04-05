@@ -3,8 +3,8 @@ package com.vanym.paniclecraft.server;
 import com.vanym.paniclecraft.core.CommonProxy;
 import com.vanym.paniclecraft.core.ModConfig;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.SERVER)
 public class ServerProxy extends CommonProxy {

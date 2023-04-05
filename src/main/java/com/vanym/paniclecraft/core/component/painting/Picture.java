@@ -14,16 +14,16 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTBase.NBTPrimitive;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Picture implements IPictureSize {
     
@@ -510,7 +510,7 @@ public class Picture implements IPictureSize {
         byte[] raw = null;
         if (nbtImage instanceof NBTTagByteArray) {
             NBTTagByteArray nbtImageBytes = (NBTTagByteArray)nbtImage;
-            packed = nbtImageBytes.func_150292_c();
+            packed = nbtImageBytes.getByteArray();
         } else if (nbtImage instanceof NBTTagCompound) {
             NBTTagCompound nbtImageTag = (NBTTagCompound)nbtImage;
             width = nbtImageTag.getInteger(TAG_IMAGE_WIDTH);
@@ -518,16 +518,16 @@ public class Picture implements IPictureSize {
             NBTBase nbtImageRaw = nbtImageTag.getTag(TAG_IMAGE_RAWDATA);
             if (nbtImageRaw instanceof NBTTagByteArray) {
                 NBTTagByteArray nbtImageRawBytes = (NBTTagByteArray)nbtImageRaw;
-                raw = nbtImageRawBytes.func_150292_c();
+                raw = nbtImageRawBytes.getByteArray();
             }
             NBTBase nbtImagePacked = nbtImageTag.getTag(TAG_IMAGE_PACKED);
             if (nbtImagePacked instanceof NBTTagByteArray) {
                 NBTTagByteArray nbtImagePackedBytes = (NBTTagByteArray)nbtImagePacked;
-                packed = nbtImagePackedBytes.func_150292_c();
+                packed = nbtImagePackedBytes.getByteArray();
             }
-        } else if (nbtImage instanceof NBTBase.NBTPrimitive) {
-            NBTBase.NBTPrimitive nbtPrim = (NBTPrimitive)nbtImage;
-            int rowSize = nbtPrim.func_150287_d();
+        } else if (nbtImage instanceof NBTPrimitive) {
+            NBTPrimitive nbtPrim = (NBTPrimitive)nbtImage;
+            int rowSize = nbtPrim.getInt();
             width = rowSize;
             height = rowSize;
         }

@@ -6,26 +6,28 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityPainting extends TileEntityPaintingContainer {
     
     public static final String IN_MOD_ID = "painting";
-    public static final String ID = DEF.MOD_ID + "." + IN_MOD_ID;
+    public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
     protected final Picture picture = new Picture(new PictureHolder());
     
     public static final String TAG_PICTURE = "Picture";
     
     @Override
-    public void writeToNBT(NBTTagCompound nbtTag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
         NBTTagCompound pictureTag = new NBTTagCompound();
         this.getPicture().writeToNBT(pictureTag);
         nbtTag.setTag(TAG_PICTURE, pictureTag);
+        return nbtTag;
     }
     
     @Override
@@ -53,23 +55,18 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         int side = this.getBlockMetadata();
         return new WorldPicturePoint(
                 WorldPictureProvider.PAINTING,
-                this.getWorldObj(),
-                this.xCoord,
-                this.yCoord,
-                this.zCoord,
+                this.getWorld(),
+                this.getPos().getX(),
+                this.getPos().getY(),
+                this.getPos().getZ(),
                 side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
-    }
-    
-    @Override
-    public void updateEntity() {
-        super.updateEntity();
     }
     
     @Override
     public String toString() {
         return String.format("Painting[x=%d, y=%d, z=%d, facing=%s]",
-                             this.xCoord, this.yCoord, this.zCoord,
-                             ForgeDirection.getOrientation(this.getBlockMetadata()));
+                             this.getPos().getX(), this.getPos().getY(), this.getPos().getZ(),
+                             EnumFacing.getFront(this.getBlockMetadata()));
     }
     
     protected class PictureHolder extends TileEntityPaintingContainer.PictureHolder {

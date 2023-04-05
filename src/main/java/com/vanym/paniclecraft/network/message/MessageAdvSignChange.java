@@ -4,14 +4,16 @@ import java.io.IOException;
 
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.EncoderException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageAdvSignChange
         implements
@@ -30,7 +32,7 @@ public class MessageAdvSignChange
     public void fromBytes(ByteBuf buf) {
         PacketBuffer pb = new PacketBuffer(buf);
         try {
-            this.tag = pb.readNBTTagCompoundFromBuffer();
+            this.tag = pb.readCompoundTag();
         } catch (IOException e) {
             this.tag = null;
         }
@@ -40,8 +42,8 @@ public class MessageAdvSignChange
     public void toBytes(ByteBuf buf) {
         PacketBuffer pb = new PacketBuffer(buf);
         try {
-            pb.writeNBTTagCompoundToBuffer(this.tag);
-        } catch (IOException e) {
+            pb.writeCompoundTag(this.tag);
+        } catch (EncoderException e) {
             pb.writeShort(-1);
         }
     }
@@ -65,10 +67,10 @@ public class MessageAdvSignChange
                 return null;
             }
         }
-        TileEntity tile = ctx.getServerHandler().playerEntity.worldObj.getTileEntity(x, y, z);
+        TileEntity tile = ctx.getServerHandler().player.world.getTileEntity(new BlockPos(x, y, z));
         if (tile != null && tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            if (tileAS.isEditor(ctx.getServerHandler().playerEntity)) {
+            if (tileAS.isEditor(ctx.getServerHandler().player)) {
                 tileAS.resetEditor();
             } else {
                 return null;

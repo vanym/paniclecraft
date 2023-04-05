@@ -12,10 +12,11 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import cpw.mods.fml.common.network.IGuiHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 
 public enum GUIs implements IGuiHandler {
     PALETTE {
@@ -84,7 +85,7 @@ public enum GUIs implements IGuiHandler {
                 int x,
                 int y,
                 int z) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
             if (tile instanceof TileEntityAdvSign) {
                 return new GuiEditAdvSign((TileEntityAdvSign)tile);
             } else {
@@ -101,7 +102,7 @@ public enum GUIs implements IGuiHandler {
                 int x,
                 int y,
                 int z) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
             if (tile instanceof TileEntityCannon) {
                 return new ContainerCannon(player.inventory, (TileEntityCannon)tile);
             } else {
@@ -117,7 +118,7 @@ public enum GUIs implements IGuiHandler {
                 int x,
                 int y,
                 int z) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
             if (tile instanceof TileEntityCannon) {
                 return new GuiCannon(new ContainerCannon(player.inventory, (TileEntityCannon)tile));
             } else {
@@ -145,7 +146,7 @@ public enum GUIs implements IGuiHandler {
                 int x,
                 int y,
                 int z) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
             if (tile instanceof TileEntityChessDesk) {
                 return new GuiChess((TileEntityChessDesk)tile);
             } else {

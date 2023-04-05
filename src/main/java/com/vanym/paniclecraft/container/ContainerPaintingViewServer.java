@@ -140,6 +140,6 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
                 view.editable), player);
         player.openContainer = view;
         player.openContainer.windowId = windowId;
-        player.openContainer.addCraftingToCrafters(player);
+        player.openContainer.addListener(player);
     }
 }

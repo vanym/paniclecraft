@@ -8,8 +8,9 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.math.RayTraceResult;
 
 public class CommandAdvSign extends TreeCommandBase {
     
@@ -18,14 +19,14 @@ public class CommandAdvSign extends TreeCommandBase {
     }
     
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "advsign";
     }
     
     protected class CommandEdit extends CommandBase {
         
         @Override
-        public String getCommandName() {
+        public String getName() {
             return "edit";
         }
         
@@ -35,18 +36,18 @@ public class CommandAdvSign extends TreeCommandBase {
         }
         
         @Override
-        public void processCommand(ICommandSender sender, String[] args) {
+        public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+                throws CommandException {
             EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
-            MovingObjectPosition target = CommandUtils.rayTraceBlocks(player);
-            TileEntity tile = sender.getEntityWorld()
-                                    .getTileEntity(target.blockX, target.blockY, target.blockZ);
+            RayTraceResult target = CommandUtils.rayTraceBlocks(player);
+            TileEntity tile = sender.getEntityWorld().getTileEntity(target.getBlockPos());
             if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
                 tileAS.setEditor(player);
                 Core.instance.network.sendTo(new MessageAdvSignOpenGui(
-                        tileAS.xCoord,
-                        tileAS.yCoord,
-                        tileAS.zCoord), player);
+                        tileAS.getPos().getX(),
+                        tileAS.getPos().getY(),
+                        tileAS.getPos().getZ()), player);
             } else {
                 throw new CommandException(
                         String.format("commands.%s.exception.noadvsign", DEF.MOD_ID));

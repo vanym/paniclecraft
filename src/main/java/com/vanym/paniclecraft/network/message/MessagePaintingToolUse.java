@@ -7,13 +7,15 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
 
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessagePaintingToolUse
         implements
@@ -80,15 +82,12 @@ public class MessagePaintingToolUse
     
     @Override
     public IMessage onMessage(MessagePaintingToolUse message, MessageContext ctx) {
-        EntityPlayer playerEntity = ctx.getServerHandler().playerEntity;
-        if (playerEntity.getHeldItem() == null) {
-            return null;
-        }
-        ItemStack heldItem = playerEntity.getHeldItem();
+        EntityPlayer player = ctx.getServerHandler().player;
+        ItemStack heldItem = player.getActiveItemStack();
         if (!(heldItem.getItem() instanceof ItemPaintingTool)) {
             return null;
         }
-        World world = playerEntity.worldObj;
+        World world = player.world;
         Picture picture = null;
         WorldPictureProvider provider = null;
         if (message.tile) {
@@ -100,8 +99,8 @@ public class MessagePaintingToolUse
             picture = provider.getOrCreatePicture(world, message.x, message.y, message.z,
                                                   message.side);
         }
-        if (picture == null || !playerEntity.canPlayerEdit(message.x, message.y, message.z,
-                                                           message.side, heldItem)) {
+        if (picture == null || !player.canPlayerEdit(new BlockPos(message.x, message.y, message.z),
+                                                     EnumFacing.getFront(message.side), heldItem)) {
             return null;
         }
         picture.usePaintingTool(heldItem, message.px, message.py);

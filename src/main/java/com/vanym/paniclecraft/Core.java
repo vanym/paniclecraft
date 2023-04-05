@@ -18,44 +18,44 @@ import com.vanym.paniclecraft.core.component.ModComponentCannon;
 import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
-import com.vanym.paniclecraft.item.ItemMod3;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
 
-import cpw.mods.fml.client.event.ConfigChangedEvent;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.ModMetadata;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLEmbeddedChannel;
-import cpw.mods.fml.common.network.FMLNetworkEvent;
-import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.server.FMLServerHandler;
 import net.minecraftforge.oredict.RecipeSorter;
 
 @Mod(
     modid = DEF.MOD_ID,
     name = DEF.MOD_NAME,
     version = DEF.VERSION,
-    acceptedMinecraftVersions = "[1.7.10]",
+    acceptedMinecraftVersions = "[1.12.2]",
     guiFactory = "com.vanym.paniclecraft.client.gui.config.GuiModConfigFactory")
 public class Core implements IGuiHandler {
     
@@ -109,7 +109,7 @@ public class Core implements IGuiHandler {
         
         this.command = new CommandMod3();
         
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
         
         if (this.config.getBoolean("creativeTab", "general", true, "")) {
             this.tab = new CreativeTabMod3(DEF.MOD_ID);
@@ -162,7 +162,7 @@ public class Core implements IGuiHandler {
     
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-        if (!event.modID.equals(DEF.MOD_ID)) {
+        if (!event.getModID().equals(DEF.MOD_ID)) {
             return;
         }
         for (ModComponent component : Core.instance.getComponents()) {
@@ -175,8 +175,8 @@ public class Core implements IGuiHandler {
         }
     }
     
-    public void registerItem(ItemMod3 item) {
-        GameRegistry.registerItem(item, item.getName());
+    public void registerItem(Item item) {
+        ForgeRegistries.ITEMS.register(item);
         if (this.tab != null) {
             item.setCreativeTab(this.tab);
             if (this.tab.iconitem == null) {
@@ -191,17 +191,16 @@ public class Core implements IGuiHandler {
     
     @SubscribeEvent
     public void onConnectionFromClient(FMLNetworkEvent.ServerConnectionFromClientEvent event) {
-        this.sendConfigToPlayer(event.manager);
+        this.sendConfigToPlayer(event.getManager());
     }
     
-    @SuppressWarnings("unchecked")
     protected void sendConfigToAllPlayers() {
-        MinecraftServer server = MinecraftServer.getServer();
+        MinecraftServer server = FMLServerHandler.instance().getServer();
         if (server != null && server.isServerRunning()) {
-            ServerConfigurationManager manager = server.getConfigurationManager();
-            List<EntityPlayerMP> players = manager.playerEntityList;
-            players.stream()
-                   .map(p->p.playerNetServerHandler.netManager)
+            PlayerList manager = server.getPlayerList();
+            manager.getPlayers()
+                   .stream()
+                   .map(p->p.connection.netManager)
                    .forEach(this::sendConfigToPlayer);
         }
     }
@@ -218,8 +217,8 @@ public class Core implements IGuiHandler {
                 return;
             }
             FMLEmbeddedChannel channel = Core.instance.getChannel(Side.SERVER);
-            Packet packet = channel.generatePacketFrom(message);
-            manager.scheduleOutboundPacket(packet);
+            Packet<?> packet = channel.generatePacketFrom(message);
+            manager.sendPacket(packet);
         });
     }
     

@@ -4,15 +4,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.command.CommandUtils.NopaintingException;
 import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 
 public class CommandPaintingView extends CommandBase {
     
@@ -27,7 +31,7 @@ public class CommandPaintingView extends CommandBase {
     }
     
     @Override
-    public String getCommandName() {
+    public String getName() {
         StringBuilder sb = new StringBuilder();
         if (this.edit) {
             sb.append("edit");
@@ -45,7 +49,7 @@ public class CommandPaintingView extends CommandBase {
     }
     
     @Override
-    public String getCommandUsage(ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         return super.getTranslationPrefix() + ".usage";
     }
     
@@ -60,25 +64,28 @@ public class CommandPaintingView extends CommandBase {
     }
     
     @Override
-    @SuppressWarnings("rawtypes")
-    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+    public List<String> getTabCompletions(
+            MinecraftServer server,
+            ICommandSender sender,
+            String[] args,
+            @Nullable BlockPos pos) {
         if (this.to && args.length == 1) {
-            return getListOfStringsMatchingLastWord(args,
-                                                    MinecraftServer.getServer().getAllUsernames());
+            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
         }
-        return super.addTabCompletionOptions(sender, args);
+        return super.getTabCompletions(server, sender, args, pos);
     }
     
     @Override
-    public void processCommand(ICommandSender sender, String[] args) {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+            throws CommandException {
         EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
         EntityPlayerMP viewer;
         int i = 0;
         if (this.to) {
             if (args.length == i) {
-                throw new WrongUsageException(this.getCommandUsage(sender));
+                throw new WrongUsageException(this.getUsage(sender));
             }
-            viewer = getPlayer(sender, args[i++]);
+            viewer = getPlayer(server, sender, args[i++]);
         } else {
             viewer = player;
         }
@@ -86,9 +93,9 @@ public class CommandPaintingView extends CommandBase {
         if (args.length == i) {
             maxRadius = 1024;
         } else if (args.length == (i + 1)) {
-            maxRadius = parseInt(sender, args[i++]);
+            maxRadius = parseInt(args[i++]);
         } else {
-            throw new WrongUsageException(this.getCommandUsage(sender));
+            throw new WrongUsageException(this.getUsage(sender));
         }
         try {
             ContainerPaintingViewServer view =

@@ -2,8 +2,9 @@ package com.vanym.paniclecraft.core.component.painting;
 
 import com.vanym.paniclecraft.Core;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class AnvilCopyEventHandler {
     
@@ -11,19 +12,20 @@ public class AnvilCopyEventHandler {
     
     @SubscribeEvent
     public void anvilCopy(AnvilUpdateEvent event) {
-        if (event.left == null || event.right == null
-            || Core.instance.painting.itemPainting != event.left.getItem()
-            || event.left.getItem() != event.right.getItem()) {
+        if (event.getLeft().isEmpty() || event.getRight().isEmpty()
+            || Core.instance.painting.itemPainting != event.getLeft().getItem()
+            || event.getLeft().getItem() != event.getRight().getItem()) {
             return;
         }
-        int limit = Core.instance.painting.itemPainting.getItemStackLimit(event.left);
-        int amount = Math.min(limit - event.left.stackSize, event.right.stackSize);
+        int limit = Core.instance.painting.itemPainting.getItemStackLimit(event.getLeft());
+        int amount = Math.min(limit - event.getLeft().getCount(), event.getRight().getCount());
         if (amount <= 0) {
             return;
         }
-        event.output = event.left.copy();
-        event.materialCost = amount;
-        event.output.stackSize += event.materialCost;
-        event.cost = Math.max(1, amount * Core.instance.painting.config.copyOnAnvilCost);
+        ItemStack output = event.getLeft().copy();
+        event.setMaterialCost(amount);
+        output.grow(amount);
+        event.setOutput(output);
+        event.setCost(Math.max(1, amount * Core.instance.painting.config.copyOnAnvilCost));
     }
 }

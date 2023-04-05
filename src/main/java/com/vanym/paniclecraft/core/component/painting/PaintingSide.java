@@ -1,22 +1,27 @@
 package com.vanym.paniclecraft.core.component.painting;
 
+import javax.annotation.Nonnull;
+
 import com.vanym.paniclecraft.utils.TileOnSide;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public enum PaintingSide {
-    DOWN(ForgeDirection.WEST, ForgeDirection.SOUTH), // -Y
-    UP(ForgeDirection.WEST, ForgeDirection.NORTH), // +Y
-    NORTH(ForgeDirection.WEST, ForgeDirection.DOWN), // -Z
-    SOUTH(ForgeDirection.EAST, ForgeDirection.DOWN), // +Z
-    WEST(ForgeDirection.SOUTH, ForgeDirection.DOWN), // -X
-    EAST(ForgeDirection.NORTH, ForgeDirection.DOWN), // +X
-    UNKNOWN(ForgeDirection.UNKNOWN, ForgeDirection.UNKNOWN);
+    DOWN(EnumFacing.WEST, EnumFacing.SOUTH), // -Y
+    UP(EnumFacing.WEST, EnumFacing.NORTH), // +Y
+    NORTH(EnumFacing.WEST, EnumFacing.DOWN), // -Z
+    SOUTH(EnumFacing.EAST, EnumFacing.DOWN), // +Z
+    WEST(EnumFacing.SOUTH, EnumFacing.DOWN), // -X
+    EAST(EnumFacing.NORTH, EnumFacing.DOWN); // +X
     
     public final TileOnSide axes;
     
-    PaintingSide(ForgeDirection xDir, ForgeDirection yDir) {
-        this.axes = new TileOnSide(xDir, yDir, ForgeDirection.getOrientation(this.ordinal()));
+    PaintingSide(EnumFacing xDir, EnumFacing yDir) {
+        this.axes = new TileOnSide(xDir, yDir, EnumFacing.getFront(this.ordinal()));
+    }
+    
+    public static PaintingSide getSide(@Nonnull EnumFacing side) {
+        return getSide(side.ordinal());
     }
     
     public static PaintingSide getSide(int side) {

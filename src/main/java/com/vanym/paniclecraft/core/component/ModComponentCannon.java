@@ -10,19 +10,21 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererCannon;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityCannonRenderer;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.network.message.MessageCannonSet;
+import com.vanym.paniclecraft.recipe.RecipeRegister;
+import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ModComponentCannon implements ModComponent {
     
@@ -49,13 +51,15 @@ public class ModComponentCannon implements ModComponent {
         }
         this.enabled = true;
         this.blockCannon = new BlockCannon();
-        GameRegistry.registerBlock(this.blockCannon, this.blockCannon.getName());
-        this.itemCannon = (ItemBlock)Item.getItemFromBlock(this.blockCannon);
-        GameRegistry.registerTileEntity(TileEntityCannon.class, DEF.MOD_ID + ".cannon");
+        ForgeRegistries.BLOCKS.register(this.blockCannon);
+        this.itemCannon = new ItemBlock(this.blockCannon);
+        ForgeRegistries.ITEMS.register(this.itemCannon.setRegistryName(this.blockCannon.getRegistryName()));
+        GameRegistry.registerTileEntity(TileEntityCannon.class,
+                                        new ResourceLocation(DEF.MOD_ID, "cannon"));
         boolean craftingRecipeCannon =
                 config.getBoolean("craftingRecipeCannon", this.getName(), true, "");
         if (craftingRecipeCannon) {
-            GameRegistry.addRecipe(new ShapedOreRecipe(
+            RecipeRegister.register(new ShapedOreRecipe(
                     this.itemCannon,
                     "i  ",
                     " i ",
@@ -63,7 +67,8 @@ public class ModComponentCannon implements ModComponent {
                     Character.valueOf('i'),
                     "ingotIron",
                     Character.valueOf('d'),
-                    Blocks.dispenser));
+                    Blocks.DISPENSER));
+            
         }
         
         Core.instance.network.registerMessage(MessageCannonSet.class, MessageCannonSet.class, 51,
@@ -84,9 +89,9 @@ public class ModComponentCannon implements ModComponent {
             return;
         }
         this.tileCannonRenderer = new TileEntityCannonRenderer();
-        this.tileCannonRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
+        this.tileCannonRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
         this.itemCannonRenderer = new ItemRendererCannon();
-        MinecraftForgeClient.registerItemRenderer(this.itemCannon, this.itemCannonRenderer);
+        this.itemCannon.setTileEntityItemStackRenderer(this.itemCannonRenderer);
         this.configChangedClient(config);
     }
     
@@ -103,8 +108,8 @@ public class ModComponentCannon implements ModComponent {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCannon.class,
                                                          this.tileCannonRenderer);
         } else {
-            TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(TileEntityCannon.class,
-                                                                             this.tileCannonRenderer);
+            TileEntityRendererDispatcher.instance.renderers.remove(TileEntityCannon.class,
+                                                                   this.tileCannonRenderer);
         }
         config.restartlessReset();
     }

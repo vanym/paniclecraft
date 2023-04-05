@@ -15,14 +15,14 @@ public class ContainerCannon extends ContainerBase {
     public ContainerCannon(InventoryPlayer playerInv, TileEntityCannon cannon) {
         this.playerInv = playerInv;
         this.cannon = cannon;
-        cannon.openInventory();
+        cannon.openInventory(playerInv.player);
         this.addSlotToContainer(new Slot(cannon, 0, 8, 18));
         this.addPlayerInventorySlots(playerInv);
     }
     
     @Override
     public boolean canInteractWith(EntityPlayer entityplayer) {
-        return this.cannon.isUseableByPlayer(entityplayer);
+        return this.cannon.isUsableByPlayer(entityplayer);
     }
     
     @Override
@@ -41,17 +41,17 @@ public class ContainerCannon extends ContainerBase {
                 return null;
             }
             
-            if (itemstack1.stackSize == 0) {
+            if (itemstack1.isEmpty()) {
                 slot.putStack(null);
             } else {
                 slot.onSlotChanged();
             }
             
-            if (itemstack1.stackSize == itemstack.stackSize) {
+            if (itemstack1.getCount() == itemstack.getCount()) {
                 return null;
             }
             
-            slot.onPickupFromSlot(player, itemstack1);
+            slot.onTake(player, itemstack1);
         }
         return itemstack;
     }
@@ -59,6 +59,6 @@ public class ContainerCannon extends ContainerBase {
     @Override
     public void onContainerClosed(EntityPlayer player) {
         super.onContainerClosed(player);
-        this.cannon.closeInventory();
+        this.cannon.closeInventory(player);
     }
 }

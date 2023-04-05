@@ -7,24 +7,23 @@ import org.lwjgl.opengl.GL12;
 
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.model.ModelSign;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
+public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEntityAdvSign> {
     
     protected static final ResourceLocation TEXTURE =
             new ResourceLocation("textures/entity/sign.png");
     
     protected final ModelSign modelSign = new ModelSign();
     
-    public void renderTileEntityAt(
+    public void render(
             TileEntityAdvSign tileAS,
             double x,
             double y,
@@ -77,7 +76,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
         GL11.glColor4f(colorf[0], colorf[1], colorf[2], colorf[3]);
         this.modelSign.renderSign();
         GL11.glPopMatrix();
-        FontRenderer fontRenderer = this.func_147498_b();
+        FontRenderer fontRenderer = this.getFontRenderer();
         int size = tileAS.lines.size();
         float textScale = 0.016666668F * scale * 4.0F / Math.max(1, size);
         GL11.glTranslatef(0.0F, 0.5F * scale, 0.07F * scale);
@@ -101,7 +100,14 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
     }
     
     @Override
-    public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
-        this.renderTileEntityAt((TileEntityAdvSign)tile, x, y, z, f, false, true, -1);
+    public void render(
+            TileEntityAdvSign tileAS,
+            double x,
+            double y,
+            double z,
+            float partialTicks,
+            int destroyStage,
+            float alpha) {
+        this.render(tileAS, x, y, z, partialTicks, false, true, -1);
     }
 }

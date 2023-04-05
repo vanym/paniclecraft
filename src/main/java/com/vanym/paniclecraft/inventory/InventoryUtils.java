@@ -4,14 +4,14 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.IWorldNameable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class InventoryUtils {
     
@@ -21,13 +21,7 @@ public class InventoryUtils {
     
     public static Stream<ItemStack> inventoryToStream(IInventory inv, boolean onClosing) {
         return IntStream.range(0, inv.getSizeInventory())
-                        .mapToObj(onClosing ? inv::getStackInSlotOnClosing : inv::getStackInSlot);
-    }
-    
-    public static void dropOnClosing(IInventory inv, EntityPlayer player) {
-        InventoryUtils.inventoryToStream(inv, true)
-                      .filter(s->s != null)
-                      .forEach(s->player.dropPlayerItemWithRandomChoice(s, false));
+                        .mapToObj(onClosing ? inv::removeStackFromSlot : inv::getStackInSlot);
     }
     
     public static ItemStack findItem(InventoryCrafting inv, Item item) {
@@ -41,11 +35,11 @@ public class InventoryUtils {
     }
     
     @SideOnly(Side.CLIENT)
-    public static String getTranslatedName(IInventory inv, Object... params) {
-        if (inv.hasCustomInventoryName()) {
-            return inv.getInventoryName();
+    public static String getTranslatedName(IWorldNameable inv, Object... params) {
+        if (inv.hasCustomName()) {
+            return inv.getName();
         } else {
-            return I18n.format(inv.getInventoryName(), params);
+            return I18n.format(inv.getName(), params);
         }
     }
 }

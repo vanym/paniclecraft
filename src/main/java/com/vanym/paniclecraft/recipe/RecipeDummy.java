@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 
 import net.minecraft.block.Block;
 import net.minecraft.inventory.InventoryCrafting;
@@ -11,8 +12,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class RecipeDummy {
     
@@ -20,20 +19,27 @@ public class RecipeDummy {
         ItemStack brush = Core.instance.painting.itemPaintBrush.getBrush();
         ItemStack smallBrush = Core.instance.painting.itemPaintBrush.getSmallBrush();
         ItemStack filler = Core.instance.painting.itemPaintBrush.getFiller();
-        return Arrays.asList(new Shapeless(brush, brush, RecipeColorizeByDye.DYE),
-                             new Shapeless(smallBrush, smallBrush, RecipeColorizeByDye.DYE),
-                             new Shapeless(filler, filler, RecipeColorizeByDye.DYE));
+        Shapeless brushRecipe = new Shapeless(brush, brush, "dye");
+        brushRecipe.setRegistryName(DEF.MOD_ID, "paintBrushByDyeDummy");
+        Shapeless smallBrushRecipe = new Shapeless(smallBrush, smallBrush, "dye");
+        smallBrushRecipe.setRegistryName(DEF.MOD_ID, "smallPaintBrushByDyeDummy");
+        Shapeless fillerRecipe = new Shapeless(filler, filler, "dye");
+        fillerRecipe.setRegistryName(DEF.MOD_ID, "paintFillerByDyeDummy");
+        return Arrays.asList(brushRecipe, smallBrushRecipe, fillerRecipe);
     }
     
     public static List<IRecipe> getColorizeByFillerDummies() {
         ItemStack brush = Core.instance.painting.itemPaintBrush.getBrush();
         ItemStack smallBrush = Core.instance.painting.itemPaintBrush.getSmallBrush();
         ItemStack filler = Core.instance.painting.itemPaintBrush.getFiller();
-        return Arrays.asList(new Shapeless(brush, brush, filler),
-                             new Shapeless(smallBrush, smallBrush, filler));
+        Shapeless brushRecipe = new Shapeless(brush, brush, filler);
+        brushRecipe.setRegistryName(DEF.MOD_ID, "paintBrushByFillerDummy");
+        Shapeless smallBrushRecipe = new Shapeless(smallBrush, smallBrush, filler);
+        smallBrushRecipe.setRegistryName(DEF.MOD_ID, "smallPaintBrushByFillerDummy");
+        return Arrays.asList(brushRecipe, smallBrushRecipe);
     }
     
-    public static class Shaped extends ShapedOreRecipe {
+    public static class Shaped extends RecipeRegister.ShapedOreRecipe {
         
         public Shaped(Block result, Object... recipe) {
             super(result, recipe);
@@ -58,7 +64,7 @@ public class RecipeDummy {
         }
     }
     
-    public static class Shapeless extends ShapelessOreRecipe {
+    public static class Shapeless extends RecipeRegister.ShapelessOreRecipe {
         
         public Shapeless(Block result, Object... recipe) {
             super(result, recipe);

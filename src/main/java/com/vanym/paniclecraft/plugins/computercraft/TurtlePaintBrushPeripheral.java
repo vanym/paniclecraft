@@ -18,8 +18,8 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChunkCoordinates;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 public class TurtlePaintBrushPeripheral extends PeripheralBase {
     
@@ -34,86 +34,86 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return "paintbrush";
     }
     
-    protected boolean detectPicture(ForgeDirection dir) throws LuaException, InterruptedException {
+    protected boolean detectPicture(EnumFacing dir) throws LuaException, InterruptedException {
         return this.searchPicture(dir) != null;
     }
     
     @PeripheralMethod(0)
     protected boolean detectPicture() throws LuaException, InterruptedException {
-        return this.detectPicture(ForgeDirection.UNKNOWN);
+        return this.detectPicture(null);
     }
     
     @PeripheralMethod(1)
     protected boolean detectPictureUp() throws LuaException, InterruptedException {
-        return this.detectPicture(ForgeDirection.UP);
+        return this.detectPicture(EnumFacing.UP);
     }
     
     @PeripheralMethod(2)
     protected boolean hasPictureDown() throws LuaException, InterruptedException {
-        return this.detectPicture(ForgeDirection.DOWN);
+        return this.detectPicture(EnumFacing.DOWN);
     }
     
-    protected int getWidth(ForgeDirection dir) throws LuaException, InterruptedException {
+    protected int getWidth(EnumFacing dir) throws LuaException, InterruptedException {
         return this.findPicture(dir).getWidth();
     }
     
     @PeripheralMethod(3)
     protected int getWidth() throws LuaException, InterruptedException {
-        return this.getWidth(ForgeDirection.UNKNOWN);
+        return this.getWidth(null);
     }
     
     @PeripheralMethod(4)
     protected int getWidthUp() throws LuaException, InterruptedException {
-        return this.getWidth(ForgeDirection.UP);
+        return this.getWidth(EnumFacing.UP);
     }
     
     @PeripheralMethod(5)
     protected int getWidthDown() throws LuaException, InterruptedException {
-        return this.getWidth(ForgeDirection.DOWN);
+        return this.getWidth(EnumFacing.DOWN);
     }
     
-    protected int getHeight(ForgeDirection dir) throws LuaException, InterruptedException {
+    protected int getHeight(EnumFacing dir) throws LuaException, InterruptedException {
         return this.findPicture(dir).getHeight();
     }
     
     @PeripheralMethod(6)
     protected int getHeight() throws LuaException, InterruptedException {
-        return this.getHeight(ForgeDirection.UNKNOWN);
+        return this.getHeight(null);
     }
     
     @PeripheralMethod(7)
     protected int getHeightUp() throws LuaException, InterruptedException {
-        return this.getHeight(ForgeDirection.UP);
+        return this.getHeight(EnumFacing.UP);
     }
     
     @PeripheralMethod(8)
     protected int getHeightDown() throws LuaException, InterruptedException {
-        return this.getHeight(ForgeDirection.DOWN);
+        return this.getHeight(EnumFacing.DOWN);
     }
     
-    protected boolean isEditable(ForgeDirection dir) throws LuaException, InterruptedException {
+    protected boolean isEditable(EnumFacing dir) throws LuaException, InterruptedException {
         return this.findPicture(dir).isEditable();
     }
     
     @PeripheralMethod(9)
     protected boolean isEditable() throws LuaException, InterruptedException {
-        return this.isEditable(ForgeDirection.UNKNOWN);
+        return this.isEditable(null);
     }
     
     @PeripheralMethod(10)
     protected boolean isEditableUp() throws LuaException, InterruptedException {
-        return this.isEditable(ForgeDirection.UP);
+        return this.isEditable(EnumFacing.UP);
     }
     
     @PeripheralMethod(11)
     protected boolean isEditableDown() throws LuaException, InterruptedException {
-        return this.isEditable(ForgeDirection.DOWN);
+        return this.isEditable(EnumFacing.DOWN);
     }
     
-    protected boolean useBrush(ForgeDirection dir, int px, int py)
+    protected boolean useBrush(EnumFacing dir, int px, int py)
             throws LuaException, InterruptedException {
         ItemStack stack = this.getSelectedStack();
-        if (stack == null || stack.stackSize == 0 || !(stack.getItem() instanceof IPaintingTool)) {
+        if (stack == null || stack.isEmpty() || !(stack.getItem() instanceof IPaintingTool)) {
             throw new LuaException("cannot find brush");
         }
         Picture picture = this.findPicture(dir);
@@ -123,17 +123,17 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     
     @PeripheralMethod(20)
     protected boolean useBrush(int px, int py) throws LuaException, InterruptedException {
-        return this.useBrush(ForgeDirection.UNKNOWN, px, py);
+        return this.useBrush(null, px, py);
     }
     
     @PeripheralMethod(21)
     protected boolean useBrushUp(int px, int py) throws LuaException, InterruptedException {
-        return this.useBrush(ForgeDirection.UP, px, py);
+        return this.useBrush(EnumFacing.UP, px, py);
     }
     
     @PeripheralMethod(22)
     protected boolean useBrushDown(int px, int py) throws LuaException, InterruptedException {
-        return this.useBrush(ForgeDirection.DOWN, px, py);
+        return this.useBrush(EnumFacing.DOWN, px, py);
     }
     
     @PeripheralMethod(31)
@@ -164,22 +164,19 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return true;
     }
     
-    protected Picture searchPicture(ForgeDirection dir) {
-        if (dir == ForgeDirection.UNKNOWN) {
-            dir = ForgeDirection.getOrientation(this.turtle.getDirection());
+    protected Picture searchPicture(EnumFacing dir) {
+        if (dir == null) {
+            dir = this.turtle.getDirection();
         }
-        ChunkCoordinates pos = this.turtle.getPosition();
-        pos.posX += dir.offsetX;
-        pos.posY += dir.offsetY;
-        pos.posZ += dir.offsetZ;
-        ForgeDirection pside = dir.getOpposite();
+        BlockPos pos = this.turtle.getPosition().offset(dir);
+        EnumFacing pside = dir.getOpposite();
         for (WorldPictureProvider provider : this.getProviders()) {
             WorldPicturePoint point = new WorldPicturePoint(
                     provider,
                     this.turtle.getWorld(),
-                    pos.posX,
-                    pos.posY,
-                    pos.posZ,
+                    pos.getX(),
+                    pos.getY(),
+                    pos.getZ(),
                     pside.ordinal());
             Picture picture = point.getOrCreatePicture();
             if (picture != null) {
@@ -189,7 +186,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return null;
     }
     
-    protected Picture findPicture(ForgeDirection dir) throws LuaException {
+    protected Picture findPicture(EnumFacing dir) throws LuaException {
         Picture picture = this.searchPicture(dir);
         if (picture == null) {
             throw new LuaException("cannot find picture");

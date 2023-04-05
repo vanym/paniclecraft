@@ -7,10 +7,12 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandPictureResize extends CommandBase {
     
@@ -21,7 +23,7 @@ public class CommandPictureResize extends CommandBase {
     }
     
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "resize";
     }
     
@@ -31,30 +33,31 @@ public class CommandPictureResize extends CommandBase {
     }
     
     @Override
-    public void processCommand(ICommandSender sender, String[] args) {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+            throws CommandException {
         int width, height;
         if (args.length == 1) {
-            width = height = parseIntBounded(sender, args[0], 1,
-                                             Math.min(Core.instance.painting.MAX_WIDTH,
-                                                      Core.instance.painting.MAX_HEIGHT));
+            width = height = parseInt(args[0], 1,
+                                      Math.min(Core.instance.painting.MAX_WIDTH,
+                                               Core.instance.painting.MAX_HEIGHT));
         } else if (args.length == 2) {
-            width = parseIntBounded(sender, args[0], 1, Core.instance.painting.MAX_WIDTH);
-            height = parseIntBounded(sender, args[1], 1, Core.instance.painting.MAX_HEIGHT);
+            width = parseInt(args[0], 1, Core.instance.painting.MAX_WIDTH);
+            height = parseInt(args[1], 1, Core.instance.painting.MAX_HEIGHT);
         } else {
-            throw new WrongUsageException(this.getCommandUsage(sender));
+            throw new WrongUsageException(this.getUsage(sender));
         }
         EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
-        ChatComponentTranslation success = new ChatComponentTranslation(
+        TextComponentTranslation success = new TextComponentTranslation(
                 String.format("commands.%s.%s.success", DEF.MOD_ID, "pictureresize"),
                 picture.getWidth(),
                 picture.getHeight(),
                 width,
                 height);
         if (picture.resize(width, height)) {
-            sender.addChatMessage(success);
+            sender.sendMessage(success);
         } else {
-            sender.addChatMessage(new ChatComponentTranslation(
+            sender.sendMessage(new TextComponentTranslation(
                     String.format("commands.%s.%s.failure", DEF.MOD_ID, "pictureresize")));
         }
     }

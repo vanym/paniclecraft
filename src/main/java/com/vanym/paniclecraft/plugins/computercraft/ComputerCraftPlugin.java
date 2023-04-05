@@ -4,7 +4,6 @@ import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.ModComponent;
 
 import dan200.computercraft.api.ComputerCraftAPI;
-import net.minecraftforge.common.MinecraftForge;
 
 public class ComputerCraftPlugin implements ModComponent {
     
@@ -39,7 +38,6 @@ public class ComputerCraftPlugin implements ModComponent {
         if (config.getBoolean("turtleUpgradePaintBrush", this.getName(), true, "")) {
             this.turtlePaintBrush = new TurtlePaintBrush();
             ComputerCraftAPI.registerTurtleUpgrade(this.turtlePaintBrush);
-            MinecraftForge.EVENT_BUS.register(this.turtlePaintBrush);
         }
     }
     

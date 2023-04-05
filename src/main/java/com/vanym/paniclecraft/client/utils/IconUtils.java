@@ -1,17 +1,13 @@
 package com.vanym.paniclecraft.client.utils;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.util.IIcon;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class IconUtils {
     
-    public static IIcon flip(IIcon icon, boolean flipU, boolean flipV) {
-        return new IconFlipped(icon, flipU, flipV);
-    }
-    
-    public static IIcon sub(
+    public static TextureAtlasSprite sub(
             int x,
             int y,
             int iconWidth,
@@ -21,7 +17,7 @@ public class IconUtils {
         return new IconSubRect(x, y, iconWidth, iconHeight, totalWidth, totalHeight);
     }
     
-    public static IIcon full(int width, int height) {
+    public static TextureAtlasSprite full(int width, int height) {
         return sub(0, 0, width, height, width, height);
     }
 }

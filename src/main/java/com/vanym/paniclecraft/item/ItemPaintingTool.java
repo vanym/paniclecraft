@@ -7,6 +7,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -16,20 +18,25 @@ import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool {
     
@@ -48,16 +55,16 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     }
     
     @Override
-    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+    public void onUsingTick(ItemStack stack, EntityLivingBase player, int count) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             this.onUsingTickClient(stack, player, count);
         }
     }
     
     @SideOnly(Side.CLIENT)
-    protected void onUsingTickClient(ItemStack stack, EntityPlayer player, int count) {
+    protected void onUsingTickClient(ItemStack stack, EntityLivingBase player, int count) {
         Minecraft mc = Minecraft.getMinecraft();
-        MessagePaintingToolUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
+        MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
         if (mes != null) {
             this.brushUseMessages.add(mes);
         }
@@ -65,7 +72,11 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     }
     
     @Override
-    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int count) {
+    public void onPlayerStoppedUsing(
+            ItemStack stack,
+            World world,
+            EntityLivingBase player,
+            int count) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             this.flashBrushUseMessages();
         }
@@ -75,9 +86,9 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     @SideOnly(Side.CLIENT)
     public void renderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
-        ItemStack itemStack = mc.thePlayer.getItemInUse();
+        ItemStack itemStack = mc.player.getActiveItemStack();
         if (itemStack != null && itemStack.getItem() == this) {
-            MessagePaintingToolUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
+            MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
             if (mes != null) {
                 this.brushUseMessages.add(mes);
             }
@@ -95,14 +106,14 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     @SideOnly(Side.CLIENT)
     public static MessagePaintingToolUse makeBrushUseMessage(
             World world,
-            MovingObjectPosition target) {
-        if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
+            RayTraceResult target) {
+        if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
             return null;
         }
-        int x = target.blockX;
-        int y = target.blockY;
-        int z = target.blockZ;
-        int side = target.sideHit;
+        int x = target.getBlockPos().getX();
+        int y = target.getBlockPos().getY();
+        int z = target.getBlockPos().getZ();
+        int side = target.sideHit.getIndex();
         boolean tile = true;
         IPictureSize picture = WorldPictureProvider.ANYTILE.getPicture(world, x, y, z, side);
         if (picture == null) {
@@ -118,10 +129,10 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             return null;
         }
         PaintingSide pside = PaintingSide.getSide(side);
-        Vec3 inBlock = GeometryUtils.getInBlockVec(target);
-        Vec3 inPainting = pside.axes.toSideCoords(inBlock);
-        int px = (int)(inPainting.xCoord * picture.getWidth());
-        int py = (int)(inPainting.yCoord * picture.getHeight());
+        Vec3d inBlock = GeometryUtils.getInBlockVec(target);
+        Vec3d inPainting = pside.axes.toSideCoords(inBlock);
+        int px = (int)(inPainting.x * picture.getWidth());
+        int py = (int)(inPainting.y * picture.getHeight());
         MessagePaintingToolUse message =
                 new MessagePaintingToolUse(x, y, z, px, py, (byte)pside.ordinal(), tile);
         return message;
@@ -133,32 +144,27 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     }
     
     @Override
-    public boolean onItemUse(
-            ItemStack itemStack,
+    public EnumActionResult onItemUse(
             EntityPlayer entityPlayer,
             World world,
-            int x,
-            int y,
-            int z,
-            int side,
+            BlockPos pos,
+            EnumHand hand,
+            EnumFacing facing,
             float hitX,
             float hitY,
             float hitZ) {
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ(), side = facing.getIndex();
         if (WorldPictureProvider.ANYTILE.getPicture(world, x, y, z, side) != null
             || (Core.instance.painting.config.allowPaintOnBlock
                 && (EntityPaintOnBlock.getExistingPicture(world, x, y, z, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)))) {
-            entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
+            entityPlayer.setActiveHand(hand);
             if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
                 this.brushUseMessages.clear();
             }
+            return EnumActionResult.SUCCESS;
         }
-        return false;
-    }
-    
-    @Override
-    public boolean isItemTool(ItemStack stack) {
-        return true;
+        return EnumActionResult.FAIL;
     }
     
     @Override
@@ -167,19 +173,18 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     }
     
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
             ItemStack itemStack,
-            EntityPlayer entityPlayer,
-            List list,
-            boolean advancedItemTooltips) {
+            @Nullable World world,
+            List<String> list,
+            ITooltipFlag flag) {
         if (itemStack.hasTagCompound()) {
             NBTTagCompound itemTag = itemStack.getTagCompound();
             if (itemTag.hasKey(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 StringBuilder sb = new StringBuilder();
-                sb.append(StatCollector.translateToLocal("text.paintingtool.radius"));
+                sb.append(I18n.translateToLocal("text.paintingtool.radius"));
                 sb.append(": ");
                 sb.append(NUMBER_FORMATTER.format(radius));
                 list.add(sb.toString());

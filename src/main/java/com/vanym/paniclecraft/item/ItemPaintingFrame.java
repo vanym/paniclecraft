@@ -7,41 +7,44 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemPaintingFrame extends ItemBlock {
     
     public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
-    public static final ForgeDirection FRONT;
-    public static final ForgeDirection LEFT;
-    public static final ForgeDirection BACK;
-    public static final ForgeDirection RIGHT;
-    public static final ForgeDirection BOTTOM;
-    public static final ForgeDirection TOP;
+    public static final EnumFacing FRONT;
+    public static final EnumFacing LEFT;
+    public static final EnumFacing BACK;
+    public static final EnumFacing RIGHT;
+    public static final EnumFacing BOTTOM;
+    public static final EnumFacing TOP;
     
     static {
-        FRONT = ForgeDirection.NORTH;
-        LEFT = FRONT.getRotation(ForgeDirection.UP);
-        BACK = LEFT.getRotation(ForgeDirection.UP);
-        RIGHT = BACK.getRotation(ForgeDirection.UP);
-        BOTTOM = ForgeDirection.DOWN;
-        TOP = ForgeDirection.UP;
+        FRONT = EnumFacing.NORTH;
+        LEFT = FRONT.rotateY();
+        BACK = LEFT.rotateY();
+        RIGHT = BACK.rotateY();
+        BOTTOM = EnumFacing.DOWN;
+        TOP = EnumFacing.UP;
         
-        TreeMap<ForgeDirection, String> letters = new TreeMap<>();
+        TreeMap<EnumFacing, String> letters = new TreeMap<>();
         letters.put(FRONT, "F");
         letters.put(LEFT, "L");
         letters.put(BACK, "K");
@@ -51,20 +54,19 @@ public class ItemPaintingFrame extends ItemBlock {
         SIDE_LETTERS = Collections.unmodifiableMap(letters);
     }
     
-    public static final List<ForgeDirection> SIDE_ORDER =
+    public static final List<EnumFacing> SIDE_ORDER =
             Arrays.asList(FRONT, RIGHT, TOP, LEFT, BACK, BOTTOM);
-    protected static final Map<ForgeDirection, String> SIDE_LETTERS;
+    protected static final Map<EnumFacing, String> SIDE_LETTERS;
     
     public ItemPaintingFrame(Block block) {
         super(block);
+        this.setRegistryName(block.getRegistryName());
     }
     
     @Override
-    public boolean isValidArmor(ItemStack stack, int armorType, Entity entity) {
-        if (armorType == 0) {
-            return true;
-        }
-        return super.isValidArmor(stack, armorType, entity);
+    @Nullable
+    public EntityEquipmentSlot getEquipmentSlot(ItemStack stack) {
+        return EntityEquipmentSlot.HEAD;
     }
     
     @Override
@@ -72,15 +74,15 @@ public class ItemPaintingFrame extends ItemBlock {
     @SideOnly(Side.CLIENT)
     public void addInformation(
             ItemStack itemStack,
-            EntityPlayer entityPlayer,
-            List list,
-            boolean advancedItemTooltips) {
+            @Nullable World world,
+            List<String> list,
+            ITooltipFlag flag) {
         if (itemStack.hasTagCompound()) {
             Map<String, String> mapLetters = new TreeMap<>();
             Map<String, Integer> mapCount = new TreeMap<>();
             NBTTagCompound itemTag = itemStack.getTagCompound();
             for (int i = 0; i < SIDE_ORDER.size(); ++i) {
-                ForgeDirection side = SIDE_ORDER.get(i);
+                EnumFacing side = SIDE_ORDER.get(i);
                 final String TAG_PICTURE_I = getPictureTag(side.ordinal());
                 if (!itemTag.hasKey(TAG_PICTURE_I)) {
                     continue;
@@ -111,7 +113,7 @@ public class ItemPaintingFrame extends ItemBlock {
         }
     }
     
-    public static ItemStack getItemWithPictures(Map<ForgeDirection, Picture> map) {
+    public static ItemStack getItemWithPictures(Map<EnumFacing, Picture> map) {
         ItemStack itemS = new ItemStack(Core.instance.painting.itemPaintingFrame);
         if (map == null) {
             return itemS;
@@ -135,30 +137,30 @@ public class ItemPaintingFrame extends ItemBlock {
         if (provider == null) {
             return getItemWithPictures(null);
         }
-        Map<ForgeDirection, Picture> map = new HashMap<>();
+        Map<EnumFacing, Picture> map = new HashMap<>();
         for (int i = 0; i < ISidePictureProvider.N; i++) {
             Picture picture = provider.getPicture(i);
             if (picture == null) {
                 continue;
             }
-            ForgeDirection pside = ForgeDirection.getOrientation(i);
+            EnumFacing pside = EnumFacing.getFront(i);
             map.put(pside, picture);
         }
         return getItemWithPictures(map);
     }
     
-    public static ItemStack getItemWithEmptyPictures(ForgeDirection... psides) {
+    public static ItemStack getItemWithEmptyPictures(EnumFacing... psides) {
         if (psides == null) {
             return getItemWithPictures(null);
         }
-        Map<ForgeDirection, Picture> map = new HashMap<>();
-        for (ForgeDirection pside : psides) {
+        Map<EnumFacing, Picture> map = new HashMap<>();
+        for (EnumFacing pside : psides) {
             map.put(pside, null);
         }
         return getItemWithPictures(map);
     }
     
-    public static String getPictureTag(ForgeDirection pside) {
+    public static String getPictureTag(EnumFacing pside) {
         return getPictureTag(pside.ordinal());
     }
     

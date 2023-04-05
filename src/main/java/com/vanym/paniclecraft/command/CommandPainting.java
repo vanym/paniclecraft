@@ -9,13 +9,15 @@ import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.event.ClickEvent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.event.ClickEvent;
 
 public class CommandPainting extends TreeCommandBase {
     
@@ -34,7 +36,7 @@ public class CommandPainting extends TreeCommandBase {
     }
     
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "painting";
     }
     
@@ -45,7 +47,7 @@ public class CommandPainting extends TreeCommandBase {
         }
         
         @Override
-        public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
             if (!this.edit && !this.to
                 && Core.instance.painting.server.freePaintingView) {
                 return true;
@@ -59,7 +61,7 @@ public class CommandPainting extends TreeCommandBase {
                 && Core.instance.painting.server.freePaintingEditViewTo) {
                 return true;
             } else {
-                return super.canCommandSenderUseCommand(sender);
+                return super.checkPermission(server, sender);
             }
         }
     }
@@ -67,7 +69,7 @@ public class CommandPainting extends TreeCommandBase {
     protected class CommandGiveTemplate extends CommandBase {
         
         @Override
-        public String getCommandName() {
+        public String getName() {
             return "givetemplate";
         }
         
@@ -87,8 +89,8 @@ public class CommandPainting extends TreeCommandBase {
             return set;
         }
         
-        protected IChatComponent createLine(Iterable<IPictureSize> sizes) {
-            IChatComponent message = new ChatComponentText("");
+        protected ITextComponent createLine(Iterable<IPictureSize> sizes) {
+            ITextComponent message = new TextComponentString("");
             boolean f = true;
             for (IPictureSize size : sizes) {
                 if (!f) {
@@ -101,39 +103,40 @@ public class CommandPainting extends TreeCommandBase {
             return message;
         }
         
-        protected IChatComponent createTemplate(IPictureSize size) {
-            IChatComponent template =
-                    new ChatComponentText(
+        protected ITextComponent createTemplate(IPictureSize size) {
+            ITextComponent template =
+                    new TextComponentString(
                             String.format("%d×%d", size.getWidth(), size.getHeight()));
             ItemStack stack = ItemPainting.getSizedItem(size);
-            stack.stackSize = stack.getMaxStackSize();
-            ChatStyle style = template.getChatStyle();
-            style.setChatClickEvent(new ClickEvent(
+            stack.setCount(stack.getMaxStackSize());
+            Style style = template.getStyle();
+            style.setClickEvent(new ClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     CommandUtils.makeGiveCommand("@p", stack)));
-            style.setChatHoverEvent(CommandUtils.makeItemHover(stack));
+            style.setHoverEvent(CommandUtils.makeItemHover(stack));
             return template;
         }
         
         @Override
-        public void processCommand(ICommandSender sender, String[] args) {
+        public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+                throws CommandException {
             SortedSet<IPictureSize> sizes = new TreeSet<>();
             if (args.length == 0) {
                 sizes.addAll(this.createSizesSet(new FixedPictureSize(16)));
                 sizes.addAll(this.createSizesSet(Core.instance.painting.config.paintingDefaultSize));
             } else if (args.length == 1) {
-                int row = parseInt(sender, args[0]);
+                int row = parseInt(args[0]);
                 IPictureSize size = new FixedPictureSize(row);
                 sizes.addAll(this.createSizesSet(size));
             } else if (args.length == 2) {
-                int width = parseInt(sender, args[0]);
-                int height = parseInt(sender, args[1]);
+                int width = parseInt(args[0]);
+                int height = parseInt(args[1]);
                 IPictureSize size = new FixedPictureSize(width, height);
                 sizes.addAll(this.createSizesSet(size));
             } else {
-                throw new WrongUsageException(this.getCommandUsage(sender));
+                throw new WrongUsageException(this.getUsage(sender));
             }
-            sender.addChatMessage(this.createLine(sizes));
+            sender.sendMessage(this.createLine(sizes));
         }
     }
 }

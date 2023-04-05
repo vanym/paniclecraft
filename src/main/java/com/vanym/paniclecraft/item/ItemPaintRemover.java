@@ -1,29 +1,18 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
-import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.NonNullList;
 
 public class ItemPaintRemover extends ItemPaintingTool {
     
     protected static final int DAMAGE_REMOVER = 0;
     protected static final int DAMAGE_SMALLREMOVER = 1;
-    
-    @SideOnly(Side.CLIENT)
-    public IIcon iconRemover;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconSmallRemover;
     
     public ItemPaintRemover() {
         super();
@@ -47,33 +36,7 @@ public class ItemPaintRemover extends ItemPaintingTool {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
-    public IIcon getIconFromDamage(int damage) {
-        switch (damage) {
-            default:
-            case DAMAGE_REMOVER:
-                return this.iconRemover;
-            case DAMAGE_SMALLREMOVER:
-                return this.iconSmallRemover;
-        }
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        final String PREFIX = DEF.MOD_ID + ":" + this.getName();
-        this.iconRemover = iconRegister.registerIcon(PREFIX);
-        this.iconSmallRemover = iconRegister.registerIcon(PREFIX + "_small");
-    }
-    
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @SideOnly(Side.CLIENT)
-    public void getSubItems(Item item, CreativeTabs creativetab, List list) {
-        if (!(item instanceof ItemPaintRemover)) {
-            return;
-        }
-        ItemPaintRemover remover = (ItemPaintRemover)item;
+    public void getSubItems(CreativeTabs creativetab, NonNullList<ItemStack> list) {
         if (!Core.instance.painting.clientConfig.forceUnhidePaintRemover
             && !Core.instance.painting.config.allowPaintOnBlock
             && creativetab != null
@@ -82,6 +45,7 @@ public class ItemPaintRemover extends ItemPaintingTool {
             // so hide it if painting on block is not allowed
             return;
         }
+        ItemPaintRemover remover = this;
         list.add(remover.getRemover());
         list.add(remover.getSmallRemover());
     }

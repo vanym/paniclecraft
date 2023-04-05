@@ -4,13 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,10 +20,16 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemAdvSign extends ItemMod3 {
     
@@ -33,13 +41,12 @@ public class ItemAdvSign extends ItemMod3 {
     }
     
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
             ItemStack itemStack,
-            EntityPlayer entityPlayer,
-            List list,
-            boolean advancedItemTooltips) {
+            @Nullable World world,
+            List<String> list,
+            ITooltipFlag flag) {
         if (itemStack.hasTagCompound()) {
             NBTTagCompound tag = itemStack.getTagCompound();
             if (tag.hasKey(TAG_SIGN, 10)) {
@@ -50,38 +57,43 @@ public class ItemAdvSign extends ItemMod3 {
                              .mapToObj(tagLines::getStringTagAt)
                              .forEachOrdered(list::add);
                 } else {
-                    list.add(StatCollector.translateToLocal("text.advSign.showtext"));
+                    list.add(I18n.translateToLocal("text.advSign.showtext"));
                 }
             }
         }
     }
     
     @Override
-    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+    public ActionResult<ItemStack> onItemRightClick(
+            World world,
+            EntityPlayer player,
+            EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
         if (stack.hasTagCompound() && player.isSneaking()) {
             NBTTagCompound tag = stack.getTagCompound();
             tag.removeTag(TAG_SIGN);
             if (tag.hasNoTags()) {
                 stack.setTagCompound(null);
             }
+            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        } else {
+            return new ActionResult<>(EnumActionResult.PASS, stack);
         }
-        return stack;
     }
     
     @Override
-    public boolean onItemUse(
-            ItemStack stack,
+    public EnumActionResult onItemUse(
             EntityPlayer player,
             World world,
-            int x,
-            int y,
-            int z,
-            int side,
+            BlockPos pos,
+            EnumHand hand,
+            EnumFacing facing,
             float hitX,
             float hitY,
             float hitZ) {
+        ItemStack stack = player.getHeldItem(hand);
         if (!player.isSneaking()) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(pos);
             if (tile != null) {
                 NBTTagCompound signTag = null;
                 if (tile instanceof TileEntitySign) {
@@ -89,6 +101,7 @@ public class ItemAdvSign extends ItemMod3 {
                     signTag = new NBTTagCompound();
                     NBTTagList linesTag = new NBTTagList();
                     Arrays.stream(tileS.signText)
+                          .map(ITextComponent::getFormattedText)
                           .map(NBTTagString::new)
                           .forEachOrdered(linesTag::appendTag);
                     signTag.setTag(TileEntityAdvSign.TAG_LINES, linesTag);
@@ -103,24 +116,25 @@ public class ItemAdvSign extends ItemMod3 {
                     }
                     NBTTagCompound tag = stack.getTagCompound();
                     tag.setTag(TAG_SIGN, signTag);
-                    return true;
+                    return EnumActionResult.SUCCESS;
                 }
             }
         }
-        if (!world.getBlock(x, y, z).getMaterial().isSolid()) {
-            return false;
+        if (!world.getBlockState(pos).getMaterial().isSolid()) {
+            return EnumActionResult.FAIL;
         }
-        ForgeDirection pside = ForgeDirection.getOrientation(side);
-        x += pside.offsetX;
-        y += pside.offsetY;
-        z += pside.offsetZ;
-        if (!player.canPlayerEdit(x, y, z, side, stack)
-            || !Core.instance.advSign.blockAdvSign.canPlaceBlockAt(world, x, y, z)
-            || !world.setBlock(x, y, z, Core.instance.advSign.blockAdvSign, side, 3)) {
-            return false;
+        pos = pos.offset(facing);
+        Block block = Core.instance.advSign.blockAdvSign;
+        if (!player.canPlayerEdit(pos, facing, stack)
+            || !block.canPlaceBlockAt(world, pos)
+            || !world.setBlockState(pos, block.getStateForPlacement(world, pos, facing,
+                                                                    hitX, hitY, hitZ,
+                                                                    0, player, hand),
+                                    11)) {
+            return EnumActionResult.FAIL;
         }
-        --stack.stackSize;
-        TileEntity tile = world.getTileEntity(x, y, z);
+        stack.shrink(1);
+        TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
             if (stack.hasTagCompound()) {
@@ -130,19 +144,19 @@ public class ItemAdvSign extends ItemMod3 {
                     tileAS.readFromNBT(signTag, true);
                 }
             }
-            if (pside == ForgeDirection.UP) {
+            if (facing == EnumFacing.UP) {
                 tileAS.setStick(true);
                 double direction = Math.round(180.0D + player.rotationYaw);
                 tileAS.setDirection(direction);
             }
-            if (pside == ForgeDirection.DOWN) {
-                int rot = MathHelper.floor_double((player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-                tileAS.setDirection(rot * 90.0D);
+            if (facing == EnumFacing.DOWN) {
+                tileAS.setDirection(player.getHorizontalFacing().getHorizontalAngle());
             }
             tileAS.setEditor(player);
-            player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), world, x, y, z);
+            player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(),
+                           world, pos.getX(), pos.getY(), pos.getZ());
         }
-        return true;
+        return EnumActionResult.SUCCESS;
     }
     
     public static ItemStack getSavedSign(TileEntityAdvSign tileAS) {

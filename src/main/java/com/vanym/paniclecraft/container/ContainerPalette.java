@@ -5,18 +5,18 @@ import java.awt.Color;
 import com.vanym.paniclecraft.container.slot.SlotWithValidCheck;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.inventory.InventoryPalette;
-import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.IInvBasic;
-import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 
-public class ContainerPalette extends ContainerBase implements IInvBasic {
+public class ContainerPalette extends ContainerBase implements IInventoryChangedListener {
     
     public final InventoryPalette inventoryPalette = new InventoryPalette();
     
@@ -26,7 +26,7 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
         this.inventoryPlayer = playerInv;
         this.addSlotToContainer(new SlotWithValidCheck(this.inventoryPalette, 0, 8, 18));
         this.addPlayerInventorySlots(playerInv);
-        this.inventoryPalette.func_110134_a(this);
+        this.inventoryPalette.addInventoryChangeListener(this);
     }
     
     public Color getColor() {
@@ -50,7 +50,7 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
     }
     
     @Override
-    public void onInventoryChanged(InventoryBasic inv) {
+    public void onInventoryChanged(IInventory inv) {
         this.onCraftMatrixChanged(inv);
     }
     
@@ -76,7 +76,7 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
                     return null;
                 }
             }
-            if (itemstack1.stackSize == 0) {
+            if (itemstack1.isEmpty()) {
                 slot.putStack((ItemStack)null);
             } else {
                 slot.onSlotChanged();
@@ -89,13 +89,14 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
     @Override
     public void onContainerClosed(EntityPlayer entityPlayer) {
         super.onContainerClosed(entityPlayer);
-        if (!entityPlayer.worldObj.isRemote) {
-            InventoryUtils.dropOnClosing(this.inventoryPalette, entityPlayer);
+        if (!entityPlayer.world.isRemote) {
+            this.clearContainer(entityPlayer, entityPlayer.world, this.inventoryPalette);
         }
     }
     
     @Override
-    public boolean canInteractWith(EntityPlayer entityplayer) {
-        return ItemPalette.canBePalette(entityplayer.getHeldItem());
+    public boolean canInteractWith(EntityPlayer player) {
+        return ItemPalette.canBePalette(player.getHeldItem(EnumHand.MAIN_HAND))
+            || ItemPalette.canBePalette(player.getHeldItem(EnumHand.OFF_HAND));
     }
 }

@@ -3,22 +3,22 @@ package com.vanym.paniclecraft.item;
 import java.awt.Color;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
@@ -28,23 +28,6 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     protected static final int DAMAGE_SMALLBRUSH = 1;
     protected static final int DAMAGE_FILLER = 4;
     protected static final int DAMAGE_COLORPICKER = 6;
-    
-    @SideOnly(Side.CLIENT)
-    public IIcon iconBrushHead;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconBrushBody;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconSmallBrushHead;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconSmallBrushBody;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconFillerHead;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconFillerBody;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconColorPickerHead;
-    @SideOnly(Side.CLIENT)
-    public IIcon iconColorPickerBody;
     
     public ItemPaintBrush() {
         super();
@@ -72,33 +55,17 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean requiresMultipleRenderPasses() {
-        return true;
-    }
-    
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @SideOnly(Side.CLIENT)
     public void addInformation(
             ItemStack itemStack,
-            EntityPlayer entityPlayer,
-            List list,
-            boolean advancedItemTooltips) {
-        super.addInformation(itemStack, entityPlayer, list, advancedItemTooltips);
+            @Nullable World world,
+            List<String> list,
+            ITooltipFlag flag) {
+        super.addInformation(itemStack, world, list, flag);
         if (GuiScreen.isShiftKeyDown()) {
             Color color = new Color(this.getColor(itemStack));
             list.add("R: \u00a7c" + color.getRed());
             list.add("G: \u00a7a" + color.getGreen());
             list.add("B: \u00a79" + color.getBlue());
-        }
-    }
-    
-    @Override
-    public int getColorFromItemStack(ItemStack stack, int pass) {
-        if (pass == 0) {
-            return this.getColor(stack);
-        } else {
-            return 0xffffff;
         }
     }
     
@@ -109,46 +76,12 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public IIcon getIconFromDamageForRenderPass(int damage, int pass) {
-        switch (damage) {
-            default:
-            case DAMAGE_BRUSH:
-                return (pass == 0 ? this.iconBrushHead : this.iconBrushBody);
-            case DAMAGE_SMALLBRUSH:
-                return (pass == 0 ? this.iconSmallBrushHead : this.iconSmallBrushBody);
-            case DAMAGE_FILLER:
-                return (pass == 0 ? this.iconFillerHead : this.iconFillerBody);
-            case DAMAGE_COLORPICKER:
-                return (pass == 0 ? this.iconColorPickerHead : this.iconColorPickerBody);
-        }
-    }
-    
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @SideOnly(Side.CLIENT)
-    public void getSubItems(Item item, CreativeTabs creativetabs, List list) {
-        if (!(item instanceof ItemPaintBrush)) {
-            return;
-        }
-        ItemPaintBrush brush = (ItemPaintBrush)item;
+    public void getSubItems(CreativeTabs creativetab, NonNullList<ItemStack> list) {
+        ItemPaintBrush brush = (ItemPaintBrush)this;
         list.add(brush.getBrush());
         list.add(brush.getSmallBrush());
         list.add(brush.getFiller());
         list.add(brush.getColorPicker());
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        final String PREFIX = DEF.MOD_ID + ":" + this.getName();
-        this.iconBrushHead = iconRegister.registerIcon(PREFIX + "_brush_head");
-        this.iconBrushBody = iconRegister.registerIcon(PREFIX + "_brush_body");
-        this.iconSmallBrushHead = iconRegister.registerIcon(PREFIX + "_smallbrush_head");
-        this.iconSmallBrushBody = iconRegister.registerIcon(PREFIX + "_smallbrush_body");
-        this.iconFillerHead = iconRegister.registerIcon(PREFIX + "_filler_head");
-        this.iconFillerBody = iconRegister.registerIcon(PREFIX + "_filler_body");
-        this.iconColorPickerHead = iconRegister.registerIcon(PREFIX + "_colorpicker_head");
-        this.iconColorPickerBody = iconRegister.registerIcon(PREFIX + "_colorpicker_body");
     }
     
     @Override

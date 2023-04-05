@@ -1,8 +1,8 @@
 package com.vanym.paniclecraft.client.gui.container;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -17,20 +17,22 @@ import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
+import net.minecraft.inventory.IContainerListener;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class GuiPalette extends GuiContainer implements ICrafting {
+public class GuiPalette extends GuiContainer implements IContainerListener {
     
     protected static final ResourceLocation GUI_TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/guis/paletteGui.png");
@@ -63,7 +65,8 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         Keyboard.enableRepeatEvents(true);
         for (int i = 0; i < this.textColor.length; ++i) {
             this.textColor[i] = new GuiOneColorField(
-                    this.fontRendererObj,
+                    i + 2,
+                    this.fontRenderer,
                     this.guiLeft + 40,
                     this.guiTop + 42 - i * 12,
                     26,
@@ -77,19 +80,20 @@ public class GuiPalette extends GuiContainer implements ICrafting {
             this.textColor[i].setEnableBackgroundDrawing(true);
         }
         this.textHex = new GuiHexColorField(
-                this.fontRendererObj,
+                1,
+                this.fontRenderer,
                 this.guiLeft + 8,
                 this.guiTop + 58);
         this.textHex.setSetter(rgb->this.setColor(new Color(rgb)));
-        this.container.removeCraftingFromCrafters(this);
-        this.container.addCraftingToCrafters(this);
+        this.container.removeListener(this);
+        this.container.addListener(this);
     }
     
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
         Keyboard.enableRepeatEvents(false);
-        this.container.removeCraftingFromCrafters(this);
+        this.container.removeListener(this);
     }
     
     @Override
@@ -100,7 +104,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     }
     
     @Override
-    protected void keyTyped(char character, int key) {
+    protected void keyTyped(char character, int key) throws IOException {
         if (this.textHex.textboxKeyTyped(character, key)) {
             return;
         }
@@ -188,7 +192,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     }
     
     @Override
-    protected void mouseClicked(int x, int y, int eventButton) {
+    protected void mouseClicked(int x, int y, int eventButton) throws IOException {
         this.textHex.mouseClicked(x, y, eventButton);
         Arrays.stream(this.textColor).forEach(t->t.mouseClicked(x, y, eventButton));
         super.mouseClicked(x, y, eventButton);
@@ -203,19 +207,19 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     
     protected void drawInventoriesNames() {
         String palette = InventoryUtils.getTranslatedName(this.container.inventoryPalette);
-        this.fontRendererObj.drawString(palette, 8, 6, 0x404040);
+        this.fontRenderer.drawString(palette, 8, 6, 0x404040);
         String player = InventoryUtils.getTranslatedName(this.container.inventoryPlayer);
-        this.fontRendererObj.drawString(player, 8, this.ySize - 96 + 2, 0x404040);
+        this.fontRenderer.drawString(player, 8, this.ySize - 96 + 2, 0x404040);
     }
     
     protected void drawRGBLabels() {
         final String letters = "BGR";
         for (int i = 0; i < this.textColor.length; ++i) {
             int yoffset = this.textColor[i].getEnableBackgroundDrawing() ? 2 : 0;
-            this.fontRendererObj.drawString(letters.charAt(i) + ": ",
-                                            -this.guiLeft + this.textColor[i].xPosition - 11,
-                                            -this.guiTop + this.textColor[i].yPosition + yoffset,
-                                            0x404040);
+            this.fontRenderer.drawString(letters.charAt(i) + ": ",
+                                         -this.guiLeft + this.textColor[i].x - 11,
+                                         -this.guiTop + this.textColor[i].y + yoffset,
+                                         0x404040);
         }
     }
     
@@ -276,9 +280,8 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     }
     
     @Override
-    @SuppressWarnings("rawtypes")
-    public void sendContainerAndContentsToPlayer(Container container, List inv) {
-        this.sendSlotContents(container, 0, container.getSlot(0).getStack());
+    public void sendAllContents(Container container, NonNullList<ItemStack> list) {
+        this.sendSlotContents(container, 0, list.get(0));
     }
     
     @Override
@@ -290,7 +293,12 @@ public class GuiPalette extends GuiContainer implements ICrafting {
     }
     
     @Override
-    public void sendProgressBarUpdate(Container container, int id, int level) {}
+    public void sendWindowProperty(Container container, int id, int level) {}
+    
+    @Override
+    public void sendAllWindowProperties(Container container, IInventory inv) {
+        this.sendSlotContents(container, 0, inv.getStackInSlot(0));
+    }
     
     protected class GuiColorPicker extends Gui {
         
@@ -380,8 +388,8 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         
         protected static final String NUM_CHARS = "0123456789";
         
-        public GuiOneColorField(FontRenderer font, int x, int y, int width, int height) {
-            super(font, x, y, width, height);
+        public GuiOneColorField(int id, FontRenderer font, int x, int y, int width, int height) {
+            super(id, font, x, y, width, height);
         }
         
         @Override

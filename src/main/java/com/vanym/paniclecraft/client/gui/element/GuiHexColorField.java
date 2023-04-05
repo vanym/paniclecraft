@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiHexColorField extends GuiTextField {
@@ -27,12 +27,12 @@ public class GuiHexColorField extends GuiTextField {
     
     protected Consumer<Integer> setter;
     
-    public GuiHexColorField(FontRenderer font, int x, int y) {
-        this(font, x, y, 50, 12);
+    public GuiHexColorField(int id, FontRenderer font, int x, int y) {
+        this(id, font, x, y, 50, 12);
     }
     
-    public GuiHexColorField(FontRenderer font, int x, int y, int width, int height) {
-        super(font, x, y, width, height);
+    public GuiHexColorField(int id, FontRenderer font, int x, int y, int width, int height) {
+        super(id, font, x, y, width, height);
         this.setMaxStringLength(7);
         this.setFocused(false);
     }

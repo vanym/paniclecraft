@@ -14,20 +14,20 @@ public abstract class CommandBase extends net.minecraft.command.CommandBase {
         if (this.path != null) {
             return "/" + String.join(" ", this.path);
         } else {
-            return this.getCommandName();
+            return this.getName();
         }
     }
     
     protected void setParentPath(String[] path) {
         if (path != null) {
             List<String> list = new ArrayList<>(Arrays.asList(path));
-            list.add(this.getCommandName());
+            list.add(this.getName());
             this.path = list.toArray(new String[list.size()]);
         }
     }
     
     @Override
-    public String getCommandUsage(ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         return this.getTranslationPrefix() + ".usage";
     }
     
@@ -37,7 +37,7 @@ public abstract class CommandBase extends net.minecraft.command.CommandBase {
         if (this.path != null) {
             path.addAll(Arrays.asList(this.path));
         } else {
-            path.add(this.getCommandName());
+            path.add(this.getName());
         }
         return String.join(".", path);
     }

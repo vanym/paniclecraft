@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -13,15 +14,14 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
+public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreRecipe {
     
-    protected final ForgeDirection side;
+    protected final EnumFacing side;
     
-    protected RecipePaintingFrameAddPainting(ForgeDirection pside, int offsetX, int offsetY) {
+    protected RecipePaintingFrameAddPainting(EnumFacing pside, int offsetX, int offsetY) {
         super(ItemPaintingFrame.getItemWithEmptyPictures(pside),
               getRecipe(offsetX, offsetY));
         this.side = pside;
@@ -85,11 +85,18 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
     }
     
     public static List<IRecipe> createAllVariants() {
-        return Arrays.asList(new RecipePaintingFrameAddPainting(ItemPaintingFrame.FRONT, -1, +1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.BACK, +1, -1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.LEFT, -1, -1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.RIGHT, +1, +1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.BOTTOM, +0, +1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.TOP, +0, -1));
+        return Arrays.asList(create(ItemPaintingFrame.FRONT, -1, +1),
+                             create(ItemPaintingFrame.BACK, +1, -1),
+                             create(ItemPaintingFrame.LEFT, -1, -1),
+                             create(ItemPaintingFrame.RIGHT, +1, +1),
+                             create(ItemPaintingFrame.BOTTOM, +0, +1),
+                             create(ItemPaintingFrame.TOP, +0, -1));
+    }
+    
+    protected static IRecipe create(EnumFacing pside, int offsetX, int offsetY) {
+        RecipePaintingFrameAddPainting recipe =
+                new RecipePaintingFrameAddPainting(pside, offsetX, offsetY);
+        recipe.setRegistryName(DEF.MOD_ID, String.format("paintingFrameAddPainting%s", pside));
+        return recipe;
     }
 }

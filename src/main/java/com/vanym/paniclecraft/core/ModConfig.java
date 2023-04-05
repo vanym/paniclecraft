@@ -70,8 +70,8 @@ public class ModConfig extends Configuration {
             String langKey) {
         Property prop = this.get(category, name, Double.toString(defaultValue), null, Type.DOUBLE);
         prop.setLanguageKey(langKey);
-        prop.comment = String.format("%s [range: %s ~ %s, default: %s]",
-                                     comment, minValue, maxValue, defaultValue);
+        prop.setComment(String.format("%s [range: %s ~ %s, default: %s]",
+                                      comment, minValue, maxValue, defaultValue));
         prop.setMinValue(minValue);
         prop.setMaxValue(maxValue);
         if (!prop.isDoubleValue()) {

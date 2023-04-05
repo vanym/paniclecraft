@@ -17,19 +17,18 @@ import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.IIcon;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiPaintingView extends GuiScreen {
@@ -58,10 +57,9 @@ public class GuiPaintingView extends GuiScreen {
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
-        this.mc.thePlayer.openContainer = this.view;
+        this.mc.player.openContainer = this.view;
         this.buttonList.add(this.buttonExport);
     }
     
@@ -76,8 +74,8 @@ public class GuiPaintingView extends GuiScreen {
         int center = (width / 2);
         this.controlsX = Math.min(this.viewX, center - 100);
         this.controlsEndX = Math.max(this.getViewEndX(), center + 100);
-        this.buttonExport.xPosition = this.controlsEndX - this.buttonExport.width;
-        this.buttonExport.yPosition = height - this.buttonExport.height - 5;
+        this.buttonExport.x = this.controlsEndX - this.buttonExport.width;
+        this.buttonExport.y = height - this.buttonExport.height - 5;
     }
     
     protected int getViewWidth() {
@@ -105,7 +103,7 @@ public class GuiPaintingView extends GuiScreen {
             sb.append(this.view.getWidth());
             sb.append("×");
             sb.append(this.view.getHeight());
-            this.fontRendererObj.drawString(sb.toString(), 2, 2, 0x7f7f7f);
+            this.fontRenderer.drawString(sb.toString(), 2, 2, 0x7f7f7f);
         }
         super.drawScreen(mouseX, mouseY, renderPartialTicks);
     }
@@ -119,11 +117,10 @@ public class GuiPaintingView extends GuiScreen {
                 if (picture == null) {
                     continue;
                 }
-                int side = ForgeDirection.SOUTH.ordinal();
-                IIcon icon = TileEntityPaintingRenderer.bindTexture(picture, side);
-                this.drawTexturedModelRectFromIcon(this.viewX + x * this.viewStep,
-                                                   this.viewY + y * this.viewStep,
-                                                   icon, this.viewStep, this.viewStep);
+                TextureAtlasSprite icon = TileEntityPaintingRenderer.bindTexture(picture);
+                this.drawTexturedModalRect(this.viewX + x * this.viewStep,
+                                           this.viewY + y * this.viewStep,
+                                           icon, this.viewStep, this.viewStep);
             }
         }
         GL11.glDisable(GL11.GL_BLEND);
@@ -140,33 +137,33 @@ public class GuiPaintingView extends GuiScreen {
         File dir = new File(this.mc.mcDataDir, "paintings");
         dir.mkdir();
         File file = getTimestampedPNGFileForDirectory(dir);
-        IChatComponent message;
+        ITextComponent message;
         try {
             FileOutputStream output = new FileOutputStream(file);
             this.view.savePainting(output);
-            ChatComponentText link = new ChatComponentText(file.getName());
-            ChatStyle style = link.getChatStyle();
-            style.setChatClickEvent(new ClickEvent(
+            TextComponentString link = new TextComponentString(file.getName());
+            Style style = link.getStyle();
+            style.setClickEvent(new ClickEvent(
                     ClickEvent.Action.OPEN_FILE,
                     file.getAbsolutePath()));
             style.setUnderlined(true);
-            message = new ChatComponentTranslation("painting.export.success", link);
+            message = new TextComponentTranslation("painting.export.success", link);
         } catch (IOException e) {
-            message = new ChatComponentTranslation("painting.export.failure", e.getMessage());
+            message = new TextComponentTranslation("painting.export.failure", e.getMessage());
         }
         this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }
     
     protected void paintingCopy() {
-        IChatComponent message;
+        ITextComponent message;
         try {
             BufferedImage img = this.view.getPaintingAsImage();
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             ImageSelection selection = new ImageSelection(img);
             clipboard.setContents(selection, null);
-            message = new ChatComponentTranslation("painting.export.copy.success");
+            message = new TextComponentTranslation("painting.export.copy.success");
         } catch (Exception e) {
-            message = new ChatComponentTranslation("painting.export.copy.failure", e.getMessage());
+            message = new TextComponentTranslation("painting.export.copy.failure", e.getMessage());
         }
         this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }
@@ -178,14 +175,14 @@ public class GuiPaintingView extends GuiScreen {
             return;
         }
         if (key == 1 || key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
-            this.mc.thePlayer.closeScreen();
+            this.mc.player.closeScreen();
         }
     }
     
     @Override
     public void onGuiClosed() {
-        if (this.mc.thePlayer != null) {
-            this.view.onContainerClosed(this.mc.thePlayer);
+        if (this.mc.player != null) {
+            this.view.onContainerClosed(this.mc.player);
         }
     }
     

@@ -9,22 +9,19 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public class PaintingFramePeripheral extends PicturePeripheral {
     
     protected final ISidePictureProvider sideProvider;
-    protected ForgeDirection pside;
+    protected EnumFacing pside;
     
     public PaintingFramePeripheral(ISidePictureProvider sideProvider) {
         this(sideProvider, null);
     }
     
-    public PaintingFramePeripheral(ISidePictureProvider sideProvider, ForgeDirection pside) {
+    public PaintingFramePeripheral(ISidePictureProvider sideProvider, EnumFacing pside) {
         this.sideProvider = sideProvider;
-        if (pside == null) {
-            pside = ForgeDirection.UNKNOWN;
-        }
         this.pside = pside;
     }
     
@@ -35,20 +32,20 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     
     @PeripheralMethod(31)
     protected Object getAvailableSides() {
-        return Arrays.stream(ForgeDirection.VALID_DIRECTIONS)
-                     .collect(Collectors.toMap(f->f.ordinal() + 1, f->f.toString().toLowerCase()));
+        return Arrays.stream(EnumFacing.VALUES)
+                     .collect(Collectors.toMap(f->f.ordinal() + 1, f->f.getName2()));
     }
     
     @PeripheralMethod(32)
     protected String getCurrentSide() {
-        return this.pside.toString().toLowerCase();
+        return this.pside != null ? this.pside.getName2() : "unknown";
     }
     
     @PeripheralMethod(33)
     protected void setSide(String name) throws LuaException, InterruptedException {
         try {
-            this.pside = Arrays.stream(ForgeDirection.VALID_DIRECTIONS)
-                               .filter(f->f.toString().equalsIgnoreCase(name))
+            this.pside = Arrays.stream(EnumFacing.VALUES)
+                               .filter(f->f.getName2().equalsIgnoreCase(name))
                                .findAny()
                                .get();
         } catch (NoSuchElementException e) {
@@ -72,7 +69,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     
     @Override
     protected Picture getPicture() {
-        if (this.pside == ForgeDirection.UNKNOWN) {
+        if (this.pside == null) {
             return null;
         }
         return this.sideProvider.getPicture(this.pside.ordinal());

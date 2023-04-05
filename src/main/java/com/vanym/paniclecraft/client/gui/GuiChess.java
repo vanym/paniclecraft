@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.client.gui;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import com.vanym.paniclecraft.Core;
@@ -8,14 +9,14 @@ import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiChess extends GuiScreen {
@@ -35,7 +36,6 @@ public class GuiChess extends GuiScreen {
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public void initGui() {
         int centerX = this.width / 2;
         int centerY = this.height / 2;
@@ -91,9 +91,9 @@ public class GuiChess extends GuiScreen {
     
     protected void sendMove(ChessGame.Move move) {
         Core.instance.network.sendToServer(new MessageChessMove(
-                this.tileChess.xCoord,
-                this.tileChess.yCoord,
-                this.tileChess.zCoord,
+                this.tileChess.getPos().getX(),
+                this.tileChess.getPos().getY(),
+                this.tileChess.getPos().getZ(),
                 move));
     }
     
@@ -126,8 +126,8 @@ public class GuiChess extends GuiScreen {
             chooseButton.chooseSelect = id;
             chooseButton.white = white;
             chooseButton.visible = true;
-            chooseButton.yPosition = top;
-            chooseButton.xPosition = left + i * 20;
+            chooseButton.y = top;
+            chooseButton.x = left + i * 20;
         }
     }
     
@@ -143,7 +143,7 @@ public class GuiChess extends GuiScreen {
     }
     
     @Override
-    protected void keyTyped(char character, int key) {
+    protected void keyTyped(char character, int key) throws IOException {
         if (character == 3 /* Ctrl+c */) {
             this.movesCopy();
             return;
@@ -156,13 +156,14 @@ public class GuiChess extends GuiScreen {
     
     @Override
     public void updateScreen() {
-        if ((this.tileChess.getWorldObj()
-                           .getTileEntity(this.tileChess.xCoord, this.tileChess.yCoord,
-                                          this.tileChess.zCoord) == null)
-            || this.mc.thePlayer.getDistanceSq(this.tileChess.xCoord + 0.5D,
-                                               this.tileChess.yCoord + 0.5D,
-                                               this.tileChess.zCoord + 0.5D) > 64.0D) {
-            this.keyTyped((char)0, 1); // close
+        if ((this.tileChess.getWorld()
+                           .getTileEntity(this.tileChess.getPos()) == null)
+            || this.mc.player.getDistanceSq(this.tileChess.getPos()
+                                                          .add(0.5D, 0.5D, 0.5D)) > 64.0D) {
+            try {
+                this.keyTyped((char)0, 1); // close
+            } catch (IOException e) {
+            }
         }
     }
     
@@ -170,7 +171,7 @@ public class GuiChess extends GuiScreen {
         String moves = this.getMovesString();
         if (!moves.isEmpty()) {
             GuiScreen.setClipboardString(moves);
-            IChatComponent message = new ChatComponentTranslation("chess.export.copy.success");
+            ITextComponent message = new TextComponentTranslation("chess.export.copy.success");
             this.mc.ingameGUI.getChatGUI().printChatMessage(message);
         }
     }
@@ -280,17 +281,17 @@ public class GuiChess extends GuiScreen {
         }
         
         @Override
-        public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+        public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
             if (!this.visible) {
                 return;
             }
             mc.renderEngine.bindTexture(BUTTONS_TEXTURE);
-            this.field_146123_n = mouseX >= this.xPosition
-                && mouseY >= this.yPosition
-                && mouseX < this.xPosition + this.width
-                && mouseY < this.yPosition + this.height;
-            int mode = this.getHoverState(this.field_146123_n);
-            this.drawTexturedModalRect(this.xPosition, this.yPosition,
+            this.hovered = mouseX >= this.x
+                && mouseY >= this.y
+                && mouseX < this.x + this.width
+                && mouseY < this.y + this.height;
+            int mode = this.getHoverState(this.hovered);
+            this.drawTexturedModalRect(this.x, this.y,
                                        mode * this.width, 0,
                                        this.width, this.height);
             byte piece = this.getPiece();
@@ -300,7 +301,7 @@ public class GuiChess extends GuiScreen {
                 if (pieceA > 6) {
                     pieceA -= 3;
                 }
-                this.drawTexturedModalRect(this.xPosition, this.yPosition, pieceA * this.width,
+                this.drawTexturedModalRect(this.x, this.y, pieceA * this.width,
                                            (pieceW ? this.height : this.height * 2),
                                            this.width, this.height);
             }

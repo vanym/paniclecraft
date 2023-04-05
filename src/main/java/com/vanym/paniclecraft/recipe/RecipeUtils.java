@@ -6,11 +6,11 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public class RecipeUtils {
     
-    public static void addPainting(ItemStack frame, ItemStack painting, ForgeDirection pside) {
+    public static void addPainting(ItemStack frame, ItemStack painting, EnumFacing pside) {
         if (!frame.hasTagCompound()) {
             frame.setTagCompound(new NBTTagCompound());
         }

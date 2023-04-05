@@ -5,10 +5,12 @@ import java.util.Arrays;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.TextComponentString;
 
 public class CommandPictureInfo extends CommandBase {
     
@@ -19,7 +21,7 @@ public class CommandPictureInfo extends CommandBase {
     }
     
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "pictureinfo";
     }
     
@@ -29,12 +31,13 @@ public class CommandPictureInfo extends CommandBase {
     }
     
     @Override
-    public void processCommand(ICommandSender sender, String[] args) {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+            throws CommandException {
         if (args.length > 0) {
-            throw new WrongUsageException(this.getCommandUsage(sender));
+            throw new WrongUsageException(this.getUsage(sender));
         }
         EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
-        sender.addChatMessage(new ChatComponentText(picture.toString()));
+        sender.sendMessage(new TextComponentString(picture.toString()));
     }
 }

@@ -5,15 +5,15 @@ import com.vanym.paniclecraft.client.gui.container.GuiPaintingView;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.FixedPictureSize;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class MessageOpenPaintingView
         implements
@@ -66,7 +66,7 @@ public class MessageOpenPaintingView
     @Override
     @SideOnly(Side.CLIENT)
     public IMessage onMessage(MessageOpenPaintingView message, MessageContext ctx) {
-        EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
+        EntityPlayer player = FMLClientHandler.instance().getClient().player;
         ContainerPaintingViewClient view = new ContainerPaintingViewClient(
                 new FixedPictureSize(message.pictureWidth, message.pictureHeight),
                 message.sizeX,

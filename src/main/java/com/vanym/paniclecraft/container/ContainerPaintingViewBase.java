@@ -9,13 +9,14 @@ import com.vanym.paniclecraft.core.component.painting.ImageUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class ContainerPaintingViewBase extends Container {
     
@@ -45,7 +46,7 @@ public abstract class ContainerPaintingViewBase extends Container {
     
     @Override
     public void onContainerClosed(EntityPlayer player) {
-        this.inv.closeInventory();
+        this.inv.closeInventory(player);
     }
     
     protected abstract Picture getPicture(int x, int y);
@@ -129,8 +130,7 @@ public abstract class ContainerPaintingViewBase extends Container {
         
         @Override
         public void setInventorySlotContents(int slot, ItemStack stack) {
-            if (stack == null || stack.stackSize <= 0
-                || stack.getItem() != Core.instance.painting.itemPainting) {
+            if (stack.getItem() != Core.instance.painting.itemPainting) {
                 ContainerPaintingViewBase.this.clearPicture(slot);
                 return;
             }
@@ -151,17 +151,17 @@ public abstract class ContainerPaintingViewBase extends Container {
         }
         
         @Override
-        public ItemStack getStackInSlotOnClosing(int slot) {
+        public ItemStack removeStackFromSlot(int slot) {
             return null;
         }
         
         @Override
-        public String getInventoryName() {
+        public String getName() {
             return "PictureInv";
         }
         
         @Override
-        public boolean hasCustomInventoryName() {
+        public boolean hasCustomName() {
             return false;
         }
         
@@ -174,15 +174,20 @@ public abstract class ContainerPaintingViewBase extends Container {
         public void markDirty() {}
         
         @Override
-        public boolean isUseableByPlayer(EntityPlayer player) {
+        public boolean isUsableByPlayer(EntityPlayer player) {
             return true;
         }
         
         @Override
-        public void openInventory() {}
+        public void openInventory(EntityPlayer player) {}
         
         @Override
-        public void closeInventory() {
+        public void closeInventory(EntityPlayer player) {
+            this.clear();
+        }
+        
+        @Override
+        public void clear() {
             int size = this.getSizeInventory();
             for (int i = 0; i < size; ++i) {
                 ContainerPaintingViewBase.this.clearPicture(i);
@@ -192,6 +197,29 @@ public abstract class ContainerPaintingViewBase extends Container {
         @Override
         public boolean isItemValidForSlot(int slot, ItemStack stack) {
             return false;
+        }
+        
+        @Override
+        public ITextComponent getDisplayName() {
+            return null;
+        }
+        
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+        
+        @Override
+        public int getField(int id) {
+            return 0;
+        }
+        
+        @Override
+        public void setField(int id, int value) {}
+        
+        @Override
+        public int getFieldCount() {
+            return 0;
         }
     }
 }

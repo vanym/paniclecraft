@@ -2,11 +2,11 @@ package com.vanym.paniclecraft.client.gui.config;
 
 import java.util.Set;
 
-import cpw.mods.fml.client.IModGuiFactory;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.client.IModGuiFactory;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiModConfigFactory implements IModGuiFactory {
@@ -15,18 +15,17 @@ public class GuiModConfigFactory implements IModGuiFactory {
     public void initialize(Minecraft minecraftInstance) {}
     
     @Override
-    public Class<? extends GuiScreen> mainConfigGuiClass() {
-        return GuiModConfig.class;
+    public boolean hasConfigGui() {
+        return true;
+    }
+    
+    @Override
+    public GuiScreen createConfigGui(GuiScreen parentScreen) {
+        return new GuiModConfig(parentScreen);
     }
     
     @Override
     public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
         return null;
     }
-    
-    @Override
-    public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
-        return null;
-    }
-    
 }

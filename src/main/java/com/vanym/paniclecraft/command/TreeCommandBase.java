@@ -7,12 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public abstract class TreeCommandBase extends CommandBase {
     
@@ -23,14 +28,13 @@ public abstract class TreeCommandBase extends CommandBase {
         super();
     }
     
-    @SuppressWarnings("unchecked")
     protected void addSubCommand(ICommand subCommand) {
         if (subCommand instanceof CommandBase) {
             ((CommandBase)subCommand).setParentPath(this.path);
         }
         this.commandList.add(subCommand);
-        this.subCommands.put(subCommand.getCommandName(), subCommand);
-        List<String> aliases = subCommand.getCommandAliases();
+        this.subCommands.put(subCommand.getName(), subCommand);
+        List<String> aliases = subCommand.getAliases();
         if (aliases != null) {
             aliases.stream().forEach(a->this.subCommands.put(a, subCommand));
         }
@@ -46,7 +50,7 @@ public abstract class TreeCommandBase extends CommandBase {
     }
     
     @Override
-    public String getCommandUsage(ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.getPath());
         sb.append(" (");
@@ -55,29 +59,31 @@ public abstract class TreeCommandBase extends CommandBase {
         return sb.toString();
     }
     
-    protected IChatComponent getUsage(ICommandSender sender) {
-        ChatComponentTranslation message = new ChatComponentTranslation(
+    protected ITextComponent getUsageComponent(ICommandSender sender) {
+        TextComponentTranslation message = new TextComponentTranslation(
                 "commands.generic.usage",
-                new Object[]{new ChatComponentTranslation(this.getCommandUsage(sender))});
-        message.getChatStyle().setColor(EnumChatFormatting.RED);
+                new Object[]{new TextComponentTranslation(this.getUsage(sender))});
+        message.getStyle().setColor(TextFormatting.RED);
         return message;
     }
     
     protected List<ICommand> getPossibleCommands(ICommandSender sender) {
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         return Arrays.asList(this.commandList.stream()
-                                             .filter(c->c.canCommandSenderUseCommand(sender))
+                                             .filter(c->c.checkPermission(server, sender))
                                              .toArray(ICommand[]::new));
     }
     
     protected List<String> getPossibleCommandsNames(ICommandSender sender) {
         return this.getPossibleCommands(sender)
                    .stream()
-                   .map(c->c.getCommandName())
+                   .map(ICommand::getName)
                    .collect(Collectors.toList());
     }
     
     @Override
-    public void processCommand(ICommandSender sender, String[] args) {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+            throws CommandException {
         ICommand command;
         if (args.length == 0 || args[0].trim().isEmpty()) {
             command = null;
@@ -85,18 +91,21 @@ public abstract class TreeCommandBase extends CommandBase {
             command = this.subCommands.get(args[0]);
         }
         if (command == null) {
-            sender.addChatMessage(this.getUsage(sender));
+            sender.sendMessage(this.getUsageComponent(sender));
             return;
         }
-        if (!command.canCommandSenderUseCommand(sender)) {
+        if (!command.checkPermission(server, sender)) {
             throw new CommandException("commands.generic.permission");
         }
-        command.processCommand(sender, dropFirstString(args));
+        command.execute(server, sender, dropFirstString(args));
     }
     
     @Override
-    @SuppressWarnings("rawtypes")
-    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+    public List<String> getTabCompletions(
+            MinecraftServer server,
+            ICommandSender sender,
+            String[] args,
+            @Nullable BlockPos pos) {
         if (args.length == 1 && !args[0].isEmpty()) {
             return this.getPossibleCommandsNames(sender)
                        .stream()
@@ -105,14 +114,14 @@ public abstract class TreeCommandBase extends CommandBase {
         } else if (args.length > 1) {
             ICommand command = this.subCommands.get(args[0]);
             if (command != null) {
-                return command.addTabCompletionOptions(sender, dropFirstString(args));
+                return command.getTabCompletions(server, sender, dropFirstString(args), pos);
             }
         }
         return this.getPossibleCommandsNames(sender);
     }
     
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
         return !this.getPossibleCommands(sender).isEmpty();
     }
     

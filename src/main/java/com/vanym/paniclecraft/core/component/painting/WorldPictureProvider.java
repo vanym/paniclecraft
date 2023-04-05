@@ -5,6 +5,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public enum WorldPictureProvider {
@@ -39,7 +40,7 @@ public enum WorldPictureProvider {
     }
     
     public Picture getPicture(World world, int x, int y, int z, int side) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+        TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
         if (tile != null && this.providerClass.isAssignableFrom(tile.getClass())) {
             return ((ISidePictureProvider)tile).getPicture(side);
         }

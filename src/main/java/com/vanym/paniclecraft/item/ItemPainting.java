@@ -2,6 +2,8 @@ package com.vanym.paniclecraft.item;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
@@ -10,17 +12,24 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemPainting extends ItemMod3 {
     
@@ -37,107 +46,104 @@ public class ItemPainting extends ItemMod3 {
     }
     
     @Override
-    public boolean onItemUse(
-            ItemStack itemStack,
+    public EnumActionResult onItemUse(
             EntityPlayer entityPlayer,
             World world,
-            int x,
-            int y,
-            int z,
-            int side,
+            BlockPos pos,
+            EnumHand hand,
+            EnumFacing side,
             float hitX,
             float hitY,
             float hitZ) {
+        ItemStack itemStack = entityPlayer.getHeldItem(hand);
         final BlockPainting painting = Core.instance.painting.blockPainting;
         int i = 0;
-        ForgeDirection dir = ForgeDirection.getOrientation(side);
         if (!entityPlayer.isSneaking()) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(pos);
             if (tile != null && tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-                return this.onItemUseOnFrame(itemStack, entityPlayer, world, tilePF, side);
+                return this.onItemUseOnFrame(itemStack, entityPlayer, world, tilePF,
+                                             side.getIndex());
             }
             for (; i < Core.instance.painting.config.paintingPlaceStack; i++) {
-                Block block = world.getBlock(x, y, z);
+                IBlockState state = world.getBlockState(pos);
+                Block block = state.getBlock();
                 if (block != painting) {
                     break;
                 }
-                int meta = world.getBlockMetadata(x, y, z);
-                if (meta != side) {
+                int meta = block.getMetaFromState(state);
+                if (meta != side.getIndex()) {
                     break;
                 }
-                ForgeDirection stackdir =
-                        BlockPaintingContainer.getStackDirection(entityPlayer, dir);
-                if (stackdir == ForgeDirection.UNKNOWN) {
+                EnumFacing stackdir = BlockPaintingContainer.getStackDirection(entityPlayer, side);
+                if (stackdir == null) {
                     break;
                 }
-                x += stackdir.offsetX;
-                y += stackdir.offsetY;
-                z += stackdir.offsetZ;
+                pos = pos.offset(stackdir);
             }
         }
         if (i == 0) {
-            x += dir.offsetX;
-            y += dir.offsetY;
-            z += dir.offsetZ;
+            pos = pos.offset(side);
         }
-        if (!entityPlayer.canPlayerEdit(x, y, z, side, itemStack)
-            || !painting.canPlaceBlockAt(world, x, y, z)
-            || !world.setBlock(x, y, z, painting, side, 3)) {
-            return false;
+        if (!entityPlayer.canPlayerEdit(pos, side, itemStack)
+            || !painting.canPlaceBlockAt(world, pos)) {
+            return EnumActionResult.FAIL;
         }
-        painting.onBlockPlacedBy(world, x, y, z, entityPlayer, itemStack);
-        painting.onPostBlockPlaced(world, x, y, z, side);
-        world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D,
-                              painting.stepSound.func_150496_b(),
-                              (painting.stepSound.getVolume() + 1.0F) / 2.0F,
-                              painting.stepSound.getPitch() * 0.8F);
-        --itemStack.stackSize;
-        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
-        Picture picture = tileP.getPicture(side);
+        IBlockState state = painting.getStateForPlacement(world, pos, side,
+                                                          hitX, hitY, hitZ,
+                                                          0, entityPlayer, hand);
+        if (!world.setBlockState(pos, state, 11)) {
+            return EnumActionResult.FAIL;
+        }
+        painting.onBlockPlacedBy(world, pos, state, entityPlayer, itemStack);
+        state = world.getBlockState(pos);
+        SoundType soundtype = state.getBlock().getSoundType(state, world, pos, entityPlayer);
+        world.playSound(entityPlayer, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS,
+                        (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+        itemStack.shrink(1);
+        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
+        Picture picture = tileP.getPicture(side.getIndex());
         fillPicture(picture, itemStack);
         if (entityPlayer != null) {
-            BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
+            BlockPaintingContainer.rotatePicture(entityPlayer, picture, side, true);
         }
-        return true;
+        return EnumActionResult.SUCCESS;
     }
     
-    public boolean onItemUseOnFrame(
+    public EnumActionResult onItemUseOnFrame(
             ItemStack itemStack,
             EntityPlayer entityPlayer,
             World world,
             TileEntityPaintingFrame tilePF,
             int side) {
         if (tilePF.getPicture(side) != null) {
-            return false;
+            return EnumActionResult.FAIL;
         }
         Picture picture = tilePF.createPicture(side);
-        --itemStack.stackSize;
+        itemStack.shrink(1);
         fillPicture(picture, itemStack);
         if (entityPlayer != null) {
-            ForgeDirection dir = ForgeDirection.getOrientation(side);
+            EnumFacing dir = EnumFacing.getFront(side);
             BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
         }
         tilePF.markForUpdate();
-        world.notifyBlockChange(tilePF.xCoord, tilePF.yCoord, tilePF.zCoord, tilePF.getBlockType());
-        return true;
+        return EnumActionResult.SUCCESS;
     }
     
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
             ItemStack itemStack,
-            EntityPlayer entityPlayer,
-            List list,
-            boolean advancedItemTooltips) {
+            @Nullable World world,
+            List<String> list,
+            ITooltipFlag flag) {
         if (itemStack.hasTagCompound()) {
             NBTTagCompound itemTag = itemStack.getTagCompound();
             if (itemTag.hasKey(TAG_PICTURE, 10)) {
                 NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
                 if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                     !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(StatCollector.translateToLocal("text.painting.uneditable"));
+                    list.add(I18n.translateToLocal("text.painting.uneditable"));
                 }
                 list.add(pictureSizeInformation(pictureTag));
             }

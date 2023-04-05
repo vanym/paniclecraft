@@ -13,17 +13,22 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.util.Vec3;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class PaintingSpecialSelectionBox {
@@ -55,26 +60,32 @@ public class PaintingSpecialSelectionBox {
     
     @SubscribeEvent
     public void drawSelectionBox(DrawBlockHighlightEvent event) {
-        final MovingObjectPosition target = event.target;
-        if (event.currentItem == null || target == null
-            || target.typeOfHit != MovingObjectType.BLOCK) {
+        final RayTraceResult target = event.getTarget();
+        if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
             return;
         }
-        Item item = event.currentItem.getItem();
+        EntityPlayer player = event.getPlayer();
+        ItemStack stack = Stream.of(EnumHand.MAIN_HAND, EnumHand.OFF_HAND)
+                                .map(player::getHeldItem)
+                                .filter(s->!s.isEmpty())
+                                .findFirst()
+                                .orElseGet(()->ItemStack.EMPTY);
+        Item item = stack.getItem();
         if (!(item instanceof IPaintingTool)) {
             return;
         }
         IPaintingTool tool = (IPaintingTool)item;
-        if (!tool.getPaintingToolType(event.currentItem).isPixelSelector()) {
+        if (!tool.getPaintingToolType(stack).isPixelSelector()) {
             return;
         }
+        BlockPos pos = target.getBlockPos();
         Picture picture = new WorldPicturePoint(
                 WorldPictureProvider.ANYTILE,
-                event.player.worldObj,
-                target.blockX,
-                target.blockY,
-                target.blockZ,
-                target.sideHit).getPicture();
+                player.world,
+                pos.getX(),
+                pos.getY(),
+                pos.getZ(),
+                target.sideHit.getIndex()).getPicture();
         if (picture == null) {
             return;
         }
@@ -83,15 +94,15 @@ public class PaintingSpecialSelectionBox {
             return;
         }
         PaintingSide pside = PaintingSide.getSide(target.sideHit);
-        double radius = tool.getPaintingToolRadius(event.currentItem, picture);
+        double radius = tool.getPaintingToolRadius(stack, picture);
         int width = picture.getWidth();
         int height = picture.getHeight();
-        Vec3 inBlockVec = GeometryUtils.getInBlockVec(target);
-        Vec3 inPictureVec = pside.axes.toSideCoords(inBlockVec);
+        Vec3d inBlockVec = GeometryUtils.getInBlockVec(target);
+        Vec3d inPictureVec = pside.axes.toSideCoords(inBlockVec);
         double outline = 0.002D;
-        double zOutline = inPictureVec.zCoord + outline;
-        int px = (int)(inPictureVec.xCoord * width);
-        int py = (int)(inPictureVec.yCoord * height);
+        double zOutline = inPictureVec.z + outline;
+        int px = (int)(inPictureVec.x * width);
+        int py = (int)(inPictureVec.y * height);
         int max = (int)Math.ceil(radius);
         Builder<AxisAlignedBB> pictureLinesBuilder = Stream.builder();
         {
@@ -107,21 +118,23 @@ public class PaintingSpecialSelectionBox {
                     boolean candraw = (ix * ix + iy * iy < radius * radius)
                         && picture.canEdit(picture.getNeighborPicture(nx, ny));
                     if (candraw != lastx) {
-                        AxisAlignedBB line = AxisAlignedBB.getBoundingBox((double)(cx + 0) / width,
-                                                                          (double)(cy + 0) / height,
-                                                                          zOutline,
-                                                                          (double)(cx + 0) / width,
-                                                                          (double)(cy + 1) / height,
-                                                                          zOutline);
+                        AxisAlignedBB line = new AxisAlignedBB(
+                                (double)(cx + 0) / width,
+                                (double)(cy + 0) / height,
+                                zOutline,
+                                (double)(cx + 0) / width,
+                                (double)(cy + 1) / height,
+                                zOutline);
                         pictureLinesBuilder.add(line);
                     }
                     if (candraw != lasty[ix + offset]) {
-                        AxisAlignedBB line = AxisAlignedBB.getBoundingBox((double)(cx + 0) / width,
-                                                                          (double)(cy + 0) / height,
-                                                                          zOutline,
-                                                                          (double)(cx + 1) / width,
-                                                                          (double)(cy + 0) / height,
-                                                                          zOutline);
+                        AxisAlignedBB line = new AxisAlignedBB(
+                                (double)(cx + 0) / width,
+                                (double)(cy + 0) / height,
+                                zOutline,
+                                (double)(cx + 1) / width,
+                                (double)(cy + 0) / height,
+                                zOutline);
                         pictureLinesBuilder.add(line);
                         
                     }
@@ -131,16 +144,16 @@ public class PaintingSpecialSelectionBox {
             }
         }
         Stream<AxisAlignedBB> pictureLines = pictureLinesBuilder.build();
-        double dx = event.player.lastTickPosX +
-                    (event.player.posX - event.player.lastTickPosX) * (double)event.partialTicks;
-        double dy = event.player.lastTickPosY +
-                    (event.player.posY - event.player.lastTickPosY) * (double)event.partialTicks;
-        double dz = event.player.lastTickPosZ +
-                    (event.player.posZ - event.player.lastTickPosZ) * (double)event.partialTicks;
+        double dx = player.lastTickPosX +
+                    (player.posX - player.lastTickPosX) * (double)event.getPartialTicks();
+        double dy = player.lastTickPosY +
+                    (player.posY - player.lastTickPosY) * (double)event.getPartialTicks();
+        double dz = player.lastTickPosZ +
+                    (player.posZ - player.lastTickPosZ) * (double)event.getPartialTicks();
         Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.axes.fromSideCoords(b)
-                                                                         .offset(target.blockX,
-                                                                                 target.blockY,
-                                                                                 target.blockZ)
+                                                                         .offset(pos.getX(),
+                                                                                 pos.getY(),
+                                                                                 pos.getZ())
                                                                          .offset(-dx, -dy, -dz));
         this.drawLines(frameLines);
     }
@@ -160,22 +173,23 @@ public class PaintingSpecialSelectionBox {
     }
     
     protected void drawLine(AxisAlignedBB box) {
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawing(GL11.GL_LINES);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buf = tessellator.getBuffer();
+        buf.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
         if (this.color != null) {
-            tessellator.setColorOpaque_I(this.color.getRGB());
+            buf.putColor4(this.color.getRGB());
         }
         if (box.minX != box.maxX) {
-            tessellator.addVertex(box.minX, box.minY, box.minZ);
-            tessellator.addVertex(box.maxX, box.minY, box.minZ);
+            buf.pos(box.minX, box.minY, box.minZ).endVertex();
+            buf.pos(box.maxX, box.minY, box.minZ).endVertex();
         }
         if (box.minY != box.maxY) {
-            tessellator.addVertex(box.minX, box.minY, box.minZ);
-            tessellator.addVertex(box.minX, box.maxY, box.minZ);
+            buf.pos(box.minX, box.minY, box.minZ).endVertex();
+            buf.pos(box.minX, box.maxY, box.minZ).endVertex();
         }
         if (box.minZ != box.maxZ) {
-            tessellator.addVertex(box.minX, box.minY, box.minZ);
-            tessellator.addVertex(box.minX, box.minY, box.maxZ);
+            buf.pos(box.minX, box.minY, box.minZ).endVertex();
+            buf.pos(box.minX, box.minY, box.maxZ).endVertex();
         }
         tessellator.draw();
     }

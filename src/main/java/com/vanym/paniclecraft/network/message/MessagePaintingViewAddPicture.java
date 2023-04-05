@@ -6,13 +6,13 @@ import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessagePaintingViewAddPicture
         implements
@@ -36,9 +36,9 @@ public class MessagePaintingViewAddPicture
         this.x = pb.readInt();
         this.y = pb.readInt();
         try {
-            this.stack = pb.readItemStackFromBuffer();
+            this.stack = pb.readItemStack();
         } catch (IOException e) {
-            this.stack = null;
+            this.stack = ItemStack.EMPTY;
         }
     }
     
@@ -47,16 +47,12 @@ public class MessagePaintingViewAddPicture
         PacketBuffer pb = new PacketBuffer(buf);
         pb.writeInt(this.x);
         pb.writeInt(this.y);
-        try {
-            pb.writeItemStackToBuffer(this.stack);
-        } catch (IOException e) {
-            pb.writeShort(-1);
-        }
+        pb.writeItemStack(this.stack);
     }
     
     @Override
     public IMessage onMessage(MessagePaintingViewAddPicture message, MessageContext ctx) {
-        EntityPlayerMP playerEntity = ctx.getServerHandler().playerEntity;
+        EntityPlayerMP playerEntity = ctx.getServerHandler().player;
         if (!(playerEntity.openContainer instanceof ContainerPaintingViewServer)) {
             return null;
         }
@@ -65,7 +61,8 @@ public class MessagePaintingViewAddPicture
             return null;
         }
         Picture picture = new Picture(true);
-        if (message.stack == null || !ItemPainting.fillPicture(picture, message.stack)) {
+        if (message.stack == null || message.stack.isEmpty()
+            || !ItemPainting.fillPicture(picture, message.stack)) {
             return null;
         }
         view.addPicture(message.x, message.y, picture);

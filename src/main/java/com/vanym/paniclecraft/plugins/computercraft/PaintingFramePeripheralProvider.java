@@ -5,18 +5,18 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 public class PaintingFramePeripheralProvider implements IPeripheralProvider {
     
     @Override
-    public IPeripheral getPeripheral(World world, int x, int y, int z, int side) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public IPeripheral getPeripheral(World world, BlockPos pos, EnumFacing side) {
+        TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-            ForgeDirection pside = ForgeDirection.getOrientation(side).getOpposite();
-            return new PaintingFramePeripheral(tilePF, pside);
+            return new PaintingFramePeripheral(tilePF, side.getOpposite());
         }
         return null;
     }

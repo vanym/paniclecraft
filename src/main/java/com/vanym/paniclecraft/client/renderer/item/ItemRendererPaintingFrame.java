@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
-import org.lwjgl.opengl.GL11;
-
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
@@ -10,17 +7,16 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ItemRendererPaintingFrame implements IItemRenderer {
+public class ItemRendererPaintingFrame extends TileEntityItemStackRenderer {
     
     public final TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
     
@@ -29,29 +25,12 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
     public ItemRendererPaintingFrame(PictureTextureCache textureCache) {
         this.textureCache = textureCache;
         this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
-        this.paintingFrameTileRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
+        this.paintingFrameTileRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
     }
     
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        if (!Core.instance.painting.clientConfig.renderPaintingFrameItem) {
-            return false;
-        }
-        return true;
-    }
-    
-    @Override
-    public boolean shouldUseRenderHelper(
-            ItemRenderType type,
-            ItemStack item,
-            ItemRendererHelper helper) {
-        return true;
-    }
-    
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack stack, Object... data) {
+    public void renderByItem(ItemStack stack, float partialTicks) {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
-        tilePF.blockType = Core.instance.painting.blockPaintingFrame;
         int[] obtainedTextures = new int[ISidePictureProvider.N];
         NBTTagCompound itemTag = stack.getTagCompound();
         if (itemTag == null) {
@@ -74,38 +53,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
                 picture.readFromNBT(pictureTag);
             }
         }
-        switch (type) {
-            case ENTITY:
-                GL11.glRotatef(270.0F, 0.0F, 1.0F, 0.0F);
-                GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-            break;
-            case FIRST_PERSON_MAP:
-            break;
-            case EQUIPPED_FIRST_PERSON:
-                GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
-                GL11.glTranslatef(-1.0F, 0.0F, 0.0F);
-            break;
-            case EQUIPPED:
-                try {
-                    EntityLivingBase entity = (EntityLivingBase)data[1];
-                    if (stack != entity.getEquipmentInSlot(4)) {
-                        GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
-                        GL11.glTranslatef(-1.0F, 0.0F, 0.0F);
-                        break;
-                    }
-                } catch (IndexOutOfBoundsException | NullPointerException | ClassCastException e) {
-                }
-                GL11.glRotatef(270.0F, 0.0F, 1.0F, 0.0F);
-                GL11.glTranslatef(0.0F, 0.0F, -1.0F);
-            break;
-            case INVENTORY:
-                GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
-                GL11.glTranslatef(0.0F, -0.9F, 0.0F);
-            break;
-            default:
-            break;
-        }
-        this.paintingFrameTileRenderer.renderTileEntityAtItem(tilePF);
+        this.paintingFrameTileRenderer.render(tilePF, 0.0D, 0.0D, 0.0D, partialTicks, -1, 0.0F);
         for (int i = 0; i < ISidePictureProvider.N; i++) {
             Picture picture = tilePF.getPicture(i);
             if (picture == null || obtainedTextures[i] >= 0) {
@@ -117,5 +65,4 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             this.textureCache.putTexture(imageTag, picture.texture);
         }
     }
-    
 }

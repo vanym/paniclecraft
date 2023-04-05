@@ -11,18 +11,19 @@ import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRend
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
+import com.vanym.paniclecraft.recipe.RecipeRegister;
+import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
+import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ModComponentDeskGame implements ModComponent {
     
@@ -46,31 +47,23 @@ public class ModComponentDeskGame implements ModComponent {
         }
         this.enabled = true;
         this.blockChessDesk = new BlockChessDesk();
-        GameRegistry.registerBlock(this.blockChessDesk, ItemChessDesk.class,
-                                   this.blockChessDesk.getName());
-        this.itemChessDesk = (ItemChessDesk)Item.getItemFromBlock(this.blockChessDesk);
-        GameRegistry.registerTileEntity(TileEntityChessDesk.class, DEF.MOD_ID + ".chessDesk");
+        ForgeRegistries.BLOCKS.register(this.blockChessDesk);
+        this.itemChessDesk = new ItemChessDesk(this.blockChessDesk);
+        Core.instance.registerItem(this.itemChessDesk);
+        GameRegistry.registerTileEntity(TileEntityChessDesk.class,
+                                        new ResourceLocation(DEF.MOD_ID, "chessDesk"));
         boolean craftingRecipeChessDesk =
                 config.getBoolean("craftingRecipeChessDesk", this.getName(), true, "");
         if (craftingRecipeChessDesk) {
-            GameRegistry.addRecipe(new ShapedOreRecipe(
+            RecipeRegister.register(new ShapedOreRecipe(
                     this.itemChessDesk,
+                    true,
                     "w b",
                     "ppp",
                     Character.valueOf('w'),
-                    new ItemStack(Blocks.wool, 1, 0),
+                    "woolWhite",
                     Character.valueOf('b'),
-                    new ItemStack(Blocks.wool, 1, 15),
-                    Character.valueOf('p'),
-                    "plankWood"));
-            GameRegistry.addRecipe(new ShapedOreRecipe(
-                    this.itemChessDesk,
-                    "b w",
-                    "ppp",
-                    Character.valueOf('w'),
-                    new ItemStack(Blocks.wool, 1, 0),
-                    Character.valueOf('b'),
-                    new ItemStack(Blocks.wool, 1, 15),
+                    "woolBlack",
                     Character.valueOf('p'),
                     "plankWood"));
         }
@@ -78,8 +71,10 @@ public class ModComponentDeskGame implements ModComponent {
                 config.getBoolean("craftingRecipeChessDeskClear", this.getName(), true,
                                   "clear chess game using crafting");
         if (craftingRecipeChessDeskClear) {
-            GameRegistry.addShapelessRecipe(new ItemStack(this.itemChessDesk, 1),
-                                            this.itemChessDesk);
+            ShapelessOreRecipe recipe =
+                    new ShapelessOreRecipe(this.itemChessDesk, this.itemChessDesk);
+            recipe.setRegistryName(DEF.MOD_ID, "chessDeskClear");
+            ForgeRegistries.RECIPES.register(recipe);
         }
         
         Core.instance.network.registerMessage(MessageChessMove.class,
@@ -94,9 +89,9 @@ public class ModComponentDeskGame implements ModComponent {
             return;
         }
         this.tileChessDeskRenderer = new TileEntityChessDeskRenderer();
-        this.tileChessDeskRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
+        this.tileChessDeskRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
         this.itemChessDeskRenderer = new ItemRendererChessDesk();
-        MinecraftForgeClient.registerItemRenderer(this.itemChessDesk, this.itemChessDeskRenderer);
+        this.itemChessDesk.setTileEntityItemStackRenderer(this.itemChessDeskRenderer);
         this.configChangedClient(config);
     }
     
@@ -113,8 +108,8 @@ public class ModComponentDeskGame implements ModComponent {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChessDesk.class,
                                                          this.tileChessDeskRenderer);
         } else {
-            TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(TileEntityChessDesk.class,
-                                                                             this.tileChessDeskRenderer);
+            TileEntityRendererDispatcher.instance.renderers.remove(TileEntityChessDesk.class,
+                                                                   this.tileChessDeskRenderer);
         }
         config.restartlessReset();
     }

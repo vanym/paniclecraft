@@ -9,7 +9,7 @@ public class CommandMod3 extends TreeCommandBase {
     public static final String NAME = DEF.MOD_ID;
     
     public CommandMod3() {
-        this.path = new String[]{this.getCommandName()};
+        this.path = new String[]{this.getName()};
     }
     
     @Override
@@ -18,7 +18,7 @@ public class CommandMod3 extends TreeCommandBase {
     }
     
     @Override
-    public String getCommandName() {
+    public String getName() {
         return NAME;
     }
 }

@@ -7,18 +7,18 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
@@ -38,7 +38,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
     }
     
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "paintonblock";
     }
     
@@ -47,7 +47,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         public CommandClearArea() {}
         
         @Override
-        public String getCommandName() {
+        public String getName() {
             return "cleararea";
         }
         
@@ -57,28 +57,25 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         }
         
         @Override
-        public void processCommand(ICommandSender sender, String[] args) {
+        public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+                throws CommandException {
             if (args.length != 1 && args.length != 4) {
-                throw new WrongUsageException(this.getCommandUsage(sender));
+                throw new WrongUsageException(this.getUsage(sender));
             }
-            double radius = parseDoubleBounded(sender, args[0], 0.0D, 1024.0D);
-            ChunkCoordinates coords = sender.getPlayerCoordinates();
+            double radius = parseDouble(args[0], 0.0D, 1024.0D);
+            BlockPos coords = sender.getPosition();
             if (args.length == 4) {
-                int x, y, z;
-                x = MathHelper.floor_double(func_110666_a(sender, coords.posX, args[1]));
-                y = MathHelper.floor_double(func_110666_a(sender, coords.posY, args[2]));
-                z = MathHelper.floor_double(func_110666_a(sender, coords.posZ, args[3]));
-                coords.set(x, y, z);
+                coords = parseBlockPos(sender, args, 1, true);
             }
             World world = sender.getEntityWorld();
-            AxisAlignedBB box = GeometryUtils.getPointBox(coords.posX + 0.5D,
-                                                          coords.posY + 0.5D,
-                                                          coords.posZ + 0.5D)
-                                             .expand(radius, radius, radius);
+            AxisAlignedBB box = GeometryUtils.getPointBox(coords.getX() + 0.5D,
+                                                          coords.getY() + 0.5D,
+                                                          coords.getZ() + 0.5D)
+                                             .grow(radius);
             int count = EntityPaintOnBlock.clearArea(world, box);
-            String name = world.provider.getDimensionName();
+            String name = world.provider.getDimensionType().getName();
             String line = this.getTranslationPrefix() + ".clear";
-            func_152373_a(sender, this, line, count, name, box.toString().substring(3));
+            notifyCommandListener(sender, this, line, count, name, box.toString().substring(3));
         }
     }
     
@@ -87,7 +84,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         public CommandInfo() {}
         
         @Override
-        public String getCommandName() {
+        public String getName() {
             return "info";
         }
         
@@ -97,43 +94,44 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         }
         
         @Override
-        public void processCommand(ICommandSender sender, String[] args) {
+        public void execute(MinecraftServer server, ICommandSender sender, String[] args)
+                throws CommandException {
             int x, y, z;
             if (args.length == 0) {
                 if (!(sender instanceof EntityPlayer)) {
-                    ChatComponentStyle message = new ChatComponentTranslation(
+                    TextComponentBase message = new TextComponentTranslation(
                             this.getTranslationPrefix() + ".playerless");
-                    message.getChatStyle().setColor(EnumChatFormatting.RED);
-                    sender.addChatMessage(message);
+                    message.getStyle().setColor(TextFormatting.RED);
+                    sender.sendMessage(message);
                     return;
                 }
                 EntityPlayer player = (EntityPlayer)sender;
-                MovingObjectPosition target = GeometryUtils.rayTraceBlocks(player, 6.0D);
-                if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
-                    ChatComponentStyle message = new ChatComponentTranslation(
+                RayTraceResult target = GeometryUtils.rayTraceBlocks(player, 6.0D);
+                if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
+                    TextComponentBase message = new TextComponentTranslation(
                             this.getTranslationPrefix() + ".noblock");
-                    message.getChatStyle().setColor(EnumChatFormatting.RED);
-                    sender.addChatMessage(message);
+                    message.getStyle().setColor(TextFormatting.RED);
+                    sender.sendMessage(message);
                     return;
                 }
-                x = target.blockX;
-                y = target.blockY;
-                z = target.blockZ;
+                x = target.getBlockPos().getX();
+                y = target.getBlockPos().getY();
+                z = target.getBlockPos().getZ();
             } else if (args.length == 3) {
-                ChunkCoordinates coords = sender.getPlayerCoordinates();
-                x = MathHelper.floor_double(func_110666_a(sender, coords.posX, args[0]));
-                y = MathHelper.floor_double(func_110666_a(sender, coords.posY, args[1]));
-                z = MathHelper.floor_double(func_110666_a(sender, coords.posZ, args[2]));
+                BlockPos coords = parseBlockPos(sender, args, 0, true);
+                x = coords.getX();
+                y = coords.getY();
+                z = coords.getZ();
             } else {
-                throw new WrongUsageException(this.getCommandUsage(sender));
+                throw new WrongUsageException(this.getUsage(sender));
             }
             EntityPaintOnBlock entityPOB =
                     EntityPaintOnBlock.getEntity(sender.getEntityWorld(), x, y, z);
             if (entityPOB == null) {
-                ChatComponentStyle message = new ChatComponentTranslation(
+                TextComponentBase message = new TextComponentTranslation(
                         this.getTranslationPrefix() + ".nopaintonblock",
                         new Object[]{x, y, z});
-                sender.addChatMessage(message);
+                sender.sendMessage(message);
                 return;
             }
             String name = entityPOB.getClass().getSimpleName();
@@ -144,7 +142,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                                         entityPOB.getBlockY(),
                                         entityPOB.getBlockZ(),
                                         id, uuid.toString());
-            sender.addChatMessage(new ChatComponentText(line));
+            sender.sendMessage(new TextComponentString(line));
         }
     }
     
@@ -155,7 +153,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         }
         
         @Override
-        public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
             if (!this.edit && !this.to
                 && Core.instance.painting.server.freePaintOnBlockView) {
                 return true;
@@ -169,7 +167,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                 && Core.instance.painting.server.freePaintOnBlockEditViewTo) {
                 return true;
             } else {
-                return super.canCommandSenderUseCommand(sender);
+                return super.checkPermission(server, sender);
             }
         }
     }

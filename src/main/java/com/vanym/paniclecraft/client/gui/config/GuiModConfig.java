@@ -6,14 +6,14 @@ import java.util.List;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 
-import cpw.mods.fml.client.config.GuiConfig;
-import cpw.mods.fml.client.config.IConfigElement;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.IConfigElement;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiModConfig extends GuiConfig {
@@ -23,7 +23,6 @@ public class GuiModConfig extends GuiConfig {
               Core.instance.config.getConfigFile().getName());
     }
     
-    @SuppressWarnings("rawtypes")
     protected static List<IConfigElement> getConfigElements() {
         List<IConfigElement> list = new ArrayList<>();
         Configuration config = Core.instance.config;

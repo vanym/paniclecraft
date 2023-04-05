@@ -6,22 +6,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemChessDesk extends ItemBlock {
     
@@ -29,49 +30,29 @@ public class ItemChessDesk extends ItemBlock {
     
     public ItemChessDesk(Block block) {
         super(block);
+        this.setRegistryName(block.getRegistryName());
     }
     
     @Override
-    public boolean isValidArmor(ItemStack stack, int armorType, Entity entity) {
-        if (armorType == 0) {
-            return true;
-        }
-        return super.isValidArmor(stack, armorType, entity);
+    @Nullable
+    public EntityEquipmentSlot getEquipmentSlot(ItemStack stack) {
+        return EntityEquipmentSlot.HEAD;
     }
     
     @Override
-    public boolean placeBlockAt(
-            ItemStack stack,
-            EntityPlayer player,
-            World world,
-            int x,
-            int y,
-            int z,
-            int side,
-            float hitX,
-            float hitY,
-            float hitZ,
-            int metadata) {
-        int rot = MathHelper.floor_double((player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-        return super.placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, rot);
-    }
-    
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
             ItemStack stack,
-            EntityPlayer player,
-            List list,
-            boolean advancedItemTooltips) {
+            @Nullable World world,
+            List<String> list,
+            ITooltipFlag flag) {
         if (!stack.hasTagCompound()) {
             return;
         }
         NBTTagCompound tag = stack.getTagCompound();
         if (tag.hasKey(TAG_MOVES)) {
             NBTTagList movesTag = tag.getTagList(TAG_MOVES, 10);
-            list.add(StatCollector.translateToLocalFormatted("item.chessDesk.moves",
-                                                             movesTag.tagCount()));
+            list.add(I18n.format("item.chessDesk.moves", movesTag.tagCount()));
             if (GuiScreen.isShiftKeyDown()) {
                 Map<NBTTagCompound, Integer> white = new HashMap<>(), black = new HashMap<>();
                 for (int i = 0; i < movesTag.tagCount(); ++i) {
@@ -96,10 +77,8 @@ public class ItemChessDesk extends ItemBlock {
                                          .reversed())
                        .map(e-> {
                            String name = e.getKey().getString(TileEntityChessDesk.TAG_PLAYERNAME);
-                           return StatCollector.translateToLocalFormatted(translate,
-                                                                          many ? new Object[]{name,
-                                                                                              e.getValue()}
-                                                                               : new Object[]{name});
+                           return I18n.format(translate, many ? new Object[]{name, e.getValue()}
+                                                              : new Object[]{name});
                        })
                        .forEach(list::add);
                 });

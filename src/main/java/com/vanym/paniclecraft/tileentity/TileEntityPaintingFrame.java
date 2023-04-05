@@ -5,23 +5,25 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     public static final String IN_MOD_ID = "paintingFrame";
-    public static final String ID = DEF.MOD_ID + "." + IN_MOD_ID;
+    public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
     public static final String TAG_PICTURE_N = TileEntityPainting.TAG_PICTURE + "[%d]";
     
     protected final PictureHolder[] holders = new PictureHolder[N];
     
     @Override
-    public void writeToNBT(NBTTagCompound nbtTag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
@@ -31,6 +33,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
                 nbtTag.setTag(TAG_PICTURE_I, pictureTag);
             }
         }
+        return nbtTag;
     }
     
     @Override
@@ -82,16 +85,16 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     protected Picture getNeighborPicture(int side, int offsetX, int offsetY) {
         return new WorldPicturePoint(
                 WorldPictureProvider.PAINTINGFRAME,
-                this.getWorldObj(),
-                this.xCoord,
-                this.yCoord,
-                this.zCoord,
+                this.getWorld(),
+                this.getPos().getX(),
+                this.getPos().getY(),
+                this.getPos().getZ(),
                 side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
     }
     
     public void rotateY(int rotUp) {
-        ForgeDirection rotator = ForgeDirection.UP;
-        ForgeDirection begin = ForgeDirection.SOUTH;
+        EnumFacing rotator = EnumFacing.UP;
+        EnumFacing begin = EnumFacing.SOUTH;
         Picture pictureUp = this.getPicture(rotator.ordinal());
         if (pictureUp != null) {
             pictureUp.rotate(rotUp);
@@ -102,9 +105,9 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         }
         for (int i = 0; i < rotUp; i++) {
             PictureHolder holderBegin = this.holders[begin.ordinal()];
-            ForgeDirection current = begin;
+            EnumFacing current = begin;
             while (true) {
-                ForgeDirection next = current.getRotation(rotator.getOpposite());
+                EnumFacing next = GeometryUtils.rotateBy(current, rotator.getOpposite());
                 if (next == begin) {
                     break;
                 }
@@ -124,11 +127,6 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
             }
             this.holders[c] = holderBegin;
         }
-    }
-    
-    @Override
-    public void updateEntity() {
-        super.updateEntity();
     }
     
     protected class PictureHolder extends TileEntityPaintingContainer.PictureHolder {
@@ -153,10 +151,10 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         @Override
         public String toString() {
             return String.format("Frame[x=%d, y=%d, z=%d, side=%s]",
-                                 TileEntityPaintingFrame.this.xCoord,
-                                 TileEntityPaintingFrame.this.yCoord,
-                                 TileEntityPaintingFrame.this.zCoord,
-                                 ForgeDirection.getOrientation(this.side));
+                                 TileEntityPaintingFrame.this.getPos().getX(),
+                                 TileEntityPaintingFrame.this.getPos().getY(),
+                                 TileEntityPaintingFrame.this.getPos().getZ(),
+                                 EnumFacing.getFront(this.side));
         }
     }
     

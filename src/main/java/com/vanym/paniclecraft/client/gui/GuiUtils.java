@@ -6,12 +6,14 @@ import java.awt.geom.Point2D;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiUtils {
@@ -23,15 +25,16 @@ public class GuiUtils {
                                  GL11.GL_TRUE, GL11.GL_FALSE);
         float[] f = color.getRGBComponents(null);
         GL11.glColor4f(f[0], f[1], f[2], f[3]);
-        Tessellator tessellator = Tessellator.instance;
+        Tessellator tessellator = Tessellator.getInstance();
         double dx = x2 - x1, dy = y2 - y1, steps = Math.max(Math.abs(dx), Math.abs(dy));
         double x = x1, y = y1, mx = (double)dx / steps, my = (double)dy / steps;
-        tessellator.startDrawing(GL11.GL_QUADS);
+        BufferBuilder buf = tessellator.getBuffer();
+        buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
         for (int i = 0; i <= steps; ++i, x += mx, y += my) {
-            tessellator.addVertex(x + 1, y + 0, 0.0D);
-            tessellator.addVertex(x + 0, y + 0, 0.0D);
-            tessellator.addVertex(x + 0, y + 1, 0.0D);
-            tessellator.addVertex(x + 1, y + 1, 0.0D);
+            buf.pos(x + 1, y + 0, 0.0D).endVertex();
+            buf.pos(x + 0, y + 0, 0.0D).endVertex();
+            buf.pos(x + 0, y + 1, 0.0D).endVertex();
+            buf.pos(x + 1, y + 1, 0.0D).endVertex();
         }
         tessellator.draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);

@@ -6,16 +6,16 @@ import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
+import net.minecraftforge.common.ForgeHooks;
 
-public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
+public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessOreRecipe {
     
     public RecipePaintingFrameRemovePainting() {
         super(Core.instance.painting.itemPainting,
@@ -32,7 +32,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
             return false;
         }
         NBTTagCompound itemTag = frame.getTagCompound();
-        for (ForgeDirection pside : ItemPaintingFrame.SIDE_ORDER) {
+        for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
             final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
             if (itemTag.hasKey(TAG_PICTURE_I)) {
                 return true;
@@ -50,7 +50,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
         }
         NBTTagCompound itemTag = frame.getTagCompound();
         NBTTagCompound pictureTag = null;
-        for (ForgeDirection pside : ItemPaintingFrame.SIDE_ORDER) {
+        for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
             final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
             if (itemTag.hasKey(TAG_PICTURE_I)) {
                 pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
@@ -73,50 +73,38 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
         return painting;
     }
     
-    @SubscribeEvent
-    public void itemCraftedEvent(ItemCraftedEvent event) {
-        // Can't use (without dirty hacks) 'ContainerItem' because of RecipePaintingFrameAddPainting
-        if (event.player == null) {
-            return;
+    @Override
+    public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
+        NonNullList<ItemStack> list =
+                NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+        ItemStack frame = null;
+        for (int i = 0; i < list.size(); ++i) {
+            ItemStack slot = inv.getStackInSlot(i);
+            Item item = slot.getItem();
+            if (item == Core.instance.painting.itemPaintingFrame) {
+                ItemStack stack = slot.copy();
+                stack.setCount(1);
+                frame = stack;
+                list.set(i, frame);
+                continue;
+            }
+            list.set(i, ForgeHooks.getContainerItem(slot));
         }
-        World world = event.player.getEntityWorld();
-        if (!(event.craftMatrix instanceof InventoryCrafting)) {
-            return;
-        }
-        InventoryCrafting inv = (InventoryCrafting)event.craftMatrix;
-        if (!this.matches(inv, world)) {
-            return;
-        }
-        ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         if (frame == null || !frame.hasTagCompound()) {
-            return;
+            return super.getRemainingItems(inv);
         }
         NBTTagCompound itemTag = frame.getTagCompound();
-        for (ForgeDirection pside : ItemPaintingFrame.SIDE_ORDER) {
+        for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
             final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
             if (!itemTag.hasKey(TAG_PICTURE_I)) {
                 continue;
             }
-            if (frame.stackSize == 1) {
-                itemTag.removeTag(TAG_PICTURE_I);
-                if (itemTag.hasNoTags()) {
-                    frame.setTagCompound(null);
-                }
-                ++frame.stackSize;
-            } else if (frame.stackSize > 1) {
-                ItemStack copy = frame.copy();
-                copy.stackSize = 1;
-                NBTTagCompound copyItemTag = copy.getTagCompound();
-                copyItemTag.removeTag(TAG_PICTURE_I);
-                if (copyItemTag.hasNoTags()) {
-                    copy.setTagCompound(null);
-                }
-                boolean added = event.player.inventory.addItemStackToInventory(copy);
-                if (!added) {
-                    event.player.dropPlayerItemWithRandomChoice(copy, false);
-                }
+            itemTag.removeTag(TAG_PICTURE_I);
+            if (itemTag.hasNoTags()) {
+                frame.setTagCompound(null);
             }
             break;
         }
+        return list;
     }
 }

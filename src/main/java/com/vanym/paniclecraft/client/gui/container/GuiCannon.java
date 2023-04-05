@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.client.gui.container;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
@@ -11,12 +12,12 @@ import com.vanym.paniclecraft.container.ContainerCannon;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.network.message.MessageCannonSet;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiCannon extends GuiContainer {
@@ -38,7 +39,7 @@ public class GuiCannon extends GuiContainer {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        this.container.cannon.getStackInSlotOnClosing(0);
+        this.container.cannon.removeStackFromSlot(0);
     }
     
     protected void sendDirection(double value) {
@@ -54,7 +55,6 @@ public class GuiCannon extends GuiContainer {
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
         this.sliderDir =
@@ -106,23 +106,23 @@ public class GuiCannon extends GuiContainer {
     
     @Override
     public void drawGuiContainerForegroundLayer(int x, int y) {
-        this.fontRendererObj.drawString(InventoryUtils.getTranslatedName(this.container.cannon),
-                                        8, 6, 0x404040);
-        this.fontRendererObj.drawString(InventoryUtils.getTranslatedName(this.container.playerInv),
-                                        8, this.ySize - 96 + 2, 0x404040);
-        this.fontRendererObj.drawString(I18n.format("gui.cannon.direction"),
-                                        62, 8, 0x404040);
+        this.fontRenderer.drawString(InventoryUtils.getTranslatedName(this.container.cannon),
+                                     8, 6, 0x404040);
+        this.fontRenderer.drawString(InventoryUtils.getTranslatedName(this.container.playerInv),
+                                     8, this.ySize - 96 + 2, 0x404040);
+        this.fontRenderer.drawString(I18n.format("gui.cannon.direction"),
+                                     62, 8, 0x404040);
         double dir = this.container.cannon.getDirection();
-        this.fontRendererObj.drawString(String.format("%.4f", dir),
-                                        62, 18, 0x404040);
-        this.fontRendererObj.drawString(I18n.format("gui.cannon.height"), 40, 48, 0x404040);
+        this.fontRenderer.drawString(String.format("%.4f", dir),
+                                     62, 18, 0x404040);
+        this.fontRenderer.drawString(I18n.format("gui.cannon.height"), 40, 48, 0x404040);
         double height = this.container.cannon.getHeight();
-        this.fontRendererObj.drawString(String.format("%.4f", height), 40, 58, 0x404040);
-        this.fontRendererObj.drawString(I18n.format("gui.cannon.strength"),
-                                        30, 28, 0x404040);
+        this.fontRenderer.drawString(String.format("%.4f", height), 40, 58, 0x404040);
+        this.fontRenderer.drawString(I18n.format("gui.cannon.strength"),
+                                     30, 28, 0x404040);
         double strength = this.container.cannon.getStrength();
-        this.fontRendererObj.drawString(String.format("%.4f", strength),
-                                        30, 38, 0x404040);
+        this.fontRenderer.drawString(String.format("%.4f", strength),
+                                     30, 38, 0x404040);
     }
     
     @Override
@@ -136,17 +136,16 @@ public class GuiCannon extends GuiContainer {
     }
     
     @Override
-    public void keyTyped(char character, int key) {
+    public void keyTyped(char character, int key) throws IOException {
         super.keyTyped(character, key);
     }
     
     @Override
-    public void mouseClicked(int x, int y, int eventButton) {
+    public void mouseClicked(int x, int y, int eventButton) throws IOException {
         super.mouseClicked(x, y, eventButton);
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     protected void mouseClickMove(int x, int y, int button, long timeSinceMouseClick) {
         super.mouseClickMove(x, y, button, timeSinceMouseClick);
         Stream<GuiCircularSlider> sliders = this.buttonList.stream()

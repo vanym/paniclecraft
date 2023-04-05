@@ -10,13 +10,15 @@ import org.lwjgl.opengl.GL11;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiCircularSlider extends GuiButton {
@@ -68,17 +70,18 @@ public class GuiCircularSlider extends GuiButton {
     }
     
     @Override
-    public void drawButton(Minecraft mc, int x, int y) {
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         GL11.glEnable(GL11.GL_BLEND);
         OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
                                  GL11.GL_TRUE, GL11.GL_FALSE);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawing(GL11.GL_POLYGON);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buf = tessellator.getBuffer();
+        buf.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION_TEX);
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
-        final double xcenter = this.xPosition + raduish, ycenter = this.yPosition + raduisv;
+        final double xcenter = this.x + raduish, ycenter = this.y + raduisv;
         final int txc = 99, tyc = 128;
         final double step = this.max / SEGMENTS;
         for (double current = this.max; current >= 0.0D; current -= step) {
@@ -89,9 +92,9 @@ public class GuiCircularSlider extends GuiButton {
             final double vy = ycenter + oy;
             final double tx = (txc + ox) / 256.0D;
             final double ty = (tyc + oy) / 256.0D;
-            tessellator.addVertexWithUV(vx, vy, this.zLevel, tx, ty);
+            buf.pos(vx, vy, this.zLevel).tex(tx, ty).endVertex();
         }
-        tessellator.addVertexWithUV(xcenter, ycenter, this.zLevel, txc, tyc);
+        buf.pos(xcenter, ycenter, this.zLevel).tex(txc, tyc).endVertex();
         tessellator.draw();
         GL11.glDisable(GL11.GL_BLEND);
         if (this.getter == null) {
@@ -113,7 +116,7 @@ public class GuiCircularSlider extends GuiButton {
     public boolean mousePressed(Minecraft mc, int x, int y) {
         Point2D.Double p = GuiUtils.getMousePoint(x, y);
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
-        final double xcenter = this.xPosition + raduish, ycenter = this.yPosition + raduisv;
+        final double xcenter = this.x + raduish, ycenter = this.y + raduisv;
         double dx = p.x - xcenter, dy = p.y - ycenter;
         this.pressed = Math.pow(dx, 2) / Math.pow(raduish, 2) +
                        Math.pow(dy, 2) / Math.pow(raduisv, 2) <= 1.0D
@@ -137,7 +140,7 @@ public class GuiCircularSlider extends GuiButton {
         }
         Point2D.Double p = GuiUtils.getMousePoint(x, y);
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
-        final double xcenter = this.xPosition + raduish, ycenter = this.yPosition + raduisv;
+        final double xcenter = this.x + raduish, ycenter = this.y + raduisv;
         double value = this.fromRadians(Math.atan2(p.y - ycenter, p.x - xcenter));
         if (value > this.max) {
             double left = 1.0D - this.max;

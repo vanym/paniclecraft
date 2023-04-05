@@ -6,11 +6,10 @@ import java.util.List;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemBroom;
+import com.vanym.paniclecraft.recipe.RecipeRegister;
+import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class ModComponentBroom implements ModComponent {
     
@@ -32,14 +31,14 @@ public class ModComponentBroom implements ModComponent {
         if (craftingRecipe) {
             ShapedOreRecipe recipe = new ShapedOreRecipe(
                     this.itemBroom,
-                    "001",
-                    "120",
-                    "110",
+                    "  1",
+                    "12 ",
+                    "11 ",
                     Character.valueOf('1'),
                     "stickWood",
                     Character.valueOf('2'),
-                    Items.string);
-            GameRegistry.addRecipe(recipe);
+                    "string");
+            RecipeRegister.register(recipe);
         }
         Core.instance.registerItem(this.itemBroom);
     }

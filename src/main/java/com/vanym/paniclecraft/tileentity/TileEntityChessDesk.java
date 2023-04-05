@@ -10,17 +10,18 @@ import java.util.function.BiConsumer;
 
 import com.vanym.paniclecraft.client.gui.GuiChess;
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityChessDesk extends TileEntityBase {
     
@@ -40,11 +41,12 @@ public class TileEntityChessDesk extends TileEntityBase {
     public static final String TAG_PLAYERUUIDLEAST = "UUIDLeast";
     
     @Override
-    public void writeToNBT(NBTTagCompound nbtTag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
         NBTTagList list = new NBTTagList();
         this.writeMovesToNBT(list);
         nbtTag.setTag(TAG_MOVES, list);
+        return nbtTag;
     }
     
     @Override
@@ -78,7 +80,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     @Override
-    public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
+    public void onDataPacket(NetworkManager manager, SPacketUpdateTileEntity packet) {
         super.onDataPacket(manager, packet);
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             this.updateGui();
@@ -102,7 +104,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     public boolean move(ChessGame.Move move, EntityPlayer player) {
-        return this.move(move, player.getCommandSenderName(), player.getUniqueID());
+        return this.move(move, player.getName(), player.getUniqueID());
     }
     
     public boolean move(ChessGame.Move move, String playerName, UUID playerUUID) {
@@ -130,11 +132,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        AxisAlignedBB box = this.getBlockType()
-                                .getCollisionBoundingBoxFromPool(this.worldObj, this.xCoord,
-                                                                 this.yCoord, this.zCoord);
-        box.maxY += 0.5D;
-        return box;
+        return GeometryUtils.setMaxY(GeometryUtils.getFullBlockBox(), 0.5D).offset(this.pos);
     }
     
     @Override

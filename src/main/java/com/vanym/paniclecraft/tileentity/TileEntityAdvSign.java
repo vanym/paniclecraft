@@ -6,16 +6,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import com.vanym.paniclecraft.utils.GeometryUtils;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityAdvSign extends TileEntityBase {
     
@@ -42,22 +40,23 @@ public class TileEntityAdvSign extends TileEntityBase {
     protected static final String TAG_ONSTICK = "OnStick";
     
     @Override
-    public void writeToNBT(NBTTagCompound nbtTag) {
-        this.writeToNBT(nbtTag, false);
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
+        return this.writeToNBT(nbtTag, false);
     }
     
-    public void writeToNBT(NBTTagCompound nbtTag, boolean toStack) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag, boolean toStack) {
         NBTTagList linesTag = new NBTTagList();
         this.lines.stream().map(NBTTagString::new).forEachOrdered(linesTag::appendTag);
         nbtTag.setTag(TAG_LINES, linesTag);
         nbtTag.setInteger(TAG_STANDCOLOR, this.standColor.getRGB());
         nbtTag.setInteger(TAG_TEXTCOLOR, this.textColor.getRGB());
         if (toStack) {
-            return;
+            return nbtTag;
         }
         super.writeToNBT(nbtTag);
         nbtTag.setDouble(TAG_DIRECTION, this.direction);
         nbtTag.setBoolean(TAG_ONSTICK, this.onStick);
+        return nbtTag;
     }
     
     @Override
@@ -108,7 +107,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void setDirection(double direction) {
-        direction = MathHelper.wrapAngleTo180_double(direction);
+        direction = MathHelper.wrapDegrees(direction);
         if (direction < 0) {
             direction += 360.0D;
         }
@@ -134,8 +133,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return GeometryUtils.getFullBlockBox()
-                            .getOffsetBoundingBox(this.xCoord, this.yCoord, this.zCoord);
+        return new AxisAlignedBB(this.pos);
     }
     
     @Override

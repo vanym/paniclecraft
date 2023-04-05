@@ -7,15 +7,16 @@ import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class RecipeColorizeByFiller implements IRecipe {
+public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
     
     @Override
     public boolean matches(InventoryCrafting inv, World world) {
@@ -23,9 +24,6 @@ public class RecipeColorizeByFiller implements IRecipe {
         boolean colorizeable = false;
         for (int i = 0; i < inv.getSizeInventory(); ++i) {
             ItemStack slot = inv.getStackInSlot(i);
-            if (slot == null) {
-                continue;
-            }
             Item item = slot.getItem();
             if (item instanceof IPaintingTool) {
                 IPaintingTool tool = (IPaintingTool)item;
@@ -53,9 +51,6 @@ public class RecipeColorizeByFiller implements IRecipe {
         ItemStack colorizeableStack = null;
         for (int i = 0; i < inv.getSizeInventory(); ++i) {
             ItemStack slot = inv.getStackInSlot(i);
-            if (slot == null) {
-                continue;
-            }
             Item item = slot.getItem();
             if (item instanceof IPaintingTool) {
                 IPaintingTool tool = (IPaintingTool)item;
@@ -86,44 +81,39 @@ public class RecipeColorizeByFiller implements IRecipe {
         return null;
     }
     
-    @SubscribeEvent
-    public void itemCraftedEvent(ItemCraftedEvent event) {
-        // Can't use (without dirty hacks) 'ContainerItem' because of RecipeColorizeByDye
-        if (event.player == null) {
-            return;
-        }
-        World world = event.player.getEntityWorld();
-        if (!(event.craftMatrix instanceof InventoryCrafting)) {
-            return;
-        }
-        InventoryCrafting inv = (InventoryCrafting)event.craftMatrix;
-        if (!this.matches(inv, world)) {
-            return;
-        }
-        
-        for (int i = 0; i < inv.getSizeInventory(); ++i) {
+    @Override
+    public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
+        NonNullList<ItemStack> list =
+                NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+        for (int i = 0; i < list.size(); ++i) {
             ItemStack slot = inv.getStackInSlot(i);
-            if (slot == null) {
-                continue;
-            }
             Item item = slot.getItem();
             if (item instanceof IPaintingTool) {
                 IPaintingTool tool = (IPaintingTool)item;
                 if (tool.getPaintingToolType(slot) == PaintingToolType.FILLER) {
-                    ++slot.stackSize;
-                    return;
+                    ItemStack stack = slot.copy();
+                    stack.setCount(1);
+                    list.set(i, stack);
+                    continue;
                 }
             }
+            list.set(i, ForgeHooks.getContainerItem(slot));
         }
-    }
-    
-    @Override
-    public int getRecipeSize() {
-        return 2;
+        return list;
     }
     
     @Override
     public ItemStack getRecipeOutput() {
-        return null;
+        return ItemStack.EMPTY;
+    }
+    
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
+    
+    @Override
+    public boolean canFit(int width, int height) {
+        return width * height >= 2;
     }
 }

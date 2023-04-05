@@ -4,13 +4,15 @@ import com.vanym.paniclecraft.item.ItemWorkbench;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 
 public class SlotPortableCrafting extends SlotCrafting {
     
     public SlotPortableCrafting(EntityPlayer player,
-            IInventory craftMatrix,
+            InventoryCrafting craftMatrix,
             IInventory craftResult,
             int slotIndex,
             int x,
@@ -19,12 +21,18 @@ public class SlotPortableCrafting extends SlotCrafting {
     }
     
     @Override
-    public void onPickupFromSlot(EntityPlayer player, ItemStack stack) {
-        ItemStack heldStack = player.getHeldItem();
+    public ItemStack onTake(EntityPlayer player, ItemStack stack) {
+        ItemStack heldStack = player.getHeldItem(EnumHand.MAIN_HAND);
         if (ItemWorkbench.canBeWorkbench(heldStack)
-            && heldStack.getItem().getMaxDamage() > 0) {
+            && heldStack.getItem().getMaxDamage(heldStack) > 0) {
             heldStack.damageItem(1, player);
+        } else {
+            ItemStack offStack = player.getHeldItem(EnumHand.OFF_HAND);
+            if (ItemWorkbench.canBeWorkbench(offStack)
+                && offStack.getItem().getMaxDamage(offStack) > 0) {
+                offStack.damageItem(1, player);
+            }
         }
-        super.onPickupFromSlot(player, stack);
+        return super.onTake(player, stack);
     }
 }

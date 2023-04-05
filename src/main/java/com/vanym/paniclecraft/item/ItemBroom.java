@@ -1,14 +1,16 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 public class ItemBroom extends ItemMod3 {
@@ -24,34 +26,31 @@ public class ItemBroom extends ItemMod3 {
     }
     
     @Override
-    public boolean isItemTool(ItemStack stack) {
-        return true;
-    }
-    
-    @Override
-    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+    public ActionResult<ItemStack> onItemRightClick(
+            World world,
+            EntityPlayer player,
+            EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
         if (!world.isRemote) {
             this.collectItems(stack, world, player);
         }
-        return stack;
+        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
     }
     
-    @SuppressWarnings({"unchecked", "rawtypes"})
     protected void collectItems(ItemStack stack, World world, EntityPlayer player) {
         final double distance = this.distance;
         AxisAlignedBB box = GeometryUtils.getPointBox(player.posX, player.posY, player.posZ)
                                          .expand(distance, distance, distance)
                                          .expand(2.0D, 2.0D, 2.0D);
-        List list = world.getEntitiesWithinAABB(EntityItem.class, box);
-        Stream<EntityItem> items = list.stream().map(EntityItem.class::cast);
-        Stream<EntityItem> matches =
-                items.filter(e->player.getDistance(e.posX, e.posY, e.posZ) <= distance)
-                     .filter(player::canEntityBeSeen);
-        matches.forEach(e-> {
-            int itemSizeWas = e.getEntityItem().stackSize;
-            e.onCollideWithPlayer(player);
-            int itemSize = e.getEntityItem().stackSize;
-            stack.damageItem(itemSizeWas - itemSize, player);
-        });
+        List<EntityItem> list = world.getEntitiesWithinAABB(EntityItem.class, box);
+        list.stream()
+            .filter(e->player.getDistance(e.posX, e.posY, e.posZ) <= distance)
+            .filter(player::canEntityBeSeen)
+            .forEach(e-> {
+                int itemSizeWas = e.getItem().getCount();
+                e.onCollideWithPlayer(player);
+                int itemSize = e.getItem().getCount();
+                stack.damageItem(itemSizeWas - itemSize, player);
+            });
     }
 }

@@ -6,9 +6,8 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class RecipePaintingFrame extends ShapedOreRecipe {
+public class RecipePaintingFrame extends RecipeRegister.ShapedOreRecipe {
     
     public RecipePaintingFrame(Object... recipe) {
         super(ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT), recipe);

@@ -13,17 +13,18 @@ import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.network.message.MessageAdvSignOpenGui;
+import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ModComponentAdvSign implements ModComponent {
     
@@ -48,26 +49,33 @@ public class ModComponentAdvSign implements ModComponent {
         this.enabled = true;
         this.blockAdvSign = new BlockAdvSign();
         this.itemAdvSign = new ItemAdvSign();
-        GameRegistry.registerBlock(this.blockAdvSign, null, this.blockAdvSign.getName());
+        ForgeRegistries.BLOCKS.register(this.blockAdvSign);
         Core.instance.registerItem(this.itemAdvSign);
-        GameRegistry.registerTileEntity(TileEntityAdvSign.class, DEF.MOD_ID + ".advSign");
+        GameRegistry.registerTileEntity(TileEntityAdvSign.class,
+                                        new ResourceLocation(DEF.MOD_ID, "advSign"));
         boolean craftingRecipeEasy = config.getBoolean("craftingRecipeEasy", this.getName(), true,
                                                        "crafting using just one regular sign");
         if (craftingRecipeEasy) {
-            GameRegistry.addShapelessRecipe(new ItemStack(this.itemAdvSign, 1), Items.sign);
+            ShapelessOreRecipe recipe = new ShapelessOreRecipe(this.itemAdvSign, Items.SIGN);
+            recipe.setRegistryName(DEF.MOD_ID, "advSignEasy");
+            ForgeRegistries.RECIPES.register(recipe);
         }
         boolean craftingRecipeBook =
                 config.getBoolean("craftingRecipeWithBook", this.getName(), false,
                                   "crafting using book and regular sign");
         if (craftingRecipeBook) {
-            GameRegistry.addShapelessRecipe(new ItemStack(this.itemAdvSign, 1), Items.sign,
-                                            Items.book);
+            ShapelessOreRecipe recipe =
+                    new ShapelessOreRecipe(this.itemAdvSign, Items.SIGN, Items.BOOK);
+            recipe.setRegistryName(DEF.MOD_ID, "advSignBook");
+            ForgeRegistries.RECIPES.register(recipe);
         }
         boolean craftingRecipeClear =
                 config.getBoolean("craftingRecipeClear", this.getName(), true,
                                   "clear adv sign using crafting");
         if (craftingRecipeClear) {
-            GameRegistry.addShapelessRecipe(new ItemStack(this.itemAdvSign, 1), this.itemAdvSign);
+            ShapelessOreRecipe recipe = new ShapelessOreRecipe(this.itemAdvSign, this.itemAdvSign);
+            recipe.setRegistryName(DEF.MOD_ID, "advSignClear");
+            ForgeRegistries.RECIPES.register(recipe);
         }
         
         Core.instance.command.addSubCommand(new CommandAdvSign());
@@ -87,9 +95,9 @@ public class ModComponentAdvSign implements ModComponent {
             return;
         }
         this.tileAdvSignRenderer = new TileEntityAdvSignRenderer();
-        this.tileAdvSignRenderer.func_147497_a(TileEntityRendererDispatcher.instance);
+        this.tileAdvSignRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
         this.itemAdvSignRenderer = new ItemRendererAdvSign();
-        MinecraftForgeClient.registerItemRenderer(this.itemAdvSign, this.itemAdvSignRenderer);
+        this.itemAdvSign.setTileEntityItemStackRenderer(this.itemAdvSignRenderer);
         this.configChangedClient(config);
     }
     
@@ -106,8 +114,8 @@ public class ModComponentAdvSign implements ModComponent {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAdvSign.class,
                                                          this.tileAdvSignRenderer);
         } else {
-            TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(TileEntityAdvSign.class,
-                                                                             this.tileAdvSignRenderer);
+            TileEntityRendererDispatcher.instance.renderers.remove(TileEntityAdvSign.class,
+                                                                   this.tileAdvSignRenderer);
         }
         config.restartlessReset();
     }

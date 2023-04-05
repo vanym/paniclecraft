@@ -6,10 +6,12 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.ModComponent;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CreativeTabMod3 extends CreativeTabs {
     
@@ -26,14 +28,14 @@ public class CreativeTabMod3 extends CreativeTabs {
     }
     
     @Override
-    public Item getTabIconItem() {
-        return this.iconitem;
+    @SideOnly(Side.CLIENT)
+    public ItemStack getTabIconItem() {
+        return new ItemStack(this.iconitem);
     }
     
     @Override
     @SideOnly(Side.CLIENT)
-    @SuppressWarnings("rawtypes")
-    public void displayAllReleventItems(List stacks) {
+    public void displayAllRelevantItems(NonNullList<ItemStack> stacks) {
         for (ModComponent component : Core.instance.getComponents()) {
             if (!component.isEnabled()) {
                 continue;
@@ -42,7 +44,7 @@ public class CreativeTabMod3 extends CreativeTabs {
             if (items == null) {
                 continue;
             }
-            items.forEach(item->item.getSubItems(item, this, stacks));
+            items.forEach(item->item.getSubItems(this, stacks));
         }
     }
 }

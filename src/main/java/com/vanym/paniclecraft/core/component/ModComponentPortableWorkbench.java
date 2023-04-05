@@ -7,21 +7,16 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPortableWorkbench;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemWorkbench;
+import com.vanym.paniclecraft.recipe.RecipeRegister;
+import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ModComponentPortableWorkbench implements ModComponent {
     
     public ItemWorkbench itemWorkbench;
-    
-    @SideOnly(Side.CLIENT)
-    public boolean renderWorkbenchItem;
     
     protected boolean enabled = false;
     
@@ -38,14 +33,9 @@ public class ModComponentPortableWorkbench implements ModComponent {
         boolean craftingRecipePortableWorkbench =
                 config.getBoolean("craftingRecipePortableWorkbench", this.getName(), true, "");
         if (craftingRecipePortableWorkbench) {
-            GameRegistry.addRecipe(new ShapelessOreRecipe(
+            RecipeRegister.register(new ShapelessOreRecipe(
                     this.itemWorkbench,
-                    "craftingTableWood",
-                    "stickWood",
-                    "stickWood"));
-            GameRegistry.addRecipe(new ShapelessOreRecipe(
-                    this.itemWorkbench,
-                    Blocks.crafting_table,
+                    "workbench",
                     "stickWood",
                     "stickWood"));
         }
@@ -54,21 +44,7 @@ public class ModComponentPortableWorkbench implements ModComponent {
     @Override
     @SideOnly(Side.CLIENT)
     public void initClient(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
-        MinecraftForgeClient.registerItemRenderer(this.itemWorkbench,
-                                                  new ItemRendererPortableWorkbench());
-        this.configChangedClient(config);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void configChangedClient(ModConfig config) {
-        config.restartless();
-        this.renderWorkbenchItem = config.getBoolean("portableWorkbenchItem", CLIENT_RENDER, true,
-                                                     "fancy renderer for portable workbench");
-        config.restartlessReset();
+        this.itemWorkbench.setTileEntityItemStackRenderer(new ItemRendererPortableWorkbench());
     }
     
     @Override

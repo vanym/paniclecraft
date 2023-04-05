@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.client.gui;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -15,12 +16,12 @@ import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiEditAdvSign extends GuiScreen {
@@ -48,7 +49,6 @@ public class GuiEditAdvSign extends GuiScreen {
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public void initGui() {
         int xCenter = this.width / 2;
         this.buttonDone =
@@ -56,8 +56,8 @@ public class GuiEditAdvSign extends GuiScreen {
         this.buttonAddLine = new GuiButton(1, xCenter + 59, this.height / 4 + 68, 20, 20, "+");
         this.buttonRemoveLine = new GuiButton(
                 2,
-                this.buttonAddLine.xPosition + 21,
-                this.buttonAddLine.yPosition,
+                this.buttonAddLine.x + 21,
+                this.buttonAddLine.y,
                 20,
                 20,
                 "-");
@@ -84,13 +84,14 @@ public class GuiEditAdvSign extends GuiScreen {
         this.sliderDir.setOffset(-0.25D);
         this.standColorHex =
                 new GuiHexColorField(
-                        this.fontRendererObj,
+                        1,
+                        this.fontRenderer,
                         xCenter + 48,
                         this.height / 4 + 106);
         this.standColorHex.setRGB(ColorUtils.getAlphaless(this.tileAS.getStandColor()));
         this.standColorHex.setSetter(rgb->this.tileAS.setStandColor(new Color(rgb)));
         this.textColorHex =
-                new GuiHexColorField(this.fontRendererObj, xCenter + 48, this.height / 4 + 90);
+                new GuiHexColorField(2, this.fontRenderer, xCenter + 48, this.height / 4 + 90);
         this.textColorHex.setRGB(ColorUtils.getAlphaless(this.tileAS.getTextColor()));
         this.textColorHex.setSetter(rgb->this.tileAS.setTextColor(new Color(rgb)));
         this.buttonList.clear();
@@ -221,14 +222,13 @@ public class GuiEditAdvSign extends GuiScreen {
     }
     
     @Override
-    protected void mouseClicked(int x, int y, int eventButton) {
+    protected void mouseClicked(int x, int y, int eventButton) throws IOException {
         super.mouseClicked(x, y, eventButton);
         this.standColorHex.mouseClicked(x, y, eventButton);
         this.textColorHex.mouseClicked(x, y, eventButton);
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     protected void mouseClickMove(int x, int y, int button, long timeSinceMouseClick) {
         super.mouseClickMove(x, y, button, timeSinceMouseClick);
         Stream<GuiCircularSlider> sliders = this.buttonList.stream()
@@ -242,29 +242,29 @@ public class GuiEditAdvSign extends GuiScreen {
         if (!this.sliderDir.isPressed()) {
             this.drawDefaultBackground();
         }
-        this.drawCenteredString(this.fontRendererObj, I18n.format("sign.edit"), this.width / 2, 40,
+        this.drawCenteredString(this.fontRenderer, I18n.format("sign.edit"), this.width / 2, 40,
                                 0xffffff);
         if (this.sliderDir.isPressed()) {
-            this.sliderDir.drawButton(this.mc, mouseX, mouseY);
+            this.sliderDir.drawButton(this.mc, mouseX, mouseY, renderPartialTicks);
             return;
         }
         this.drawSign();
         String linesText = String.format("Lines:%2d", this.tileAS.lines.size());
-        int linesTextWidth = this.fontRendererObj.getStringWidth(linesText);
-        this.drawString(this.fontRendererObj, linesText,
-                        this.buttonAddLine.xPosition - 2 - linesTextWidth,
-                        this.buttonAddLine.yPosition + 10, 0xffffff);
+        int linesTextWidth = this.fontRenderer.getStringWidth(linesText);
+        this.drawString(this.fontRenderer, linesText,
+                        this.buttonAddLine.x - 2 - linesTextWidth,
+                        this.buttonAddLine.y + 10, 0xffffff);
         String standText = "Stand:";
-        int standTextWidth = this.fontRendererObj.getStringWidth(standText);
-        this.drawString(this.fontRendererObj, standText,
-                        this.standColorHex.xPosition - 2 - standTextWidth,
-                        this.standColorHex.yPosition + 3, 0xffffff);
+        int standTextWidth = this.fontRenderer.getStringWidth(standText);
+        this.drawString(this.fontRenderer, standText,
+                        this.standColorHex.x - 2 - standTextWidth,
+                        this.standColorHex.y + 3, 0xffffff);
         this.standColorHex.drawTextBox();
         String textText = "Text:";
-        int textTextWidth = this.fontRendererObj.getStringWidth(textText);
-        this.drawString(this.fontRendererObj, textText,
-                        this.textColorHex.xPosition - 2 - textTextWidth,
-                        this.textColorHex.yPosition + 3, 0xffffff);
+        int textTextWidth = this.fontRenderer.getStringWidth(textText);
+        this.drawString(this.fontRenderer, textText,
+                        this.textColorHex.x - 2 - textTextWidth,
+                        this.textColorHex.y + 3, 0xffffff);
         this.textColorHex.drawTextBox();
         super.drawScreen(mouseX, mouseY, renderPartialTicks);
     }
@@ -282,9 +282,9 @@ public class GuiEditAdvSign extends GuiScreen {
             selectLine = this.editLine;
         }
         
-        Core.instance.advSign.tileAdvSignRenderer.renderTileEntityAt(this.tileAS, -0.5D, -0.75D,
-                                                                     -0.5D, 0.0F, true, false,
-                                                                     selectLine);
+        Core.instance.advSign.tileAdvSignRenderer.render(this.tileAS, -0.5D, -0.75D,
+                                                         -0.5D, 0.0F, true, false,
+                                                         selectLine);
         GL11.glPopMatrix();
     }
     
@@ -343,6 +343,6 @@ public class GuiEditAdvSign extends GuiScreen {
     }
     
     protected boolean lineFits(CharSequence line) {
-        return this.fontRendererObj.getStringWidth(line.toString()) <= this.getMaxLineFontWidth();
+        return this.fontRenderer.getStringWidth(line.toString()) <= this.getMaxLineFontWidth();
     }
 }
