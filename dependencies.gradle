@@ -1,0 +1,6 @@
+
+dependencies {
+    // cc-tweaked-1.12.2-1.89.2.jar cf075ec4f281ed5c510a96a91299927b
+    compileOnly "org.squiddev:cc-tweaked-${minecraft_version}:${cc_tweaked_version}"
+    runtime "org.squiddev:cc-tweaked-${minecraft_version}:${cc_tweaked_version}"
+}

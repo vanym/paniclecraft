@@ -1,0 +1,7 @@
+
+repositories {
+    maven {
+        name = "cc-tweaked"
+        url = "https://squiddev.cc/maven/"
+    }
+}
