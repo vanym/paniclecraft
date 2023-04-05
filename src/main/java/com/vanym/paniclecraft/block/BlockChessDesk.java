@@ -40,7 +40,7 @@ public class BlockChessDesk extends BlockContainerMod3 {
     public BlockChessDesk() {
         super(Material.WOOD);
         this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-        this.setUnlocalizedName("chessDesk");
+        this.setUnlocalizedName("chess_desk");
         this.setHardness(0.5F);
     }
     

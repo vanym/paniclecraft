@@ -6,16 +6,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.vanym.paniclecraft.DEF;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityAdvSign extends TileEntityBase {
+    
+    public static final String IN_MOD_ID = "advanced_sign";
+    public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
     public static final int MAX_LINES = 32;
     public static final int MIN_LINES = 1;

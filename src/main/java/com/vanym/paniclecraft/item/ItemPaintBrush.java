@@ -31,7 +31,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
     public ItemPaintBrush() {
         super();
-        this.setUnlocalizedName("paintBrush");
+        this.setUnlocalizedName("paintbrush");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
@@ -69,9 +69,28 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
         }
     }
     
+    protected String getSubtypeName(ItemStack stack) {
+        switch (stack.getItemDamage()) {
+            case DAMAGE_BRUSH:
+                return "brush";
+            case DAMAGE_SMALLBRUSH:
+                return "smallbrush";
+            case DAMAGE_FILLER:
+                return "filler";
+            case DAMAGE_COLORPICKER:
+                return "colorpicker";
+            default:
+                return null;
+        }
+    }
+    
     @Override
-    public String getUnlocalizedName(ItemStack itemStack) {
-        return this.getUnlocalizedName() + itemStack.getItemDamage();
+    public String getUnlocalizedName(ItemStack stack) {
+        String name = this.getSubtypeName(stack);
+        if (name == null) {
+            return this.getUnlocalizedName() + stack.getItemDamage();
+        }
+        return "item.paintingtool_" + name;
     }
     
     @Override

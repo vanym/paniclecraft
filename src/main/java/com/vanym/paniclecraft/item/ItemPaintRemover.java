@@ -16,7 +16,7 @@ public class ItemPaintRemover extends ItemPaintingTool {
     
     public ItemPaintRemover() {
         super();
-        this.setUnlocalizedName("paintRemover");
+        this.setUnlocalizedName("paintremover");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
@@ -30,9 +30,24 @@ public class ItemPaintRemover extends ItemPaintingTool {
         return new ItemStack(this, 1, DAMAGE_SMALLREMOVER);
     }
     
+    protected String getSubtypeName(ItemStack stack) {
+        switch (stack.getItemDamage()) {
+            case DAMAGE_REMOVER:
+                return "remover";
+            case DAMAGE_SMALLREMOVER:
+                return "smallremover";
+            default:
+                return null;
+        }
+    }
+    
     @Override
-    public String getUnlocalizedName(ItemStack itemStack) {
-        return this.getUnlocalizedName() + itemStack.getItemDamage();
+    public String getUnlocalizedName(ItemStack stack) {
+        String name = this.getSubtypeName(stack);
+        if (name == null) {
+            return this.getUnlocalizedName() + stack.getItemDamage();
+        }
+        return "item.paintingtool_" + name;
     }
     
     @Override

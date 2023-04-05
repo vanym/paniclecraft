@@ -19,7 +19,6 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -51,8 +50,7 @@ public class ModComponentAdvSign implements ModComponent {
         this.itemAdvSign = new ItemAdvSign();
         ForgeRegistries.BLOCKS.register(this.blockAdvSign);
         Core.instance.registerItem(this.itemAdvSign);
-        GameRegistry.registerTileEntity(TileEntityAdvSign.class,
-                                        new ResourceLocation(DEF.MOD_ID, "advSign"));
+        GameRegistry.registerTileEntity(TileEntityAdvSign.class, TileEntityAdvSign.ID);
         boolean craftingRecipeEasy = config.getBoolean("craftingRecipeEasy", this.getName(), true,
                                                        "crafting using just one regular sign");
         if (craftingRecipeEasy) {

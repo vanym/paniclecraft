@@ -15,7 +15,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
-    public static final String IN_MOD_ID = "paintingFrame";
+    public static final String IN_MOD_ID = "paintingframe";
     public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
     public static final String TAG_PICTURE_N = TileEntityPainting.TAG_PICTURE + "[%d]";

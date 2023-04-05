@@ -18,7 +18,6 @@ import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -50,8 +49,7 @@ public class ModComponentDeskGame implements ModComponent {
         ForgeRegistries.BLOCKS.register(this.blockChessDesk);
         this.itemChessDesk = new ItemChessDesk(this.blockChessDesk);
         Core.instance.registerItem(this.itemChessDesk);
-        GameRegistry.registerTileEntity(TileEntityChessDesk.class,
-                                        new ResourceLocation(DEF.MOD_ID, "chessDesk"));
+        GameRegistry.registerTileEntity(TileEntityChessDesk.class, TileEntityChessDesk.ID);
         boolean craftingRecipeChessDesk =
                 config.getBoolean("craftingRecipeChessDesk", this.getName(), true, "");
         if (craftingRecipeChessDesk) {

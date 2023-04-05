@@ -22,7 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiChess extends GuiScreen {
     
     protected static final ResourceLocation BUTTONS_TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/guis/chessButtons.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/guis/chess_buttons.png");
     
     protected final GuiSquareButton[] fieldButtons = new GuiSquareButton[64];
     protected final GuiChooseButton[] chooseButtons = new GuiChooseButton[4];

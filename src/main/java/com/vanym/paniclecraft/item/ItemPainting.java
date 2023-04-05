@@ -37,7 +37,7 @@ public class ItemPainting extends ItemMod3 {
     
     public ItemPainting() {
         super();
-        this.setUnlocalizedName("paintingBlock");
+        this.setUnlocalizedName("paintingblock");
     }
     
     @Override
@@ -143,7 +143,7 @@ public class ItemPainting extends ItemMod3 {
                 NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
                 if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                     !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(I18n.translateToLocal("text.painting.uneditable"));
+                    list.add(I18n.translateToLocal("item.painting.uneditable"));
                 }
                 list.add(pictureSizeInformation(pictureTag));
             }

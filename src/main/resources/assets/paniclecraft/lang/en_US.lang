@@ -1,18 +1,18 @@
 item.broom.name=Broom
 
-item.advSign.name=Advanced Sign
-text.advSign.showtext=Press <shift> to see text
+item.advanced_sign.name=Advanced Sign
+item.advanced_sign.showtext=Press <shift> to see text
 
-item.paintingBlock.name=Canvas
-text.painting.uneditable=Uneditable
-tile.paintingFrame.name=Canvas Frame
-item.paintBrush0.name=Paint Brush
-item.paintBrush1.name=Small Paint Brush
-item.paintBrush4.name=Paint Filler
-item.paintBrush6.name=Color Picker
-item.paintRemover0.name=Paint Chipper
-item.paintRemover1.name=Paint Knife
-text.paintingtool.radius=Radius
+item.paintingblock.name=Canvas
+item.painting.uneditable=Uneditable
+tile.paintingframe.name=Canvas Frame
+item.paintingtool_brush.name=Paint Brush
+item.paintingtool_smallbrush.name=Small Paint Brush
+item.paintingtool_filler.name=Paint Filler
+item.paintingtool_colorpicker.name=Color Picker
+item.paintingtool_remover.name=Paint Chipper
+item.paintingtool_smallremover.name=Paint Knife
+item.paintingtool.radius=Radius
 item.palette.name=Palette
 item.palette.inv=Palette
 
@@ -32,15 +32,15 @@ gui.cannon.direction=Direction
 gui.cannon.height=Height
 gui.cannon.strength=Strength
 
-tile.chessDesk.name=Chess Board
-item.chessDesk.moves=Moves: %d
-item.chessDesk.player.white.one=W: %s
-item.chessDesk.player.white.many=W: %s (%d)
-item.chessDesk.player.black.one=B: %s
-item.chessDesk.player.black.many=B: %s (%d)
+tile.chess_desk.name=Chess Board
+item.chess_desk.moves=Moves: %d
+item.chess_desk.player.white.one=W: %s
+item.chess_desk.player.white.many=W: %s (%d)
+item.chess_desk.player.black.one=B: %s
+item.chess_desk.player.black.many=B: %s (%d)
 chess.export.copy.success=Copy chess notation to clipboard
 
-item.portableWorkbench.name=Portable Workbench
+item.portable_workbench.name=Portable Workbench
 
 commands.paniclecraft.exception.playerless=Only players can use this command
 commands.paniclecraft.exception.noblock=Can't find block you looking at

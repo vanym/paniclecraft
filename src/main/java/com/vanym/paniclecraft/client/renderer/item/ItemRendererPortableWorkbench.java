@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ItemRendererPortableWorkbench extends TileEntityItemStackRenderer {
     
     protected static final ResourceLocation TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/models/portableWorkbench.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/models/portable_workbench.png");
     
     ModelPortableWorkbench model = new ModelPortableWorkbench();
     

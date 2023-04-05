@@ -38,7 +38,7 @@ public class BlockAdvSign extends BlockContainerMod3 {
     public BlockAdvSign() {
         super(Material.WOOD);
         this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.UP));
-        this.setUnlocalizedName("advSign");
+        this.setUnlocalizedName("advanced_sign");
         this.setHardness(1.0F);
     }
     
