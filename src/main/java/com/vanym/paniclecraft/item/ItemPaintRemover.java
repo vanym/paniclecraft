@@ -41,9 +41,24 @@ public class ItemPaintRemover extends ItemPaintingTool {
         return new ItemStack(this, 1, DAMAGE_SMALLREMOVER);
     }
     
+    protected String getSubtypeName(ItemStack stack) {
+        switch (stack.getItemDamage()) {
+            case DAMAGE_REMOVER:
+                return "remover";
+            case DAMAGE_SMALLREMOVER:
+                return "smallremover";
+            default:
+                return null;
+        }
+    }
+    
     @Override
-    public String getUnlocalizedName(ItemStack itemStack) {
-        return this.getUnlocalizedName() + itemStack.getItemDamage();
+    public String getUnlocalizedName(ItemStack stack) {
+        String name = this.getSubtypeName(stack);
+        if (name == null) {
+            return this.getUnlocalizedName() + stack.getItemDamage();
+        }
+        return "item.paintingtool_" + name;
     }
     
     @Override
@@ -61,9 +76,9 @@ public class ItemPaintRemover extends ItemPaintingTool {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister) {
-        final String PREFIX = DEF.MOD_ID + ":" + this.getName();
-        this.iconRemover = iconRegister.registerIcon(PREFIX);
-        this.iconSmallRemover = iconRegister.registerIcon(PREFIX + "_small");
+        final String PREFIX = DEF.MOD_ID + ":paintingtool";
+        this.iconRemover = iconRegister.registerIcon(PREFIX + "_remover");
+        this.iconSmallRemover = iconRegister.registerIcon(PREFIX + "_smallremover");
     }
     
     @Override

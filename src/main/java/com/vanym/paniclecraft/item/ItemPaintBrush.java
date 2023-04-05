@@ -102,9 +102,28 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
         }
     }
     
+    protected String getSubtypeName(ItemStack stack) {
+        switch (stack.getItemDamage()) {
+            case DAMAGE_BRUSH:
+                return "brush";
+            case DAMAGE_SMALLBRUSH:
+                return "smallbrush";
+            case DAMAGE_FILLER:
+                return "filler";
+            case DAMAGE_COLORPICKER:
+                return "colorpicker";
+            default:
+                return null;
+        }
+    }
+    
     @Override
-    public String getUnlocalizedName(ItemStack itemStack) {
-        return this.getUnlocalizedName() + itemStack.getItemDamage();
+    public String getUnlocalizedName(ItemStack stack) {
+        String name = this.getSubtypeName(stack);
+        if (name == null) {
+            return this.getUnlocalizedName() + stack.getItemDamage();
+        }
+        return "item.paintingtool_" + name;
     }
     
     @Override
@@ -140,7 +159,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister) {
-        final String PREFIX = DEF.MOD_ID + ":" + this.getName();
+        final String PREFIX = DEF.MOD_ID + ":paintingtool";
         this.iconBrushHead = iconRegister.registerIcon(PREFIX + "_brush_head");
         this.iconBrushBody = iconRegister.registerIcon(PREFIX + "_brush_body");
         this.iconSmallBrushHead = iconRegister.registerIcon(PREFIX + "_smallbrush_head");
