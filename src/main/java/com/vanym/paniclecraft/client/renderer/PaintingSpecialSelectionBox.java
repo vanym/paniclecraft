@@ -77,7 +77,7 @@ public class PaintingSpecialSelectionBox {
                                 .map(player::getHeldItem)
                                 .filter(s->!s.isEmpty())
                                 .findFirst()
-                                .orElseGet(()->ItemStack.EMPTY);
+                                .orElse(ItemStack.EMPTY);
         Item item = stack.getItem();
         if (!(item instanceof IPaintingTool)) {
             return;
