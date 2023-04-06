@@ -15,6 +15,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -26,7 +27,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -143,7 +143,7 @@ public class ItemPainting extends ItemMod3 {
                 NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
                 if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                     !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(I18n.translateToLocal("item.painting.uneditable"));
+                    list.add(I18n.format("item.painting.uneditable"));
                 }
                 list.add(pictureSizeInformation(pictureTag));
             }

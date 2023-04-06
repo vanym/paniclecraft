@@ -19,6 +19,7 @@ import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,7 +31,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -184,7 +184,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             if (itemTag.hasKey(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 StringBuilder sb = new StringBuilder();
-                sb.append(I18n.translateToLocal("item.paintingtool.radius"));
+                sb.append(I18n.format("item.paintingtool.radius"));
                 sb.append(": ");
                 sb.append(NUMBER_FORMATTER.format(radius));
                 list.add(sb.toString());

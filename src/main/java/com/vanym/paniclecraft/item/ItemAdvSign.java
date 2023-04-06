@@ -12,6 +12,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -26,7 +27,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -57,7 +57,7 @@ public class ItemAdvSign extends ItemMod3 {
                              .mapToObj(tagLines::getStringTagAt)
                              .forEachOrdered(list::add);
                 } else {
-                    list.add(I18n.translateToLocal("item.advanced_sign.showtext"));
+                    list.add(I18n.format("item.advanced_sign.showtext"));
                 }
             }
         }
