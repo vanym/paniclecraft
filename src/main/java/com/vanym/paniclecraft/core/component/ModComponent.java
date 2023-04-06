@@ -32,7 +32,7 @@ public abstract class ModComponent implements IModComponent {
         Comparator<Field> comparatorOrder =
                 Comparator.comparing(f->f.getAnnotation(ModComponentObject.class).value());
         return builder.build()
-                      .flatMap(c->Arrays.stream(c.getFields()))
+                      .flatMap(c->Arrays.stream(c.getDeclaredFields()))
                       .filter(f->f.isAnnotationPresent(ModComponentObject.class))
                       .filter(f->clazz.isAssignableFrom(f.getType()))
                       .sorted(comparatorOrder)
