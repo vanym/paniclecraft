@@ -59,11 +59,13 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -473,6 +475,13 @@ public class ModComponentPainting extends ModComponent {
                     this.clientConfig.paintingSpecialSelectionBoxColor);
             MinecraftForge.EVENT_BUS.register(this.paintingSpecialSelectionBox);
         }
+    }
+    
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void registerItemColors(ColorHandlerEvent.Item event) {
+        event.getItemColors()
+             .registerItemColorHandler(this.itemPaintBrush.color(), this.itemPaintBrush);
     }
     
     @Override

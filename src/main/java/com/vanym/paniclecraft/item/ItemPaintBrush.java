@@ -14,6 +14,7 @@ import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
@@ -23,7 +24,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
+public class ItemPaintBrush extends ItemPaintingTool implements IWithSubtypes, IColorizeable {
     
     public static final String TAG_COLOR = "Color";
     
@@ -90,6 +91,11 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
             return this.getUnlocalizedName() + damage;
         }
         return "item." + name;
+    }
+    
+    @Override
+    public Map<Integer, String> getSubtypes() {
+        return SUBTYPES;
     }
     
     @Override
@@ -173,6 +179,23 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
                 return getRadius(Core.instance.painting.config.smallBrushRadiuses, picture);
             default:
                 return 0.1D;
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public IItemColor color() {
+        return new ItemColor();
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected class ItemColor implements IItemColor {
+        @Override
+        public int colorMultiplier(ItemStack stack, int tintIndex) {
+            if (tintIndex == 0) {
+                return ItemPaintBrush.this.getColor(stack);
+            } else {
+                return -1;
+            }
         }
     }
 }

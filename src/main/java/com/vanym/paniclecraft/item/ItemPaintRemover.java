@@ -12,7 +12,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
-public class ItemPaintRemover extends ItemPaintingTool {
+public class ItemPaintRemover extends ItemPaintingTool implements IWithSubtypes {
     
     protected static final int DAMAGE_REMOVER = 0;
     protected static final int DAMAGE_SMALLREMOVER = 1;
@@ -49,6 +49,11 @@ public class ItemPaintRemover extends ItemPaintingTool {
             return this.getUnlocalizedName() + damage;
         }
         return "item." + name;
+    }
+    
+    @Override
+    public Map<Integer, String> getSubtypes() {
+        return SUBTYPES;
     }
     
     @Override
