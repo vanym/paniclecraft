@@ -1,7 +1,6 @@
 package com.vanym.paniclecraft.core.component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
@@ -30,9 +29,11 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ModComponentAdvSign implements IModComponent {
+public class ModComponentAdvSign extends ModComponent {
     
+    @ModComponentObject
     public ItemAdvSign itemAdvSign;
+    @ModComponentObject
     public BlockAdvSign blockAdvSign;
     
     protected List<IRecipe> recipes = new ArrayList<>();
@@ -147,10 +148,5 @@ public class ModComponentAdvSign implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemAdvSign);
     }
 }

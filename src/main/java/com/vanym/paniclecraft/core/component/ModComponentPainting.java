@@ -75,18 +75,25 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ModComponentPainting implements IModComponent {
+public class ModComponentPainting extends ModComponent {
     
     public final int MAX_WIDTH = 256;
     public final int MAX_HEIGHT = 256;
     public final Color DEFAULT_COLOR = new Color(200, 200, 200);
     
+    @ModComponentObject
     public ItemPainting itemPainting;
+    @ModComponentObject
     public ItemPaintingFrame itemPaintingFrame;
+    @ModComponentObject
     public ItemPaintBrush itemPaintBrush;
+    @ModComponentObject
     public ItemPaintRemover itemPaintRemover;
+    @ModComponentObject
     public ItemPalette itemPalette;
+    @ModComponentObject
     public BlockPainting blockPainting;
+    @ModComponentObject
     public BlockPaintingFrame blockPaintingFrame;
     
     protected List<IRecipe> recipes = new ArrayList<>();
@@ -491,13 +498,6 @@ public class ModComponentPainting implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemPainting, this.itemPaintingFrame,
-                             this.itemPaintBrush, this.itemPaintRemover,
-                             this.itemPalette);
     }
     
     @Override

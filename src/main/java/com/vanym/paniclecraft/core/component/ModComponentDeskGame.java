@@ -1,7 +1,6 @@
 package com.vanym.paniclecraft.core.component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
@@ -28,9 +27,11 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ModComponentDeskGame implements IModComponent {
+public class ModComponentDeskGame extends ModComponent {
     
+    @ModComponentObject
     public BlockChessDesk blockChessDesk;
+    @ModComponentObject
     public ItemChessDesk itemChessDesk;
     
     protected List<IRecipe> recipes = new ArrayList<>();
@@ -140,10 +141,5 @@ public class ModComponentDeskGame implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemChessDesk);
     }
 }

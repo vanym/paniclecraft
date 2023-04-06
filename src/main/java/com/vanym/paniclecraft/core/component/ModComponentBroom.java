@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.core.component;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemBroom;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
@@ -13,10 +10,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class ModComponentBroom implements IModComponent {
+public class ModComponentBroom extends ModComponent {
     
+    @ModComponentObject
     public ItemBroom itemBroom;
     
+    @ModComponentObject
     protected IRecipe recipeBroom;
     
     protected boolean enabled = false;
@@ -66,10 +65,5 @@ public class ModComponentBroom implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemBroom);
     }
 }

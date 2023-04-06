@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.core.component;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPortableWorkbench;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemWorkbench;
@@ -16,10 +13,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ModComponentPortableWorkbench implements IModComponent {
+public class ModComponentPortableWorkbench extends ModComponent {
     
+    @ModComponentObject
     public ItemWorkbench itemWorkbench;
     
+    @ModComponentObject
     protected IRecipe recipeWorkbench;
     
     protected boolean enabled = false;
@@ -74,10 +73,5 @@ public class ModComponentPortableWorkbench implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemWorkbench);
     }
 }

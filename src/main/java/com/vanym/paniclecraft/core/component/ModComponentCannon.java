@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.core.component;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockCannon;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererCannon;
@@ -27,11 +24,14 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ModComponentCannon implements IModComponent {
+public class ModComponentCannon extends ModComponent {
     
+    @ModComponentObject
     public BlockCannon blockCannon;
+    @ModComponentObject
     public ItemBlock itemCannon;
     
+    @ModComponentObject
     protected IRecipe recipeCannon;
     
     protected ChangeableConfig myServerConfig = new ChangeableConfig();
@@ -143,11 +143,6 @@ public class ModComponentCannon implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemCannon);
     }
     
     @Override
