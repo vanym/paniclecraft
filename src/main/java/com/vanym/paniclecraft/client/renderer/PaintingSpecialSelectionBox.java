@@ -58,6 +58,14 @@ public class PaintingSpecialSelectionBox {
         this.color = color;
     }
     
+    protected Color getColor() {
+        if (this.color != null) {
+            return this.color;
+        } else {
+            return new Color(0.0F, 0.0F, 0.0F, 0.4F);
+        }
+    }
+    
     @SubscribeEvent
     public void drawSelectionBox(DrawBlockHighlightEvent event) {
         final RayTraceResult target = event.getTarget();
@@ -162,7 +170,6 @@ public class PaintingSpecialSelectionBox {
         GL11.glEnable(GL11.GL_BLEND);
         OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
                                  GL11.GL_ONE, GL11.GL_ZERO);
-        GL11.glColor4f(0.0F, 0.0F, 0.0F, 0.4F);
         GL11.glLineWidth(2.0F);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDepthMask(false);
@@ -175,21 +182,20 @@ public class PaintingSpecialSelectionBox {
     protected void drawLine(AxisAlignedBB box) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buf = tessellator.getBuffer();
-        buf.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-        if (this.color != null) {
-            buf.putColor4(this.color.getRGB());
-        }
+        buf.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+        Color color = this.getColor();
+        int r = color.getRed(), g = color.getGreen(), b = color.getBlue(), a = color.getAlpha();
         if (box.minX != box.maxX) {
-            buf.pos(box.minX, box.minY, box.minZ).endVertex();
-            buf.pos(box.maxX, box.minY, box.minZ).endVertex();
+            buf.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+            buf.pos(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
         }
         if (box.minY != box.maxY) {
-            buf.pos(box.minX, box.minY, box.minZ).endVertex();
-            buf.pos(box.minX, box.maxY, box.minZ).endVertex();
+            buf.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+            buf.pos(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
         }
         if (box.minZ != box.maxZ) {
-            buf.pos(box.minX, box.minY, box.minZ).endVertex();
-            buf.pos(box.minX, box.minY, box.maxZ).endVertex();
+            buf.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+            buf.pos(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
         }
         tessellator.draw();
     }
