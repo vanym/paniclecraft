@@ -44,6 +44,9 @@ public class ModComponentPortableWorkbench implements ModComponent {
     @Override
     @SideOnly(Side.CLIENT)
     public void initClient(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
         this.itemWorkbench.setTileEntityItemStackRenderer(new ItemRendererPortableWorkbench());
     }
     
