@@ -75,7 +75,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ModComponentPainting implements ModComponent {
+public class ModComponentPainting implements IModComponent {
     
     public final int MAX_WIDTH = 256;
     public final int MAX_HEIGHT = 256;

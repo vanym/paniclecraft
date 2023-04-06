@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.core.component.ModComponent;
+import com.vanym.paniclecraft.core.component.IModComponent;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -31,8 +31,8 @@ public class CreativeTabMod3 extends CreativeTabs {
     public ItemStack getTabIconItem() {
         return Core.instance.getComponents()
                             .stream()
-                            .filter(ModComponent::isEnabled)
-                            .map(ModComponent::getItems)
+                            .filter(IModComponent::isEnabled)
+                            .map(IModComponent::getItems)
                             .filter(Objects::nonNull)
                             .flatMap(List::stream)
                             .flatMap(item-> {
@@ -47,7 +47,7 @@ public class CreativeTabMod3 extends CreativeTabs {
     @Override
     @SideOnly(Side.CLIENT)
     public void displayAllRelevantItems(NonNullList<ItemStack> stacks) {
-        for (ModComponent component : Core.instance.getComponents()) {
+        for (IModComponent component : Core.instance.getComponents()) {
             if (!component.isEnabled()) {
                 continue;
             }

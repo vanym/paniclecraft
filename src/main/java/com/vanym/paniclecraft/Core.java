@@ -10,8 +10,8 @@ import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.core.ModConfig;
-import com.vanym.paniclecraft.core.component.ModComponent;
-import com.vanym.paniclecraft.core.component.ModComponent.IServerSideConfig;
+import com.vanym.paniclecraft.core.component.IModComponent;
+import com.vanym.paniclecraft.core.component.IModComponent.IServerSideConfig;
 import com.vanym.paniclecraft.core.component.ModComponentAdvSign;
 import com.vanym.paniclecraft.core.component.ModComponentBroom;
 import com.vanym.paniclecraft.core.component.ModComponentCannon;
@@ -81,12 +81,12 @@ public class Core implements IGuiHandler {
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
     
-    protected final List<ModComponent> components = new ArrayList<>(
+    protected final List<IModComponent> components = new ArrayList<>(
             Arrays.asList(this.broom, this.advSign, this.painting,
                           this.deskgame, this.cannon,
                           this.portableworkbench));
     
-    public List<ModComponent> getComponents() {
+    public List<IModComponent> getComponents() {
         return Collections.unmodifiableList(this.components);
     }
     
@@ -117,7 +117,7 @@ public class Core implements IGuiHandler {
         
         this.preInitCommon();
         
-        for (ModComponent component : Core.instance.getComponents()) {
+        for (IModComponent component : Core.instance.getComponents()) {
             component.preInit(this.config);
         }
         proxy.preInit(this.config);
@@ -131,7 +131,7 @@ public class Core implements IGuiHandler {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, instance);
-        for (ModComponent component : Core.instance.getComponents()) {
+        for (IModComponent component : Core.instance.getComponents()) {
             component.init(this.config);
         }
         proxy.init(this.config);
@@ -155,7 +155,7 @@ public class Core implements IGuiHandler {
         if (!event.getModID().equals(DEF.MOD_ID)) {
             return;
         }
-        for (ModComponent component : Core.instance.getComponents()) {
+        for (IModComponent component : Core.instance.getComponents()) {
             component.configChanged(this.config);
         }
         proxy.configChanged(this.config);

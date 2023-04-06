@@ -30,7 +30,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ModComponentAdvSign implements ModComponent {
+public class ModComponentAdvSign implements IModComponent {
     
     public ItemAdvSign itemAdvSign;
     public BlockAdvSign blockAdvSign;

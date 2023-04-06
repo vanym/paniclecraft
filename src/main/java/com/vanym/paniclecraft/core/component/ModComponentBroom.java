@@ -13,7 +13,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class ModComponentBroom implements ModComponent {
+public class ModComponentBroom implements IModComponent {
     
     public ItemBroom itemBroom;
     

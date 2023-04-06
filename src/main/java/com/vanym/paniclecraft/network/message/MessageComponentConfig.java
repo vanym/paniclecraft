@@ -3,7 +3,7 @@ package com.vanym.paniclecraft.network.message;
 import java.util.NoSuchElementException;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.component.ModComponent;
+import com.vanym.paniclecraft.core.component.IModComponent;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -18,12 +18,12 @@ public class MessageComponentConfig
             IMessage,
             IMessageHandler<MessageComponentConfig, IMessage> {
     
-    ModComponent component;
-    ModComponent.IServerSideConfig config;
+    IModComponent component;
+    IModComponent.IServerSideConfig config;
     
     public MessageComponentConfig() {}
     
-    public MessageComponentConfig(ModComponent component) {
+    public MessageComponentConfig(IModComponent component) {
         this.component = component;
         this.config = component.getServerSideConfig();
     }
