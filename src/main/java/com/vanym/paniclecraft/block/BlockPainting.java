@@ -88,36 +88,6 @@ public class BlockPainting extends BlockPaintingContainer {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(
-            IBlockState state,
-            IBlockAccess world,
-            BlockPos pos,
-            EnumFacing side) {
-        if (!this.specialRendererPhase.isNone()) {
-            int meta = state.getBlock().getMetaFromState(state);
-            boolean flag = this.shouldSideBeRendered(side.getIndex(), meta, null);
-            if (!flag) {
-                return false;
-            }
-        }
-        return super.shouldSideBeRendered(state, world, pos, side);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(int side, int meta, TileEntity tile) {
-        boolean contains = (side == meta);
-        switch (this.specialRendererPhase) {
-            default:
-            case FRAME:
-                return !contains;
-            case PICTURE:
-                return contains;
-        }
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
     public boolean hasCustomBreakingProgress(IBlockState state) {
         return true;
     }

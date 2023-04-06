@@ -395,8 +395,6 @@ public class ModComponentPainting implements ModComponent {
     public void preInitClient(ModConfig config) {
         this.paintingSpecialSelectionBox = null;
         this.clientConfig = new ChangeableClientConfig();
-        this.blockPainting.initClient();
-        this.blockPaintingFrame.initClient();
         this.itemPaintBrush.initClient();
         this.itemPaintRemover.initClient();
     }

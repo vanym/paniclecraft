@@ -46,9 +46,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
                                                         .map(PropertyBool::create)
                                                         .toArray(PropertyBool[]::new);
     
-    @SideOnly(Side.CLIENT)
-    protected int specialRendererSide;
-    
     protected final double frameOutlineSize;
     
     protected final List<AxisAlignedBB> frameBoxes;
@@ -64,18 +61,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             state = state.withProperty(side, false);
         }
         this.setDefaultState(state);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void initClient() {
-        super.initClient();
-        this.specialRendererSide = -1;
-    }
-    
-    @SideOnly(Side.CLIENT)
-    public void setRendererSide(int sRS) {
-        this.specialRendererSide = sRS;
     }
     
     @Override
@@ -205,41 +190,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             state = state.withProperty(SIDES[i], tilePF.getPicture(i) != null);
         }
         return state;
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(
-            IBlockState state,
-            IBlockAccess world,
-            BlockPos pos,
-            EnumFacing side) {
-        if (!this.specialRendererPhase.isNone()) {
-            TileEntity tile = world.getTileEntity(pos);
-            if (tile != null) {
-                boolean flag = this.shouldSideBeRendered(side.getIndex(),
-                                                         this.getMetaFromState(state), tile);
-                if (!flag) {
-                    return false;
-                }
-            }
-        }
-        return super.shouldSideBeRendered(state, world, pos, side);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(int side, int meta, TileEntity tile) {
-        TileEntityPaintingFrame tileFrame = (TileEntityPaintingFrame)tile;
-        boolean contains = (tileFrame.getPicture(side) != null);
-        if (this.specialRendererPhase == SpecialRendererPhase.PICTURE) {
-            return contains && side == this.specialRendererSide;
-        } else if (this.specialRendererPhase == SpecialRendererPhase.FRAME && contains) {
-            return !GeometryUtils.isTouchingSide(side, this.specialRendererBox);
-        } else if (this.specialRendererPhase == SpecialRendererPhase.FRAMEINSIDE) {
-            return EnumFacing.getFront(side).getOpposite().getIndex() == this.specialRendererSide;
-        }
-        return true;
     }
     
     public List<AxisAlignedBB> getFrameBoxes() {
