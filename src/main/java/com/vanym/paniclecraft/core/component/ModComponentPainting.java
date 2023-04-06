@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.core.component;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -48,22 +50,25 @@ import com.vanym.paniclecraft.recipe.RecipePaintingCombine;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
-import com.vanym.paniclecraft.recipe.RecipeRegister;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -83,6 +88,8 @@ public class ModComponentPainting implements ModComponent {
     public ItemPalette itemPalette;
     public BlockPainting blockPainting;
     public BlockPaintingFrame blockPaintingFrame;
+    
+    protected List<IRecipe> recipes = new ArrayList<>();
     
     protected ChangeableConfig myServerConfig = new ChangeableConfig();
     public ChangeableConfig config = this.myServerConfig;
@@ -115,24 +122,18 @@ public class ModComponentPainting implements ModComponent {
             return;
         }
         this.enabled = true;
+        MinecraftForge.EVENT_BUS.register(this);
         
         this.itemPainting = new ItemPainting();
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPaintRemover = new ItemPaintRemover();
         this.itemPalette = new ItemPalette();
-        Core.instance.registerItem(this.itemPainting);
-        Core.instance.registerItem(this.itemPaintBrush);
-        Core.instance.registerItem(this.itemPaintRemover);
-        Core.instance.registerItem(this.itemPalette);
         
         this.blockPainting = new BlockPainting();
-        ForgeRegistries.BLOCKS.register(this.blockPainting);
         GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID);
         
         this.blockPaintingFrame = new BlockPaintingFrame();
-        ForgeRegistries.BLOCKS.register(this.blockPaintingFrame);
         this.itemPaintingFrame = new ItemPaintingFrame(this.blockPaintingFrame);
-        Core.instance.registerItem(this.itemPaintingFrame);
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class, TileEntityPaintingFrame.ID);
         
         EntityRegistry.registerModEntity(EntityPaintOnBlock.ID, EntityPaintOnBlock.class,
@@ -195,7 +196,7 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('s'),
                     "stickWood");
             recipe.setRegistryName(DEF.MOD_ID, "paintBrush");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeSmallPaintBrush", this.getName(), true, "")) {
             ShapedOreRecipe recipe = new ShapedOreRecipe(
@@ -207,7 +208,7 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('s'),
                     "stickWood");
             recipe.setRegistryName(DEF.MOD_ID, "smallPaintBrush");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintFiller", this.getName(), true, "")) {
             ShapedOreRecipe recipe = new ShapedOreRecipe(
@@ -219,7 +220,7 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('b'),
                     Items.BOWL);
             recipe.setRegistryName(DEF.MOD_ID, "paintFiller");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeColorPicker", this.getName(), true, "")) {
             ShapedOreRecipe recipe = new ShapedOreRecipe(
@@ -230,7 +231,7 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('b'),
                     Items.GLASS_BOTTLE);
             recipe.setRegistryName(DEF.MOD_ID, "colorPicker");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintRemoverFromStick", this.getName(), false, "")) {
             ShapedOreRecipe recipe = new ShapedOreRecipe(
@@ -242,7 +243,7 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('s'),
                     "stickWood");
             recipe.setRegistryName(DEF.MOD_ID, "paintRemoverStick");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintRemoverFromBrush", this.getName(), false, "")) {
             ShapedOreRecipe recipe = new ShapedOreRecipe(
@@ -267,7 +268,7 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('s'),
                     "stickWood");
             recipe.setRegistryName(DEF.MOD_ID, "smallPaintRemoverStick");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeSmallPaintRemoverFromBrush", this.getName(), false,
                               "")) {
@@ -280,19 +281,19 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('b'),
                     this.itemPaintBrush.getSmallBrush());
             recipe.setRegistryName(DEF.MOD_ID, "smallPaintRemoverBrush");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
             RecipeColorizeByDye recipe = new RecipeColorizeByDye();
             recipe.setRegistryName(DEF.MOD_ID, "recipeColorizeByDye");
-            ForgeRegistries.RECIPES.register(recipe);
-            RecipeDummy.getColorizeByDyeDummies().forEach(ForgeRegistries.RECIPES::register);
+            this.recipes.add(recipe);
+            this.recipes.addAll(RecipeDummy.getColorizeByDyeDummies());
         }
         if (config.getBoolean("craftingRecipeColorizeByFiller", this.getName(), true, "")) {
             RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
             recipe.setRegistryName(DEF.MOD_ID, "recipeColorizeByFiller");
-            ForgeRegistries.RECIPES.register(recipe);
-            RecipeDummy.getColorizeByFillerDummies().forEach(ForgeRegistries.RECIPES::register);
+            this.recipes.add(recipe);
+            this.recipes.addAll(RecipeDummy.getColorizeByFillerDummies());
         }
         if (config.getBoolean("craftingRecipePalette", this.getName(), false, "")) {
             ShapelessOreRecipe recipe = new ShapelessOreRecipe(
@@ -300,8 +301,8 @@ public class ModComponentPainting implements ModComponent {
                     "slabWood",
                     "dyeRed",
                     "dyeGreen",
-                    "dyeBlue");
-            RecipeRegister.register(recipe);
+                    "dyeBlue").flow();
+            this.recipes.add(recipe);
         }
         int paintingsAmount = config.getInt("craftingRecipePaintingAmount", this.getName(), 8,
                                             0, 64, "\'0\' to disable");
@@ -316,14 +317,14 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('s'),
                     "stickWood",
                     Character.valueOf('c'),
-                    "wool");
-            RecipeRegister.register(recipe);
+                    "wool").flow();
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintingClear", this.getName(), true, "")) {
             ShapelessOreRecipe recipe =
                     new ShapelessOreRecipe(this.itemPainting, this.itemPainting);
             recipe.setRegistryName(DEF.MOD_ID, "paintingBlockClear");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         {
             final Pattern combinePattern =
@@ -347,7 +348,7 @@ public class ModComponentPainting implements ModComponent {
                       rcp.setRegistryName(DEF.MOD_ID, String.format("paintingCombine%dx%d", x, y));
                       return rcp;
                   })
-                  .forEach(ForgeRegistries.RECIPES::register);
+                  .forEach(this.recipes::add);
         }
         if (config.getBoolean("craftingRecipePaintingFrame", this.getName(), true, "")) {
             RecipePaintingFrame recipe = new RecipePaintingFrame(
@@ -359,7 +360,7 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('s'),
                     "stickWood");
             recipe.setRegistryName(DEF.MOD_ID, "paintingFrame");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintingFrameAdd", this.getName(), true, "")) {
             RecipePaintingFrameAddPainting.createAllVariants()
@@ -368,8 +369,23 @@ public class ModComponentPainting implements ModComponent {
         if (config.getBoolean("craftingRecipePaintingFrameRemove", this.getName(), true, "")) {
             RecipePaintingFrameRemovePainting recipe = new RecipePaintingFrameRemovePainting();
             recipe.setRegistryName(DEF.MOD_ID, "paintingFrameRemovePainting");
-            ForgeRegistries.RECIPES.register(recipe);
+            this.recipes.add(recipe);
         }
+    }
+    
+    @SubscribeEvent
+    public void registerBlocks(RegistryEvent.Register<Block> e) {
+        Stream.of(this.blockPainting, this.blockPaintingFrame).forEach(e.getRegistry()::register);
+    }
+    
+    @SubscribeEvent
+    public void registerItems(RegistryEvent.Register<Item> e) {
+        this.getItems().forEach(e.getRegistry()::register);
+    }
+    
+    @SubscribeEvent
+    public void registerRecipes(RegistryEvent.Register<IRecipe> e) {
+        this.recipes.forEach(e.getRegistry()::register);
     }
     
     @Override

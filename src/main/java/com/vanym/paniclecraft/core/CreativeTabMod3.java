@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.core;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -15,8 +16,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CreativeTabMod3 extends CreativeTabs {
     
-    public Item iconitem;
-    
     public CreativeTabMod3(String modid) {
         super(modid);
     }
@@ -30,7 +29,19 @@ public class CreativeTabMod3 extends CreativeTabs {
     @Override
     @SideOnly(Side.CLIENT)
     public ItemStack getTabIconItem() {
-        return new ItemStack(this.iconitem);
+        return Core.instance.getComponents()
+                            .stream()
+                            .filter(ModComponent::isEnabled)
+                            .map(ModComponent::getItems)
+                            .filter(Objects::nonNull)
+                            .flatMap(List::stream)
+                            .flatMap(item-> {
+                                NonNullList<ItemStack> list = NonNullList.create();
+                                item.getSubItems(this, list);
+                                return list.stream();
+                            })
+                            .findFirst()
+                            .orElse(ItemStack.EMPTY);
     }
     
     @Override

@@ -21,7 +21,6 @@ import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
@@ -45,7 +44,6 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.server.FMLServerHandler;
 
@@ -164,16 +162,6 @@ public class Core implements IGuiHandler {
         this.sendConfigToAllPlayers();
         if (this.config.hasChanged()) {
             this.config.save();
-        }
-    }
-    
-    public void registerItem(Item item) {
-        ForgeRegistries.ITEMS.register(item);
-        if (this.tab != null) {
-            item.setCreativeTab(this.tab);
-            if (this.tab.iconitem == null) {
-                this.tab.iconitem = item;
-            }
         }
     }
     
