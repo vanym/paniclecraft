@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.core.component;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockChessDesk;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererChessDesk;
@@ -23,9 +20,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class ModComponentDeskGame implements IModComponent {
+public class ModComponentDeskGame extends ModComponent {
     
+    @ModComponentObject
     public BlockChessDesk blockChessDesk;
+    @ModComponentObject
     public ItemChessDesk itemChessDesk;
     
     @SideOnly(Side.CLIENT)
@@ -118,10 +117,5 @@ public class ModComponentDeskGame implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemChessDesk);
     }
 }

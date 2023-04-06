@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.core.component;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockCannon;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererCannon;
@@ -23,9 +20,11 @@ import net.minecraft.item.ItemBlock;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class ModComponentCannon implements IModComponent {
+public class ModComponentCannon extends ModComponent {
     
+    @ModComponentObject
     public BlockCannon blockCannon;
+    @ModComponentObject
     public ItemBlock itemCannon;
     
     protected ChangeableConfig myServerConfig = new ChangeableConfig();
@@ -119,11 +118,6 @@ public class ModComponentCannon implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemCannon);
     }
     
     @Override

@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.core.component;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererAdvSign;
@@ -20,13 +17,14 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 
-public class ModComponentAdvSign implements IModComponent {
+public class ModComponentAdvSign extends ModComponent {
     
+    @ModComponentObject
     public ItemAdvSign itemAdvSign;
+    @ModComponentObject
     public BlockAdvSign blockAdvSign;
     
     @SideOnly(Side.CLIENT)
@@ -119,10 +117,5 @@ public class ModComponentAdvSign implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemAdvSign);
     }
 }

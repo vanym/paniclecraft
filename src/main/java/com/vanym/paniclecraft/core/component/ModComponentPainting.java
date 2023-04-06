@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.core.component;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -72,18 +71,25 @@ import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-public class ModComponentPainting implements IModComponent {
+public class ModComponentPainting extends ModComponent {
     
     public final int MAX_WIDTH = 256;
     public final int MAX_HEIGHT = 256;
     public final Color DEFAULT_COLOR = new Color(200, 200, 200);
     
+    @ModComponentObject
     public ItemPainting itemPainting;
+    @ModComponentObject
     public ItemPaintingFrame itemPaintingFrame;
+    @ModComponentObject
     public ItemPaintBrush itemPaintBrush;
+    @ModComponentObject
     public ItemPaintRemover itemPaintRemover;
+    @ModComponentObject
     public ItemPalette itemPalette;
+    @ModComponentObject
     public BlockPainting blockPainting;
+    @ModComponentObject
     public BlockPaintingFrame blockPaintingFrame;
     
     protected ChangeableConfig myServerConfig = new ChangeableConfig();
@@ -485,13 +491,6 @@ public class ModComponentPainting implements IModComponent {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-    
-    @Override
-    public List<Item> getItems() {
-        return Arrays.asList(this.itemPainting, this.itemPaintingFrame,
-                             this.itemPaintBrush, this.itemPaintRemover,
-                             this.itemPalette);
     }
     
     @Override
