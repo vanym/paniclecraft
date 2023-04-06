@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +34,12 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
     protected static final Map<Integer, String> SUBTYPES;
     static {
-        SUBTYPES = new HashMap<>();
-        SUBTYPES.put(DAMAGE_BRUSH, "paintingtool_brush");
-        SUBTYPES.put(DAMAGE_SMALLBRUSH, "paintingtool_brush_small");
-        SUBTYPES.put(DAMAGE_FILLER, "paintingtool_filler");
-        SUBTYPES.put(DAMAGE_COLORPICKER, "paintingtool_colorpicker");
+        Map<Integer, String> subtypes = new HashMap<>();
+        subtypes.put(DAMAGE_BRUSH, "paintingtool_brush");
+        subtypes.put(DAMAGE_SMALLBRUSH, "paintingtool_brush_small");
+        subtypes.put(DAMAGE_FILLER, "paintingtool_filler");
+        subtypes.put(DAMAGE_COLORPICKER, "paintingtool_colorpicker");
+        SUBTYPES = Collections.unmodifiableMap(subtypes);
     }
     
     public ItemPaintBrush() {
