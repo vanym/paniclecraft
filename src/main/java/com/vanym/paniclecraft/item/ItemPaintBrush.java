@@ -1,7 +1,9 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -28,6 +30,15 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     protected static final int DAMAGE_SMALLBRUSH = 1;
     protected static final int DAMAGE_FILLER = 4;
     protected static final int DAMAGE_COLORPICKER = 6;
+    
+    protected static final Map<Integer, String> SUBTYPES;
+    static {
+        SUBTYPES = new HashMap<>();
+        SUBTYPES.put(DAMAGE_BRUSH, "paintingtool_brush");
+        SUBTYPES.put(DAMAGE_SMALLBRUSH, "paintingtool_brush_small");
+        SUBTYPES.put(DAMAGE_FILLER, "paintingtool_filler");
+        SUBTYPES.put(DAMAGE_COLORPICKER, "paintingtool_colorpicker");
+    }
     
     @SideOnly(Side.CLIENT)
     public IIcon iconBrushHead;
@@ -102,28 +113,14 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
         }
     }
     
-    protected String getSubtypeName(ItemStack stack) {
-        switch (stack.getItemDamage()) {
-            case DAMAGE_BRUSH:
-                return "brush";
-            case DAMAGE_SMALLBRUSH:
-                return "smallbrush";
-            case DAMAGE_FILLER:
-                return "filler";
-            case DAMAGE_COLORPICKER:
-                return "colorpicker";
-            default:
-                return null;
-        }
-    }
-    
     @Override
     public String getUnlocalizedName(ItemStack stack) {
-        String name = this.getSubtypeName(stack);
+        int damage = stack.getItemDamage();
+        String name = SUBTYPES.get(damage);
         if (name == null) {
-            return this.getUnlocalizedName() + stack.getItemDamage();
+            return this.getUnlocalizedName() + damage;
         }
-        return "item.paintingtool_" + name;
+        return "item." + name;
     }
     
     @Override
@@ -162,8 +159,8 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
         final String PREFIX = DEF.MOD_ID + ":paintingtool";
         this.iconBrushHead = iconRegister.registerIcon(PREFIX + "_brush_head");
         this.iconBrushBody = iconRegister.registerIcon(PREFIX + "_brush_body");
-        this.iconSmallBrushHead = iconRegister.registerIcon(PREFIX + "_smallbrush_head");
-        this.iconSmallBrushBody = iconRegister.registerIcon(PREFIX + "_smallbrush_body");
+        this.iconSmallBrushHead = iconRegister.registerIcon(PREFIX + "_brush_small_head");
+        this.iconSmallBrushBody = iconRegister.registerIcon(PREFIX + "_brush_small_body");
         this.iconFillerHead = iconRegister.registerIcon(PREFIX + "_filler_head");
         this.iconFillerBody = iconRegister.registerIcon(PREFIX + "_filler_body");
         this.iconColorPickerHead = iconRegister.registerIcon(PREFIX + "_colorpicker_head");
