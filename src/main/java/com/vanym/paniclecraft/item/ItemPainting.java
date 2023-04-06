@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -37,12 +38,8 @@ public class ItemPainting extends ItemMod3 {
     
     public ItemPainting() {
         super();
+        this.setRegistryName(DEF.MOD_ID, "painting");
         this.setUnlocalizedName("paintingblock");
-    }
-    
-    @Override
-    public String getName() {
-        return "painting";
     }
     
     @Override
