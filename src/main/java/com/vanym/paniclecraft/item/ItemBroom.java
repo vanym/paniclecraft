@@ -49,7 +49,7 @@ public class ItemBroom extends ItemMod3 {
             .forEach(e-> {
                 int itemSizeWas = e.getItem().getCount();
                 e.onCollideWithPlayer(player);
-                int itemSize = e.getItem().getCount();
+                int itemSize = e.isDead ? 0 : e.getItem().getCount();
                 stack.damageItem(itemSizeWas - itemSize, player);
             });
     }
