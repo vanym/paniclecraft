@@ -23,7 +23,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class ModComponentCannon implements ModComponent {
+public class ModComponentCannon implements IModComponent {
     
     public BlockCannon blockCannon;
     public ItemBlock itemCannon;

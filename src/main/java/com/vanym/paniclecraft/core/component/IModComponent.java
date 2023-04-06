@@ -9,7 +9,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.Item;
 
-public interface ModComponent {
+public interface IModComponent {
     
     public static final String ENABLE_FLAG = "enable";
     

@@ -24,7 +24,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 
-public class ModComponentAdvSign implements ModComponent {
+public class ModComponentAdvSign implements IModComponent {
     
     public ItemAdvSign itemAdvSign;
     public BlockAdvSign blockAdvSign;

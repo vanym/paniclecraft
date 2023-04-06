@@ -12,7 +12,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class ModComponentBroom implements ModComponent {
+public class ModComponentBroom implements IModComponent {
     
     public ItemBroom itemBroom;
     

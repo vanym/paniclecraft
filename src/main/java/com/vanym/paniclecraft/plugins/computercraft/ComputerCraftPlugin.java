@@ -1,12 +1,12 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
 import com.vanym.paniclecraft.core.ModConfig;
-import com.vanym.paniclecraft.core.component.ModComponent;
+import com.vanym.paniclecraft.core.component.IModComponent;
 
 import dan200.computercraft.api.ComputerCraftAPI;
 import net.minecraftforge.common.MinecraftForge;
 
-public class ComputerCraftPlugin implements ModComponent {
+public class ComputerCraftPlugin implements IModComponent {
     
     protected static ComputerCraftPlugin instance;
     

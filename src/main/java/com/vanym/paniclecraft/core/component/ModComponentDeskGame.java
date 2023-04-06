@@ -23,7 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class ModComponentDeskGame implements ModComponent {
+public class ModComponentDeskGame implements IModComponent {
     
     public BlockChessDesk blockChessDesk;
     public ItemChessDesk itemChessDesk;

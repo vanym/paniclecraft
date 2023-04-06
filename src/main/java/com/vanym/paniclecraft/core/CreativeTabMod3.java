@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.core.component.ModComponent;
+import com.vanym.paniclecraft.core.component.IModComponent;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -34,7 +34,7 @@ public class CreativeTabMod3 extends CreativeTabs {
     @SideOnly(Side.CLIENT)
     @SuppressWarnings("rawtypes")
     public void displayAllReleventItems(List stacks) {
-        for (ModComponent component : Core.instance.getComponents()) {
+        for (IModComponent component : Core.instance.getComponents()) {
             if (!component.isEnabled()) {
                 continue;
             }

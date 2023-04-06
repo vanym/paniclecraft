@@ -72,7 +72,7 @@ import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-public class ModComponentPainting implements ModComponent {
+public class ModComponentPainting implements IModComponent {
     
     public final int MAX_WIDTH = 256;
     public final int MAX_HEIGHT = 256;

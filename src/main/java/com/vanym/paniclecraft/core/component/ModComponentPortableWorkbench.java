@@ -16,7 +16,7 @@ import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-public class ModComponentPortableWorkbench implements ModComponent {
+public class ModComponentPortableWorkbench implements IModComponent {
     
     public ItemWorkbench itemWorkbench;
     
