@@ -1,6 +1,8 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -13,6 +15,13 @@ public class ItemPaintRemover extends ItemPaintingTool {
     
     protected static final int DAMAGE_REMOVER = 0;
     protected static final int DAMAGE_SMALLREMOVER = 1;
+    
+    protected static final Map<Integer, String> SUBTYPES;
+    static {
+        SUBTYPES = new HashMap<>();
+        SUBTYPES.put(DAMAGE_REMOVER, "paintingtool_remover");
+        SUBTYPES.put(DAMAGE_SMALLREMOVER, "paintingtool_remover_small");
+    }
     
     public ItemPaintRemover() {
         super();
@@ -30,24 +39,14 @@ public class ItemPaintRemover extends ItemPaintingTool {
         return new ItemStack(this, 1, DAMAGE_SMALLREMOVER);
     }
     
-    protected String getSubtypeName(ItemStack stack) {
-        switch (stack.getItemDamage()) {
-            case DAMAGE_REMOVER:
-                return "remover";
-            case DAMAGE_SMALLREMOVER:
-                return "smallremover";
-            default:
-                return null;
-        }
-    }
-    
     @Override
     public String getUnlocalizedName(ItemStack stack) {
-        String name = this.getSubtypeName(stack);
+        int damage = stack.getItemDamage();
+        String name = SUBTYPES.get(damage);
         if (name == null) {
-            return this.getUnlocalizedName() + stack.getItemDamage();
+            return this.getUnlocalizedName() + damage;
         }
-        return "item.paintingtool_" + name;
+        return "item." + name;
     }
     
     @Override
