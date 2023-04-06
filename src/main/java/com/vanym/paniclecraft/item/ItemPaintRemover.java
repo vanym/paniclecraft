@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +25,10 @@ public class ItemPaintRemover extends ItemPaintingTool {
     
     protected static final Map<Integer, String> SUBTYPES;
     static {
-        SUBTYPES = new HashMap<>();
-        SUBTYPES.put(DAMAGE_REMOVER, "paintingtool_remover");
-        SUBTYPES.put(DAMAGE_SMALLREMOVER, "paintingtool_remover_small");
+        Map<Integer, String> subtypes = new HashMap<>();
+        subtypes.put(DAMAGE_REMOVER, "paintingtool_remover");
+        subtypes.put(DAMAGE_SMALLREMOVER, "paintingtool_remover_small");
+        SUBTYPES = Collections.unmodifiableMap(subtypes);
     }
     
     @SideOnly(Side.CLIENT)
