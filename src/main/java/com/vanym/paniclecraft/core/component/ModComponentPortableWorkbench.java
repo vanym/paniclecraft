@@ -65,6 +65,9 @@ public class ModComponentPortableWorkbench implements ModComponent {
     @Override
     @SideOnly(Side.CLIENT)
     public void configChangedClient(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
         config.restartless();
         this.renderWorkbenchItem = config.getBoolean("portableWorkbenchItem", CLIENT_RENDER, true,
                                                      "fancy renderer for portable workbench");

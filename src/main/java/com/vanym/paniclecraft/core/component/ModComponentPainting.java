@@ -167,6 +167,9 @@ public class ModComponentPainting implements ModComponent {
     
     @Override
     public void configChanged(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
         this.myServerConfig.read(config);
         this.server.read(config);
     }
@@ -379,6 +382,9 @@ public class ModComponentPainting implements ModComponent {
     @Override
     @SideOnly(Side.CLIENT)
     public void preInitClient(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
         this.paintingSpecialSelectionBox = null;
         this.clientConfig = new ChangeableClientConfig();
         this.blockPainting.initClient();
@@ -393,7 +399,6 @@ public class ModComponentPainting implements ModComponent {
         if (!this.isEnabled()) {
             return;
         }
-        
         this.textureCache = new PictureTextureCache();
         this.paintingTileRenderer = new TileEntityPaintingRenderer();
         this.paintingItemRenderer = new ItemRendererPainting(this.textureCache);
@@ -415,6 +420,9 @@ public class ModComponentPainting implements ModComponent {
     @Override
     @SideOnly(Side.CLIENT)
     public void configChangedClient(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
         this.clientConfig.read(config);
         this.applyConfigClient();
     }

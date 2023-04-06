@@ -73,6 +73,9 @@ public class ModComponentCannon implements ModComponent {
     
     @Override
     public void configChanged(ModConfig config) {
+        if (!this.isEnabled()) {
+            return;
+        }
         this.myServerConfig.read(config);
     }
     
