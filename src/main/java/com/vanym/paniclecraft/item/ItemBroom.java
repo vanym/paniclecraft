@@ -40,8 +40,8 @@ public class ItemBroom extends ItemMod3 {
     protected void collectItems(ItemStack stack, World world, EntityPlayer player) {
         final double distance = this.distance;
         AxisAlignedBB box = GeometryUtils.getPointBox(player.posX, player.posY, player.posZ)
-                                         .expand(distance, distance, distance)
-                                         .expand(2.0D, 2.0D, 2.0D);
+                                         .grow(distance)
+                                         .grow(2.0D);
         List<EntityItem> list = world.getEntitiesWithinAABB(EntityItem.class, box);
         list.stream()
             .filter(e->player.getDistance(e.posX, e.posY, e.posZ) <= distance)
