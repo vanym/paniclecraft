@@ -19,7 +19,6 @@ import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
-import com.vanym.paniclecraft.recipe.RecipeDummy;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -49,7 +48,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.server.FMLServerHandler;
-import net.minecraftforge.oredict.RecipeSorter;
 
 @Mod(
     modid = DEF.MOD_ID,
@@ -128,12 +126,6 @@ public class Core implements IGuiHandler {
     }
     
     protected void preInitCommon() {
-        RecipeSorter.register(DEF.MOD_ID + ":dummyshaped", RecipeDummy.Shaped.class,
-                              RecipeSorter.Category.SHAPED,
-                              "after:forge:shapedore after:forge:shapelessore");
-        RecipeSorter.register(DEF.MOD_ID + ":dummyshapeless", RecipeDummy.Shapeless.class,
-                              RecipeSorter.Category.SHAPELESS,
-                              "after:forge:shapedore after:forge:shapelessore");
         Core.instance.network.registerMessage(MessageComponentConfig.class,
                                               MessageComponentConfig.class, 5, Side.CLIENT);
     }

@@ -69,7 +69,6 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.oredict.RecipeSorter;
 
 public class ModComponentPainting implements ModComponent {
     
@@ -283,16 +282,12 @@ public class ModComponentPainting implements ModComponent {
         if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
             RecipeColorizeByDye recipe = new RecipeColorizeByDye();
             recipe.setRegistryName(DEF.MOD_ID, "recipeColorizeByDye");
-            RecipeSorter.register(DEF.MOD_ID + ":colorizebydye", RecipeColorizeByDye.class,
-                                  RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
             ForgeRegistries.RECIPES.register(recipe);
             RecipeDummy.getColorizeByDyeDummies().forEach(ForgeRegistries.RECIPES::register);
         }
         if (config.getBoolean("craftingRecipeColorizeByFiller", this.getName(), true, "")) {
             RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
             recipe.setRegistryName(DEF.MOD_ID, "recipeColorizeByFiller");
-            RecipeSorter.register(DEF.MOD_ID + ":colorizebyfiller", RecipeColorizeByFiller.class,
-                                  RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
             ForgeRegistries.RECIPES.register(recipe);
             RecipeDummy.getColorizeByFillerDummies().forEach(ForgeRegistries.RECIPES::register);
         }
@@ -336,11 +331,6 @@ public class ModComponentPainting implements ModComponent {
                                              "3x1", "3x2", "1x3", "2x3", "3x3"});
             prop.setComment("" + prop.getDefault());
             String[] paintingCombines = prop.getStringList();
-            if (paintingCombines.length > 0) {
-                RecipeSorter.register(DEF.MOD_ID + ":paintingcombine", RecipePaintingCombine.class,
-                                      RecipeSorter.Category.SHAPED,
-                                      "after:forge:shapedore before:forge:shapelessore");
-            }
             Arrays.stream(paintingCombines)
                   .map(combinePattern::matcher)
                   .filter(Matcher::matches)
@@ -366,26 +356,15 @@ public class ModComponentPainting implements ModComponent {
                     Character.valueOf('s'),
                     "stickWood");
             recipe.setRegistryName(DEF.MOD_ID, "paintingFrame");
-            RecipeSorter.register(DEF.MOD_ID + ":paintingframe", RecipePaintingFrame.class,
-                                  RecipeSorter.Category.SHAPED,
-                                  "after:forge:shapedore before:forge:shapelessore");
             ForgeRegistries.RECIPES.register(recipe);
         }
         if (config.getBoolean("craftingRecipePaintingFrameAdd", this.getName(), true, "")) {
-            RecipeSorter.register(DEF.MOD_ID + ":paintingframeaddpainting",
-                                  RecipePaintingFrameAddPainting.class,
-                                  RecipeSorter.Category.SHAPED,
-                                  "after:forge:shapedore before:forge:shapelessore");
             RecipePaintingFrameAddPainting.createAllVariants()
                                           .forEach(ForgeRegistries.RECIPES::register);
         }
         if (config.getBoolean("craftingRecipePaintingFrameRemove", this.getName(), true, "")) {
             RecipePaintingFrameRemovePainting recipe = new RecipePaintingFrameRemovePainting();
             recipe.setRegistryName(DEF.MOD_ID, "paintingFrameRemovePainting");
-            RecipeSorter.register(DEF.MOD_ID + ":paintingframeremovepainting",
-                                  RecipePaintingFrameRemovePainting.class,
-                                  RecipeSorter.Category.SHAPED,
-                                  "after:forge:shapelessore");
             ForgeRegistries.RECIPES.register(recipe);
         }
     }
