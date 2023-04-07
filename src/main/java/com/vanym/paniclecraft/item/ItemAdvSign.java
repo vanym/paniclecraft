@@ -133,7 +133,6 @@ public class ItemAdvSign extends ItemMod3 {
                                     11)) {
             return EnumActionResult.FAIL;
         }
-        stack.shrink(1);
         TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
@@ -153,9 +152,10 @@ public class ItemAdvSign extends ItemMod3 {
                 tileAS.setDirection(player.getHorizontalFacing().getHorizontalAngle());
             }
             tileAS.setEditor(player);
-            player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(),
-                           world, pos.getX(), pos.getY(), pos.getZ());
         }
+        stack.shrink(1);
+        player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(),
+                       world, pos.getX(), pos.getY(), pos.getZ());
         return EnumActionResult.SUCCESS;
     }
     

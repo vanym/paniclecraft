@@ -97,10 +97,10 @@ public class ItemPainting extends ItemMod3 {
         SoundType soundtype = state.getBlock().getSoundType(state, world, pos, entityPlayer);
         world.playSound(entityPlayer, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS,
                         (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-        itemStack.shrink(1);
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
         Picture picture = tileP.getPicture(side.getIndex());
         fillPicture(picture, itemStack);
+        itemStack.shrink(1);
         if (entityPlayer != null) {
             BlockPaintingContainer.rotatePicture(entityPlayer, picture, side, true);
         }
