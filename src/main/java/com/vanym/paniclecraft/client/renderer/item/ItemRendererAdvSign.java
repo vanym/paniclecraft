@@ -25,6 +25,6 @@ public class ItemRendererAdvSign extends TileEntityItemStackRenderer {
             }
         }
         Core.instance.advSign.tileAdvSignRenderer.render(tileAS, 0.0D, 0.0D, 0.0D,
-                                                         partialTicks, false, false, -1);
+                                                         partialTicks, -1, true, false, -1);
     }
 }
