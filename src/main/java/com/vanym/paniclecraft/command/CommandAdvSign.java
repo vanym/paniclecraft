@@ -44,10 +44,7 @@ public class CommandAdvSign extends TreeCommandBase {
             if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
                 tileAS.setEditor(player);
-                Core.instance.network.sendTo(new MessageAdvSignOpenGui(
-                        tileAS.getPos().getX(),
-                        tileAS.getPos().getY(),
-                        tileAS.getPos().getZ()), player);
+                Core.instance.network.sendTo(new MessageAdvSignOpenGui(tileAS.getPos()), player);
             } else {
                 throw new CommandException(
                         String.format("commands.%s.exception.noadvsign", DEF.MOD_ID));

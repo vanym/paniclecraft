@@ -5,6 +5,7 @@ import com.vanym.paniclecraft.core.GUIs;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -20,6 +21,12 @@ public class MessageAdvSignOpenGui
     int x, y, z;
     
     public MessageAdvSignOpenGui() {}
+    
+    public MessageAdvSignOpenGui(BlockPos pos) {
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
+    }
     
     public MessageAdvSignOpenGui(int x, int y, int z) {
         this.x = x;
