@@ -7,7 +7,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -18,6 +17,7 @@ import com.vanym.paniclecraft.utils.ColorUtils;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraftforge.fml.relauncher.Side;
@@ -270,12 +270,12 @@ public class GuiEditAdvSign extends GuiScreen {
     }
     
     protected void drawSign() {
-        GL11.glPushMatrix();
-        GL11.glTranslatef(this.width / 2, 0.0F, 50.0F);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(this.width / 2, 0.0F, 50.0F);
         float scale = 93.75F;
-        GL11.glScalef(-scale, -scale, -scale);
-        GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
-        GL11.glTranslatef(0.0F, -1.0625F, 0.0F);
+        GlStateManager.scale(-scale, -scale, -scale);
+        GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+        GlStateManager.translate(0.0F, -1.0625F, 0.0F);
         
         int selectLine = -1;
         if (this.updateCounter / 6 % 2 == 0) {
@@ -285,7 +285,7 @@ public class GuiEditAdvSign extends GuiScreen {
         Core.instance.advSign.tileAdvSignRenderer.render(this.tileAS, -0.5D, -0.75D,
                                                          -0.5D, 0.0F, -1, true, false,
                                                          selectLine);
-        GL11.glPopMatrix();
+        GlStateManager.popMatrix();
     }
     
     protected void lineButtonsUpdate() {
