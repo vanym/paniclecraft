@@ -13,7 +13,7 @@ import com.vanym.paniclecraft.client.gui.GuiUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
@@ -71,12 +71,13 @@ public class GuiCircularSlider extends GuiButton {
     
     @Override
     public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        GL11.glEnable(GL11.GL_BLEND);
-        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
-                                 GL11.GL_TRUE, GL11.GL_FALSE);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                                            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                            GlStateManager.SourceFactor.ONE,
+                                            GlStateManager.DestFactor.ZERO);
         mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buf = tessellator.getBuffer();
         buf.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION_TEX);
@@ -96,7 +97,7 @@ public class GuiCircularSlider extends GuiButton {
         }
         buf.pos(xcenter, ycenter, this.zLevel).tex(txc, tyc).endVertex();
         tessellator.draw();
-        GL11.glDisable(GL11.GL_BLEND);
+        GlStateManager.disableBlend();
         if (this.getter == null) {
             return;
         }
