@@ -1,6 +1,35 @@
 {
-    "parent": "item/generated",
-    "textures": {
-        "layer0": "paniclecraft:items/advanced_sign"
+    "parent": "builtin/entity",
+    "display": {
+        "gui": {
+            "rotation": [ 20, 0, 0 ],
+            "translation": [ 0, -1, 0],
+            "scale":[ 0.775, 0.775, 0.775 ]
+        },
+        "ground": {
+            "rotation": [ 0, 180, 0 ],
+            "translation": [ 0, 3, 0],
+            "scale":[ 0.275, 0.275, 0.275 ]
+        },
+        "fixed": {
+            "rotation": [ 0, 180, 0 ],
+            "translation": [ 0, 0, 0],
+            "scale":[ 0.75, 0.75, 0.75 ]
+        },
+        "head": {
+            "rotation": [ 0, 180, 0 ],
+            "translation": [ 0, 8, 0],
+            "scale":[ 1, 1, 1]
+        },
+        "thirdperson_righthand": {
+            "rotation": [ 15, -10, 12 ],
+            "translation": [ -0.5, 2.25, 1.5],
+            "scale": [ 0.5, 0.5, 0.5 ]
+        },
+        "firstperson_righthand": {
+            "rotation": [ 0, 270, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 0.40, 0.40, 0.40 ]
+        }
     }
 }

@@ -39,7 +39,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
         if (!statik) {
             float rotation = 0.0F;
             float yaxis = 1.0F;
-            switch (tileAS.getBlockMetadata()) {
+            switch (tileAS.hasWorld() ? tileAS.getBlockMetadata() : 1) {
                 case 0:
                     GL11.glRotatef(180.0F, 1.0F, 0.0F, 0.0F);
                     GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
