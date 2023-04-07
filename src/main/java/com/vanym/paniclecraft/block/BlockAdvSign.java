@@ -113,7 +113,7 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
             return FULL_BLOCK_AABB;
         }
         TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-        SignSide pside = SignSide.getSide(tileAS.getBlockMetadata());
+        SignSide pside = SignSide.getSide(state.getValue(FACING).getIndex());
         AxisAlignedBB box;
         if (tileAS.onStick()) {
             box = new AxisAlignedBB(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
