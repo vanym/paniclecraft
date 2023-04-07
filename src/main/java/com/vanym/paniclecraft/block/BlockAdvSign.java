@@ -14,6 +14,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
+import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -31,7 +33,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockAdvSign extends BlockContainerMod3 {
+public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomStateMapper {
     
     public static final PropertyDirection FACING = BlockDirectional.FACING;
     
@@ -196,6 +198,12 @@ public class BlockAdvSign extends BlockContainerMod3 {
         TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getTileEntity(pos);
         spawnAsEntity(world, pos, ItemAdvSign.getSavedSign(tileAS));
         super.breakBlock(world, pos, state);
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public IStateMapper getStateMapper() {
+        return new StateMap.Builder().ignore(FACING).build();
     }
     
     @Override

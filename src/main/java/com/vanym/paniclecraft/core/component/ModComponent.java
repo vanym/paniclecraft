@@ -16,6 +16,7 @@ import java.util.stream.Stream.Builder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.block.IWithCustomStateMapper;
 import com.vanym.paniclecraft.item.IWithSubtypes;
 
 import net.minecraft.block.Block;
@@ -50,7 +51,16 @@ public abstract class ModComponent implements IModComponent {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void registerModels(ModelRegistryEvent event) {
+        this.getBlocks().forEach(this::registerModel);
         this.getItems().forEach(this::registerModel);
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected void registerModel(Block block) {
+        if (block instanceof IWithCustomStateMapper) {
+            IWithCustomStateMapper mapper = (IWithCustomStateMapper)block;
+            ModelLoader.setCustomStateMapper(block, mapper.getStateMapper());
+        }
     }
     
     @SideOnly(Side.CLIENT)
