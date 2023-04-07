@@ -12,10 +12,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class MessageAdvSignOpenGui
-        implements
-            IMessage,
-            IMessageHandler<MessageAdvSignOpenGui, IMessage> {
+public class MessageAdvSignOpenGui implements IMessage {
     
     int x, y, z;
     
@@ -41,12 +38,15 @@ public class MessageAdvSignOpenGui
         buf.writeInt(this.z);
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IMessage onMessage(MessageAdvSignOpenGui message, MessageContext ctx) {
-        EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
-        player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), player.getEntityWorld(),
-                       message.x, message.y, message.z);
-        return null;
+    public static class Handler implements IMessageHandler<MessageAdvSignOpenGui, IMessage> {
+        
+        @Override
+        @SideOnly(Side.CLIENT)
+        public IMessage onMessage(MessageAdvSignOpenGui message, MessageContext ctx) {
+            EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
+            player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), player.getEntityWorld(),
+                           message.x, message.y, message.z);
+            return null;
+        }
     }
 }

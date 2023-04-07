@@ -15,10 +15,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class MessageOpenPaintingView
-        implements
-            IMessage,
-            IMessageHandler<MessageOpenPaintingView, IMessage> {
+public class MessageOpenPaintingView implements IMessage {
     
     int windowId, pictureWidth, pictureHeight, sizeX, sizeY;
     boolean hasAlpha, editable;
@@ -63,23 +60,26 @@ public class MessageOpenPaintingView
         buf.writeBoolean(this.editable);
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IMessage onMessage(MessageOpenPaintingView message, MessageContext ctx) {
-        EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
-        ContainerPaintingViewClient view = new ContainerPaintingViewClient(
-                new FixedPictureSize(message.pictureWidth, message.pictureHeight),
-                message.sizeX,
-                message.sizeY,
-                message.hasAlpha);
-        GuiPaintingView gui;
-        if (message.editable) {
-            gui = new GuiPaintingEditView(view);
-        } else {
-            gui = new GuiPaintingView(view);
+    public static class Handler implements IMessageHandler<MessageOpenPaintingView, IMessage> {
+        
+        @Override
+        @SideOnly(Side.CLIENT)
+        public IMessage onMessage(MessageOpenPaintingView message, MessageContext ctx) {
+            EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
+            ContainerPaintingViewClient view = new ContainerPaintingViewClient(
+                    new FixedPictureSize(message.pictureWidth, message.pictureHeight),
+                    message.sizeX,
+                    message.sizeY,
+                    message.hasAlpha);
+            GuiPaintingView gui;
+            if (message.editable) {
+                gui = new GuiPaintingEditView(view);
+            } else {
+                gui = new GuiPaintingView(view);
+            }
+            FMLCommonHandler.instance().showGuiScreen(gui);
+            player.openContainer.windowId = message.windowId;
+            return null;
         }
-        FMLCommonHandler.instance().showGuiScreen(gui);
-        player.openContainer.windowId = message.windowId;
-        return null;
     }
 }

@@ -11,7 +11,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 
-public class MessageChessMove implements IMessage, IMessageHandler<MessageChessMove, IMessage> {
+public class MessageChessMove implements IMessage {
     
     int x;
     int y;
@@ -46,16 +46,19 @@ public class MessageChessMove implements IMessage, IMessageHandler<MessageChessM
         ByteBufUtils.writeUTF8String(buf, this.move.toString(false));
     }
     
-    @Override
-    public IMessage onMessage(MessageChessMove message, MessageContext ctx) {
-        EntityPlayer playerEntity = ctx.getServerHandler().playerEntity;
-        TileEntity tile = playerEntity.worldObj.getTileEntity(message.x, message.y, message.z);
-        if (message.move != null && tile instanceof TileEntityChessDesk
-            && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
-                                          message.z + 0.5D) <= 64.0D) {
-            TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
-            tileCD.move(message.move, playerEntity);
+    public static class Handler implements IMessageHandler<MessageChessMove, IMessage> {
+        
+        @Override
+        public IMessage onMessage(MessageChessMove message, MessageContext ctx) {
+            EntityPlayer playerEntity = ctx.getServerHandler().playerEntity;
+            TileEntity tile = playerEntity.worldObj.getTileEntity(message.x, message.y, message.z);
+            if (message.move != null && tile instanceof TileEntityChessDesk
+                && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
+                                              message.z + 0.5D) <= 64.0D) {
+                TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
+                tileCD.move(message.move, playerEntity);
+            }
+            return null;
         }
-        return null;
     }
 }

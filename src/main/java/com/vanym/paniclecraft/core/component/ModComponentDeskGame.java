@@ -72,7 +72,7 @@ public class ModComponentDeskGame extends ModComponent {
                                             this.itemChessDesk);
         }
         
-        Core.instance.network.registerMessage(MessageChessMove.class,
+        Core.instance.network.registerMessage(MessageChessMove.Handler.class,
                                               MessageChessMove.class, 40,
                                               Side.SERVER);
     }

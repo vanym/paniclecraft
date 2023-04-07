@@ -134,7 +134,7 @@ public class Core implements IGuiHandler {
         RecipeSorter.register(DEF.MOD_ID + ":dummyshapeless", RecipeDummy.Shapeless.class,
                               RecipeSorter.Category.SHAPELESS,
                               "after:forge:shapedore after:forge:shapelessore");
-        Core.instance.network.registerMessage(MessageComponentConfig.class,
+        Core.instance.network.registerMessage(MessageComponentConfig.Handler.class,
                                               MessageComponentConfig.class, 5, Side.CLIENT);
     }
     

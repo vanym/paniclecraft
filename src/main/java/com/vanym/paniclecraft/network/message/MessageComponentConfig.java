@@ -13,10 +13,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 
-public class MessageComponentConfig
-        implements
-            IMessage,
-            IMessageHandler<MessageComponentConfig, IMessage> {
+public class MessageComponentConfig implements IMessage {
     
     IModComponent component;
     IModComponent.IServerSideConfig config;
@@ -59,12 +56,15 @@ public class MessageComponentConfig
         }
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IMessage onMessage(MessageComponentConfig message, MessageContext ctx) {
-        if (message.component != null && message.config != null) {
-            message.component.setServerSideConfig(message.config);
+    public static class Handler implements IMessageHandler<MessageComponentConfig, IMessage> {
+        
+        @Override
+        @SideOnly(Side.CLIENT)
+        public IMessage onMessage(MessageComponentConfig message, MessageContext ctx) {
+            if (message.component != null && message.config != null) {
+                message.component.setServerSideConfig(message.config);
+            }
+            return null;
         }
-        return null;
     }
 }

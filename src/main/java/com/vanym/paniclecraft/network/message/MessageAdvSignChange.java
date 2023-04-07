@@ -13,10 +13,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 
-public class MessageAdvSignChange
-        implements
-            IMessage,
-            IMessageHandler<MessageAdvSignChange, IMessage> {
+public class MessageAdvSignChange implements IMessage {
     
     NBTTagCompound tag;
     
@@ -46,36 +43,39 @@ public class MessageAdvSignChange
         }
     }
     
-    @Override
-    public IMessage onMessage(MessageAdvSignChange message, MessageContext ctx) {
-        if (message.tag == null) {
-            return null;
-        }
-        int x = message.tag.getInteger("x");
-        int y = message.tag.getInteger("y");
-        int z = message.tag.getInteger("z");
-        NBTTagList linesTag = message.tag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
-        int size = linesTag.tagCount();
-        if (size > TileEntityAdvSign.MAX_LINES || size < TileEntityAdvSign.MIN_LINES) {
-            return null;
-        }
-        for (int i = 0; i < size; ++i) {
-            String line = linesTag.getStringTagAt(i);
-            if (line.length() > 64 * size) {
+    public static class Handler implements IMessageHandler<MessageAdvSignChange, IMessage> {
+        
+        @Override
+        public IMessage onMessage(MessageAdvSignChange message, MessageContext ctx) {
+            if (message.tag == null) {
                 return null;
             }
-        }
-        TileEntity tile = ctx.getServerHandler().playerEntity.worldObj.getTileEntity(x, y, z);
-        if (tile != null && tile instanceof TileEntityAdvSign) {
-            TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            if (tileAS.isEditor(ctx.getServerHandler().playerEntity)) {
-                tileAS.resetEditor();
-            } else {
+            int x = message.tag.getInteger("x");
+            int y = message.tag.getInteger("y");
+            int z = message.tag.getInteger("z");
+            NBTTagList linesTag = message.tag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
+            int size = linesTag.tagCount();
+            if (size > TileEntityAdvSign.MAX_LINES || size < TileEntityAdvSign.MIN_LINES) {
                 return null;
             }
-            tileAS.readFromNBT(message.tag);
-            tileAS.markForUpdate();
+            for (int i = 0; i < size; ++i) {
+                String line = linesTag.getStringTagAt(i);
+                if (line.length() > 64 * size) {
+                    return null;
+                }
+            }
+            TileEntity tile = ctx.getServerHandler().playerEntity.worldObj.getTileEntity(x, y, z);
+            if (tile != null && tile instanceof TileEntityAdvSign) {
+                TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+                if (tileAS.isEditor(ctx.getServerHandler().playerEntity)) {
+                    tileAS.resetEditor();
+                } else {
+                    return null;
+                }
+                tileAS.readFromNBT(message.tag);
+                tileAS.markForUpdate();
+            }
+            return null;
         }
-        return null;
     }
 }

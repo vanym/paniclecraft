@@ -154,16 +154,16 @@ public class ModComponentPainting extends ModComponent {
         Arrays.asList(new CommandPainting(), new CommandPaintOnBlock())
               .forEach(Core.instance.command::addSubCommand);
         
-        Core.instance.network.registerMessage(MessagePaintingToolUse.class,
+        Core.instance.network.registerMessage(MessagePaintingToolUse.Handler.class,
                                               MessagePaintingToolUse.class, 30,
                                               Side.SERVER);
-        Core.instance.network.registerMessage(MessagePaletteSetColor.class,
+        Core.instance.network.registerMessage(MessagePaletteSetColor.Handler.class,
                                               MessagePaletteSetColor.class, 32,
                                               Side.SERVER);
-        Core.instance.network.registerMessage(MessageOpenPaintingView.class,
+        Core.instance.network.registerMessage(MessageOpenPaintingView.Handler.class,
                                               MessageOpenPaintingView.class, 33,
                                               Side.CLIENT);
-        Core.instance.network.registerMessage(MessagePaintingViewAddPicture.class,
+        Core.instance.network.registerMessage(MessagePaintingViewAddPicture.Handler.class,
                                               MessagePaintingViewAddPicture.class, 34,
                                               Side.SERVER);
         this.initRecipe(config);
