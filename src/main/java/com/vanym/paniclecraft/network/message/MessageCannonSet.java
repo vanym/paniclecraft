@@ -1,12 +1,12 @@
 package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.container.ContainerCannon;
+import com.vanym.paniclecraft.network.InWorldHandler;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageCannonSet implements IMessage {
@@ -69,10 +69,10 @@ public class MessageCannonSet implements IMessage {
         buf.writeDouble(this.value);
     }
     
-    public static class Handler implements IMessageHandler<MessageCannonSet, IMessage> {
+    public static class Handler extends InWorldHandler<MessageCannonSet> {
         
         @Override
-        public IMessage onMessage(MessageCannonSet message, MessageContext ctx) {
+        public void onMessageInWorld(MessageCannonSet message, MessageContext ctx) {
             EntityPlayer playerEntity = ctx.getServerHandler().player;
             if (playerEntity.openContainer instanceof ContainerCannon) {
                 ContainerCannon containerCannon = (ContainerCannon)playerEntity.openContainer;
@@ -82,7 +82,6 @@ public class MessageCannonSet implements IMessage {
                     tileCannon.markForUpdate();
                 }
             }
-            return null;
         }
     }
 }

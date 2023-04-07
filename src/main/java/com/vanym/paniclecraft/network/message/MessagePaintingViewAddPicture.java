@@ -5,13 +5,13 @@ import java.io.IOException;
 import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
+import com.vanym.paniclecraft.network.InWorldHandler;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessagePaintingViewAddPicture implements IMessage {
@@ -47,29 +47,26 @@ public class MessagePaintingViewAddPicture implements IMessage {
         pb.writeItemStack(this.stack);
     }
     
-    public static class Handler
-            implements
-                IMessageHandler<MessagePaintingViewAddPicture, IMessage> {
+    public static class Handler extends InWorldHandler<MessagePaintingViewAddPicture> {
         
         @Override
-        public IMessage onMessage(MessagePaintingViewAddPicture message, MessageContext ctx) {
+        public void onMessageInWorld(MessagePaintingViewAddPicture message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             if (!(playerEntity.openContainer instanceof ContainerPaintingViewServer)) {
-                return null;
+                return;
             }
             ContainerPaintingViewServer view =
                     (ContainerPaintingViewServer)playerEntity.openContainer;
             if (!view.isEditable()) {
-                return null;
+                return;
             }
             Picture picture = new Picture(true);
             if (message.stack == null || message.stack.isEmpty()
                 || !ItemPainting.fillPicture(picture, message.stack)) {
-                return null;
+                return;
             }
             view.addPicture(message.x, message.y, picture);
             picture.unload();
-            return null;
         }
     }
 }

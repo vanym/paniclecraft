@@ -4,11 +4,11 @@ import java.util.NoSuchElementException;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.IModComponent;
+import com.vanym.paniclecraft.network.InWorldHandler;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -56,15 +56,14 @@ public class MessageComponentConfig implements IMessage {
         }
     }
     
-    public static class Handler implements IMessageHandler<MessageComponentConfig, IMessage> {
+    public static class Handler extends InWorldHandler<MessageComponentConfig> {
         
         @Override
         @SideOnly(Side.CLIENT)
-        public IMessage onMessage(MessageComponentConfig message, MessageContext ctx) {
+        public void onMessageInWorld(MessageComponentConfig message, MessageContext ctx) {
             if (message.component != null && message.config != null) {
                 message.component.setServerSideConfig(message.config);
             }
-            return null;
         }
     }
 }

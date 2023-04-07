@@ -2,13 +2,13 @@ package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
+import com.vanym.paniclecraft.network.InWorldHandler;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -45,15 +45,14 @@ public class MessageAdvSignOpenGui implements IMessage {
         buf.writeInt(this.z);
     }
     
-    public static class Handler implements IMessageHandler<MessageAdvSignOpenGui, IMessage> {
+    public static class Handler extends InWorldHandler<MessageAdvSignOpenGui> {
         
         @Override
         @SideOnly(Side.CLIENT)
-        public IMessage onMessage(MessageAdvSignOpenGui message, MessageContext ctx) {
+        public void onMessageInWorld(MessageAdvSignOpenGui message, MessageContext ctx) {
             EntityPlayer player = FMLClientHandler.instance().getClient().player;
             player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), player.getEntityWorld(),
                            message.x, message.y, message.z);
-            return null;
         }
     }
 }

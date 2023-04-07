@@ -3,11 +3,11 @@ package com.vanym.paniclecraft.network.message;
 import java.awt.Color;
 
 import com.vanym.paniclecraft.container.ContainerPalette;
+import com.vanym.paniclecraft.network.InWorldHandler;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessagePaletteSetColor implements IMessage {
@@ -30,17 +30,16 @@ public class MessagePaletteSetColor implements IMessage {
         buf.writeInt(this.color.getRGB());
     }
     
-    public static class Handler implements IMessageHandler<MessagePaletteSetColor, IMessage> {
+    public static class Handler extends InWorldHandler<MessagePaletteSetColor> {
         
         @Override
-        public IMessage onMessage(MessagePaletteSetColor message, MessageContext ctx) {
+        public void onMessageInWorld(MessagePaletteSetColor message, MessageContext ctx) {
             EntityPlayer playerEntity = ctx.getServerHandler().player;
             if (!(playerEntity.openContainer instanceof ContainerPalette)) {
-                return null;
+                return;
             }
             ContainerPalette palette = (ContainerPalette)playerEntity.openContainer;
             palette.setColor(message.color);
-            return null;
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
+import com.vanym.paniclecraft.network.InWorldHandler;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import io.netty.buffer.ByteBuf;
@@ -9,7 +10,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageChessMove implements IMessage {
@@ -55,10 +55,10 @@ public class MessageChessMove implements IMessage {
         return new BlockPos(this.x, this.y, this.z);
     }
     
-    public static class Handler implements IMessageHandler<MessageChessMove, IMessage> {
+    public static class Handler extends InWorldHandler<MessageChessMove> {
         
         @Override
-        public IMessage onMessage(MessageChessMove message, MessageContext ctx) {
+        public void onMessageInWorld(MessageChessMove message, MessageContext ctx) {
             EntityPlayer playerEntity = ctx.getServerHandler().player;
             TileEntity tile = playerEntity.world.getTileEntity(message.getPos());
             if (message.move != null && tile instanceof TileEntityChessDesk
@@ -67,7 +67,6 @@ public class MessageChessMove implements IMessage {
                 TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
                 tileCD.move(message.move, playerEntity);
             }
-            return null;
         }
     }
 }

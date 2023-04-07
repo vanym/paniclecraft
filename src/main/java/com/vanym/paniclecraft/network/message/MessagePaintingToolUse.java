@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
+import com.vanym.paniclecraft.network.InWorldHandler;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,7 +15,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessagePaintingToolUse implements IMessage {
@@ -78,14 +78,14 @@ public class MessagePaintingToolUse implements IMessage {
         buf.writeBoolean(this.tile);
     }
     
-    public static class Handler implements IMessageHandler<MessagePaintingToolUse, IMessage> {
+    public static class Handler extends InWorldHandler<MessagePaintingToolUse> {
         
         @Override
-        public IMessage onMessage(MessagePaintingToolUse message, MessageContext ctx) {
+        public void onMessageInWorld(MessagePaintingToolUse message, MessageContext ctx) {
             EntityPlayer player = ctx.getServerHandler().player;
             ItemStack heldItem = player.getActiveItemStack();
             if (!(heldItem.getItem() instanceof ItemPaintingTool)) {
-                return null;
+                return;
             }
             World world = player.world;
             Picture picture = null;
@@ -102,10 +102,9 @@ public class MessagePaintingToolUse implements IMessage {
             if (picture == null
                 || !player.canPlayerEdit(new BlockPos(message.x, message.y, message.z),
                                          EnumFacing.getFront(message.side), heldItem)) {
-                return null;
+                return;
             }
             picture.usePaintingTool(heldItem, message.px, message.py);
-            return null;
         }
     }
 }

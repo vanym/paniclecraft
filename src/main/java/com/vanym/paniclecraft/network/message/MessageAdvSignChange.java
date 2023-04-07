@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.network.message;
 
 import java.io.IOException;
 
+import com.vanym.paniclecraft.network.InWorldHandler;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import io.netty.buffer.ByteBuf;
@@ -12,7 +13,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageAdvSignChange implements IMessage {
@@ -45,12 +45,12 @@ public class MessageAdvSignChange implements IMessage {
         }
     }
     
-    public static class Handler implements IMessageHandler<MessageAdvSignChange, IMessage> {
+    public static class Handler extends InWorldHandler<MessageAdvSignChange> {
         
         @Override
-        public IMessage onMessage(MessageAdvSignChange message, MessageContext ctx) {
+        public void onMessageInWorld(MessageAdvSignChange message, MessageContext ctx) {
             if (message.tag == null) {
-                return null;
+                return;
             }
             int x = message.tag.getInteger("x");
             int y = message.tag.getInteger("y");
@@ -58,12 +58,12 @@ public class MessageAdvSignChange implements IMessage {
             NBTTagList linesTag = message.tag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
             int size = linesTag.tagCount();
             if (size > TileEntityAdvSign.MAX_LINES || size < TileEntityAdvSign.MIN_LINES) {
-                return null;
+                return;
             }
             for (int i = 0; i < size; ++i) {
                 String line = linesTag.getStringTagAt(i);
                 if (line.length() > 64 * size) {
-                    return null;
+                    return;
                 }
             }
             TileEntity tile =
@@ -73,12 +73,11 @@ public class MessageAdvSignChange implements IMessage {
                 if (tileAS.isEditor(ctx.getServerHandler().player)) {
                     tileAS.resetEditor();
                 } else {
-                    return null;
+                    return;
                 }
                 tileAS.readFromNBT(message.tag);
                 tileAS.markForUpdate();
             }
-            return null;
         }
     }
 }
