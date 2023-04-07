@@ -21,6 +21,10 @@ public class MessageChessMove implements IMessage, IMessageHandler<MessageChessM
     
     public MessageChessMove() {}
     
+    public MessageChessMove(BlockPos pos, ChessGame.Move move) {
+        this(pos.getX(), pos.getY(), pos.getZ(), move);
+    }
+    
     public MessageChessMove(int x, int y, int z, ChessGame.Move move) {
         this.x = x;
         this.y = y;
@@ -47,11 +51,14 @@ public class MessageChessMove implements IMessage, IMessageHandler<MessageChessM
         ByteBufUtils.writeUTF8String(buf, this.move.toString(false));
     }
     
+    protected BlockPos getPos() {
+        return new BlockPos(this.x, this.y, this.z);
+    }
+    
     @Override
     public IMessage onMessage(MessageChessMove message, MessageContext ctx) {
         EntityPlayer playerEntity = ctx.getServerHandler().player;
-        BlockPos pos = new BlockPos(message.x, message.y, message.z);
-        TileEntity tile = playerEntity.world.getTileEntity(pos);
+        TileEntity tile = playerEntity.world.getTileEntity(message.getPos());
         if (message.move != null && tile instanceof TileEntityChessDesk
             && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
                                           message.z + 0.5D) <= 64.0D) {
