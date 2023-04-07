@@ -139,7 +139,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return new AxisAlignedBB(this.pos);
+        return new AxisAlignedBB(this.pos).grow(0.25D);
     }
     
     @Override
