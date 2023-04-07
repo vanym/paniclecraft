@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessageChessMove implements IMessage, IMessageHandler<MessageChessMove, IMessage> {
+public class MessageChessMove implements IMessage {
     
     int x;
     int y;
@@ -55,16 +55,19 @@ public class MessageChessMove implements IMessage, IMessageHandler<MessageChessM
         return new BlockPos(this.x, this.y, this.z);
     }
     
-    @Override
-    public IMessage onMessage(MessageChessMove message, MessageContext ctx) {
-        EntityPlayer playerEntity = ctx.getServerHandler().player;
-        TileEntity tile = playerEntity.world.getTileEntity(message.getPos());
-        if (message.move != null && tile instanceof TileEntityChessDesk
-            && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
-                                          message.z + 0.5D) <= 64.0D) {
-            TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
-            tileCD.move(message.move, playerEntity);
+    public static class Handler implements IMessageHandler<MessageChessMove, IMessage> {
+        
+        @Override
+        public IMessage onMessage(MessageChessMove message, MessageContext ctx) {
+            EntityPlayer playerEntity = ctx.getServerHandler().player;
+            TileEntity tile = playerEntity.world.getTileEntity(message.getPos());
+            if (message.move != null && tile instanceof TileEntityChessDesk
+                && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
+                                              message.z + 0.5D) <= 64.0D) {
+                TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
+                tileCD.move(message.move, playerEntity);
+            }
+            return null;
         }
-        return null;
     }
 }

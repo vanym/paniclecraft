@@ -124,7 +124,7 @@ public class Core implements IGuiHandler {
     }
     
     protected void preInitCommon() {
-        Core.instance.network.registerMessage(MessageComponentConfig.class,
+        Core.instance.network.registerMessage(MessageComponentConfig.Handler.class,
                                               MessageComponentConfig.class, 5, Side.CLIENT);
     }
     

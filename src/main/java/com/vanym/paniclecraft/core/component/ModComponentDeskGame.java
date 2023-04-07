@@ -77,7 +77,7 @@ public class ModComponentDeskGame extends ModComponent {
             this.recipes.add(recipe);
         }
         
-        Core.instance.network.registerMessage(MessageChessMove.class,
+        Core.instance.network.registerMessage(MessageChessMove.Handler.class,
                                               MessageChessMove.class, 40,
                                               Side.SERVER);
     }

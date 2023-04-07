@@ -10,10 +10,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessagePaletteSetColor
-        implements
-            IMessage,
-            IMessageHandler<MessagePaletteSetColor, IMessage> {
+public class MessagePaletteSetColor implements IMessage {
     
     protected Color color;
     
@@ -33,14 +30,17 @@ public class MessagePaletteSetColor
         buf.writeInt(this.color.getRGB());
     }
     
-    @Override
-    public IMessage onMessage(MessagePaletteSetColor message, MessageContext ctx) {
-        EntityPlayer playerEntity = ctx.getServerHandler().player;
-        if (!(playerEntity.openContainer instanceof ContainerPalette)) {
+    public static class Handler implements IMessageHandler<MessagePaletteSetColor, IMessage> {
+        
+        @Override
+        public IMessage onMessage(MessagePaletteSetColor message, MessageContext ctx) {
+            EntityPlayer playerEntity = ctx.getServerHandler().player;
+            if (!(playerEntity.openContainer instanceof ContainerPalette)) {
+                return null;
+            }
+            ContainerPalette palette = (ContainerPalette)playerEntity.openContainer;
+            palette.setColor(message.color);
             return null;
         }
-        ContainerPalette palette = (ContainerPalette)playerEntity.openContainer;
-        palette.setColor(message.color);
-        return null;
     }
 }

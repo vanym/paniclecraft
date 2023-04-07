@@ -81,10 +81,10 @@ public class ModComponentAdvSign extends ModComponent {
         
         Core.instance.command.addSubCommand(new CommandAdvSign());
         
-        Core.instance.network.registerMessage(MessageAdvSignChange.class,
+        Core.instance.network.registerMessage(MessageAdvSignChange.Handler.class,
                                               MessageAdvSignChange.class, 20,
                                               Side.SERVER);
-        Core.instance.network.registerMessage(MessageAdvSignOpenGui.class,
+        Core.instance.network.registerMessage(MessageAdvSignOpenGui.Handler.class,
                                               MessageAdvSignOpenGui.class, 21,
                                               Side.CLIENT);
     }

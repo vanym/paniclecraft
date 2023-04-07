@@ -14,10 +14,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessagePaintingViewAddPicture
-        implements
-            IMessage,
-            IMessageHandler<MessagePaintingViewAddPicture, IMessage> {
+public class MessagePaintingViewAddPicture implements IMessage {
     
     int x, y;
     ItemStack stack;
@@ -50,23 +47,29 @@ public class MessagePaintingViewAddPicture
         pb.writeItemStack(this.stack);
     }
     
-    @Override
-    public IMessage onMessage(MessagePaintingViewAddPicture message, MessageContext ctx) {
-        EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-        if (!(playerEntity.openContainer instanceof ContainerPaintingViewServer)) {
+    public static class Handler
+            implements
+                IMessageHandler<MessagePaintingViewAddPicture, IMessage> {
+        
+        @Override
+        public IMessage onMessage(MessagePaintingViewAddPicture message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            if (!(playerEntity.openContainer instanceof ContainerPaintingViewServer)) {
+                return null;
+            }
+            ContainerPaintingViewServer view =
+                    (ContainerPaintingViewServer)playerEntity.openContainer;
+            if (!view.isEditable()) {
+                return null;
+            }
+            Picture picture = new Picture(true);
+            if (message.stack == null || message.stack.isEmpty()
+                || !ItemPainting.fillPicture(picture, message.stack)) {
+                return null;
+            }
+            view.addPicture(message.x, message.y, picture);
+            picture.unload();
             return null;
         }
-        ContainerPaintingViewServer view = (ContainerPaintingViewServer)playerEntity.openContainer;
-        if (!view.isEditable()) {
-            return null;
-        }
-        Picture picture = new Picture(true);
-        if (message.stack == null || message.stack.isEmpty()
-            || !ItemPainting.fillPicture(picture, message.stack)) {
-            return null;
-        }
-        view.addPicture(message.x, message.y, picture);
-        picture.unload();
-        return null;
     }
 }

@@ -17,10 +17,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessagePaintingToolUse
-        implements
-            IMessage,
-            IMessageHandler<MessagePaintingToolUse, IMessage> {
+public class MessagePaintingToolUse implements IMessage {
+    
     int x, y, z, px, py;
     byte side;
     boolean tile;
@@ -80,30 +78,34 @@ public class MessagePaintingToolUse
         buf.writeBoolean(this.tile);
     }
     
-    @Override
-    public IMessage onMessage(MessagePaintingToolUse message, MessageContext ctx) {
-        EntityPlayer player = ctx.getServerHandler().player;
-        ItemStack heldItem = player.getActiveItemStack();
-        if (!(heldItem.getItem() instanceof ItemPaintingTool)) {
+    public static class Handler implements IMessageHandler<MessagePaintingToolUse, IMessage> {
+        
+        @Override
+        public IMessage onMessage(MessagePaintingToolUse message, MessageContext ctx) {
+            EntityPlayer player = ctx.getServerHandler().player;
+            ItemStack heldItem = player.getActiveItemStack();
+            if (!(heldItem.getItem() instanceof ItemPaintingTool)) {
+                return null;
+            }
+            World world = player.world;
+            Picture picture = null;
+            WorldPictureProvider provider = null;
+            if (message.tile) {
+                provider = WorldPictureProvider.ANYTILE;
+            } else if (Core.instance.painting.config.allowPaintOnBlock) {
+                provider = WorldPictureProvider.PAINTONBLOCK;
+            }
+            if (provider != null) {
+                picture = provider.getOrCreatePicture(world, message.x, message.y, message.z,
+                                                      message.side);
+            }
+            if (picture == null
+                || !player.canPlayerEdit(new BlockPos(message.x, message.y, message.z),
+                                         EnumFacing.getFront(message.side), heldItem)) {
+                return null;
+            }
+            picture.usePaintingTool(heldItem, message.px, message.py);
             return null;
         }
-        World world = player.world;
-        Picture picture = null;
-        WorldPictureProvider provider = null;
-        if (message.tile) {
-            provider = WorldPictureProvider.ANYTILE;
-        } else if (Core.instance.painting.config.allowPaintOnBlock) {
-            provider = WorldPictureProvider.PAINTONBLOCK;
-        }
-        if (provider != null) {
-            picture = provider.getOrCreatePicture(world, message.x, message.y, message.z,
-                                                  message.side);
-        }
-        if (picture == null || !player.canPlayerEdit(new BlockPos(message.x, message.y, message.z),
-                                                     EnumFacing.getFront(message.side), heldItem)) {
-            return null;
-        }
-        picture.usePaintingTool(heldItem, message.px, message.py);
-        return null;
     }
 }

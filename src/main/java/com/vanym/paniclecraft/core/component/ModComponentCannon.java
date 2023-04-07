@@ -68,8 +68,8 @@ public class ModComponentCannon extends ModComponent {
                     Blocks.DISPENSER).flow();
         }
         
-        Core.instance.network.registerMessage(MessageCannonSet.class, MessageCannonSet.class, 51,
-                                              Side.SERVER);
+        Core.instance.network.registerMessage(MessageCannonSet.Handler.class,
+                                              MessageCannonSet.class, 51, Side.SERVER);
         
         this.configChanged(config);
     }

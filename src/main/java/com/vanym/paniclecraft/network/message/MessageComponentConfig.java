@@ -13,10 +13,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class MessageComponentConfig
-        implements
-            IMessage,
-            IMessageHandler<MessageComponentConfig, IMessage> {
+public class MessageComponentConfig implements IMessage {
     
     IModComponent component;
     IModComponent.IServerSideConfig config;
@@ -59,12 +56,15 @@ public class MessageComponentConfig
         }
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IMessage onMessage(MessageComponentConfig message, MessageContext ctx) {
-        if (message.component != null && message.config != null) {
-            message.component.setServerSideConfig(message.config);
+    public static class Handler implements IMessageHandler<MessageComponentConfig, IMessage> {
+        
+        @Override
+        @SideOnly(Side.CLIENT)
+        public IMessage onMessage(MessageComponentConfig message, MessageContext ctx) {
+            if (message.component != null && message.config != null) {
+                message.component.setServerSideConfig(message.config);
+            }
+            return null;
         }
-        return null;
     }
 }
