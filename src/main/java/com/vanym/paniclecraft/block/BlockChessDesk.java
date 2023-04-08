@@ -64,8 +64,7 @@ public class BlockChessDesk extends BlockContainerMod3 {
             float hitZ,
             int meta,
             EntityLivingBase placer) {
-        return this.getDefaultState()
-                   .withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing());
     }
     
     @Override
