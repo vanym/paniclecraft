@@ -117,8 +117,8 @@ public class ItemPainting extends ItemMod3 {
             return EnumActionResult.FAIL;
         }
         Picture picture = tilePF.createPicture(side);
-        itemStack.shrink(1);
         fillPicture(picture, itemStack);
+        itemStack.shrink(1);
         if (entityPlayer != null) {
             EnumFacing dir = EnumFacing.getFront(side);
             BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
