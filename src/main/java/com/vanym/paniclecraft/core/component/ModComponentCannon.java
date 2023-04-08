@@ -92,6 +92,7 @@ public class ModComponentCannon extends ModComponent {
         this.tileCannonRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
         this.itemCannonRenderer = new ItemRendererCannon();
         this.itemCannon.setTileEntityItemStackRenderer(this.itemCannonRenderer);
+        MinecraftForge.EVENT_BUS.register(this.itemCannonRenderer);
         this.configChangedClient(config);
     }
     
