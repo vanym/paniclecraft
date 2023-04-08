@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -22,6 +21,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
@@ -202,7 +203,9 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     
     @Override
     public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
+        this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, renderPartialTicks);
+        this.renderHoveredToolTip(mouseX, mouseY);
     }
     
     protected void drawInventoriesNames() {
@@ -225,13 +228,15 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     
     @Override
     public void drawGuiContainerForegroundLayer(int x, int y) {
+        RenderHelper.disableStandardItemLighting();
         this.drawInventoriesNames();
         this.drawRGBLabels();
+        RenderHelper.enableGUIStandardItemLighting();
     }
     
     @Override
     public void drawGuiContainerBackgroundLayer(float f, int i, int j) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.renderEngine.bindTexture(GUI_TEXTURE);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
         this.chart.drawChart(this.mc);
@@ -243,8 +248,7 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
                  this.picker.xPosition + this.picker.width,
                  this.picker.yPosition + this.picker.height,
                  color.getRGB());
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glDisable(GL11.GL_BLEND);
+        RenderHelper.disableStandardItemLighting();
         this.textHex.drawTextBox();
         Arrays.stream(this.textColor).forEach(t->t.drawTextBox());
     }
