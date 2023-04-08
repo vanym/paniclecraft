@@ -207,20 +207,8 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     @Override
-    public ItemStack decrStackSize(int slot, int size) {
-        if (this.stack.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
-        if (this.stack.getCount() <= size) {
-            ItemStack stack = this.stack;
-            this.stack = ItemStack.EMPTY;
-            this.markDirty();
-            return stack;
-        } else {
-            ItemStack stack = this.stack.splitStack(size);
-            this.markDirty();
-            return stack;
-        }
+    public ItemStack decrStackSize(int slot, int amount) {
+        return this.stack.splitStack(amount);
     }
     
     @Override
