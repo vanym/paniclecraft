@@ -14,9 +14,6 @@ public interface IColorizeable {
     public void setColor(ItemStack itemStack, int color);
     
     public static IColorizeable getColorizeable(ItemStack stack) {
-        if (stack == null) {
-            return null;
-        }
         Item item = stack.getItem();
         if (!(item instanceof IColorizeable)) {
             return null;

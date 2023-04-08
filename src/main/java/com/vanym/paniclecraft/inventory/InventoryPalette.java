@@ -15,9 +15,6 @@ public class InventoryPalette extends InventoryBasic {
     
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemStack) {
-        if (itemStack == null) {
-            return false;
-        }
         Item item = itemStack.getItem();
         return item instanceof IColorizeable;
     }

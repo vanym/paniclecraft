@@ -56,28 +56,28 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int slotNum) {
-        ItemStack itemstack = null;
+        ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = (Slot)this.inventorySlots.get(slotNum);
         
         if (slot != null && slot.getHasStack()) {
             ItemStack itemstack1 = slot.getStack();
             if (slotNum == 0) {
                 if (!this.mergeItemStack(itemstack1, 1, 37, true)) {
-                    return null;
+                    return ItemStack.EMPTY;
                 }
             } else if (this.inventoryPalette.isItemValidForSlot(0, itemstack1)
                 && this.mergeItemStack(itemstack1, 0, 1, true)) {
             } else if (slotNum >= 1 && slotNum < 28) {
                 if (!this.mergeItemStack(itemstack1, 28, 37, false)) {
-                    return null;
+                    return ItemStack.EMPTY;
                 }
             } else if (slotNum >= 28 && slotNum < 37) {
                 if (!this.mergeItemStack(itemstack1, 1, 28, false)) {
-                    return null;
+                    return ItemStack.EMPTY;
                 }
             }
             if (itemstack1.isEmpty()) {
-                slot.putStack((ItemStack)null);
+                slot.putStack(ItemStack.EMPTY);
             } else {
                 slot.onSlotChanged();
             }
