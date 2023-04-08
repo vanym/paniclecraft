@@ -16,6 +16,7 @@ import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -71,8 +72,9 @@ public class ModComponentDeskGame extends ModComponent {
                 config.getBoolean("craftingRecipeChessDeskClear", this.getName(), true,
                                   "clear chess game using crafting");
         if (craftingRecipeChessDeskClear) {
-            ShapelessOreRecipe recipe =
-                    new ShapelessOreRecipe(this.itemChessDesk, this.itemChessDesk);
+            ShapelessOreRecipe recipe = new ShapelessOreRecipe(
+                    this.itemChessDesk,
+                    new ItemStack(this.itemChessDesk));
             RecipeRegister.flowRegistryName(recipe, "%s_clear");
             this.recipes.add(recipe);
         }

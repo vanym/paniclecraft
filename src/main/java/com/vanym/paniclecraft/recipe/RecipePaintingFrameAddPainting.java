@@ -76,10 +76,10 @@ public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreReci
             }
             list.add(sb.toString());
         }
-        list.addAll(Arrays.asList(Character.valueOf('f'),
-                                  Core.instance.painting.itemPaintingFrame));
-        list.addAll(Arrays.asList(Character.valueOf('p'),
-                                  Core.instance.painting.itemPainting));
+        list.add(Character.valueOf('f'));
+        list.add(new ItemStack(Core.instance.painting.itemPaintingFrame));
+        list.add(Character.valueOf('p'));
+        list.add(new ItemStack(Core.instance.painting.itemPainting));
         return list.toArray();
     }
     
