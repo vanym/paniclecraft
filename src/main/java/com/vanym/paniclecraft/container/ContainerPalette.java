@@ -61,6 +61,8 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
         
         if (slot != null && slot.getHasStack()) {
             ItemStack itemstack1 = slot.getStack();
+            itemstack = itemstack1.copy();
+            
             if (slotNum == 0) {
                 if (!this.mergeItemStack(itemstack1, 1, 37, true)) {
                     return null;
@@ -81,6 +83,12 @@ public class ContainerPalette extends ContainerBase implements IInvBasic {
             } else {
                 slot.onSlotChanged();
             }
+            
+            if (itemstack1.stackSize == itemstack.stackSize) {
+                return null;
+            }
+            
+            slot.onPickupFromSlot(player, itemstack1);
         }
         
         return itemstack;
