@@ -80,7 +80,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
                 this.fontRendererObj,
                 this.guiLeft + 8,
                 this.guiTop + 58);
-        this.textHex.setSetter(rgb->this.setColor(new Color(rgb)));
+        this.textHex.setSetter(rgb->this.sendColor(new Color(rgb)));
         this.container.removeCraftingFromCrafters(this);
         this.container.addCraftingToCrafters(this);
     }
@@ -183,7 +183,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         int rgb = ColorUtils.getAlphaless(this.getColor());
         rgb &= ~(0xff << (i * 8));
         rgb |= color << (i * 8);
-        this.setColor(new Color(rgb));
+        this.sendColor(new Color(rgb));
         return true;
     }
     
@@ -245,7 +245,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         Arrays.stream(this.textColor).forEach(t->t.drawTextBox());
     }
     
-    protected void setColor(Color color) {
+    protected void sendColor(Color color) {
         Core.instance.network.sendToServer(new MessagePaletteSetColor(color));
     }
     
@@ -324,7 +324,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
                 return;
             }
             int rgb = colorizeable.getColor(stack);
-            GuiPalette.this.setColor(new Color(rgb));
+            GuiPalette.this.sendColor(new Color(rgb));
         }
     }
     
@@ -363,7 +363,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
             if (color == null || color.getAlpha() == 0) {
                 return;
             }
-            GuiPalette.this.setColor(color);
+            GuiPalette.this.sendColor(color);
         }
         
         public void drawChart(Minecraft mc) {
