@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererAdvSign;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityAdvSignRenderer;
@@ -13,6 +12,7 @@ import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.network.message.MessageAdvSignOpenGui;
+import com.vanym.paniclecraft.recipe.RecipeRegister;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
@@ -58,7 +58,7 @@ public class ModComponentAdvSign extends ModComponent {
                                                        "crafting using just one regular sign");
         if (craftingRecipeEasy) {
             ShapelessOreRecipe recipe = new ShapelessOreRecipe(this.itemAdvSign, Items.SIGN);
-            recipe.setRegistryName(DEF.MOD_ID, "advSignEasy");
+            RecipeRegister.flowRegistryName(recipe, "%s_easy");
             this.recipes.add(recipe);
         }
         boolean craftingRecipeBook =
@@ -67,7 +67,7 @@ public class ModComponentAdvSign extends ModComponent {
         if (craftingRecipeBook) {
             ShapelessOreRecipe recipe =
                     new ShapelessOreRecipe(this.itemAdvSign, Items.SIGN, Items.BOOK);
-            recipe.setRegistryName(DEF.MOD_ID, "advSignBook");
+            RecipeRegister.flowRegistryName(recipe, "%s_book");
             this.recipes.add(recipe);
         }
         boolean craftingRecipeClear =
@@ -75,7 +75,7 @@ public class ModComponentAdvSign extends ModComponent {
                                   "clear adv sign using crafting");
         if (craftingRecipeClear) {
             ShapelessOreRecipe recipe = new ShapelessOreRecipe(this.itemAdvSign, this.itemAdvSign);
-            recipe.setRegistryName(DEF.MOD_ID, "advSignClear");
+            RecipeRegister.flowRegistryName(recipe, "%s_clear");
             this.recipes.add(recipe);
         }
         

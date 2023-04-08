@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockChessDesk;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererChessDesk;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRenderer;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
+import com.vanym.paniclecraft.recipe.RecipeRegister;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
@@ -73,7 +73,7 @@ public class ModComponentDeskGame extends ModComponent {
         if (craftingRecipeChessDeskClear) {
             ShapelessOreRecipe recipe =
                     new ShapelessOreRecipe(this.itemChessDesk, this.itemChessDesk);
-            recipe.setRegistryName(DEF.MOD_ID, "chessDeskClear");
+            RecipeRegister.flowRegistryName(recipe, "%s_clear");
             this.recipes.add(recipe);
         }
         

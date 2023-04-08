@@ -1,10 +1,10 @@
 package com.vanym.paniclecraft.recipe;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 
 import net.minecraft.block.Block;
 import net.minecraft.inventory.InventoryCrafting;
@@ -19,24 +19,20 @@ public class RecipeDummy {
         ItemStack brush = Core.instance.painting.itemPaintBrush.getBrush();
         ItemStack smallBrush = Core.instance.painting.itemPaintBrush.getSmallBrush();
         ItemStack filler = Core.instance.painting.itemPaintBrush.getFiller();
-        Shapeless brushRecipe = new Shapeless(brush, brush, "dye");
-        brushRecipe.setRegistryName(DEF.MOD_ID, "paintBrushByDyeDummy");
-        Shapeless smallBrushRecipe = new Shapeless(smallBrush, smallBrush, "dye");
-        smallBrushRecipe.setRegistryName(DEF.MOD_ID, "smallPaintBrushByDyeDummy");
-        Shapeless fillerRecipe = new Shapeless(filler, filler, "dye");
-        fillerRecipe.setRegistryName(DEF.MOD_ID, "paintFillerByDyeDummy");
-        return Arrays.asList(brushRecipe, smallBrushRecipe, fillerRecipe);
+        return Stream.of(brush, smallBrush, filler)
+                     .map(item->new Shapeless(item, item, "dye"))
+                     .peek(RecipeRegister.namer("%s_colorize_by_dye_dummy"))
+                     .collect(Collectors.toList());
     }
     
     public static List<IRecipe> getColorizeByFillerDummies() {
         ItemStack brush = Core.instance.painting.itemPaintBrush.getBrush();
         ItemStack smallBrush = Core.instance.painting.itemPaintBrush.getSmallBrush();
         ItemStack filler = Core.instance.painting.itemPaintBrush.getFiller();
-        Shapeless brushRecipe = new Shapeless(brush, brush, filler);
-        brushRecipe.setRegistryName(DEF.MOD_ID, "paintBrushByFillerDummy");
-        Shapeless smallBrushRecipe = new Shapeless(smallBrush, smallBrush, filler);
-        smallBrushRecipe.setRegistryName(DEF.MOD_ID, "smallPaintBrushByFillerDummy");
-        return Arrays.asList(brushRecipe, smallBrushRecipe);
+        return Stream.of(brush, smallBrush)
+                     .map(item->new Shapeless(item, item, filler))
+                     .peek(RecipeRegister.namer("%s_colorize_by_filler_dummy"))
+                     .collect(Collectors.toList());
     }
     
     public static class Shaped extends RecipeRegister.ShapedOreRecipe {

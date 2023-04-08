@@ -49,6 +49,7 @@ import com.vanym.paniclecraft.recipe.RecipePaintingCombine;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
+import com.vanym.paniclecraft.recipe.RecipeRegister;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
@@ -198,8 +199,7 @@ public class ModComponentPainting extends ModComponent {
                     Character.valueOf('w'),
                     "woolWhite",
                     Character.valueOf('s'),
-                    "stickWood");
-            recipe.setRegistryName(DEF.MOD_ID, "paintBrush");
+                    "stickWood").name();
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeSmallPaintBrush", this.getName(), true, "")) {
@@ -210,8 +210,7 @@ public class ModComponentPainting extends ModComponent {
                     Character.valueOf('f'),
                     "feather",
                     Character.valueOf('s'),
-                    "stickWood");
-            recipe.setRegistryName(DEF.MOD_ID, "smallPaintBrush");
+                    "stickWood").name();
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintFiller", this.getName(), true, "")) {
@@ -222,8 +221,7 @@ public class ModComponentPainting extends ModComponent {
                     Character.valueOf('w'),
                     "dyeWhite",
                     Character.valueOf('b'),
-                    Items.BOWL);
-            recipe.setRegistryName(DEF.MOD_ID, "paintFiller");
+                    Items.BOWL).name();
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeColorPicker", this.getName(), true, "")) {
@@ -233,8 +231,7 @@ public class ModComponentPainting extends ModComponent {
                     " b",
                     "b ",
                     Character.valueOf('b'),
-                    Items.GLASS_BOTTLE);
-            recipe.setRegistryName(DEF.MOD_ID, "colorPicker");
+                    Items.GLASS_BOTTLE).name();
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintRemoverFromStick", this.getName(), false, "")) {
@@ -246,7 +243,7 @@ public class ModComponentPainting extends ModComponent {
                     "ingotIron",
                     Character.valueOf('s'),
                     "stickWood");
-            recipe.setRegistryName(DEF.MOD_ID, "paintRemoverStick");
+            RecipeRegister.useName(recipe, "%s_stick");
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintRemoverFromBrush", this.getName(), false, "")) {
@@ -258,7 +255,7 @@ public class ModComponentPainting extends ModComponent {
                     "ingotIron",
                     Character.valueOf('b'),
                     this.itemPaintBrush.getBrush());
-            recipe.setRegistryName(DEF.MOD_ID, "paintRemoverBrush");
+            RecipeRegister.useName(recipe, "%s_brush");
             ForgeRegistries.RECIPES.register(recipe);
         }
         if (config.getBoolean("craftingRecipeSmallPaintRemoverFromStick", this.getName(), false,
@@ -271,7 +268,7 @@ public class ModComponentPainting extends ModComponent {
                     Items.FLINT,
                     Character.valueOf('s'),
                     "stickWood");
-            recipe.setRegistryName(DEF.MOD_ID, "smallPaintRemoverStick");
+            RecipeRegister.useName(recipe, "%s_stick");
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeSmallPaintRemoverFromBrush", this.getName(), false,
@@ -284,18 +281,18 @@ public class ModComponentPainting extends ModComponent {
                     Items.FLINT,
                     Character.valueOf('b'),
                     this.itemPaintBrush.getSmallBrush());
-            recipe.setRegistryName(DEF.MOD_ID, "smallPaintRemoverBrush");
+            RecipeRegister.useName(recipe, "%s_brush");
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
             RecipeColorizeByDye recipe = new RecipeColorizeByDye();
-            recipe.setRegistryName(DEF.MOD_ID, "recipeColorizeByDye");
+            recipe.setRegistryName(DEF.MOD_ID, "colorize_by_dye");
             this.recipes.add(recipe);
             this.recipes.addAll(RecipeDummy.getColorizeByDyeDummies());
         }
         if (config.getBoolean("craftingRecipeColorizeByFiller", this.getName(), true, "")) {
             RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
-            recipe.setRegistryName(DEF.MOD_ID, "recipeColorizeByFiller");
+            recipe.setRegistryName(DEF.MOD_ID, "colorize_by_filler");
             this.recipes.add(recipe);
             this.recipes.addAll(RecipeDummy.getColorizeByFillerDummies());
         }
@@ -327,7 +324,7 @@ public class ModComponentPainting extends ModComponent {
         if (config.getBoolean("craftingRecipePaintingClear", this.getName(), true, "")) {
             ShapelessOreRecipe recipe =
                     new ShapelessOreRecipe(this.itemPainting, this.itemPainting);
-            recipe.setRegistryName(DEF.MOD_ID, "paintingBlockClear");
+            RecipeRegister.flowRegistryName(recipe, "%s_clear");
             this.recipes.add(recipe);
         }
         {
@@ -348,9 +345,9 @@ public class ModComponentPainting extends ModComponent {
                       } // formatter does not understand ';' beauty :(
                       int x = Integer.parseInt(m.group(i + 1));
                       int y = Integer.parseInt(m.group(i + 2));
-                      RecipePaintingCombine rcp = new RecipePaintingCombine(x, y);
-                      rcp.setRegistryName(DEF.MOD_ID, String.format("paintingCombine%dx%d", x, y));
-                      return rcp;
+                      RecipePaintingCombine r = new RecipePaintingCombine(x, y);
+                      r.setRegistryName(DEF.MOD_ID, String.format("painting_combine_%dx%d", x, y));
+                      return r;
                   })
                   .forEach(this.recipes::add);
         }
@@ -363,7 +360,7 @@ public class ModComponentPainting extends ModComponent {
                     this.itemPainting,
                     Character.valueOf('s'),
                     "stickWood");
-            recipe.setRegistryName(DEF.MOD_ID, "paintingFrame");
+            RecipeRegister.flowRegistryName(recipe);
             this.recipes.add(recipe);
         }
         if (config.getBoolean("craftingRecipePaintingFrameAdd", this.getName(), true, "")) {
@@ -372,7 +369,7 @@ public class ModComponentPainting extends ModComponent {
         }
         if (config.getBoolean("craftingRecipePaintingFrameRemove", this.getName(), true, "")) {
             RecipePaintingFrameRemovePainting recipe = new RecipePaintingFrameRemovePainting();
-            recipe.setRegistryName(DEF.MOD_ID, "paintingFrameRemovePainting");
+            RecipeRegister.flowRegistryName(recipe, "%s_remove_painting");
             this.recipes.add(recipe);
         }
     }

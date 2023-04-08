@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -96,7 +95,7 @@ public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreReci
     protected static IRecipe create(EnumFacing pside, int offsetX, int offsetY) {
         RecipePaintingFrameAddPainting recipe =
                 new RecipePaintingFrameAddPainting(pside, offsetX, offsetY);
-        recipe.setRegistryName(DEF.MOD_ID, String.format("paintingFrameAddPainting%s", pside));
+        RecipeRegister.flowRegistryName(recipe, "%s_add_painting_" + pside);
         return recipe;
     }
 }
