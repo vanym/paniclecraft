@@ -18,6 +18,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockCannon extends BlockContainerMod3 {
     
@@ -57,6 +59,12 @@ public class BlockCannon extends BlockContainerMod3 {
             IBlockAccess world,
             BlockPos pos) {
         return NULL_AABB;
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean hasCustomBreakingProgress(IBlockState state) {
+        return true;
     }
     
     @Override
