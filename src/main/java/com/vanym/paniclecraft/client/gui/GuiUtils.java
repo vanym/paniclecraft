@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraftforge.fml.relauncher.Side;
@@ -19,12 +19,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiUtils {
     
     public static void drawLine(double x1, double y1, double x2, double y2, Color color) {
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
-                                 GL11.GL_TRUE, GL11.GL_FALSE);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                                            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                            GlStateManager.SourceFactor.ONE,
+                                            GlStateManager.DestFactor.ZERO);
+        GlStateManager.disableTexture2D();
         float[] f = color.getRGBComponents(null);
-        GL11.glColor4f(f[0], f[1], f[2], f[3]);
+        GlStateManager.color(f[0], f[1], f[2], f[3]);
         Tessellator tessellator = Tessellator.getInstance();
         double dx = x2 - x1, dy = y2 - y1, steps = Math.max(Math.abs(dx), Math.abs(dy));
         double x = x1, y = y1, mx = (double)dx / steps, my = (double)dy / steps;
@@ -37,8 +39,8 @@ public class GuiUtils {
             buf.pos(x + 1, y + 1, 0.0D).endVertex();
         }
         tessellator.draw();
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
     }
     
     public static Point2D.Double getMousePoint() {

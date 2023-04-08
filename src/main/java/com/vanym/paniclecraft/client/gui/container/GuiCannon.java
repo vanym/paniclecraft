@@ -3,8 +3,6 @@ package com.vanym.paniclecraft.client.gui.container;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import org.lwjgl.opengl.GL11;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -14,6 +12,8 @@ import com.vanym.paniclecraft.network.message.MessageCannonSet;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -106,6 +106,7 @@ public class GuiCannon extends GuiContainer {
     
     @Override
     public void drawGuiContainerForegroundLayer(int x, int y) {
+        RenderHelper.disableStandardItemLighting();
         this.fontRenderer.drawString(InventoryUtils.getTranslatedName(this.container.cannon),
                                      8, 6, 0x404040);
         this.fontRenderer.drawString(InventoryUtils.getTranslatedName(this.container.playerInv),
@@ -123,11 +124,14 @@ public class GuiCannon extends GuiContainer {
         double strength = this.container.cannon.getStrength();
         this.fontRenderer.drawString(String.format("%.4f", strength),
                                      30, 38, 0x404040);
+        RenderHelper.enableGUIStandardItemLighting();
     }
     
     @Override
     public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
+        this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, renderPartialTicks);
+        this.renderHoveredToolTip(mouseX, mouseY);
     }
     
     @Override
@@ -156,7 +160,7 @@ public class GuiCannon extends GuiContainer {
     
     @Override
     public void drawGuiContainerBackgroundLayer(float f, int i, int j) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(GUI_TEXTURE);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
     }
