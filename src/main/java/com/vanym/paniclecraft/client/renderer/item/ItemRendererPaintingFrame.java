@@ -53,7 +53,7 @@ public class ItemRendererPaintingFrame extends TileEntityItemStackRenderer {
                 picture.readFromNBT(pictureTag);
             }
         }
-        this.paintingFrameTileRenderer.render(tilePF, 0.0D, 0.0D, 0.0D, partialTicks, -1, 0.0F);
+        this.paintingFrameTileRenderer.renderAtItem(tilePF);
         for (int i = 0; i < ISidePictureProvider.N; i++) {
             Picture picture = tilePF.getPicture(i);
             if (picture == null || obtainedTextures[i] >= 0) {

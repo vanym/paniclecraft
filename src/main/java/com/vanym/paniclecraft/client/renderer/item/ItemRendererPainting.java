@@ -49,7 +49,7 @@ public class ItemRendererPainting extends TileEntityItemStackRenderer {
         } else if (nbtPictureTag != null) {
             picture.readFromNBT(nbtPictureTag);
         }
-        this.paintingTileRenderer.render(tilePainting, 0.0D, 0.0D, 0.0D, partialTicks, -1, 0.0F);
+        this.paintingTileRenderer.renderAtItem(tilePainting);
         if (obtainedTexture < 0) {
             this.textureCache.putTexture(nbtImageTag, picture.texture);
         }

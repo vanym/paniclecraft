@@ -20,18 +20,20 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
     }
     
     @Override
-    protected int getN() {
-        return ISidePictureProvider.N;
-    }
-    
-    @Override
-    protected IBlockState getActualState(IBlockState state, TileEntityPaintingContainer tile) {
+    protected IBlockState getActualState(TileEntityPaintingContainer tile) {
         BlockPaintingFrame block = Core.instance.painting.blockPaintingFrame;
+        IBlockState state = tile.hasWorld() ? tile.getWorld().getBlockState(tile.getPos())
+                                            : block.getDefaultState();
         return block.getActualState(state, (TileEntityPaintingFrame)tile);
     }
     
     @Override
     protected Picture getPicture(TileEntityPaintingContainer tile, int side) {
         return tile.getPicture(side);
+    }
+    
+    @Override
+    protected int getSize(TileEntityPaintingContainer tile) {
+        return ISidePictureProvider.N;
     }
 }
