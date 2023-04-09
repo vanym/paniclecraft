@@ -38,6 +38,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -107,6 +108,11 @@ public class TileEntityPaintingRenderer
         if (destroyStage < 0) {
             renderInWorldEnable();
         } else {
+            // skipping second time render of destroy stage
+            int pass = MinecraftForgeClient.getRenderPass();
+            if (pass > 0) {
+                return;
+            }
             RenderHelper.disableStandardItemLighting();
         }
         this.renderPainting(te, x, y, z, destroyStage);
