@@ -123,7 +123,7 @@ public abstract class ContainerPaintingViewBase extends Container {
         public ItemStack getStackInSlot(int slot) {
             Picture picture = ContainerPaintingViewBase.this.getPicture(slot);
             if (!IPictureSize.equals(picture, ContainerPaintingViewBase.this.pictureSize)) {
-                return null;
+                return ItemStack.EMPTY;
             }
             return ItemPainting.getPictureAsItem(picture);
         }
@@ -147,12 +147,12 @@ public abstract class ContainerPaintingViewBase extends Container {
         
         @Override
         public ItemStack decrStackSize(int slot, int amount) {
-            return null;
+            return ItemStack.EMPTY;
         }
         
         @Override
         public ItemStack removeStackFromSlot(int slot) {
-            return null;
+            return ItemStack.EMPTY;
         }
         
         @Override
