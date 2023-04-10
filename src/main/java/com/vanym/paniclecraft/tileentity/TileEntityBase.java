@@ -9,6 +9,7 @@ import net.minecraft.tileentity.TileEntity;
 public abstract class TileEntityBase extends TileEntity {
     
     public void markForUpdate() {
+        this.markDirty();
         if (this.worldObj != null) {
             this.worldObj.markBlockForUpdate(this.xCoord, this.yCoord, this.zCoord);
         }
