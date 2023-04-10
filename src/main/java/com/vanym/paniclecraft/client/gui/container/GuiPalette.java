@@ -262,7 +262,7 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     }
     
     protected void updateText(ItemStack stack) {
-        boolean empty = (stack == null);
+        boolean empty = stack.isEmpty();
         Color color = this.container.getColor();
         if (color == null) {
             color = new Color(0);
