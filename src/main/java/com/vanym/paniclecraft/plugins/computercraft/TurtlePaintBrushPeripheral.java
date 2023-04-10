@@ -49,7 +49,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     }
     
     @PeripheralMethod(2)
-    protected boolean hasPictureDown() throws LuaException, InterruptedException {
+    protected boolean detectPictureDown() throws LuaException, InterruptedException {
         return this.detectPicture(EnumFacing.DOWN);
     }
     
