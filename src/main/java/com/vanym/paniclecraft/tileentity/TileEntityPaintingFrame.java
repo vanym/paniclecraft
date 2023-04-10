@@ -86,9 +86,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         return new WorldPicturePoint(
                 WorldPictureProvider.PAINTINGFRAME,
                 this.getWorld(),
-                this.getPos().getX(),
-                this.getPos().getY(),
-                this.getPos().getZ(),
+                this.getPos(),
                 side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
     }
     

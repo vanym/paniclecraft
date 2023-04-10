@@ -25,6 +25,10 @@ public class MessagePaintingToolUse implements IMessage {
     
     public MessagePaintingToolUse() {}
     
+    public MessagePaintingToolUse(BlockPos pos, int px, int py, byte side, boolean tile) {
+        this(pos.getX(), pos.getY(), pos.getZ(), px, py, side, tile);
+    }
+    
     public MessagePaintingToolUse(int x, int y, int z, int px, int py, byte side, boolean tile) {
         this.x = x;
         this.y = y;
@@ -78,6 +82,10 @@ public class MessagePaintingToolUse implements IMessage {
         buf.writeBoolean(this.tile);
     }
     
+    protected BlockPos getPos() {
+        return new BlockPos(this.x, this.y, this.z);
+    }
+    
     public static class Handler extends InWorldHandler<MessagePaintingToolUse> {
         
         @Override
@@ -96,8 +104,7 @@ public class MessagePaintingToolUse implements IMessage {
                 provider = WorldPictureProvider.PAINTONBLOCK;
             }
             if (provider != null) {
-                picture = provider.getOrCreatePicture(world, message.x, message.y, message.z,
-                                                      message.side);
+                picture = provider.getOrCreatePicture(world, message.getPos(), message.side);
             }
             if (picture == null
                 || !player.canPlayerEdit(new BlockPos(message.x, message.y, message.z),

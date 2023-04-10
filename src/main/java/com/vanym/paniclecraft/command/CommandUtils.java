@@ -65,9 +65,7 @@ public class CommandUtils {
         return (provider)->new WorldPicturePoint(
                 provider,
                 player.getEntityWorld(),
-                target.getBlockPos().getX(),
-                target.getBlockPos().getY(),
-                target.getBlockPos().getZ(),
+                target.getBlockPos(),
                 target.sideHit.getIndex());
     }
     

@@ -1,46 +1,36 @@
 package com.vanym.paniclecraft.core.component.painting;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public final class WorldPicturePoint {
     
     public final WorldPictureProvider provider;
     public final World world;
-    public final int x;
-    public final int y;
-    public final int z;
+    public final BlockPos pos;
     public final int side;
     
     public WorldPicturePoint(WorldPictureProvider provider,
             World world,
-            int x,
-            int y,
-            int z,
+            BlockPos pos,
             int side) {
         this.provider = provider;
         this.world = world;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.pos = pos;
         this.side = side;
     }
     
     public Picture getOrCreatePicture() {
-        return this.provider.getOrCreatePicture(this.world, this.x, this.y, this.z, this.side);
+        return this.provider.getOrCreatePicture(this.world, this.pos, this.side);
     }
     
     public Picture getPicture() {
-        return this.provider.getPicture(this.world, this.x, this.y, this.z, this.side);
+        return this.provider.getPicture(this.world, this.pos, this.side);
     }
     
     public WorldPicturePoint getNeighborPoint(int xOffset, int yOffset) {
         PaintingSide pside = PaintingSide.getSide(this.side);
-        int x = this.x + pside.axes.xDir.getFrontOffsetX() * xOffset +
-                pside.axes.yDir.getFrontOffsetX() * yOffset;
-        int y = this.y + pside.axes.xDir.getFrontOffsetY() * xOffset +
-                pside.axes.yDir.getFrontOffsetY() * yOffset;
-        int z = this.z + pside.axes.xDir.getFrontOffsetZ() * xOffset +
-                pside.axes.yDir.getFrontOffsetZ() * yOffset;
-        return new WorldPicturePoint(this.provider, this.world, x, y, z, this.side);
+        BlockPos pos = this.pos.offset(pside.axes.xDir, xOffset).offset(pside.axes.yDir, yOffset);
+        return new WorldPicturePoint(this.provider, this.world, pos, this.side);
     }
 }

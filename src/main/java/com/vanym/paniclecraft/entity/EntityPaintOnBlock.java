@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
@@ -34,7 +35,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
@@ -83,33 +83,18 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
     }
     
-    public int getBlockX() {
-        return MathHelper.floor(this.posX);
-    }
-    
-    public int getBlockY() {
-        return MathHelper.floor(this.posY);
-    }
-    
-    public int getBlockZ() {
-        return MathHelper.floor(this.posZ);
-    }
-    
     public BlockPos getBlockPos() {
-        return new BlockPos(this.getBlockX(), this.getBlockY(), this.getBlockZ());
+        return new BlockPos(this);
     }
     
-    public void setBlock(int x, int y, int z) {
-        this.setLocationAndAngles(x + 0.5D, y, z + 0.5D, 0.0F, 0.0F);
+    public void setBlockPos(BlockPos pos) {
+        this.moveToBlockPosAndAngles(pos, 0.0F, 0.0F);
     }
     
     public void checkValidness() {
         for (int i = 0; i < this.holders.length; ++i) {
             if ((this.holders[i] == null)
-                || EntityPaintOnBlock.isValidBlockSide(this.world,
-                                                       this.getBlockX(),
-                                                       this.getBlockY(),
-                                                       this.getBlockZ(), i)) {
+                || EntityPaintOnBlock.isValidBlockSide(this.world, this.getBlockPos(), i)) {
                 continue;
             }
             this.clearPicture(i);
@@ -288,9 +273,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             return new WorldPicturePoint(
                     WorldPictureProvider.PAINTONBLOCK,
                     EntityPaintOnBlock.this.world,
-                    EntityPaintOnBlock.this.getBlockX(),
-                    EntityPaintOnBlock.this.getBlockY(),
-                    EntityPaintOnBlock.this.getBlockZ(),
+                    EntityPaintOnBlock.this.getBlockPos(),
                     this.side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
         }
         
@@ -307,10 +290,9 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         
         @Override
         public String toString() {
+            BlockPos pos = EntityPaintOnBlock.this.getBlockPos();
             return String.format("PaintOnBlock[x=%d, y=%d, z=%d, side=%s]",
-                                 EntityPaintOnBlock.this.getBlockX(),
-                                 EntityPaintOnBlock.this.getBlockY(),
-                                 EntityPaintOnBlock.this.getBlockZ(),
+                                 pos.getX(), pos.getY(), pos.getZ(),
                                  EnumFacing.getFront(this.side));
         }
     }
@@ -494,21 +476,21 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         return list.size();
     }
     
-    public static Picture getOrCreateEntityPicture(World world, int x, int y, int z, int side) {
-        EntityPaintOnBlock entityPON = getEntity(world, x, y, z);
+    public static Picture getOrCreateEntityPicture(World world, BlockPos pos, int side) {
+        EntityPaintOnBlock entityPON = getEntity(world, pos);
         if (entityPON != null) {
             Picture picture = entityPON.getPicture(side);
             if (!world.isRemote && picture == null
-                && isValidBlockSide(world, x, y, z, side)) {
+                && isValidBlockSide(world, pos, side)) {
                 picture = entityPON.createPicture(side);
             }
             return picture;
         }
-        if (world.isRemote || !isValidBlockSide(world, x, y, z, side)) {
+        if (world.isRemote || !isValidBlockSide(world, pos, side)) {
             return null;
         }
         entityPON = new EntityPaintOnBlock(world);
-        entityPON.setBlock(x, y, z);
+        entityPON.setBlockPos(pos);
         if (world.spawnEntity(entityPON)) {
             return entityPON.createPicture(side);
         } else {
@@ -516,8 +498,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
     }
     
-    public static EntityPaintOnBlock getEntity(World world, int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
+    public static EntityPaintOnBlock getEntity(World world, BlockPos pos) {
         if (!world.isBlockLoaded(pos)) {
             return null;
         }
@@ -528,29 +509,24 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             return null;
         }
         ClassInheritanceMultiMap<Entity> list = lists[listIndex];
-        for (EntityPaintOnBlock entityPOB : list.getByClass(EntityPaintOnBlock.class)) {
-            if (pos.getX() == entityPOB.getBlockX()
-                && pos.getY() == entityPOB.getBlockY()
-                && pos.getZ() == entityPOB.getBlockZ()) {
-                return entityPOB;
-            }
-        }
-        return null;
+        return StreamSupport.stream(list.getByClass(EntityPaintOnBlock.class).spliterator(), false)
+                            .filter(e->pos.equals(e.getBlockPos()))
+                            .findAny()
+                            .orElse(null);
     }
     
-    public static Picture getExistingPicture(World world, int x, int y, int z, int side) {
-        EntityPaintOnBlock entityPOB = getEntity(world, x, y, z);
+    public static Picture getExistingPicture(World world, BlockPos pos, int side) {
+        EntityPaintOnBlock entityPOB = getEntity(world, pos);
         if (entityPOB == null) {
             return null;
         }
         return entityPOB.getPicture(side);
     }
     
-    public static boolean isValidBlockSide(World world, int x, int y, int z, int side) {
+    public static boolean isValidBlockSide(World world, BlockPos pos, int side) {
         boolean valid;
         boolean air = false;
         boolean liquid = false;
-        BlockPos pos = new BlockPos(x, y, z);
         IBlockState state = world.getBlockState(pos);
         EnumFacing pside = EnumFacing.getFront(side);
         if (state.getBlock().isAir(state, world, pos)) {

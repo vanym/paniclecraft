@@ -14,13 +14,13 @@ public enum WorldPictureProvider {
     ANYTILE(ISidePictureProvider.class),
     PAINTONBLOCK(EntityPaintOnBlock.class) {
         @Override
-        public Picture getOrCreatePicture(World world, int x, int y, int z, int side) {
-            return EntityPaintOnBlock.getOrCreateEntityPicture(world, x, y, z, side);
+        public Picture getOrCreatePicture(World world, BlockPos pos, int side) {
+            return EntityPaintOnBlock.getOrCreateEntityPicture(world, pos, side);
         }
         
         @Override
-        public Picture getPicture(World world, int x, int y, int z, int side) {
-            return EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
+        public Picture getPicture(World world, BlockPos pos, int side) {
+            return EntityPaintOnBlock.getExistingPicture(world, pos, side);
         }
         
         @Override
@@ -35,12 +35,12 @@ public enum WorldPictureProvider {
         this.providerClass = providerClass;
     }
     
-    public Picture getOrCreatePicture(World world, int x, int y, int z, int side) {
-        return this.getPicture(world, x, y, z, side);
+    public Picture getOrCreatePicture(World world, BlockPos pos, int side) {
+        return this.getPicture(world, pos, side);
     }
     
-    public Picture getPicture(World world, int x, int y, int z, int side) {
-        TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
+    public Picture getPicture(World world, BlockPos pos, int side) {
+        TileEntity tile = world.getTileEntity(pos);
         if (tile != null && this.providerClass.isAssignableFrom(tile.getClass())) {
             return ((ISidePictureProvider)tile).getPicture(side);
         }

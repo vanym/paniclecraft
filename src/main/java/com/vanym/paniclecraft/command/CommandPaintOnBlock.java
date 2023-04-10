@@ -96,7 +96,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         @Override
         public void execute(MinecraftServer server, ICommandSender sender, String[] args)
                 throws CommandException {
-            int x, y, z;
+            BlockPos pos;
             if (args.length == 0) {
                 if (!(sender instanceof EntityPlayer)) {
                     TextComponentBase message = new TextComponentTranslation(
@@ -114,33 +114,29 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                     sender.sendMessage(message);
                     return;
                 }
-                x = target.getBlockPos().getX();
-                y = target.getBlockPos().getY();
-                z = target.getBlockPos().getZ();
+                pos = target.getBlockPos();
             } else if (args.length == 3) {
-                BlockPos coords = parseBlockPos(sender, args, 0, true);
-                x = coords.getX();
-                y = coords.getY();
-                z = coords.getZ();
+                pos = parseBlockPos(sender, args, 0, true);
             } else {
                 throw new WrongUsageException(this.getUsage(sender));
             }
             EntityPaintOnBlock entityPOB =
-                    EntityPaintOnBlock.getEntity(sender.getEntityWorld(), x, y, z);
+                    EntityPaintOnBlock.getEntity(sender.getEntityWorld(), pos);
             if (entityPOB == null) {
                 TextComponentBase message = new TextComponentTranslation(
                         this.getTranslationPrefix() + ".nopaintonblock",
-                        new Object[]{x, y, z});
+                        new Object[]{pos.getX(), pos.getY(), pos.getZ()});
                 sender.sendMessage(message);
                 return;
             }
             String name = entityPOB.getClass().getSimpleName();
             int id = entityPOB.getEntityId();
             UUID uuid = entityPOB.getUniqueID();
+            BlockPos entityPos = entityPOB.getBlockPos();
             String line = String.format("%s[x=%d, y=%d, z=%d, id=%d, uuid=%s]", name,
-                                        entityPOB.getBlockX(),
-                                        entityPOB.getBlockY(),
-                                        entityPOB.getBlockZ(),
+                                        entityPos.getX(),
+                                        entityPos.getY(),
+                                        entityPos.getZ(),
                                         id, uuid.toString());
             sender.sendMessage(new TextComponentString(line));
         }

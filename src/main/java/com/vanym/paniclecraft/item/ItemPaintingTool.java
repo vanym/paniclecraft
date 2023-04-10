@@ -110,17 +110,15 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
             return null;
         }
-        int x = target.getBlockPos().getX();
-        int y = target.getBlockPos().getY();
-        int z = target.getBlockPos().getZ();
+        BlockPos pos = target.getBlockPos();
         int side = target.sideHit.getIndex();
         boolean tile = true;
-        IPictureSize picture = WorldPictureProvider.ANYTILE.getPicture(world, x, y, z, side);
+        IPictureSize picture = WorldPictureProvider.ANYTILE.getPicture(world, pos, side);
         if (picture == null) {
             tile = false;
             if (Core.instance.painting.config.allowPaintOnBlock) {
-                picture = EntityPaintOnBlock.getExistingPicture(world, x, y, z, side);
-                if (picture == null && EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)) {
+                picture = EntityPaintOnBlock.getExistingPicture(world, pos, side);
+                if (picture == null && EntityPaintOnBlock.isValidBlockSide(world, pos, side)) {
                     picture = Core.instance.painting.config.paintOnBlockDefaultSize;
                 }
             }
@@ -134,7 +132,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         int px = (int)(inPainting.x * picture.getWidth());
         int py = (int)(inPainting.y * picture.getHeight());
         MessagePaintingToolUse message =
-                new MessagePaintingToolUse(x, y, z, px, py, (byte)pside.ordinal(), tile);
+                new MessagePaintingToolUse(pos, px, py, (byte)pside.ordinal(), tile);
         return message;
     }
     
@@ -153,11 +151,11 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             float hitX,
             float hitY,
             float hitZ) {
-        int x = pos.getX(), y = pos.getY(), z = pos.getZ(), side = facing.getIndex();
-        if (WorldPictureProvider.ANYTILE.getPicture(world, x, y, z, side) != null
+        int side = facing.getIndex();
+        if (WorldPictureProvider.ANYTILE.getPicture(world, pos, side) != null
             || (Core.instance.painting.config.allowPaintOnBlock
-                && (EntityPaintOnBlock.getExistingPicture(world, x, y, z, side) != null
-                    || EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)))) {
+                && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
+                    || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.setActiveHand(hand);
             if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
                 this.brushUseMessages.clear();

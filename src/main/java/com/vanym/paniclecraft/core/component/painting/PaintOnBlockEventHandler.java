@@ -54,8 +54,7 @@ public class PaintOnBlockEventHandler {
                 IBlockState oldState,
                 IBlockState newState,
                 int flags) {
-            EntityPaintOnBlock entityPOB =
-                    EntityPaintOnBlock.getEntity(this.world, pos.getX(), pos.getY(), pos.getZ());
+            EntityPaintOnBlock entityPOB = EntityPaintOnBlock.getEntity(this.world, pos);
             if (entityPOB != null) {
                 entityPOB.checkValidness();
             }

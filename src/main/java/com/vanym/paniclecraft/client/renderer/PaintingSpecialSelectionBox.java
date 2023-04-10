@@ -90,9 +90,7 @@ public class PaintingSpecialSelectionBox {
         Picture picture = new WorldPicturePoint(
                 WorldPictureProvider.ANYTILE,
                 player.world,
-                pos.getX(),
-                pos.getY(),
-                pos.getZ(),
+                pos,
                 target.sideHit.getIndex()).getPicture();
         if (picture == null) {
             return;

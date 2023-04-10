@@ -174,10 +174,8 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
             WorldPicturePoint point = new WorldPicturePoint(
                     provider,
                     this.turtle.getWorld(),
-                    pos.getX(),
-                    pos.getY(),
-                    pos.getZ(),
-                    pside.ordinal());
+                    pos,
+                    pside.getIndex());
             Picture picture = point.getOrCreatePicture();
             if (picture != null) {
                 return picture;

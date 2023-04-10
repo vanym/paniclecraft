@@ -14,8 +14,7 @@ public class PaintingPeripheralProvider implements IPeripheralProvider {
     @Override
     public IPeripheral getPeripheral(World world, BlockPos pos, EnumFacing side) {
         int pside = side.getOpposite().getIndex();
-        Picture picture = WorldPictureProvider.PAINTING.getPicture(world, pos.getX(), pos.getY(),
-                                                                   pos.getZ(), pside);
+        Picture picture = WorldPictureProvider.PAINTING.getPicture(world, pos, pside);
         if (picture != null) {
             return new PaintingPeripheral(picture);
         }
