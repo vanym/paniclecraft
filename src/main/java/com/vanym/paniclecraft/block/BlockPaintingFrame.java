@@ -115,6 +115,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         world.spawnEntity(entityItem);
         tileP.clearPicture(side.getIndex());
         tileP.markForUpdate();
+        world.notifyNeighborsOfStateChange(pos, this, true);
         return true;
     }
     
