@@ -1,6 +1,5 @@
 package com.vanym.paniclecraft.inventory;
 
-import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -25,13 +24,9 @@ public class InventoryUtils {
     }
     
     public static ItemStack findItem(InventoryCrafting inv, Item item) {
-        try {
-            return inventoryToStream(inv).filter(s->s != null && item == s.getItem())
-                                         .findFirst()
-                                         .get();
-        } catch (NoSuchElementException e) {
-            return null;
-        }
+        return inventoryToStream(inv).filter(s->s != null && item == s.getItem())
+                                     .findFirst()
+                                     .orElse(null);
     }
     
     @SideOnly(Side.CLIENT)
