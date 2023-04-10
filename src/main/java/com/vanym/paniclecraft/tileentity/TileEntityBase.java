@@ -13,6 +13,7 @@ import net.minecraft.world.IWorldNameable;
 public abstract class TileEntityBase extends TileEntity {
     
     public void markForUpdate() {
+        this.markDirty();
         if (this.world != null) {
             IBlockState state = this.world.getBlockState(this.pos);
             this.world.notifyBlockUpdate(this.pos, state, state, 3);

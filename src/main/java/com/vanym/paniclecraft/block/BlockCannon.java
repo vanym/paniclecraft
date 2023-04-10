@@ -11,6 +11,8 @@ import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -118,5 +120,15 @@ public class BlockCannon extends BlockContainerMod3 {
             double height = Math.round(entity.rotationPitch);
             tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
         }
+    }
+    
+    @Override
+    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+        TileEntity tileentity = world.getTileEntity(pos);
+        if (tileentity instanceof IInventory) {
+            InventoryHelper.dropInventoryItems(world, pos, (IInventory)tileentity);
+            world.updateComparatorOutputLevel(pos, this);
+        }
+        super.breakBlock(world, pos, state);
     }
 }
