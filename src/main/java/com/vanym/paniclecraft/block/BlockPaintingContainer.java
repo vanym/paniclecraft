@@ -47,9 +47,9 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
         EnumFacing dir = side.getOpposite();
         Vec3d dirvec = new Vec3d(dir.getDirectionVec());
         Vec3d lookvec = new Vec3d(EnumFacing.SOUTH.getDirectionVec());
-        lookvec.rotatePitch(-(player.rotationPitch * 0.999F) * (float)Math.PI / 180.0F);
-        lookvec.rotateYaw(-player.rotationYaw * (float)Math.PI / 180.0F);
-        Vec3d stackvec = dirvec.subtract(lookvec);
+        lookvec = lookvec.rotatePitch(-(player.rotationPitch * 0.999F) * (float)Math.PI / 180.0F);
+        lookvec = lookvec.rotateYaw(-player.rotationYaw * (float)Math.PI / 180.0F);
+        Vec3d stackvec = lookvec.subtract(dirvec);
         EnumFacing stackdir = GeometryUtils.getDirectionByVec(stackvec);
         if (stackdir == dir || stackdir == side) {
             return null;
