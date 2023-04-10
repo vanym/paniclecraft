@@ -56,7 +56,7 @@ public class RecipeDummy {
         
         @Override
         public ItemStack getCraftingResult(InventoryCrafting inv) {
-            return null;
+            return ItemStack.EMPTY;
         }
     }
     
@@ -81,7 +81,7 @@ public class RecipeDummy {
         
         @Override
         public ItemStack getCraftingResult(InventoryCrafting inv) {
-            return null;
+            return ItemStack.EMPTY;
         }
     }
 }

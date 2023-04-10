@@ -70,7 +70,7 @@ public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
         int offsetX = 0, offsetY = 0;
         while (true) {
             ItemStack stack = inv.getStackInRowAndColumn(offsetX, offsetY);
-            if (stack != null) {
+            if (!stack.isEmpty()) {
                 break;
             }
             switch (Integer.compare(offsetX, offsetY)) {

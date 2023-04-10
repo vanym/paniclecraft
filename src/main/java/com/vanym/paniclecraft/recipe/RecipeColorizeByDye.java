@@ -20,7 +20,7 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
         int dyes = 0;
         for (int i = 0; i < inv.getSizeInventory(); i++) {
             ItemStack slot = inv.getStackInSlot(i);
-            if (slot == null) {
+            if (slot.isEmpty()) {
                 continue;
             }
             if (slot.getItem() instanceof IColorizeable) {
@@ -34,7 +34,7 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
     
     @Override
     public ItemStack getCraftingResult(InventoryCrafting inv) {
-        ItemStack itemstack = null;
+        ItemStack itemstack = ItemStack.EMPTY;
         int[] aint = new int[3];
         int i = 0;
         int j = 0;
@@ -48,15 +48,15 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
         for (k = 0; k < inv.getSizeInventory(); ++k) {
             ItemStack slot = inv.getStackInSlot(k);
             
-            if (slot == null) {
+            if (slot.isEmpty()) {
                 continue;
             }
             
             if (slot.getItem() instanceof IColorizeable) {
                 itemcolored = (IColorizeable)slot.getItem();
                 
-                if (itemstack != null) {
-                    return null;
+                if (!itemstack.isEmpty()) {
+                    return ItemStack.EMPTY;
                 }
                 
                 itemstack = slot.copy();
@@ -91,7 +91,7 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
         }
         
         if (itemcolored == null) {
-            return null;
+            return ItemStack.EMPTY;
         } else {
             k = aint[0] / j;
             int i1 = aint[1] / j;

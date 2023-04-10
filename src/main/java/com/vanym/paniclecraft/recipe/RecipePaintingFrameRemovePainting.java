@@ -45,7 +45,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
     public ItemStack getCraftingResult(InventoryCrafting inv) {
         ItemStack painting = super.getCraftingResult(inv);
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        if (frame == null || !frame.hasTagCompound()) {
+        if (!frame.hasTagCompound()) {
             return painting;
         }
         NBTTagCompound itemTag = frame.getTagCompound();
@@ -77,7 +77,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
     public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
         NonNullList<ItemStack> list =
                 NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
-        ItemStack frame = null;
+        ItemStack frame = ItemStack.EMPTY;
         for (int i = 0; i < list.size(); ++i) {
             ItemStack slot = inv.getStackInSlot(i);
             Item item = slot.getItem();
@@ -90,7 +90,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
             }
             list.set(i, ForgeHooks.getContainerItem(slot));
         }
-        if (frame == null || !frame.hasTagCompound()) {
+        if (!frame.hasTagCompound()) {
             return super.getRemainingItems(inv);
         }
         NBTTagCompound itemTag = frame.getTagCompound();

@@ -24,9 +24,9 @@ public class InventoryUtils {
     }
     
     public static ItemStack findItem(InventoryCrafting inv, Item item) {
-        return inventoryToStream(inv).filter(s->s != null && item == s.getItem())
+        return inventoryToStream(inv).filter(s->item == s.getItem())
                                      .findFirst()
-                                     .orElse(null);
+                                     .orElse(ItemStack.EMPTY);
     }
     
     @SideOnly(Side.CLIENT)

@@ -24,6 +24,9 @@ public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> im
         boolean colorizeable = false;
         for (int i = 0; i < inv.getSizeInventory(); ++i) {
             ItemStack slot = inv.getStackInSlot(i);
+            if (slot.isEmpty()) {
+                continue;
+            }
             Item item = slot.getItem();
             if (item instanceof IPaintingTool) {
                 IPaintingTool tool = (IPaintingTool)item;
@@ -49,29 +52,29 @@ public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> im
     
     @Override
     public ItemStack getCraftingResult(InventoryCrafting inv) {
-        ItemStack fillerStack = null;
-        ItemStack colorizeableStack = null;
+        ItemStack fillerStack = ItemStack.EMPTY;
+        ItemStack colorizeableStack = ItemStack.EMPTY;
         for (int i = 0; i < inv.getSizeInventory(); ++i) {
             ItemStack slot = inv.getStackInSlot(i);
             Item item = slot.getItem();
             if (item instanceof IPaintingTool) {
                 IPaintingTool tool = (IPaintingTool)item;
                 if (tool.getPaintingToolType(slot) == PaintingToolType.FILLER) {
-                    if (fillerStack != null) {
-                        return null;
+                    if (!fillerStack.isEmpty()) {
+                        return ItemStack.EMPTY;
                     }
                     fillerStack = slot;
                     continue;
                 }
             }
             if (item instanceof IColorizeable) {
-                if (colorizeableStack != null) {
-                    return null;
+                if (!colorizeableStack.isEmpty()) {
+                    return ItemStack.EMPTY;
                 }
                 colorizeableStack = slot.copy();
             }
         }
-        if (fillerStack != null && colorizeableStack != null) {
+        if (!fillerStack.isEmpty() && !colorizeableStack.isEmpty()) {
             Item fillerItem = fillerStack.getItem();
             Item colorizeableItem = colorizeableStack.getItem();
             IPaintingTool tool = (IPaintingTool)fillerItem;
@@ -80,7 +83,7 @@ public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> im
             colorizeable.setColor(colorizeableStack, ColorUtils.getAlphaless(color));
             return colorizeableStack;
         }
-        return null;
+        return ItemStack.EMPTY;
     }
     
     @Override
