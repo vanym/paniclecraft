@@ -3,13 +3,16 @@ package com.vanym.paniclecraft.block;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.GUIs;
+import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -92,6 +95,18 @@ public class BlockCannon extends BlockContainerMod3 {
             double height = Math.round(entity.rotationPitch);
             tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
         }
+    }
+    
+    @Override
+    public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile instanceof TileEntityCannon) {
+            TileEntityCannon tileCannon = (TileEntityCannon)tile;
+            InventoryUtils.inventoryToStream(tileCannon)
+                          .map(sk->new EntityItem(world, x + 0.5F, y + 0.3F, z + 0.5F, sk.copy()))
+                          .forEach(world::spawnEntityInWorld);
+        }
+        super.breakBlock(world, x, y, z, block, meta);
     }
     
     @Override
