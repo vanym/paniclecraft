@@ -7,6 +7,7 @@ import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -89,6 +90,16 @@ public class BlockCannon extends BlockContainerMod3 {
             BlockPos pos,
             EnumFacing side) {
         return side == EnumFacing.DOWN;
+    }
+    
+    @Override
+    public BlockFaceShape getBlockFaceShape(
+            IBlockAccess world,
+            IBlockState state,
+            BlockPos pos,
+            EnumFacing face) {
+        return this.isSideSolid(state, world, pos, face) ? BlockFaceShape.SOLID
+                                                         : BlockFaceShape.UNDEFINED;
     }
     
     @Override

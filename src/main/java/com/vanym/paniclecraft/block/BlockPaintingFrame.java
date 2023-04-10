@@ -19,6 +19,7 @@ import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -219,11 +220,17 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             BlockPos pos,
             EnumFacing side) {
         TileEntityPaintingFrame tile = (TileEntityPaintingFrame)world.getTileEntity(pos);
-        if (tile.getPicture(side.ordinal()) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return tile.getPicture(side.getIndex()) != null;
+    }
+    
+    @Override
+    public BlockFaceShape getBlockFaceShape(
+            IBlockAccess world,
+            IBlockState state,
+            BlockPos pos,
+            EnumFacing face) {
+        return this.isSideSolid(state, world, pos, face) ? BlockFaceShape.SOLID
+                                                         : BlockFaceShape.BOWL;
     }
     
     @Override
