@@ -25,6 +25,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -139,6 +140,21 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     @Override
     public int getMaxItemUseDuration(ItemStack itemstack) {
         return 72000;
+    }
+    
+    @Override
+    public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
+        return oldStack.getItem() instanceof ItemPaintingTool
+            && newStack.getItem() instanceof ItemPaintingTool;
+    }
+    
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(
+            World world,
+            EntityPlayer player,
+            EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
+        return new ActionResult<>(EnumActionResult.FAIL, stack);
     }
     
     @Override
