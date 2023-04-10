@@ -17,7 +17,6 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.utils.IconUtils;
@@ -32,6 +31,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -143,9 +143,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
         if (this.importTexture == null) {
             return;
         }
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.importTexture.getGlTextureId());
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
+                                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        GlStateManager.bindTexture(this.importTexture.getGlTextureId());
         int pictureWidth = this.view.pictureSize.getWidth();
         int pictureHeight = this.view.pictureSize.getHeight();
         int importTextureEndX = this.getImportTextureEndX();
@@ -175,10 +176,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
             for (int x = Math.max(0, this.importTextureX / pictureWidth); x < w; ++x) {
                 Picture picture = this.view.getPicture(x, y);
                 if (picture != null && picture.isEditable()) {
-                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                 } else {
                     final float c = 32.0F / 255.0F;
-                    GL11.glColor4f(c, c, c, 0.75F);
+                    GlStateManager.color(c, c, c, 0.75F);
                 }
                 int paintingX = x * pictureWidth;
                 int paintingEndX = paintingX + pictureWidth;
@@ -222,7 +223,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 tessellator.draw();
             }
         }
-        GL11.glDisable(GL11.GL_BLEND);
+        GlStateManager.disableBlend();
     }
     
     @Override

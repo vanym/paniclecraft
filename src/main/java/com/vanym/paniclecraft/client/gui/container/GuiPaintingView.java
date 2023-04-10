@@ -10,8 +10,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.lwjgl.opengl.GL11;
-
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
@@ -20,6 +18,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
@@ -109,8 +108,9 @@ public class GuiPaintingView extends GuiScreen {
     }
     
     protected void drawPainting() {
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
+                                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         for (int y = 0; y < this.view.sizeY; ++y) {
             for (int x = 0; x < this.view.sizeX; ++x) {
                 Picture picture = this.view.getPicture(x, y);
@@ -123,7 +123,7 @@ public class GuiPaintingView extends GuiScreen {
                                            icon, this.viewStep, this.viewStep);
             }
         }
-        GL11.glDisable(GL11.GL_BLEND);
+        GlStateManager.disableBlend();
     }
     
     @Override
