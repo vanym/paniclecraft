@@ -21,7 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TurtlePaintBrush implements ITurtleUpgrade {
     
-    protected static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, "paintBrush");
+    protected static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, "paintbrush");
     
     public TurtlePaintBrush() {}
     

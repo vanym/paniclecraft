@@ -111,7 +111,7 @@ public class Core implements IGuiHandler {
             this.tab = new CreativeTabMod3(DEF.MOD_ID);
         }
         
-        if (Loader.isModLoaded("ComputerCraft")) {
+        if (Loader.isModLoaded("computercraft")) {
             this.components.add(com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.instance());
         }
         
