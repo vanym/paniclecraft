@@ -20,6 +20,7 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
@@ -207,6 +208,11 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     @Override
     public boolean doesEntityNotTriggerPressurePlate() {
         return true;
+    }
+    
+    @Override
+    public EnumPushReaction getPushReaction() {
+        return EnumPushReaction.IGNORE;
     }
     
     @Override
