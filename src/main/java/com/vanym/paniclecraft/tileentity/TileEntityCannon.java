@@ -67,13 +67,9 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
         } else {
             nbtTag.removeTag(TAG_TIMEOUT);
         }
-        if (!this.stack.isEmpty()) {
-            NBTTagCompound itemTag = new NBTTagCompound();
-            this.stack.writeToNBT(itemTag);
-            nbtTag.setTag(TAG_STACK, itemTag);
-        } else {
-            nbtTag.removeTag(TAG_STACK);
-        }
+        NBTTagCompound itemTag = new NBTTagCompound();
+        this.stack.writeToNBT(itemTag);
+        nbtTag.setTag(TAG_STACK, itemTag);
         return nbtTag;
     }
     
@@ -86,9 +82,8 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
         this.vector = null;
         this.timeout = nbtTag.getInteger(TAG_TIMEOUT);
         if (nbtTag.hasKey(TAG_STACK, 10)) {
-            this.stack = new ItemStack(nbtTag.getCompoundTag(TAG_STACK));
-        } else {
-            this.stack = ItemStack.EMPTY;
+            NBTTagCompound itemTag = nbtTag.getCompoundTag(TAG_STACK);
+            this.stack = new ItemStack(itemTag);
         }
     }
     
