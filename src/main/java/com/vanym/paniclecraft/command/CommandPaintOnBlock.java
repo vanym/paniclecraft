@@ -7,18 +7,15 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
@@ -100,22 +97,8 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         public void processCommand(ICommandSender sender, String[] args) {
             int x, y, z;
             if (args.length == 0) {
-                if (!(sender instanceof EntityPlayer)) {
-                    ChatComponentStyle message = new ChatComponentTranslation(
-                            this.getTranslationPrefix() + ".playerless");
-                    message.getChatStyle().setColor(EnumChatFormatting.RED);
-                    sender.addChatMessage(message);
-                    return;
-                }
-                EntityPlayer player = (EntityPlayer)sender;
-                MovingObjectPosition target = GeometryUtils.rayTraceBlocks(player, 6.0D);
-                if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
-                    ChatComponentStyle message = new ChatComponentTranslation(
-                            this.getTranslationPrefix() + ".noblock");
-                    message.getChatStyle().setColor(EnumChatFormatting.RED);
-                    sender.addChatMessage(message);
-                    return;
-                }
+                EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
+                MovingObjectPosition target = CommandUtils.rayTraceBlocks(player);
                 x = target.blockX;
                 y = target.blockY;
                 z = target.blockZ;
@@ -130,11 +113,9 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             EntityPaintOnBlock entityPOB =
                     EntityPaintOnBlock.getEntity(sender.getEntityWorld(), x, y, z);
             if (entityPOB == null) {
-                ChatComponentStyle message = new ChatComponentTranslation(
+                throw new CommandException(
                         this.getTranslationPrefix() + ".nopaintonblock",
                         new Object[]{x, y, z});
-                sender.addChatMessage(message);
-                return;
             }
             String name = entityPOB.getClass().getSimpleName();
             int id = entityPOB.getEntityId();
