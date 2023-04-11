@@ -22,6 +22,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -172,6 +173,11 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
     @SideOnly(Side.CLIENT)
     public boolean hasCustomBreakingProgress(IBlockState state) {
         return true;
+    }
+    
+    @Override
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
     @Override
