@@ -60,13 +60,11 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
         } else {
             nbtTag.removeTag(TAG_TIMEOUT);
         }
+        NBTTagCompound itemTag = new NBTTagCompound();
         if (this.stack != null) {
-            NBTTagCompound itemTag = new NBTTagCompound();
             this.stack.writeToNBT(itemTag);
-            nbtTag.setTag(TAG_STACK, itemTag);
-        } else {
-            nbtTag.removeTag(TAG_STACK);
         }
+        nbtTag.setTag(TAG_STACK, itemTag);
     }
     
     @Override
@@ -78,9 +76,8 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
         this.vector = null;
         this.timeout = nbtTag.getInteger(TAG_TIMEOUT);
         if (nbtTag.hasKey(TAG_STACK, 10)) {
-            this.stack = ItemStack.loadItemStackFromNBT(nbtTag.getCompoundTag(TAG_STACK));
-        } else {
-            this.stack = null;
+            NBTTagCompound itemTag = nbtTag.getCompoundTag(TAG_STACK);
+            this.stack = ItemStack.loadItemStackFromNBT(itemTag);
         }
     }
     
