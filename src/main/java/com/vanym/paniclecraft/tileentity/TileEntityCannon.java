@@ -102,6 +102,11 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     }
     
     @Override
+    public boolean canUpdate() {
+        return true;
+    }
+    
+    @Override
     public Packet getDescriptionPacket() {
         NBTTagCompound dataTag = new NBTTagCompound();
         this.writeToNBT(dataTag, true);
