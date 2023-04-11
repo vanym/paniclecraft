@@ -10,15 +10,12 @@ import com.vanym.paniclecraft.utils.GeometryUtils;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.TextComponentBase;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
@@ -98,22 +95,8 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                 throws CommandException {
             BlockPos pos;
             if (args.length == 0) {
-                if (!(sender instanceof EntityPlayer)) {
-                    TextComponentBase message = new TextComponentTranslation(
-                            this.getTranslationPrefix() + ".playerless");
-                    message.getStyle().setColor(TextFormatting.RED);
-                    sender.sendMessage(message);
-                    return;
-                }
-                EntityPlayer player = (EntityPlayer)sender;
-                RayTraceResult target = GeometryUtils.rayTraceBlocks(player, 6.0D);
-                if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
-                    TextComponentBase message = new TextComponentTranslation(
-                            this.getTranslationPrefix() + ".noblock");
-                    message.getStyle().setColor(TextFormatting.RED);
-                    sender.sendMessage(message);
-                    return;
-                }
+                EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
+                RayTraceResult target = CommandUtils.rayTraceBlocks(player);
                 pos = target.getBlockPos();
             } else if (args.length == 3) {
                 pos = parseBlockPos(sender, args, 0, true);
@@ -123,11 +106,9 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             EntityPaintOnBlock entityPOB =
                     EntityPaintOnBlock.getEntity(sender.getEntityWorld(), pos);
             if (entityPOB == null) {
-                TextComponentBase message = new TextComponentTranslation(
+                throw new CommandException(
                         this.getTranslationPrefix() + ".nopaintonblock",
                         new Object[]{pos.getX(), pos.getY(), pos.getZ()});
-                sender.sendMessage(message);
-                return;
             }
             String name = entityPOB.getClass().getSimpleName();
             int id = entityPOB.getEntityId();
