@@ -28,6 +28,7 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -45,7 +46,6 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.server.FMLServerHandler;
 
 @Mod(
     modid = DEF.MOD_ID,
@@ -175,7 +175,7 @@ public class Core implements IGuiHandler {
     }
     
     protected void sendConfigToAllPlayers() {
-        MinecraftServer server = FMLServerHandler.instance().getServer();
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server != null && server.isServerRunning()) {
             PlayerList manager = server.getPlayerList();
             manager.getPlayers()

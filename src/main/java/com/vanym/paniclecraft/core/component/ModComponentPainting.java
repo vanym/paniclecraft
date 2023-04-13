@@ -165,7 +165,6 @@ public class ModComponentPainting extends ModComponent {
                                               Side.SERVER);
         this.initRecipe(config);
         this.configChanged(config);
-        this.applyConfig();
     }
     
     @Override
@@ -175,6 +174,7 @@ public class ModComponentPainting extends ModComponent {
         }
         this.myServerConfig.read(config);
         this.server.read(config);
+        this.applyConfig();
     }
     
     protected void applyConfig() {
