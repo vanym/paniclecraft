@@ -196,7 +196,7 @@ public class Core implements IGuiHandler {
     
     @SuppressWarnings("unchecked")
     protected void sendConfigToAllPlayers() {
-        MinecraftServer server = MinecraftServer.getServer();
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server != null && server.isServerRunning()) {
             ServerConfigurationManager manager = server.getConfigurationManager();
             List<EntityPlayerMP> players = manager.playerEntityList;
