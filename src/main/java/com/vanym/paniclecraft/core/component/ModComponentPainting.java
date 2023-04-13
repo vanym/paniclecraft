@@ -393,6 +393,7 @@ public class ModComponentPainting extends ModComponent {
     
     @Override
     @SideOnly(Side.CLIENT)
+    @SuppressWarnings("deprecation")
     public void initClient(ModConfig config) {
         if (!this.isEnabled()) {
             return;
