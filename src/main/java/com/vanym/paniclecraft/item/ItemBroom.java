@@ -53,4 +53,9 @@ public class ItemBroom extends ItemMod3 {
                 stack.damageItem(itemSizeWas - itemSize, player);
             });
     }
+    
+    @Override
+    public int getItemBurnTime(ItemStack fuel) {
+        return 200;
+    }
 }
