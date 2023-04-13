@@ -5,13 +5,14 @@ import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
+import cpw.mods.fml.common.IFuelHandler;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
-public class ItemBroom extends ItemMod3 {
+public class ItemBroom extends ItemMod3 implements IFuelHandler {
     
     public final double distance;
     
@@ -53,5 +54,13 @@ public class ItemBroom extends ItemMod3 {
             int itemSize = e.getEntityItem().stackSize;
             stack.damageItem(itemSizeWas - itemSize, player);
         });
+    }
+    
+    @Override
+    public int getBurnTime(ItemStack fuel) {
+        if (fuel.getItem() instanceof ItemBroom) {
+            return 200;
+        }
+        return 0;
     }
 }

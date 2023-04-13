@@ -39,6 +39,7 @@ public class ModComponentBroom extends ModComponent {
             GameRegistry.addRecipe(recipe);
         }
         Core.instance.registerItem(this.itemBroom);
+        GameRegistry.registerFuelHandler(this.itemBroom);
     }
     
     @Override
