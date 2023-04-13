@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
@@ -20,10 +21,31 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockBasePressurePlate;
+import net.minecraft.block.BlockBrewingStand;
+import net.minecraft.block.BlockButton;
+import net.minecraft.block.BlockCactus;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockFenceGate;
+import net.minecraft.block.BlockPane;
+import net.minecraft.block.BlockRail;
+import net.minecraft.block.BlockRailBase;
+import net.minecraft.block.BlockRailBase.EnumRailDirection;
+import net.minecraft.block.BlockRailDetector;
+import net.minecraft.block.BlockRailPowered;
+import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockStairs;
+import net.minecraft.block.BlockVine;
+import net.minecraft.block.BlockWall;
 import net.minecraft.block.material.EnumPushReaction;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -534,8 +556,9 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         boolean air = false;
         boolean liquid = false;
         IBlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
         EnumFacing pside = EnumFacing.getFront(side);
-        if (state.getBlock().isAir(state, world, pos)) {
+        if (block.isAir(state, world, pos)) {
             valid = false;
             air = true;
         } else if (state.getMaterial().isLiquid()) {
@@ -543,14 +566,34 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             liquid = true;
         } else if (state.isOpaqueCube()) {
             IBlockState neighborState = world.getBlockState(pos.offset(pside));
-            if (neighborState.isOpaqueCube()) {
-                valid = false;
+            valid = !neighborState.isOpaqueCube();
+        } else if (state.getBlockFaceShape(world, pos, pside) == BlockFaceShape.SOLID) {
+            valid = true;
+        } else if (Stream.of(BlockStairs.class, BlockFence.class, BlockWall.class, BlockPane.class,
+                             BlockFenceGate.class, BlockBrewingStand.class,
+                             BlockBasePressurePlate.class, BlockButton.class, BlockCactus.class,
+                             BlockSnow.class, BlockRedstoneWire.class, BlockVine.class)
+                         .anyMatch(clazz->clazz.isAssignableFrom(block.getClass()))) {
+            valid = true;
+        } else if (Stream.of(Blocks.RAIL, Blocks.GOLDEN_RAIL,
+                             Blocks.ACTIVATOR_RAIL, Blocks.DETECTOR_RAIL)
+                         .anyMatch(block::equals)) {
+            PropertyEnum<BlockRailBase.EnumRailDirection> shape;
+            if (Stream.of(Blocks.GOLDEN_RAIL, Blocks.ACTIVATOR_RAIL).anyMatch(block::equals)) {
+                shape = BlockRailPowered.SHAPE;
+            } else if (block.equals(Blocks.DETECTOR_RAIL)) {
+                shape = BlockRailDetector.SHAPE;
             } else {
-                valid = true;
+                shape = BlockRail.SHAPE;
             }
+            EnumRailDirection value = state.getValue(shape);
+            valid = value != null && !value.isAscending();
         } else {
-            // TODO make detailed rules
-            valid = false;
+            AxisAlignedBB box = state.getBoundingBox(world, pos);
+            AxisAlignedBB absoluteBox = box.offset(pos);
+            List<AxisAlignedBB> list = new ArrayList<>();
+            state.addCollisionBoxToList(world, pos, absoluteBox, list, null, false);
+            valid = !list.isEmpty() && list.stream().allMatch(absoluteBox::equals);
         }
         BlockSideValidForPaint event =
                 new BlockSideValidForPaint(world, pos, state, side, valid, air, liquid);
