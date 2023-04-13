@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.block;
 
+import java.util.Objects;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.GUIs;
@@ -103,6 +105,7 @@ public class BlockCannon extends BlockContainerMod3 {
         if (tile instanceof TileEntityCannon) {
             TileEntityCannon tileCannon = (TileEntityCannon)tile;
             InventoryUtils.inventoryToStream(tileCannon)
+                          .filter(Objects::nonNull)
                           .map(sk->new EntityItem(world, x + 0.5F, y + 0.3F, z + 0.5F, sk.copy()))
                           .forEach(world::spawnEntityInWorld);
         }
