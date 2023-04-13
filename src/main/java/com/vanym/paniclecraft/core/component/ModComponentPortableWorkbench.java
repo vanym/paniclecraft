@@ -32,6 +32,7 @@ public class ModComponentPortableWorkbench extends ModComponent {
                                        "\'0\' is infinite");
         this.itemWorkbench = new ItemWorkbench(durability);
         Core.instance.registerItem(this.itemWorkbench);
+        GameRegistry.registerFuelHandler(this.itemWorkbench);
         boolean craftingRecipePortableWorkbench =
                 config.getBoolean("craftingRecipePortableWorkbench", this.getName(), true, "");
         if (craftingRecipePortableWorkbench) {
