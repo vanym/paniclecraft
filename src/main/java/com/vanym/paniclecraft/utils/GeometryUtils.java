@@ -55,11 +55,11 @@ public class GeometryUtils {
         return tside.fromSideCoords(box);
     }
     
-    public static boolean isTouchingSide(int side, AxisAlignedBB box) {
+    public static boolean isTouchingSide(EnumFacing side, AxisAlignedBB box) {
         if (box == null) {
             return false;
         }
-        EnumFacing zdir = EnumFacing.getFront(side).getOpposite();
+        EnumFacing zdir = side.getOpposite();
         TileOnSide tside = getZTileOnSide(zdir);
         AxisAlignedBB sideBox = tside.toSideCoords(box);
         return sideBox.minZ <= 0.0D;

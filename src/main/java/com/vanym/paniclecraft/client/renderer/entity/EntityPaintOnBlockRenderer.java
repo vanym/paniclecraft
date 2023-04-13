@@ -2,12 +2,14 @@ package com.vanym.paniclecraft.client.renderer.entity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
@@ -21,6 +23,11 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockPane;
+import net.minecraft.block.BlockStairs;
+import net.minecraft.block.BlockWall;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
@@ -60,8 +67,14 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
     protected final FaceBakery faceBakery = new FaceBakery();
     protected BlockRendererDispatcher blockRenderer;
     
+    protected final Map<Collection<AxisAlignedBB>, IBakedModel> preparedModels;
+    
     public EntityPaintOnBlockRenderer() {
         super(Minecraft.getMinecraft().getRenderManager());
+        this.preparedModels =
+                Stream.of(GeometryUtils.getFullBlockBox())
+                      .map(Arrays::asList)
+                      .collect(Collectors.toMap(Function.identity(), this::makeModel));
     }
     
     @Override
@@ -109,9 +122,8 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
             final double expandZ = expandBase + Math.pow(z / 4, 2) * expandAdjust;
             BlockModelRenderer render = this.blockRenderer.getBlockModelRenderer();
             IBlockState state = world.getBlockState(pos);
-            state = state.getActualState(world, pos);
             long rand = MathHelper.getPositionRandom(pos);
-            IBakedModel model = this.getModel(state.getBoundingBox(world, pos));
+            IBakedModel model = this.getModel(state, world, pos);
             for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = entityPOB.getPicture(side);
                 if (picture == null) {
@@ -158,42 +170,70 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
         return null;
     }
     
+    protected IBakedModel getModel(IBlockState state, World world, BlockPos pos) {
+        if (this.isUsingCollisionBox(state, world, pos)) {
+            return this.getModelByCollisionBox(state, world, pos);
+        }
+        return this.getModel(state.getBoundingBox(world, pos));
+    }
+    
+    protected boolean isUsingCollisionBox(IBlockState state, World world, BlockPos pos) {
+        Block block = state.getBlock();
+        return block instanceof BlockStairs
+            || block instanceof BlockFence
+            || block instanceof BlockWall
+            || block instanceof BlockPane;
+    }
+    
+    protected IBakedModel getModelByCollisionBox(IBlockState state, World world, BlockPos pos) {
+        List<AxisAlignedBB> absoluteList = new ArrayList<>();
+        AxisAlignedBB absoluteMask = GeometryUtils.getFullBlockBox().offset(pos);
+        state.addCollisionBoxToList(world, pos, absoluteMask, absoluteList, null, false);
+        List<AxisAlignedBB> list =
+                absoluteList.stream()
+                            .map(box->box.offset(-pos.getX(), -pos.getY(), -pos.getZ()))
+                            .map(box->box.intersect(GeometryUtils.getFullBlockBox()))
+                            .collect(Collectors.toList());
+        return this.getModel(list);
+    }
+    
     protected IBakedModel getModel(AxisAlignedBB box) {
         if (box == null) {
             box = GeometryUtils.getFullBlockBox();
+        } else {
+            box = box.intersect(GeometryUtils.getFullBlockBox());
         }
-        return this.makeModel(box);
+        return this.getModel(Arrays.asList(box));
     }
     
-    protected IBakedModel makeModel(AxisAlignedBB box) {
-        Vector3f min = new Vector3f((float)box.minX, (float)box.minY, (float)box.minZ);
-        Vector3f max = new Vector3f((float)box.maxX, (float)box.maxY, (float)box.maxZ);
-        min.scale(16.0F);
-        max.scale(16.0F);
-        BlockPart part = new BlockPart(min, max, newBlockPartFaceMap(), null, true);
-        // fixing vertical sides rotation
-        Arrays.stream(EnumFacing.values())
-              .filter(side->side.getAxis().isVertical())
-              .map(part.mapFaces::get)
-              .map(bpf->bpf.blockFaceUV.uvs)
-              .forEach(uvs-> {
-                  for (int i = 0; i < uvs.length; ++i) {
-                      uvs[i] = 16.0F - uvs[i];
-                  }
-              });
+    protected IBakedModel getModel(Collection<AxisAlignedBB> boxes) {
+        IBakedModel model = this.preparedModels.get(boxes);
+        if (model != null) {
+            return model;
+        }
+        return this.makeModel(boxes);
+    }
+    
+    protected IBakedModel makeModel(Collection<AxisAlignedBB> boxes) {
+        List<BlockPart> parts = boxes.stream()
+                                     .map(EntityPaintOnBlockRenderer::makeBlockPart)
+                                     .collect(Collectors.toList());
         List<BakedQuad> quads = new ArrayList<>();
         EnumMap<EnumFacing, List<BakedQuad>> quadsMap = new EnumMap<>(EnumFacing.class);
         for (EnumFacing side : EnumFacing.values()) {
             quadsMap.put(side, new ArrayList<>());
         }
-        for (Entry<EnumFacing, BlockPartFace> e : part.mapFaces.entrySet()) {
-            EnumFacing side = e.getKey();
-            BlockPartFace face = e.getValue();
-            BakedQuad quad = this.faceBakery.makeBakedQuad(part.positionFrom, part.positionTo,
-                                                           face, FULL_SPRITE, side,
-                                                           ModelRotation.X0_Y0, part.partRotation,
-                                                           false, part.shade);
-            quads.add(quad);
+        for (BlockPart part : parts) {
+            for (Entry<EnumFacing, BlockPartFace> e : part.mapFaces.entrySet()) {
+                EnumFacing side = e.getKey();
+                BlockPartFace face = e.getValue();
+                BakedQuad quad = this.faceBakery.makeBakedQuad(part.positionFrom, part.positionTo,
+                                                               face, FULL_SPRITE, side,
+                                                               ModelRotation.X0_Y0,
+                                                               part.partRotation,
+                                                               false, part.shade);
+                quadsMap.getOrDefault(face.cullFace, quads).add(quad);
+            }
         }
         return new SimpleBakedModel(
                 quads,
@@ -205,13 +245,34 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
                 ItemOverrideList.NONE);
     }
     
-    protected static Map<EnumFacing, BlockPartFace> newBlockPartFaceMap() {
-        return Arrays.stream(EnumFacing.values())
-                     .collect(Collectors.toMap(Function.identity(),
-                                               side->new BlockPartFace(
-                                                       null,
-                                                       side.getIndex(),
-                                                       "",
-                                                       new BlockFaceUV(null, 0))));
+    protected static BlockPart makeBlockPart(AxisAlignedBB box) {
+        Vector3f min = new Vector3f((float)box.minX, (float)box.minY, (float)box.minZ);
+        Vector3f max = new Vector3f((float)box.maxX, (float)box.maxY, (float)box.maxZ);
+        min.scale(16.0F);
+        max.scale(16.0F);
+        Map<EnumFacing, BlockPartFace> blockPartFaceMap =
+                Stream.of(EnumFacing.values())
+                      .collect(Collectors.toMap(Function.identity(),
+                                                side-> {
+                                                    EnumFacing cullFace = null;
+                                                    if (GeometryUtils.isTouchingSide(side, box)) {
+                                                        cullFace = side;
+                                                    }
+                                                    int i = side.getIndex();
+                                                    BlockFaceUV uv = new BlockFaceUV(null, 0);
+                                                    return new BlockPartFace(cullFace, i, "", uv);
+                                                }));
+        BlockPart part = new BlockPart(min, max, blockPartFaceMap, null, true);
+        // fixing vertical sides rotation
+        Arrays.stream(EnumFacing.values())
+              .filter(side->side.getAxis().isVertical())
+              .map(part.mapFaces::get)
+              .map(bpf->bpf.blockFaceUV.uvs)
+              .forEach(uvs-> {
+                  for (int i = 0; i < uvs.length; ++i) {
+                      uvs[i] = 16.0F - uvs[i];
+                  }
+              });
+        return part;
     }
 }
