@@ -18,6 +18,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class ModComponentDeskGame extends ModComponent {
@@ -47,6 +48,7 @@ public class ModComponentDeskGame extends ModComponent {
         GameRegistry.registerBlock(this.blockChessDesk, ItemChessDesk.class,
                                    this.blockChessDesk.getName());
         this.itemChessDesk = (ItemChessDesk)Item.getItemFromBlock(this.blockChessDesk);
+        MinecraftForge.EVENT_BUS.register(this.itemChessDesk);
         GameRegistry.registerTileEntity(TileEntityChessDesk.class,
                                         TileEntityChessDesk.ID.toString());
         boolean craftingRecipeChessDesk =

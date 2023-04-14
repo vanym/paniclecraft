@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
+import cpw.mods.fml.common.eventhandler.Event;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -54,6 +56,19 @@ public class ItemChessDesk extends ItemBlock {
             int metadata) {
         int rot = MathHelper.floor_double((player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         return super.placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, rot);
+    }
+    
+    @SubscribeEvent
+    @SuppressWarnings("deprecation")
+    public void onFuelBurnTime(net.minecraftforge.event.FuelBurnTimeEvent event) {
+        ItemStack fuel = event.fuel;
+        if (fuel.getItem() instanceof ItemChessDesk && fuel.hasTagCompound()) {
+            NBTTagCompound itemTag = fuel.getTagCompound();
+            if (itemTag.hasKey(TAG_MOVES)) {
+                event.burnTime = 0;
+                event.setResult(Event.Result.DENY);
+            }
+        }
     }
     
     @Override
