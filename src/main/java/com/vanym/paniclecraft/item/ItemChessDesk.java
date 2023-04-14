@@ -40,6 +40,17 @@ public class ItemChessDesk extends ItemBlock {
     }
     
     @Override
+    public int getItemBurnTime(ItemStack fuel) {
+        if (fuel.hasTagCompound()) {
+            NBTTagCompound itemTag = fuel.getTagCompound();
+            if (itemTag.hasKey(TAG_MOVES)) {
+                return 0;
+            }
+        }
+        return -1;
+    }
+    
+    @Override
     @SideOnly(Side.CLIENT)
     public void addInformation(
             ItemStack stack,

@@ -34,4 +34,9 @@ public class ItemWorkbench extends ItemMod3 {
     public static boolean canBeWorkbench(ItemStack stack) {
         return stack != null && stack.getItem() instanceof ItemWorkbench && !stack.isEmpty();
     }
+    
+    @Override
+    public int getItemBurnTime(ItemStack fuel) {
+        return 200;
+    }
 }

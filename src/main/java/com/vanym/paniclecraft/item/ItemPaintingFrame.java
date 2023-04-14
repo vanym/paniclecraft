@@ -70,6 +70,20 @@ public class ItemPaintingFrame extends ItemBlock {
     }
     
     @Override
+    public int getItemBurnTime(ItemStack fuel) {
+        if (fuel.hasTagCompound()) {
+            NBTTagCompound itemTag = fuel.getTagCompound();
+            if (SIDE_ORDER.stream()
+                          .map(EnumFacing::getIndex)
+                          .map(ItemPaintingFrame::getPictureTag)
+                          .anyMatch(itemTag::hasKey)) {
+                return 0;
+            }
+        }
+        return -1;
+    }
+    
+    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
