@@ -148,6 +148,7 @@ public class ModComponentPainting extends ModComponent {
                                          EntityPaintOnBlock.IN_MOD_ID, 33,
                                          Core.instance, 64, 1, true);
         
+        MinecraftForge.EVENT_BUS.register(this.itemPaintingFrame);
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
         MinecraftForge.EVENT_BUS.register(new PaintOnBlockEventHandler());
         

@@ -12,6 +12,8 @@ import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
+import cpw.mods.fml.common.eventhandler.Event;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -65,6 +67,22 @@ public class ItemPaintingFrame extends ItemBlock {
             return true;
         }
         return super.isValidArmor(stack, armorType, entity);
+    }
+    
+    @SubscribeEvent
+    @SuppressWarnings("deprecation")
+    public void onFuelBurnTime(net.minecraftforge.event.FuelBurnTimeEvent event) {
+        ItemStack fuel = event.fuel;
+        if (fuel.getItem() instanceof ItemPaintingFrame && fuel.hasTagCompound()) {
+            NBTTagCompound itemTag = fuel.getTagCompound();
+            if (SIDE_ORDER.stream()
+                          .map(ForgeDirection::ordinal)
+                          .map(ItemPaintingFrame::getPictureTag)
+                          .anyMatch(itemTag::hasKey)) {
+                event.burnTime = 0;
+                event.setResult(Event.Result.DENY);
+            }
+        }
     }
     
     @Override
