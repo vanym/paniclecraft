@@ -15,6 +15,7 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
 
 if (project.file('.git/HEAD').isFile()) {
     apply plugin: 'com.palantir.git-version'
