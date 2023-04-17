@@ -105,7 +105,6 @@ minecraft {
     }
 }
 
-apply from: 'repositories.gradle'
 apply from: 'dependencies.gradle'
 
 runClient {
