@@ -1,0 +1,115 @@
+// minecraftforge 1.16.5 mod dev
+
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+    }
+}
+
+plugins {
+    id 'com.palantir.git-version' version '0.13.0' apply false
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+
+if (project.file('.git/HEAD').isFile()) {
+    apply plugin: 'com.palantir.git-version'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+checkPropertyExists("mod_name")
+checkPropertyExists("mod_id")
+checkPropertyExists("mod_group")
+checkPropertyExists("minecraft_version")
+checkPropertyExists("minecraft_version_range")
+checkPropertyExists("forge_version")
+checkPropertyExists("forge_version_range")
+checkPropertyExists("development_environment_username")
+
+propertyDefaultIfUnset("mcp_mappings_channel", "official")
+propertyDefaultIfUnset("mcp_mappings_version", "${minecraft_version}")
+
+String identified_version
+String version_override = System.getenv("VERSION") ?: null
+try {
+    identified_version = (version_override == null) ? gitVersion() : version_override
+} catch (Exception ignored) {
+    println('This mod must be version controlled by Git AND the repository must provide at least one tag,\n' +
+            'or the VERSION override must be set!')
+    version_override = 'NO-GIT-TAG-SET'
+    identified_version = version_override
+}
+version = minecraft_version + '-' + identified_version
+ext {
+    mod_version = identified_version
+}
+
+if (identified_version == version_override) {
+    println("Override version to ${mod_version}")
+}
+
+group = mod_group
+
+if (project.hasProperty("custom_archive_basename") && custom_archive_basename) {
+    archivesBaseName = custom_archive_basename
+} else {
+    archivesBaseName = mod_id
+}
+
+minecraft {
+    mappings channel: "${mcp_mappings_channel}", version: "${mcp_mappings_version}"
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            if (development_environment_username) {
+                arg "--username=${development_environment_username}"
+            }
+        }
+        server {
+            workingDirectory project.file('run')
+        }
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+}
+
+apply from: 'dependencies.gradle'
+
+jar.finalizedBy('reobfJar')
+
+processResources {
+    exclude '.cache'
+
+    filesMatching("META-INF/mods.toml") {
+        expand 'mod_version': mod_version,
+               'mod_name':    mod_name,
+               'mod_id':      mod_id,
+               'minecraft_version_range': minecraft_version_range,
+               'forge_version_range':     forge_version_range
+    }
+    filesMatching("pack.mcmeta") {
+        expand 'mod_id': mod_id
+    }
+}
+
+def checkPropertyExists(String propertyName) {
+    if (!project.hasProperty(propertyName)) {
+        throw new GradleException("This project requires a property \"" +
+                                  propertyName + "\"! Please add it your \"gradle.properties\".")
+    }
+}
+
+def propertyDefaultIfUnset(String propertyName, defaultValue) {
+    if (!project.hasProperty(propertyName) || project.property(propertyName) == "") {
+        project.ext.setProperty(propertyName, defaultValue)
+    }
+}
