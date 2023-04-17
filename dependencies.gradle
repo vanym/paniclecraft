@@ -52,5 +52,4 @@ task downloadJarsToLibs {
 
 tasks.compileJava.dependsOn downloadJarsToLibs
 
-dependencies {
-}
+tasks.jar.finalizedBy('reobf')
