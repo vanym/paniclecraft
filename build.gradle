@@ -40,16 +40,13 @@ checkPropertyExists("mod_id")
 checkPropertyExists("mod_group")
 checkPropertyExists("minecraft_version")
 checkPropertyExists("forge_version")
+checkPropertyExists("mcp_mappings")
 checkPropertyExists("replace_gradle_token_in_file")
 checkPropertyExists("gradle_token_mod_id")
 checkPropertyExists("gradle_token_mod_name")
 checkPropertyExists("gradle_token_version")
 checkPropertyExists("gradle_token_group_name")
 checkPropertyExists("development_environment_username")
-
-propertyDefaultIfUnset("minecraft_version", "1.12.2")
-propertyDefaultIfUnset("forge_version", "14.23.5.2847")
-propertyDefaultIfUnset("mcp_mappings", "snapshot_20171003")
 
 String identified_version
 String version_override = System.getenv("VERSION") ?: null
@@ -123,6 +120,8 @@ runServer {
     args(arguments)
     jvmArgs(jvmArguments)
 }
+
+jar.finalizedBy('reobfJar')
 
 processResources {
     inputs.property "version", project.version
