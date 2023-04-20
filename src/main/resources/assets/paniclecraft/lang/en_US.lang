@@ -69,3 +69,12 @@ commands.paniclecraft.paintonblock.cleararea.clear=Clear paint from %d blocks in
 
 commands.paniclecraft.paintonblock.info.usage=/paniclecraft paintonblock info [<pos>]
 commands.paniclecraft.paintonblock.info.nopaintonblock=No paint on block found at %d %d %d
+
+commands.paniclecraft.version.usage=/paniclecraft version
+commands.paniclecraft.version.pending=paniclecraft %s, version check not done
+commands.paniclecraft.version.failed=paniclecraft %s, version check failed
+commands.paniclecraft.version.up_to_date=paniclecraft %s, up to date
+commands.paniclecraft.version.outdated=paniclecraft %s, outdated, recommended: %s
+commands.paniclecraft.version.ahead=paniclecraft %s, ahead, recommended: %s
+commands.paniclecraft.version.beta=paniclecraft %s, ahead beta, latest: %s
+commands.paniclecraft.version.beta_outdated=paniclecraft %s, outdated beta, latest: %s
