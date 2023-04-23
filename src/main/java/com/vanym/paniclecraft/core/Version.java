@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -19,14 +20,15 @@ import org.apache.http.client.utils.URIBuilder;
 
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.ForgeVersion.Status;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.versioning.ComparableVersion;
 import net.minecraftforge.fml.relauncher.Side;
 
 public class Version {
@@ -70,6 +72,34 @@ public class Version {
             target = result.target;
             homepage = result.homepage;
         }
+        putResultToForgeVersion(result);
+    }
+    
+    @SuppressWarnings("deprecation")
+    protected static void putResultToForgeVersion(CheckResult result) {
+        try {
+            // @formatter:off
+            Map<ModContainer, ForgeVersion.CheckResult> results =
+                    net.minecraftforge.fml.relauncher.
+                    ReflectionHelper.getPrivateValue(ForgeVersion.class, null, "results");
+            Constructor<ForgeVersion.CheckResult> constructor =
+                    net.minecraftforge.fml.relauncher.
+                    ReflectionHelper.findConstructor(ForgeVersion.CheckResult.class,
+                                                     Status.class, ComparableVersion.class,
+                                                     Map.class, String.class);
+            // @formatter:on
+            ComparableVersion version = null;
+            if (result.target != null) {
+                version = new ComparableVersion(result.target);
+            }
+            ForgeVersion.CheckResult forgeResult =
+                    constructor.newInstance(result.status, version, null, result.homepage);
+            if (forgeResult != null) {
+                ModContainer mod = FMLCommonHandler.instance().findContainerFor(Core.instance);
+                results.put(mod, forgeResult);
+            }
+        } catch (Exception e) {
+        }
     }
     
     public static void startVersionCheck() {
@@ -98,12 +128,12 @@ public class Version {
             Map<String, String> promos = (Map<String, String>)json.get("promos");
             String rec = promos.get(MinecraftForge.MC_VERSION + "-recommended");
             String lat = promos.get(MinecraftForge.MC_VERSION + "-latest");
-            ArtifactVersion current = new DefaultArtifactVersion(getVersion());
+            ComparableVersion current = new ComparableVersion(getVersion());
             String homepage = (String)json.get("homepage");
             Status status = Status.BETA;
             String target = null;
             if (rec != null) {
-                int diff = current.compareTo(new DefaultArtifactVersion(rec));
+                int diff = current.compareTo(new ComparableVersion(rec));
                 target = rec;
                 if (diff == 0) {
                     status = Status.UP_TO_DATE;
@@ -115,7 +145,7 @@ public class Version {
             }
             if (lat != null && (rec == null || status == Status.AHEAD)) {
                 target = lat;
-                if (current.compareTo(new DefaultArtifactVersion(lat)) < 0) {
+                if (current.compareTo(new ComparableVersion(lat)) < 0) {
                     status = Status.BETA_OUTDATED;
                 } else {
                     status = Status.BETA;
