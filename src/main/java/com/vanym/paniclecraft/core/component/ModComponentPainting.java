@@ -763,12 +763,10 @@ public class ModComponentPainting extends ModComponent {
         public boolean paintingFrameInfoSideLetters = false;
         
         public boolean renderPaintingTile = true;
-        public boolean renderPaintingItem = true;
         public int renderPaintingTilePartFrameType = 1;
         public int renderPaintingTilePartPictureType = 2;
         public double renderPaintingTileMaxRenderDistanceSquared = Math.pow(128.0D, 2);
         public boolean renderPaintingFrameTile = true;
-        public boolean renderPaintingFrameItem = true;
         public int renderPaintingFrameTilePartFrameType = 0;
         public int renderPaintingFrameTilePartPictureType = 2;
         public double renderPaintingFrameTileMaxRenderDistanceSquared = Math.pow(128.0D, 2);
@@ -797,7 +795,6 @@ public class ModComponentPainting extends ModComponent {
                                                         "2: smooth lighting maximum", "");
             
             this.renderPaintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
-            this.renderPaintingItem = config.getBoolean("paintingItem", CLIENT_RENDER, true, "");
             this.renderPaintingTilePartFrameType =
                     config.getInt("paintingTilePartFrameType", CLIENT_RENDER,
                                   1, -1, 2, PART_RENDER_TYPE);
@@ -810,8 +807,6 @@ public class ModComponentPainting extends ModComponent {
                              2);
             this.renderPaintingFrameTile =
                     config.getBoolean("paintingFrameTile", CLIENT_RENDER, true, "");
-            this.renderPaintingFrameItem =
-                    config.getBoolean("paintingFrameItem", CLIENT_RENDER, true, "");
             this.renderPaintingFrameTilePartFrameType =
                     config.getInt("paintingFrameTilePartFrameType", CLIENT_RENDER,
                                   0, -1, 2, PART_RENDER_TYPE);

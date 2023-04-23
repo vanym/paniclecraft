@@ -39,9 +39,6 @@ public class ModComponentAdvSign extends ModComponent {
     @SideOnly(Side.CLIENT)
     public ItemRendererAdvSign itemAdvSignRenderer;
     
-    @SideOnly(Side.CLIENT)
-    public boolean renderAdvSignItem;
-    
     protected boolean enabled = false;
     
     @Override
@@ -114,7 +111,6 @@ public class ModComponentAdvSign extends ModComponent {
             return;
         }
         config.restartless();
-        this.renderAdvSignItem = config.getBoolean("advSignItem", CLIENT_RENDER, true, "");
         boolean advSignTile = config.getBoolean("advSignTile", CLIENT_RENDER, true, "");
         if (advSignTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAdvSign.class,

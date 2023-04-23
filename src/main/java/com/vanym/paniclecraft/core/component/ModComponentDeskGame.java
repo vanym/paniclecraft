@@ -38,9 +38,6 @@ public class ModComponentDeskGame extends ModComponent {
     @SideOnly(Side.CLIENT)
     public ItemRendererChessDesk itemChessDeskRenderer;
     
-    @SideOnly(Side.CLIENT)
-    public boolean renderChessDeskItem;
-    
     protected boolean enabled = false;
     
     @Override
@@ -109,7 +106,6 @@ public class ModComponentDeskGame extends ModComponent {
             return;
         }
         config.restartless();
-        this.renderChessDeskItem = config.getBoolean("chessDeskItem", CLIENT_RENDER, true, "");
         boolean chessDeskTile = config.getBoolean("chessDeskTile", CLIENT_RENDER, true, "");
         if (chessDeskTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChessDesk.class,
