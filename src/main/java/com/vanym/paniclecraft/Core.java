@@ -6,10 +6,12 @@ import java.util.Collections;
 import java.util.List;
 
 import com.vanym.paniclecraft.command.CommandMod3;
+import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.core.Version;
 import com.vanym.paniclecraft.core.component.IModComponent;
 import com.vanym.paniclecraft.core.component.IModComponent.IServerSideConfig;
 import com.vanym.paniclecraft.core.component.ModComponentAdvSign;
@@ -104,11 +106,16 @@ public class Core implements IGuiHandler {
         this.config = new ModConfig(event.getSuggestedConfigurationFile());
         
         this.command = new CommandMod3();
+        this.command.addSubCommand(new CommandVersion());
         
         MinecraftForge.EVENT_BUS.register(this);
         
         if (this.config.getBoolean("creativeTab", "general", true, "")) {
             this.tab = new CreativeTabMod3(DEF.MOD_ID);
+        }
+        
+        if (this.config.getBoolean("versionCheck", "general", true, "")) {
+            Version.startVersionCheck();
         }
         
         if (Loader.isModLoaded("computercraft")) {
