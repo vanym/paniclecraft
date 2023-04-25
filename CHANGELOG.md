@@ -1,5 +1,35 @@
 # Changelog
 
+## Unreleased
+### Added
+ - Paint on blocks
+ - Paint removers
+ - Color picker
+ - Painting view GUI
+ - Allow to wear frame on head
+ - Allow to wear chess desk as hat
+ - Painting custom recipes
+ - On anvil painting copying
+ - Chat commands
+ - Config GUI
+ - Advanced sign on wall rotation
+ - Chess game PGN copying
+ - Chess peripheral
+ - Painting frame peripheral
+
+### Changed
+ - Full refactoring/rework
+ - Lots of changes, fixes
+ - Painting render
+ - Palette GUI
+ - Advanced sign GUI
+ - Cannon GUI
+ - IDs
+
+### Removed
+ - Unnecessary code and resources
+ - All translations except English
+
 ## 2.0.0a1 - 2022-12-12
 ### Added
  - Legacy code containing
