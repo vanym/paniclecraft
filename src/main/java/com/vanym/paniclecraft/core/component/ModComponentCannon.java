@@ -38,9 +38,6 @@ public class ModComponentCannon extends ModComponent {
     @SideOnly(Side.CLIENT)
     public ItemRendererCannon itemCannonRenderer;
     
-    @SideOnly(Side.CLIENT)
-    public boolean renderCannonItem;
-    
     protected boolean enabled = false;
     
     @Override
@@ -103,7 +100,6 @@ public class ModComponentCannon extends ModComponent {
             return;
         }
         config.restartless();
-        this.renderCannonItem = config.getBoolean("cannonItem", CLIENT_RENDER, true, "");
         boolean cannonTile = config.getBoolean("cannonTile", CLIENT_RENDER, true, "");
         if (cannonTile) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCannon.class,
