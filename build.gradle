@@ -123,6 +123,28 @@ runServer {
 
 jar.finalizedBy('reobfJar')
 
+task determinizeJar(type: Zip) {
+    dependsOn reobfJar
+    def jarPath = reobfJar.jar
+    from zipTree(jarPath)
+    archiveName = jarPath.name
+    destinationDir = temporaryDir
+    doLast {
+        copy {
+            from archivePath
+            into jarPath.parent
+        }
+        archivePath.delete()
+    }
+}
+
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+reobfJar.finalizedBy('determinizeJar')
+
 processResources {
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
