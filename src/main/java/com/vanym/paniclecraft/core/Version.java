@@ -25,6 +25,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.versioning.ArtifactVersion;
 import cpw.mods.fml.common.versioning.DefaultArtifactVersion;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.ForgeVersion.Status;
 import net.minecraftforge.common.MinecraftForge;
@@ -157,6 +158,10 @@ public class Version {
         builder.addParameter("minecraft", MinecraftForge.MC_VERSION);
         Side side = FMLCommonHandler.instance().getSide();
         builder.addParameter("side", Objects.toString(side).toLowerCase());
+        boolean deobfEnv = (boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment");
+        if (deobfEnv) {
+            builder.addParameter("environment", "deobfuscated");
+        }
         try {
             return builder.build();
         } catch (URISyntaxException e) {
