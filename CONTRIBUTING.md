@@ -10,6 +10,6 @@ To add, change translations, you need to commit and pull request to the `1.7.10`
 
 ## Code
 
-All code must be cleaned up and then formatted using the rules from [codestyle](codestyle) (only `model` package is exception).
+All code must be cleaned up and then formatted using the rules from [codestyle](codestyle) (only `model` package is an exception).
 
 Keep the same code style.
