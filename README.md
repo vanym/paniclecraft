@@ -14,3 +14,7 @@ Information about contributing can be found in [`CONTRIBUTING.md`](CONTRIBUTING.
 ## Changelog
 
 Changelog can be found in [`CHANGELOG.md`](CHANGELOG.md)
+
+## License
+
+Made by VanyM, licensed under [MPL 2.0](LICENSE)
