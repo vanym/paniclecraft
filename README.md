@@ -1,7 +1,7 @@
 PanicleCraft
 ============
 
-Here you can find sources of the PanicleCraft mod for Minecraft
+PanicleCraft is a Minecraft mod with miscellaneous things: paint brushes, drawable paintings, chess, broom and more…
 
 ## Building
 
