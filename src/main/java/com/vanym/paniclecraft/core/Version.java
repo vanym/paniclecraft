@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 
+import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.ForgeVersion.Status;
 import net.minecraftforge.common.MinecraftForge;
@@ -187,6 +188,10 @@ public class Version {
         builder.addParameter("minecraft", MinecraftForge.MC_VERSION);
         Side side = FMLCommonHandler.instance().getSide();
         builder.addParameter("side", Objects.toString(side).toLowerCase());
+        boolean deobfEnv = (boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment");
+        if (deobfEnv) {
+            builder.addParameter("environment", "deobfuscated");
+        }
         try {
             return builder.build();
         } catch (URISyntaxException e) {
