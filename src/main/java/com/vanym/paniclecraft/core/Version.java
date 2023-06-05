@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -9,14 +10,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.http.client.utils.URIBuilder;
 
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
@@ -182,19 +187,36 @@ public class Version {
     }
     
     protected static URI buildURI(URI uri) {
-        URIBuilder builder = new URIBuilder(uri);
-        builder.addParameter("paniclecraft", getVersion());
-        builder.addParameter("forge", ForgeVersion.getVersion());
-        builder.addParameter("minecraft", MinecraftForge.MC_VERSION);
+        List<Map.Entry<String, String>> list = new ArrayList<>();
+        BiFunction<String, String, AbstractMap.SimpleImmutableEntry<String, String>> pair =
+                AbstractMap.SimpleImmutableEntry<String, String>::new;
+        BiConsumer<String, String> params = (key, val)->list.add(pair.apply(key, val));
+        params.accept("paniclecraft", getVersion());
+        params.accept("forge", ForgeVersion.getVersion());
+        params.accept("minecraft", MinecraftForge.MC_VERSION);
         Side side = FMLCommonHandler.instance().getSide();
-        builder.addParameter("side", Objects.toString(side).toLowerCase());
+        params.accept("side", Objects.toString(side).toLowerCase());
         boolean deobfEnv = (boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment");
         if (deobfEnv) {
-            builder.addParameter("environment", "deobfuscated");
+            params.accept("environment", "deobfuscated");
         }
         try {
-            return builder.build();
-        } catch (URISyntaxException e) {
+            StringBuilder sb = new StringBuilder(Optional.ofNullable(uri.getQuery()).orElse(""));
+            for (Map.Entry<String, String> e : list) {
+                if (sb.length() > 0) {
+                    sb.append("&");
+                }
+                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                sb.append("=");
+                sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            }
+            return new URI(
+                    uri.getScheme(),
+                    uri.getAuthority(),
+                    uri.getPath(),
+                    sb.toString(),
+                    uri.getFragment());
+        } catch (URISyntaxException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
