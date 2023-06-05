@@ -16,7 +16,7 @@
 ### Removed
  - NEI plugin
 
-## Unreleased
+## 2.7.0.0 - 2023-06-05
 ### Added
  - Paint on blocks
  - Paint removers
