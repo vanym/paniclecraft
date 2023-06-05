@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.12.0.0 - 2023-06-05
 ### Added
  - Allow to wear painting as mask
  - Allow to wear advanced sign as hat
