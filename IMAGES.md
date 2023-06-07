@@ -36,7 +36,7 @@
 
 ![](images/screenshot_painting_frame_head.png)
 
-## Paint on block (disabled by default)
+## Paint on block, make graffiti (disabled by default)
 
 ![](images/screenshot_paintonblock_brush.png)
 

@@ -4,9 +4,9 @@ PanicleCraft is a mod with a miscellaneous components. **Open [images](IMAGES.md
 
 ## Components
 
-### Paint brushes and paintings
+### Paint brushes, paintings, graffiti
 
-Place a canvas and paint on it using brushes. Brushes can also paint on blocks, but this feature is disabled by default.
+Place a canvas and paint on it using brushes. Brushes can also paint on blocks, make graffiti, but this feature is disabled by default.
 
 Use dyes to change brushes color in a crafting table. Palette can set any color to brush.
 
