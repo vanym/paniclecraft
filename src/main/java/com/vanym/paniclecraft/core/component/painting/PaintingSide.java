@@ -4,23 +4,23 @@ import javax.annotation.Nonnull;
 
 import com.vanym.paniclecraft.utils.TileOnSide;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 
 public enum PaintingSide {
-    DOWN(EnumFacing.WEST, EnumFacing.SOUTH), // -Y
-    UP(EnumFacing.WEST, EnumFacing.NORTH), // +Y
-    NORTH(EnumFacing.WEST, EnumFacing.DOWN), // -Z
-    SOUTH(EnumFacing.EAST, EnumFacing.DOWN), // +Z
-    WEST(EnumFacing.SOUTH, EnumFacing.DOWN), // -X
-    EAST(EnumFacing.NORTH, EnumFacing.DOWN); // +X
+    DOWN(Direction.WEST, Direction.SOUTH), // -Y
+    UP(Direction.WEST, Direction.NORTH), // +Y
+    NORTH(Direction.WEST, Direction.DOWN), // -Z
+    SOUTH(Direction.EAST, Direction.DOWN), // +Z
+    WEST(Direction.SOUTH, Direction.DOWN), // -X
+    EAST(Direction.NORTH, Direction.DOWN); // +X
     
     public final TileOnSide axes;
     
-    PaintingSide(EnumFacing xDir, EnumFacing yDir) {
-        this.axes = new TileOnSide(xDir, yDir, EnumFacing.getFront(this.ordinal()));
+    PaintingSide(Direction xDir, Direction yDir) {
+        this.axes = new TileOnSide(xDir, yDir, Direction.byIndex(this.ordinal()));
     }
     
-    public static PaintingSide getSide(@Nonnull EnumFacing side) {
+    public static PaintingSide getSide(@Nonnull Direction side) {
         return getSide(side.ordinal());
     }
     

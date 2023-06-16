@@ -21,8 +21,8 @@ import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ImageUtils {
     
@@ -150,7 +150,7 @@ public class ImageUtils {
         ImageIO.write(img, "png", output);
     }
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static BufferedImage getPaintingAsImage(
             IPictureSize elementSize,
             int sizeX,
