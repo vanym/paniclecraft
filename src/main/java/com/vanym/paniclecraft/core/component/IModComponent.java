@@ -20,7 +20,9 @@ public interface IModComponent {
     
     public String getName();
     
-    public boolean isEnabled();
+    default public boolean isEnabled() {
+        return true;
+    }
     
     default public List<Item> getItems() {
         return null;
