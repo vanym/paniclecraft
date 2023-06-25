@@ -1,34 +1,57 @@
 package com.vanym.paniclecraft.item;
 
-import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.GUIs;
+import java.util.function.Supplier;
 
-import net.minecraft.entity.player.EntityPlayer;
+import com.vanym.paniclecraft.client.renderer.item.ItemRendererPortableWorkbench;
+import com.vanym.paniclecraft.container.ContainerPortableWorkbench;
+
+import net.minecraft.block.CraftingTableBlock;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 public class ItemWorkbench extends ItemMod3 {
     
-    public ItemWorkbench(int damage) {
-        this.setUnlocalizedName("portable_workbench");
-        this.setMaxDamage(damage);
-        this.setMaxStackSize(1);
+    public final Supplier<Integer> durability;
+    
+    protected final INamedContainerProvider containerProvider =
+            new SimpleNamedContainerProvider(
+                    (id, inventory, player)->new ContainerPortableWorkbench(id, inventory),
+                    CraftingTableBlock.field_220271_a);
+    
+    public ItemWorkbench(Supplier<Integer> durability) {
+        super(new Item.Properties().maxDamage(8192)
+                                   .setTEISR(()->ItemRendererPortableWorkbench::new));
+        this.setRegistryName("portable_workbench");
+        this.durability = durability;
+    }
+    
+    @Override
+    public int getMaxDamage(ItemStack stack) {
+        return this.durability.get();
+    }
+    
+    @Override
+    public boolean isDamageable() {
+        return this.durability.get() > 0;
     }
     
     @Override
     public ActionResult<ItemStack> onItemRightClick(
             World world,
-            EntityPlayer player,
-            EnumHand hand) {
+            PlayerEntity player,
+            Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
         if (!world.isRemote) {
-            player.openGui(Core.instance, GUIs.PORTABLEWORKBENCH.ordinal(), world,
-                           (int)player.posX, (int)player.posY, (int)player.posZ);
+            player.openContainer(this.containerProvider);
         }
-        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }
     
     public static boolean canBeWorkbench(ItemStack stack) {
@@ -36,7 +59,7 @@ public class ItemWorkbench extends ItemMod3 {
     }
     
     @Override
-    public int getItemBurnTime(ItemStack fuel) {
+    public int getBurnTime(ItemStack fuel) {
         return 200;
     }
 }

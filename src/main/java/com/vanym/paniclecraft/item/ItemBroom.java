@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
@@ -13,14 +14,13 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ItemBroom extends ItemMod3 {
     
-    public final ForgeConfigSpec.IntValue durability;
-    public final ForgeConfigSpec.DoubleValue distance;
+    public final Supplier<Integer> durability;
+    public final Supplier<Double> distance;
     
-    public ItemBroom(ForgeConfigSpec.IntValue durability, ForgeConfigSpec.DoubleValue distance) {
+    public ItemBroom(Supplier<Integer> durability, Supplier<Double> distance) {
         super(new Item.Properties().maxDamage(3072));
         this.setRegistryName("broom");
         this.durability = durability;

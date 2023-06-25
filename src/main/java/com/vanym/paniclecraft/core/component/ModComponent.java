@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
 import net.minecraft.block.Block;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,6 +31,11 @@ public abstract class ModComponent implements IModComponent {
         this.getBlocks().forEach(e.getRegistry()::register);
     }
     
+    @SubscribeEvent
+    public void registerContainers(RegistryEvent.Register<ContainerType<?>> e) {
+        this.getContainers().forEach(e.getRegistry()::register);
+    }
+    
     @Override
     public List<Item> getItems() {
         return this.getObjects(Item.class);
@@ -37,6 +43,11 @@ public abstract class ModComponent implements IModComponent {
     
     public List<Block> getBlocks() {
         return this.getObjects(Block.class);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public List<ContainerType> getContainers() {
+        return this.getObjects(ContainerType.class);
     }
     
     protected final <T> List<T> getObjects(Class<T> clazz) {

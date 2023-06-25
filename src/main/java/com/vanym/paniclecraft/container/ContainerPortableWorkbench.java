@@ -3,21 +3,21 @@ package com.vanym.paniclecraft.container;
 import com.vanym.paniclecraft.container.slot.SlotPortableCrafting;
 import com.vanym.paniclecraft.item.ItemWorkbench;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerWorkbench;
-import net.minecraft.inventory.Slot;
-import net.minecraft.util.EnumHand;
-import net.minecraft.world.World;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.util.Hand;
 
-public class ContainerPortableWorkbench extends ContainerWorkbench {
+public class ContainerPortableWorkbench extends WorkbenchContainer {
     
-    public ContainerPortableWorkbench(EntityPlayer player, World world) {
-        super(player.inventory, world, player.getPosition());
+    public ContainerPortableWorkbench(int id, PlayerInventory inventory) {
+        super(id, inventory);
         Slot original = (Slot)this.inventorySlots.get(0);
         SlotPortableCrafting slot = new SlotPortableCrafting(
-                player,
-                this.craftMatrix,
-                this.craftResult,
+                inventory.player,
+                this.field_75162_e,
+                this.field_75160_f,
                 original.slotNumber,
                 original.xPos,
                 original.yPos);
@@ -25,8 +25,8 @@ public class ContainerPortableWorkbench extends ContainerWorkbench {
     }
     
     @Override
-    public boolean canInteractWith(EntityPlayer player) {
-        return ItemWorkbench.canBeWorkbench(player.getHeldItem(EnumHand.MAIN_HAND))
-            || ItemWorkbench.canBeWorkbench(player.getHeldItem(EnumHand.OFF_HAND));
+    public boolean canInteractWith(PlayerEntity player) {
+        return ItemWorkbench.canBeWorkbench(player.getHeldItem(Hand.MAIN_HAND))
+            || ItemWorkbench.canBeWorkbench(player.getHeldItem(Hand.OFF_HAND));
     }
 }
