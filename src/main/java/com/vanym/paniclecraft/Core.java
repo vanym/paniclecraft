@@ -3,17 +3,22 @@ package com.vanym.paniclecraft;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.google.common.collect.Maps;
+import com.vanym.paniclecraft.client.ClientProxy;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
-import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.Version;
 import com.vanym.paniclecraft.core.component.IModComponent;
-import com.vanym.paniclecraft.core.component.IModComponent.IServerSideConfig;
 import com.vanym.paniclecraft.core.component.ModComponentAdvSign;
 import com.vanym.paniclecraft.core.component.ModComponentBroom;
 import com.vanym.paniclecraft.core.component.ModComponentCannon;
@@ -21,22 +26,28 @@ import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
+import com.vanym.paniclecraft.server.ServerProxy;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.ModMetadata;
-import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -45,25 +56,19 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.config.ModConfig.Type;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.NetworkRegistry.ChannelBuilder;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.fml.relauncher.Side;
 
-@Mod(
-    modid = DEF.MOD_ID,
-    name = DEF.MOD_NAME,
-    version = DEF.VERSION,
-    acceptedMinecraftVersions = "[1.12.2]",
-    guiFactory = "com.vanym.paniclecraft.client.gui.config.GuiModConfigFactory")
+@Mod(DEF.MOD_ID)
 public class Core implements IGuiHandler {
     
-    @Instance(DEF.MOD_ID)
     public static Core instance;
-    
-    @SidedProxy(
-        clientSide = "com.vanym.paniclecraft.client.ClientProxy",
-        serverSide = "com.vanym.paniclecraft.server.ServerProxy",
-        modId = DEF.MOD_ID)
     public static IProxy proxy;
     
     public final ModComponentBroom broom = new ModComponentBroom();
@@ -74,22 +79,51 @@ public class Core implements IGuiHandler {
     public final ModComponentPortableWorkbench portableworkbench =
             new ModComponentPortableWorkbench();
     
-    public CreativeTabMod3 tab;
+    public final CreativeTabMod3 tab = new CreativeTabMod3(DEF.MOD_ID);
     
     public CommandMod3 command;
     
-    public ModConfig config;
-    
-    public final SimpleNetworkWrapper network =
-            NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
+    public final SimpleChannel network =
+            ChannelBuilder.named(new ResourceLocation(DEF.MOD_ID, "main_channel"))
+                          .simpleChannel();
     
     protected final List<IModComponent> components = new ArrayList<>(
             Arrays.asList(this.broom, this.advSign, this.painting,
                           this.deskgame, this.cannon,
                           this.portableworkbench));
     
+    protected final ForgeConfigSpec.BooleanValue versionCheck;
+    
+    public Core() {
+        instance = this;
+        proxy = DistExecutor.runForDist(()->ClientProxy::new, ()->ServerProxy::new);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        ModLoadingContext context = ModLoadingContext.get();
+        bus.addListener(this::setup);
+        EnumMap<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders =
+                new EnumMap<>(ModConfig.Type.class);
+        configBuilders.entrySet().stream().forEach(e->e.setValue(new ForgeConfigSpec.Builder()));
+        ForgeConfigSpec.Builder commonBuilder = configBuilders.get(ModConfig.Type.COMMON);
+        this.versionCheck = commonBuilder.define("versionCheck", true);
+        Map<ModConfig.Type, ForgeConfigSpec.Builder> initConfigBuilders =
+                Collections.unmodifiableMap(configBuilders);
+        Core.instance.getComponents().forEach(comp->comp.init(initConfigBuilders));
+        EnumMap<ModConfig.Type, ForgeConfigSpec> specs = new EnumMap<>(ModConfig.Type.class);
+        configBuilders.entrySet().stream().forEach(e->specs.put(e.getKey(), e.getValue().build()));
+        specs.entrySet()
+             .stream()
+             .filter(e->!e.getValue().isEmpty())
+             .forEach(e->context.registerConfig(e.getKey(), e.getValue()));
+    }
+    
     public List<IModComponent> getComponents() {
         return Collections.unmodifiableList(this.components);
+    }
+    
+    protected void setup(FMLCommonSetupEvent event) {
+        if (this.versionCheck.get()) {
+            Version.startVersionCheck();
+        }
     }
     
     @EventHandler
@@ -212,7 +246,7 @@ public class Core implements IGuiHandler {
     @Override
     public Object getServerGuiElement(
             int ID,
-            EntityPlayer player,
+            PlayerEntity player,
             World world,
             int x,
             int y,
@@ -227,7 +261,7 @@ public class Core implements IGuiHandler {
     @Override
     public Object getClientGuiElement(
             int ID,
-            EntityPlayer player,
+            PlayerEntity player,
             World world,
             int x,
             int y,
