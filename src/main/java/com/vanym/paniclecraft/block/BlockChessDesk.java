@@ -1,182 +1,141 @@
 package com.vanym.paniclecraft.block;
 
-import java.util.Random;
+import javax.annotation.Nullable;
 
-import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.GUIs;
+import com.vanym.paniclecraft.client.gui.GuiChess;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import net.minecraft.block.BlockHorizontal;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalBlock;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 
 public class BlockChessDesk extends BlockContainerMod3 {
     
-    public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
     
-    protected static final AxisAlignedBB CHESS_DESK_AABB =
-            new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 3.0D / 16.0D, 1.0D);
+    protected static final VoxelShape CHESS_DESK_SHAPE =
+            VoxelShapes.create(0.0D, 0.0D, 0.0D, 1.0D, 3.0D / 16.0D, 1.0D);
     
     public BlockChessDesk() {
-        super(Material.WOOD);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-        this.setUnlocalizedName("chess_desk");
-        this.setHardness(0.5F);
+        super(Block.Properties.create(Material.WOOD)
+                              .sound(SoundType.WOOD)
+                              .hardnessAndResistance(0.5F)
+                              .noDrops());
+        this.setRegistryName("chess_desk");
+        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
     }
     
     @Override
-    public TileEntity createNewTileEntity(World world, int meta) {
+    public TileEntity createNewTileEntity(IBlockReader worldIn) {
         return new TileEntityChessDesk();
     }
     
     @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, FACING);
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
     }
     
     @Override
-    public IBlockState getStateForPlacement(
-            World world,
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing());
+    }
+    
+    @Override
+    public BlockState rotate(BlockState state, Rotation rot) {
+        return state.with(FACING, rot.rotate(state.get(FACING)));
+    }
+    
+    @Override
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.toRotation(state.get(FACING)));
+    }
+    
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            IBlockReader worldIn,
             BlockPos pos,
-            EnumFacing facing,
-            float hitX,
-            float hitY,
-            float hitZ,
-            int meta,
-            EntityLivingBase placer) {
-        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing());
+            ISelectionContext context) {
+        return CHESS_DESK_SHAPE;
     }
     
     @Override
-    public IBlockState withRotation(IBlockState state, Rotation rot) {
-        return state.withProperty(FACING, rot.rotate(state.getValue(FACING)));
-    }
-    
-    @Override
-    public IBlockState withMirror(IBlockState state, Mirror mirror) {
-        return state.withRotation(mirror.toRotation(state.getValue(FACING)));
-    }
-    
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta));
-    }
-    
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(FACING).getHorizontalIndex();
-    }
-    
-    @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return CHESS_DESK_AABB;
-    }
-    
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public boolean hasCustomBreakingProgress(IBlockState state) {
+    @OnlyIn(Dist.CLIENT)
+    public boolean hasCustomBreakingProgress(BlockState state) {
         return true;
     }
     
     @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
-    }
-    
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-    
-    @Override
-    public boolean isSideSolid(
-            IBlockState state,
-            IBlockAccess world,
-            BlockPos pos,
-            EnumFacing side) {
-        return side == EnumFacing.DOWN;
-    }
-    
-    @Override
-    public BlockFaceShape getBlockFaceShape(
-            IBlockAccess world,
-            IBlockState state,
-            BlockPos pos,
-            EnumFacing face) {
-        return this.isSideSolid(state, world, pos, face) ? BlockFaceShape.SOLID
-                                                         : BlockFaceShape.UNDEFINED;
-    }
-    
-    @Override
-    public int quantityDropped(Random rand) {
-        return 0;
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
     @Override
     public boolean onBlockActivated(
+            BlockState state,
             World world,
             BlockPos pos,
-            IBlockState state,
-            EntityPlayer player,
-            EnumHand hand,
-            EnumFacing facing,
-            float hitX,
-            float hitY,
-            float hitZ) {
-        player.openGui(Core.instance, GUIs.CHESS.ordinal(),
-                       world, pos.getX(), pos.getY(), pos.getZ());
+            PlayerEntity player,
+            Hand hand,
+            BlockRayTraceResult hit) {
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+            TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getTileEntity(pos);
+            Minecraft.getInstance().displayGuiScreen(new GuiChess(tileCD));
+        }
         return true;
     }
     
     @Override
-    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getTileEntity(pos);
         spawnAsEntity(world, pos, ItemChessDesk.getSavedDesk(tileCD));
-        super.breakBlock(world, pos, state);
+        super.onBlockHarvested(world, pos, state, player);
     }
     
     @Override
     public void onBlockPlacedBy(
             World world,
             BlockPos pos,
-            IBlockState state,
-            EntityLivingBase placer,
+            BlockState state,
+            @Nullable LivingEntity placer,
             ItemStack stack) {
-        if (!stack.hasTagCompound()) {
+        if (!stack.hasTag()) {
             return;
         }
-        NBTTagCompound tag = stack.getTagCompound();
-        if (!tag.hasKey(ItemChessDesk.TAG_MOVES, 9)) {
+        CompoundNBT tag = stack.getTag();
+        if (!tag.contains(ItemChessDesk.TAG_MOVES, 9)) {
             return;
         }
-        NBTTagList list = tag.getTagList(ItemChessDesk.TAG_MOVES, 10);
+        ListNBT list = tag.getList(ItemChessDesk.TAG_MOVES, 10);
         TileEntity tile = world.getTileEntity(pos);
         if (!TileEntityChessDesk.class.isInstance(tile)) {
             return;
@@ -186,13 +145,12 @@ public class BlockChessDesk extends BlockContainerMod3 {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(
-            IBlockState state,
+            BlockState state,
             RayTraceResult target,
-            World world,
+            IBlockReader world,
             BlockPos pos,
-            EntityPlayer player) {
+            PlayerEntity player) {
         TileEntityChessDesk tile = (TileEntityChessDesk)world.getTileEntity(pos);
         return ItemChessDesk.getSavedDesk(tile);
     }

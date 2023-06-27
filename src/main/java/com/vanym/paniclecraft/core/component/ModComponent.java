@@ -16,6 +16,7 @@ import java.util.stream.Stream.Builder;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -36,6 +37,11 @@ public abstract class ModComponent implements IModComponent {
         this.getContainers().forEach(e.getRegistry()::register);
     }
     
+    @SubscribeEvent
+    public void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> e) {
+        this.getTileEntities().forEach(e.getRegistry()::register);
+    }
+    
     @Override
     public List<Item> getItems() {
         return this.getObjects(Item.class);
@@ -48,6 +54,11 @@ public abstract class ModComponent implements IModComponent {
     @SuppressWarnings("rawtypes")
     public List<ContainerType> getContainers() {
         return this.getObjects(ContainerType.class);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public List<TileEntityType> getTileEntities() {
+        return this.getObjects(TileEntityType.class);
     }
     
     protected final <T> List<T> getObjects(Class<T> clazz) {
