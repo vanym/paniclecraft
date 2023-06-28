@@ -4,26 +4,37 @@ import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.container.ContainerCannon;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.ITickableTileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
-public class TileEntityCannon extends TileEntityBase implements IInventory, ITickable {
+public class TileEntityCannon extends TileEntityBase
+        implements
+            IInventory,
+            INamedContainerProvider,
+            ITickableTileEntity {
     
     public static final String IN_MOD_ID = "cannon";
     public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
@@ -41,7 +52,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     
     protected Vec3d vector;
     
-    protected IItemHandler itemHandler;
+    protected LazyOptional<IItemHandler> itemHandler = LazyOptional.of(()->new InvWrapper(this));
     
     protected static final String TAG_DIRECTION = "Direction";
     protected static final String TAG_HEIGHT = "Height";
@@ -49,54 +60,58 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     protected static final String TAG_TIMEOUT = "Timeout";
     protected static final String TAG_STACK = "Item";
     
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
-        return this.writeToNBT(nbtTag, false);
+    public TileEntityCannon() {
+        super(Core.instance.cannon.tileEntityCannon);
     }
     
-    protected NBTTagCompound writeToNBT(NBTTagCompound nbtTag, boolean forClient) {
-        nbtTag = super.writeToNBT(nbtTag);
-        nbtTag.setDouble(TAG_DIRECTION, this.direction);
-        nbtTag.setDouble(TAG_HEIGHT, this.height);
-        nbtTag.setDouble(TAG_STRENGTH, this.strength);
+    @Override
+    public CompoundNBT write(CompoundNBT nbtTag) {
+        return this.write(nbtTag, false);
+    }
+    
+    protected CompoundNBT write(CompoundNBT nbtTag, boolean forClient) {
+        nbtTag = super.write(nbtTag);
+        nbtTag.putDouble(TAG_DIRECTION, this.direction);
+        nbtTag.putDouble(TAG_HEIGHT, this.height);
+        nbtTag.putDouble(TAG_STRENGTH, this.strength);
         if (forClient) {
             return nbtTag;
         }
         if (this.timeout > 0) {
-            nbtTag.setInteger(TAG_TIMEOUT, this.timeout);
+            nbtTag.putInt(TAG_TIMEOUT, this.timeout);
         } else {
-            nbtTag.removeTag(TAG_TIMEOUT);
+            nbtTag.remove(TAG_TIMEOUT);
         }
-        NBTTagCompound itemTag = new NBTTagCompound();
-        this.stack.writeToNBT(itemTag);
-        nbtTag.setTag(TAG_STACK, itemTag);
+        CompoundNBT itemTag = new CompoundNBT();
+        this.stack.write(itemTag);
+        nbtTag.put(TAG_STACK, itemTag);
         return nbtTag;
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound nbtTag) {
-        super.readFromNBT(nbtTag);
+    public void read(CompoundNBT nbtTag) {
+        super.read(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.height = nbtTag.getDouble(TAG_HEIGHT);
         this.strength = nbtTag.getDouble(TAG_STRENGTH);
         this.vector = null;
-        this.timeout = nbtTag.getInteger(TAG_TIMEOUT);
-        if (nbtTag.hasKey(TAG_STACK, 10)) {
-            NBTTagCompound itemTag = nbtTag.getCompoundTag(TAG_STACK);
-            this.stack = new ItemStack(itemTag);
+        this.timeout = nbtTag.getInt(TAG_TIMEOUT);
+        if (nbtTag.contains(TAG_STACK, 10)) {
+            CompoundNBT itemTag = nbtTag.getCompound(TAG_STACK);
+            this.stack = ItemStack.read(itemTag);
         }
     }
     
     @Override
-    public void update() {
+    public void tick() {
         if (this.world.isRemote) {
             return;
         }
-        this.timeout = Math.min(this.timeout, Core.instance.cannon.config.shootTimeout);
+        this.timeout = Math.min(this.timeout, Core.instance.cannon.shootTimeout.get());
         if (this.timeout <= 0 && !this.stack.isEmpty()) {
             this.shoot(this.stack);
             this.stack = ItemStack.EMPTY;
-            this.timeout = Core.instance.cannon.config.shootTimeout;
+            this.timeout = Core.instance.cannon.shootTimeout.get();
             this.markDirty();
         }
         if (this.timeout > 0) {
@@ -105,8 +120,8 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     @Override
-    public NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound(), true);
+    public CompoundNBT getUpdateTag() {
+        return this.write(new CompoundNBT(), true);
     }
     
     public void setDirection(double direction) {
@@ -138,7 +153,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     public boolean setStrength(double strength) {
-        if (strength >= 0 && strength <= Core.instance.cannon.config.maxStrength) {
+        if (strength >= 0 && strength <= Core.instance.cannon.maxStrength.get()) {
             this.strength = strength;
             this.vector = null;
             return true;
@@ -165,28 +180,26 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     protected void shoot(ItemStack stack) {
-        EntityItem entityItem = new EntityItem(
+        ItemEntity entityItem = new ItemEntity(
                 this.world,
                 this.pos.getX() + 0.5D,
                 this.pos.getY() + 0.4D,
                 this.pos.getZ() + 0.5D,
                 stack);
-        entityItem.setPickupDelay(Core.instance.cannon.config.pickupDelay);
+        entityItem.setPickupDelay(Core.instance.cannon.pickupDelay.get());
         Vec3d motion = this.getVector();
-        entityItem.motionX = motion.x;
-        entityItem.motionZ = motion.z;
-        entityItem.motionY = motion.y;
-        this.world.spawnEntity(entityItem);
+        entityItem.setMotion(motion);
+        this.world.addEntity(entityItem);
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
         return new AxisAlignedBB(this.pos).grow(0.5D);
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public double getMaxRenderDistanceSquared() {
         return 16384.0D;
     }
@@ -203,7 +216,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     
     @Override
     public ItemStack decrStackSize(int slot, int amount) {
-        return this.stack.splitStack(amount);
+        return this.stack.split(amount);
     }
     
     @Override
@@ -219,7 +232,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     
     @Override
     public void setInventorySlotContents(int slot, ItemStack stack) {
-        if (Core.instance.cannon.config.shootTimeout > 0) {
+        if (Core.instance.cannon.shootTimeout.get() > 0) {
             this.stack = stack;
             this.markDirty();
         } else if (!this.world.isRemote && !stack.isEmpty()) {
@@ -228,13 +241,9 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     @Override
-    public String getName() {
-        return Core.instance.cannon.blockCannon.getUnlocalizedName() + ".inv";
-    }
-    
-    @Override
-    public boolean hasCustomName() {
-        return false;
+    public ITextComponent getDisplayName() {
+        return new TranslationTextComponent(
+                Core.instance.cannon.blockCannon.getRegistryName().getPath() + ".inv");
     }
     
     @Override
@@ -243,9 +252,9 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player) {
+    public boolean isUsableByPlayer(PlayerEntity player) {
         return this == player.world.getTileEntity(this.pos)
-            && player.getDistanceSq(this.pos.add(0.5D, 0.5D, 0.5D)) <= 64.0D;
+            && player.getDistanceSq(new Vec3d(this.pos).add(0.5D, 0.5D, 0.5D)) <= 64.0D;
     }
     
     @Override
@@ -264,40 +273,15 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     @Override
-    public void openInventory(EntityPlayer player) {}
-    
-    @Override
-    public void closeInventory(EntityPlayer player) {}
-    
-    @Override
-    public int getField(int id) {
-        return 0;
+    public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
+        return new ContainerCannon(id, inventory, this);
     }
     
     @Override
-    public void setField(int id, int value) {}
-    
-    @Override
-    public int getFieldCount() {
-        return 0;
-    }
-    
-    @Override
-    @Nullable
-    @SuppressWarnings("unchecked")
-    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            if (this.itemHandler == null) {
-                this.itemHandler = new InvWrapper(this);
-            }
-            return (T)this.itemHandler;
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
+        if (!this.removed && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return this.itemHandler.cast();
         }
         return super.getCapability(capability, facing);
-    }
-    
-    @Override
-    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
-            || super.hasCapability(capability, facing);
     }
 }

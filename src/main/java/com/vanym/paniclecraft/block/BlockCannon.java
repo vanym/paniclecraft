@@ -2,124 +2,83 @@ package com.vanym.paniclecraft.block;
 
 import javax.annotation.Nullable;
 
-import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class BlockCannon extends BlockContainerMod3 {
     
     public BlockCannon() {
-        super(Material.ANVIL);
-        this.setUnlocalizedName("cannon");
-        this.setHardness(1.5F);
+        super(Block.Properties.create(Material.ANVIL)
+                              .hardnessAndResistance(1.5F)
+                              .doesNotBlockMovement());
+        this.setRegistryName("cannon");
     }
     
     @Override
     public boolean onBlockActivated(
+            BlockState state,
             World world,
             BlockPos pos,
-            IBlockState state,
-            EntityPlayer player,
-            EnumHand hand,
-            EnumFacing facing,
-            float hitX,
-            float hitY,
-            float hitZ) {
+            PlayerEntity player,
+            Hand hand,
+            BlockRayTraceResult hit) {
         if (!world.isRemote) {
-            player.openGui(Core.instance, GUIs.CANNON.ordinal(),
-                           world, pos.getX(), pos.getY(), pos.getZ());
+            TileEntity tile = world.getTileEntity(pos);
+            if (tile instanceof INamedContainerProvider && player instanceof ServerPlayerEntity) {
+                NetworkHooks.openGui((ServerPlayerEntity)player,
+                                     (INamedContainerProvider)tile,
+                                     tile.getPos());
+            }
         }
         return true;
     }
     
     @Override
-    public TileEntity createNewTileEntity(World world, int meta) {
+    public TileEntity createNewTileEntity(IBlockReader worldIn) {
         return new TileEntityCannon();
     }
     
     @Override
-    @Nullable
-    public AxisAlignedBB getCollisionBoundingBox(
-            IBlockState state,
-            IBlockAccess world,
-            BlockPos pos) {
-        return NULL_AABB;
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public boolean hasCustomBreakingProgress(IBlockState state) {
+    @OnlyIn(Dist.CLIENT)
+    public boolean hasCustomBreakingProgress(BlockState state) {
         return true;
     }
     
     @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
-    }
-    
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-    
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-    
-    @Override
-    public boolean isPassable(IBlockAccess worldIn, BlockPos pos) {
-        return true;
-    }
-    
-    @Override
-    public boolean isSideSolid(
-            IBlockState state,
-            IBlockAccess world,
-            BlockPos pos,
-            EnumFacing side) {
-        return side == EnumFacing.DOWN;
-    }
-    
-    @Override
-    public BlockFaceShape getBlockFaceShape(
-            IBlockAccess world,
-            IBlockState state,
-            BlockPos pos,
-            EnumFacing face) {
-        return this.isSideSolid(state, world, pos, face) ? BlockFaceShape.SOLID
-                                                         : BlockFaceShape.UNDEFINED;
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
     @Override
     public void onBlockPlacedBy(
             World world,
             BlockPos pos,
-            IBlockState state,
-            EntityLivingBase entity,
+            BlockState state,
+            @Nullable LivingEntity entity,
             ItemStack stack) {
         super.onBlockPlacedBy(world, pos, state, entity, stack);
         TileEntity tile = world.getTileEntity(pos);
-        if (tile != null && tile instanceof TileEntityCannon) {
+        if (entity != null && tile != null && tile instanceof TileEntityCannon) {
             TileEntityCannon tileCannon = (TileEntityCannon)tile;
             double direction = Math.round(180.0D + entity.rotationYaw);
             tileCannon.setDirection(direction);
@@ -129,12 +88,21 @@ public class BlockCannon extends BlockContainerMod3 {
     }
     
     @Override
-    public void breakBlock(World world, BlockPos pos, IBlockState state) {
-        TileEntity tileentity = world.getTileEntity(pos);
-        if (tileentity instanceof IInventory) {
-            InventoryHelper.dropInventoryItems(world, pos, (IInventory)tileentity);
-            world.updateComparatorOutputLevel(pos, this);
+    @SuppressWarnings("deprecation")
+    public void onReplaced(
+            BlockState state,
+            World worldIn,
+            BlockPos pos,
+            BlockState newState,
+            boolean isMoving) {
+        if (state.getBlock() != newState.getBlock()) {
+            TileEntity tileentity = worldIn.getTileEntity(pos);
+            if (tileentity instanceof IInventory) {
+                InventoryHelper.dropInventoryItems(worldIn, pos, (IInventory)tileentity);
+                worldIn.updateComparatorOutputLevel(pos, this);
+            }
+            
+            super.onReplaced(state, worldIn, pos, newState, isMoving);
         }
-        super.breakBlock(world, pos, state);
     }
 }

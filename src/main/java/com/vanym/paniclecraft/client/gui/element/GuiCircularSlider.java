@@ -1,27 +1,26 @@
 package com.vanym.paniclecraft.client.gui.element;
 
 import java.awt.Color;
-import java.awt.geom.Point2D;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
-public class GuiCircularSlider extends GuiButton {
+@OnlyIn(Dist.CLIENT)
+public class GuiCircularSlider extends Widget {
     
     protected static final ResourceLocation BUTTON_TEXTURES =
             new ResourceLocation(DEF.MOD_ID, "textures/guis/button_background.png");
@@ -37,12 +36,12 @@ public class GuiCircularSlider extends GuiButton {
     
     protected boolean pressed = false;
     
-    public GuiCircularSlider(int id,
+    public GuiCircularSlider(
             int x,
             int y,
             int width,
             int height) {
-        super(id, x, y, width, height, "");
+        super(x, y, width, height, "");
     }
     
     public void setGetter(Supplier<Double> getter) {
@@ -70,14 +69,15 @@ public class GuiCircularSlider extends GuiButton {
     }
     
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public void renderButton(int mouseX, int mouseY, float partialTicks) {
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-                                            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                                            GlStateManager.SourceFactor.ONE,
-                                            GlStateManager.DestFactor.ZERO);
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                                         GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                         GlStateManager.SourceFactor.ONE,
+                                         GlStateManager.DestFactor.ZERO);
+        Minecraft mc = Minecraft.getInstance();
         mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buf = tessellator.getBuffer();
         buf.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION_TEX);
@@ -93,9 +93,9 @@ public class GuiCircularSlider extends GuiButton {
             final double vy = ycenter + oy;
             final double tx = (txc + ox) / 256.0D;
             final double ty = (tyc + oy) / 256.0D;
-            buf.pos(vx, vy, this.zLevel).tex(tx, ty).endVertex();
+            buf.pos(vx, vy, this.blitOffset).tex(tx, ty).endVertex();
         }
-        buf.pos(xcenter, ycenter, this.zLevel).tex(txc, tyc).endVertex();
+        buf.pos(xcenter, ycenter, this.blitOffset).tex(txc, tyc).endVertex();
         tessellator.draw();
         GlStateManager.disableBlend();
         if (this.getter == null) {
@@ -114,35 +114,33 @@ public class GuiCircularSlider extends GuiButton {
     }
     
     @Override
-    public boolean mousePressed(Minecraft mc, int x, int y) {
-        Point2D.Double p = GuiUtils.getMousePoint(x, y);
+    public boolean clicked(double x, double y) {
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.x + raduish, ycenter = this.y + raduisv;
-        double dx = p.x - xcenter, dy = p.y - ycenter;
+        double dx = x - xcenter, dy = y - ycenter;
         this.pressed = Math.pow(dx, 2) / Math.pow(raduish, 2) +
                        Math.pow(dy, 2) / Math.pow(raduisv, 2) <= 1.0D
             && this.fromRadians(Math.atan2(dy, dx)) <= this.max;
         if (this.pressed) {
-            this.mouseDragged(mc, x, y);
+            this.onDrag(x, y, x, y);
         }
         return this.pressed;
     }
     
     @Override
-    public void mouseReleased(int x, int y) {
-        this.mouseDragged(Minecraft.getMinecraft(), x, y);
+    public void onRelease(double x, double y) {
+        this.onDrag(x, y, x, y);
         this.pressed = false;
     }
     
     @Override
-    public void mouseDragged(Minecraft mc, int x, int y) {
+    public void onDrag(double x, double y, double dragX, double dragY) {
         if (!this.pressed || this.setter == null) {
             return;
         }
-        Point2D.Double p = GuiUtils.getMousePoint(x, y);
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.x + raduish, ycenter = this.y + raduisv;
-        double value = this.fromRadians(Math.atan2(p.y - ycenter, p.x - xcenter));
+        double value = this.fromRadians(Math.atan2(y - ycenter, x - xcenter));
         if (value > this.max) {
             double left = 1.0D - this.max;
             if (value - this.max > left / 2.0D) {

@@ -1,7 +1,5 @@
 package com.vanym.paniclecraft.network.message;
 
-import java.util.function.Supplier;
-
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
@@ -33,16 +31,7 @@ public class MessageChessMove {
         return new MessageChessMove(pos, move);
     }
     
-    public static void handle(MessageChessMove message, Supplier<NetworkEvent.Context> ctx) {
-        handle(message, ctx.get());
-    }
-    
-    protected static void handle(MessageChessMove message, NetworkEvent.Context ctx) {
-        ctx.enqueueWork(()->handleInWorld(message, ctx));
-        ctx.setPacketHandled(true);
-    }
-    
-    protected static void handleInWorld(MessageChessMove message, NetworkEvent.Context ctx) {
+    public static void handleInWorld(MessageChessMove message, NetworkEvent.Context ctx) {
         PlayerEntity player = ctx.getSender();
         TileEntity tile = player.world.getTileEntity(message.pos);
         if (message.move != null && tile instanceof TileEntityChessDesk

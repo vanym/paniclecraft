@@ -7,9 +7,11 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockChessDesk;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRenderer;
 import com.vanym.paniclecraft.item.ItemChessDesk;
+import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -64,13 +66,14 @@ public class ModComponentDeskGame extends ModComponent {
         Core.instance.network.registerMessage(40, MessageChessMove.class,
                                               MessageChessMove::encode,
                                               MessageChessMove::decode,
-                                              MessageChessMove::handle);
+                                              NetworkUtils.handleInWorld(MessageChessMove::handleInWorld));
     }
     
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
         this.tileChessDeskRenderer = new TileEntityChessDeskRenderer();
+        this.tileChessDeskRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
         if (this.renderTileChessDesk.get()) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChessDesk.class,
                                                          this.tileChessDeskRenderer);
