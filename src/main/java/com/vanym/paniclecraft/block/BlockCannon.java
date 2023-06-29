@@ -7,6 +7,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,6 +30,7 @@ public class BlockCannon extends BlockContainerMod3 {
     
     public BlockCannon() {
         super(Block.Properties.create(Material.ANVIL)
+                              .sound(SoundType.ANVIL)
                               .hardnessAndResistance(1.5F)
                               .doesNotBlockMovement());
         this.setRegistryName("cannon");

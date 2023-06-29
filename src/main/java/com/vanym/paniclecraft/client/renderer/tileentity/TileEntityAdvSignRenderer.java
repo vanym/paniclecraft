@@ -4,23 +4,24 @@ import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.model.ModelSign;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.model.SignModel;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
-public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEntityAdvSign> {
+@OnlyIn(Dist.CLIENT)
+public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvSign> {
     
     protected static final ResourceLocation TEXTURE =
             new ResourceLocation("textures/entity/sign.png");
     
-    protected final ModelSign modelSign = new ModelSign();
+    protected final SignModel modelSign = new SignModel();
     
     public void render(
             TileEntityAdvSign tileAS,
@@ -34,15 +35,16 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             int selectLine) {
         GlStateManager.pushMatrix();
         float scale = 0.6666667F;
-        GlStateManager.translate((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
-        this.modelSign.signStick.showModel = tileAS.onStick();
+        GlStateManager.translatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
+        this.modelSign.getSignStick().showModel = tileAS.onStick();
         if (!statik) {
             float rotation = 0.0F;
             float yaxis = 1.0F;
-            switch (tileAS.hasWorld() ? tileAS.getBlockMetadata() : 1) {
+            switch (tileAS.hasWorld() ? tileAS.getBlockState().get(BlockAdvSign.FACING).getIndex()
+                                      : 1) {
                 case 0:
-                    GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
-                    GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
                     yaxis *= -1.0F;
                 break;
                 case 4:
@@ -52,40 +54,40 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
                 case 5:
                     rotation += 90.0F;
                 case 3:
-                    GlStateManager.rotate(rotation, 0.0F, 1.0F, 0.0F);
-                    GlStateManager.rotate(90.0F, 1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotatef(rotation, 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
                 break;
             }
-            GlStateManager.rotate(-(float)tileAS.getDirection(), 0.0F, yaxis, 0.0F);
+            GlStateManager.rotatef(-(float)tileAS.getDirection(), 0.0F, yaxis, 0.0F);
             if (!tileAS.onStick()) {
-                GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
-                GlStateManager.translate(0.0F, -0.3125F, -0.4375F);
+                GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
+                GlStateManager.translatef(0.0F, -0.3125F, -0.4375F);
             }
         }
         if (destroyStage >= 0) {
             this.bindTexture(DESTROY_STAGES[destroyStage]);
             GlStateManager.matrixMode(GL11.GL_TEXTURE);
             GlStateManager.pushMatrix();
-            GlStateManager.scale(4.0F, 2.0F, 1.0F);
-            GlStateManager.translate(0.0625F, 0.0625F, 0.0625F);
+            GlStateManager.scalef(4.0F, 2.0F, 1.0F);
+            GlStateManager.translatef(0.0625F, 0.0625F, 0.0625F);
             GlStateManager.matrixMode(GL11.GL_MODELVIEW);
         } else {
             this.bindTexture(TEXTURE);
             GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-                                                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                                                GlStateManager.SourceFactor.ONE,
-                                                GlStateManager.DestFactor.ZERO);
+            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                                             GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                             GlStateManager.SourceFactor.ONE,
+                                             GlStateManager.DestFactor.ZERO);
         }
         if (inWorld) {
             GlStateManager.enableRescaleNormal();
         }
         GlStateManager.pushMatrix();
-        GlStateManager.scale(scale, -scale, -scale);
+        GlStateManager.scalef(scale, -scale, -scale);
         if (destroyStage < 0) {
             Color color = tileAS.getStandColor();
             float[] colorf = color.getRGBComponents(null);
-            GlStateManager.color(colorf[0], colorf[1], colorf[2], colorf[3]);
+            GlStateManager.color4f(colorf[0], colorf[1], colorf[2], colorf[3]);
         }
         this.modelSign.renderSign();
         GlStateManager.popMatrix();
@@ -93,9 +95,9 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             FontRenderer fontRenderer = this.getFontRenderer();
             int size = tileAS.lines.size();
             float textScale = 0.016666668F * scale * 4.0F / Math.max(1, size);
-            GlStateManager.translate(0.0F, 0.5F * scale, 0.07F * scale);
-            GlStateManager.scale(textScale, -textScale, textScale);
-            GlStateManager.glNormal3f(0.0F, 0.0F, -1.0F * textScale);
+            GlStateManager.translatef(0.0F, 0.5F * scale, 0.07F * scale);
+            GlStateManager.scalef(textScale, -textScale, textScale);
+            GlStateManager.normal3f(0.0F, 0.0F, -1.0F * textScale);
             GlStateManager.depthMask(false);
             Color textColor = tileAS.getTextColor();
             for (int i = 0; i < size; ++i) {
@@ -110,7 +112,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             }
             GlStateManager.depthMask(true);
         }
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.popMatrix();
         if (destroyStage >= 0) {
             GlStateManager.matrixMode(GL11.GL_TEXTURE);
@@ -126,8 +128,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             double y,
             double z,
             float partialTicks,
-            int destroyStage,
-            float alpha) {
+            int destroyStage) {
         this.render(tileAS, x, y, z, partialTicks, destroyStage, false, true, -1);
     }
 }

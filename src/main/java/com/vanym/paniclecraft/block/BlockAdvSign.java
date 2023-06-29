@@ -1,121 +1,87 @@
 package com.vanym.paniclecraft.block;
 
-import java.util.Random;
-
-import javax.annotation.Nullable;
-
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.TileOnSide;
 
-import net.minecraft.block.BlockDirectional;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.DirectionalBlock;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.block.statemap.IStateMapper;
-import net.minecraft.client.renderer.block.statemap.StateMap;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomStateMapper {
+public class BlockAdvSign extends BlockContainerMod3 {
     
-    public static final PropertyDirection FACING = BlockDirectional.FACING;
+    public static final DirectionProperty FACING = DirectionalBlock.FACING;
     
     public BlockAdvSign() {
-        super(Material.WOOD);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.UP));
-        this.setUnlocalizedName("advanced_sign");
-        this.setHardness(1.0F);
+        super(Block.Properties.create(Material.WOOD)
+                              .sound(SoundType.WOOD)
+                              .hardnessAndResistance(1.0F)
+                              .doesNotBlockMovement()
+                              .noDrops());
+        this.setRegistryName("advanced_sign");
+        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.UP));
     }
     
     @Override
-    public TileEntity createNewTileEntity(World world, int meta) {
+    public TileEntity createNewTileEntity(IBlockReader worldIn) {
         return new TileEntityAdvSign();
     }
     
     @Override
-    public IBlockState getStateForPlacement(
-            World worldIn,
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        return this.getDefaultState().with(FACING, context.getFace());
+    }
+    
+    @Override
+    public BlockState rotate(BlockState state, Rotation rot) {
+        return state.with(FACING, rot.rotate(state.get(FACING)));
+    }
+    
+    @Override
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.toRotation(state.get(FACING)));
+    }
+    
+    @Override
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+    }
+    
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            IBlockReader world,
             BlockPos pos,
-            EnumFacing facing,
-            float hitX,
-            float hitY,
-            float hitZ,
-            int meta,
-            EntityLivingBase placer) {
-        return this.getDefaultState().withProperty(FACING, facing);
-    }
-    
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(meta));
-    }
-    
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(FACING).getIndex();
-    }
-    
-    @Override
-    public IBlockState withRotation(IBlockState state, Rotation rot) {
-        return state.withProperty(FACING, rot.rotate(state.getValue(FACING)));
-    }
-    
-    @Override
-    public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-        return state.withRotation(mirrorIn.toRotation(state.getValue(FACING)));
-    }
-    
-    @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, FACING);
-    }
-    
-    @Override
-    public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-        return Core.instance.advSign.itemAdvSign;
-    }
-    
-    @Override
-    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
-        return new ItemStack(Core.instance.advSign.itemAdvSign);
-    }
-    
-    @Override
-    @Nullable
-    public AxisAlignedBB getCollisionBoundingBox(
-            IBlockState state,
-            IBlockAccess world,
-            BlockPos pos) {
-        return NULL_AABB;
-    }
-    
-    @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {
+            ISelectionContext context) {
         TileEntity tile = world.getTileEntity(pos);
         if (!TileEntityAdvSign.class.isInstance(tile)) {
-            return FULL_BLOCK_AABB;
+            return VoxelShapes.fullCube();
         }
         TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-        SignSide pside = SignSide.getSide(state.getValue(FACING).getIndex());
+        SignSide pside = SignSide.getSide(state.get(FACING).getIndex());
         AxisAlignedBB box;
         if (tileAS.onStick()) {
             box = new AxisAlignedBB(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
@@ -161,42 +127,18 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
                     0.125D);
         }
         box = pside.axes.fromSideCoords(box);
-        return box;
+        return VoxelShapes.create(box);
     }
     
     @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public boolean hasCustomBreakingProgress(IBlockState state) {
+    @OnlyIn(Dist.CLIENT)
+    public boolean hasCustomBreakingProgress(BlockState state) {
         return true;
     }
     
     @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
-    }
-    
-    @Override
-    public boolean isPassable(IBlockAccess worldIn, BlockPos pos) {
-        return true;
-    }
-    
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-    
-    @Override
-    public BlockFaceShape getBlockFaceShape(
-            IBlockAccess world,
-            IBlockState state,
-            BlockPos pos,
-            EnumFacing face) {
-        return BlockFaceShape.UNDEFINED;
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
     @Override
@@ -205,48 +147,36 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
     }
     
     @Override
-    public int quantityDropped(Random rand) {
-        return 0;
-    }
-    
-    @Override
-    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getTileEntity(pos);
         spawnAsEntity(world, pos, ItemAdvSign.getSavedSign(tileAS));
-        super.breakBlock(world, pos, state);
+        super.onBlockHarvested(world, pos, state, player);
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
-    public IStateMapper getStateMapper() {
-        return new StateMap.Builder().ignore(FACING).build();
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(
-            IBlockState state,
+            BlockState state,
             RayTraceResult target,
-            World world,
+            IBlockReader world,
             BlockPos pos,
-            EntityPlayer player) {
+            PlayerEntity player) {
         TileEntity tile = world.getTileEntity(pos);
         return ItemAdvSign.getSavedSign(tile instanceof TileEntityAdvSign ? (TileEntityAdvSign)tile
                                                                           : null);
     }
     
     protected static enum SignSide {
-        DOWN(EnumFacing.WEST), // -Y
-        UP(EnumFacing.EAST), // +Y
-        NORTH(EnumFacing.WEST), // -Z
-        SOUTH(EnumFacing.EAST), // +Z
-        WEST(EnumFacing.SOUTH), // -X
-        EAST(EnumFacing.NORTH); // +X
+        DOWN(Direction.WEST), // -Y
+        UP(Direction.EAST), // +Y
+        NORTH(Direction.WEST), // -Z
+        SOUTH(Direction.EAST), // +Z
+        WEST(Direction.SOUTH), // -X
+        EAST(Direction.NORTH); // +X
         
         public final TileOnSide axes;
         
-        SignSide(EnumFacing xDir) {
-            this.axes = new TileOnSide(xDir, EnumFacing.getFront(this.ordinal()));
+        SignSide(Direction xDir) {
+            this.axes = new TileOnSide(xDir, Direction.byIndex(this.ordinal()));
         }
         
         public static SignSide getSide(int side) {

@@ -6,20 +6,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityAdvSign extends TileEntityBase {
-    
+
     public static final String IN_MOD_ID = "advanced_sign";
     public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
@@ -36,7 +44,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     protected double direction = 0.0D;
     protected boolean onStick = false;
     
-    protected EntityPlayer editor = null;
+    protected PlayerEntity editor = null;
     
     public static final String TAG_LINES = "Lines";
     public static final String TAG_STANDCOLOR = "StandColor";
@@ -45,43 +53,47 @@ public class TileEntityAdvSign extends TileEntityBase {
     protected static final String TAG_DIRECTION = "Direction";
     protected static final String TAG_ONSTICK = "OnStick";
     
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
-        return this.writeToNBT(nbtTag, false);
+    public TileEntityAdvSign() {
+        super(Core.instance.advSign.getTileEntities());
     }
     
-    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag, boolean toStack) {
-        NBTTagList linesTag = new NBTTagList();
-        this.lines.stream().map(NBTTagString::new).forEachOrdered(linesTag::appendTag);
-        nbtTag.setTag(TAG_LINES, linesTag);
-        nbtTag.setInteger(TAG_STANDCOLOR, this.standColor.getRGB());
-        nbtTag.setInteger(TAG_TEXTCOLOR, this.textColor.getRGB());
+    @Override
+    public CompoundNBT write(CompoundNBT nbtTag) {
+        return this.write(nbtTag, false);
+    }
+    
+    public CompoundNBT write(CompoundNBT nbtTag, boolean toStack) {
+        ListNBT linesTag = new ListNBT();
+        this.lines.stream().map(StringNBT::new).forEachOrdered(linesTag::add);
+        nbtTag.put(TAG_LINES, linesTag);
+        nbtTag.putInt(TAG_STANDCOLOR, this.standColor.getRGB());
+        nbtTag.putInt(TAG_TEXTCOLOR, this.textColor.getRGB());
         if (toStack) {
             return nbtTag;
         }
-        super.writeToNBT(nbtTag);
-        nbtTag.setDouble(TAG_DIRECTION, this.direction);
-        nbtTag.setBoolean(TAG_ONSTICK, this.onStick);
+        super.write(nbtTag);
+        nbtTag.putDouble(TAG_DIRECTION, this.direction);
+        nbtTag.putBoolean(TAG_ONSTICK, this.onStick);
         return nbtTag;
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound nbtTag) {
-        this.readFromNBT(nbtTag, false);
+    public void read(CompoundNBT nbtTag) {
+        this.read(nbtTag, false);
     }
     
-    public void readFromNBT(NBTTagCompound nbtTag, boolean fromStack) {
-        this.standColor = new Color(nbtTag.getInteger(TAG_STANDCOLOR), true);
-        this.textColor = new Color(nbtTag.getInteger(TAG_TEXTCOLOR), true);
+    public void read(CompoundNBT nbtTag, boolean fromStack) {
+        this.standColor = new Color(nbtTag.getInt(TAG_STANDCOLOR), true);
+        this.textColor = new Color(nbtTag.getInt(TAG_TEXTCOLOR), true);
         this.lines.clear();
-        NBTTagList linesTag = nbtTag.getTagList(TAG_LINES, 8);
-        for (int i = 0; i < linesTag.tagCount(); ++i) {
-            this.lines.add(linesTag.getStringTagAt(i));
+        ListNBT linesTag = nbtTag.getList(TAG_LINES, 8);
+        for (int i = 0; i < linesTag.size(); ++i) {
+            this.lines.add(linesTag.getString(i));
         }
         if (fromStack) {
             return;
         }
-        super.readFromNBT(nbtTag);
+        super.read(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.onStick = nbtTag.getBoolean(TAG_ONSTICK);
     }
@@ -124,7 +136,7 @@ public class TileEntityAdvSign extends TileEntityBase {
         return this.direction;
     }
     
-    public void setEditor(EntityPlayer editor) {
+    public void setEditor(PlayerEntity editor) {
         this.editor = editor;
     }
     
@@ -132,18 +144,18 @@ public class TileEntityAdvSign extends TileEntityBase {
         this.setEditor(null);
     }
     
-    public boolean isEditor(EntityPlayer player) {
+    public boolean isEditor(PlayerEntity player) {
         return this.editor != null && this.editor == player;
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
         return new AxisAlignedBB(this.pos).grow(0.25D);
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public double getMaxRenderDistanceSquared() {
         return 16384.0D;
     }

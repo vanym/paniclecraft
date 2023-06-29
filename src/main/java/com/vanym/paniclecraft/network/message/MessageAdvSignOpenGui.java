@@ -1,58 +1,40 @@
 package com.vanym.paniclecraft.network.message;
 
-import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.GUIs;
-import com.vanym.paniclecraft.network.InWorldHandler;
+import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
+import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class MessageAdvSignOpenGui implements IMessage {
+public class MessageAdvSignOpenGui {
     
-    int x, y, z;
-    
-    public MessageAdvSignOpenGui() {}
+    public final BlockPos pos;
     
     public MessageAdvSignOpenGui(BlockPos pos) {
-        this.x = pos.getX();
-        this.y = pos.getY();
-        this.z = pos.getZ();
+        this.pos = pos;
     }
     
-    public MessageAdvSignOpenGui(int x, int y, int z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+    public static void encode(MessageAdvSignOpenGui message, PacketBuffer buf) {
+        buf.writeBlockPos(message.pos);
     }
     
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.x = buf.readInt();
-        this.y = buf.readInt();
-        this.z = buf.readInt();
+    public static MessageAdvSignOpenGui decode(PacketBuffer buf) {
+        BlockPos pos = buf.readBlockPos();
+        return new MessageAdvSignOpenGui(pos);
     }
     
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeInt(this.x);
-        buf.writeInt(this.y);
-        buf.writeInt(this.z);
-    }
-    
-    public static class Handler extends InWorldHandler<MessageAdvSignOpenGui> {
-        
-        @Override
-        @SideOnly(Side.CLIENT)
-        public void onMessageInWorld(MessageAdvSignOpenGui message, MessageContext ctx) {
-            EntityPlayer player = FMLClientHandler.instance().getClient().player;
-            player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), player.getEntityWorld(),
-                           message.x, message.y, message.z);
+    public static void handleInWorld(MessageAdvSignOpenGui message, NetworkEvent.Context ctx) {
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+            Minecraft minecraft = Minecraft.getInstance();
+            TileEntity tile = minecraft.world.getTileEntity(message.pos);
+            if (tile instanceof TileEntityAdvSign) {
+                TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+                Minecraft.getInstance().displayGuiScreen(new GuiEditAdvSign(tileAS));
+            }
         }
     }
 }

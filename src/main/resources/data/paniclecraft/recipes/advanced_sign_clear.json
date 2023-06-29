@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "paniclecraft:advanced_sign"
+    }
+  ],
+  "result": {
+    "item": "paniclecraft:advanced_sign"
+  }
+}
