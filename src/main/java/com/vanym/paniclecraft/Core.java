@@ -66,7 +66,7 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.fml.relauncher.Side;
 
 @Mod(DEF.MOD_ID)
-public class Core implements IGuiHandler {
+public class Core {
     
     public static Core instance;
     public static IProxy proxy;
@@ -241,35 +241,5 @@ public class Core implements IGuiHandler {
             Packet<?> packet = channel.generatePacketFrom(message);
             manager.sendPacket(packet);
         });
-    }
-    
-    @Override
-    public Object getServerGuiElement(
-            int ID,
-            PlayerEntity player,
-            World world,
-            int x,
-            int y,
-            int z) {
-        if (ID >= 0 && ID < GUIs.values().length) {
-            return GUIs.values()[ID].getServerGuiElement(ID, player, world, x, y, z);
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public Object getClientGuiElement(
-            int ID,
-            PlayerEntity player,
-            World world,
-            int x,
-            int y,
-            int z) {
-        if (ID >= 0 && ID < GUIs.values().length) {
-            return GUIs.values()[ID].getClientGuiElement(ID, player, world, x, y, z);
-        } else {
-            return null;
-        }
     }
 }
