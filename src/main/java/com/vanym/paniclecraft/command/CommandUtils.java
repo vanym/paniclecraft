@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
@@ -14,13 +15,21 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 
 public class CommandUtils {
+    
+    protected static final SimpleCommandExceptionType REQUIRES_BLOCK_EXCEPTION_TYPE =
+            new SimpleCommandExceptionType(
+                    new TranslationTextComponent(
+                            String.format("commands.%s.exception.noblock", DEF.MOD_ID)));
     
     public static String makeGiveCommand(String player, ItemStack stack) {
         return String.format("/give %s %s %d %d %s",
@@ -37,24 +46,15 @@ public class CommandUtils {
                 new TextComponentString(stack.writeToNBT(new NBTTagCompound()).toString()));
     }
     
-    public static EntityPlayerMP getSenderAsPlayer(ICommandSender sender) throws CommandException {
-        if (sender instanceof EntityPlayerMP) {
-            return (EntityPlayerMP)sender;
-        } else {
-            throw new CommandException(
-                    String.format("commands.%s.exception.playerless", DEF.MOD_ID));
-        }
-    }
-    
-    public static RayTraceResult rayTraceBlocks(EntityPlayer player) throws CommandException {
+    public static BlockRayTraceResult rayTraceBlocks(PlayerEntity player) throws CommandException {
         return rayTraceBlocks(player, 6.0D);
     }
     
-    public static RayTraceResult rayTraceBlocks(EntityPlayer player, double distance)
+    public static BlockRayTraceResult rayTraceBlocks(PlayerEntity player, double distance)
             throws CommandException {
-        RayTraceResult target = GeometryUtils.rayTraceBlocks(player, distance);
-        if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
-            throw new CommandException(String.format("commands.%s.exception.noblock", DEF.MOD_ID));
+        BlockRayTraceResult target = GeometryUtils.rayTraceBlocks(player, distance);
+        if (target == null || target.getType() != RayTraceResult.Type.BLOCK) {
+            throw REQUIRES_BLOCK_EXCEPTION_TYPE.create();
         }
         return target;
     }

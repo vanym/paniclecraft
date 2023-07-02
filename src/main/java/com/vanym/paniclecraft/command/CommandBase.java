@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.minecraft.command.ICommandSender;
-
-public abstract class CommandBase extends net.minecraft.command.CommandBase {
+public abstract class CommandBase implements ICommand {
     
     protected String[] path;
     
@@ -24,11 +22,6 @@ public abstract class CommandBase extends net.minecraft.command.CommandBase {
             list.add(this.getName());
             this.path = list.toArray(new String[list.size()]);
         }
-    }
-    
-    @Override
-    public String getUsage(ICommandSender sender) {
-        return this.getTranslationPrefix() + ".usage";
     }
     
     protected String getTranslationPrefix() {

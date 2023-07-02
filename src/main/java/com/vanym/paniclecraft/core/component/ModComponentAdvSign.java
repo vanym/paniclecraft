@@ -6,6 +6,7 @@ import java.util.Map;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityAdvSignRenderer;
+import com.vanym.paniclecraft.command.CommandAdvSign;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
@@ -53,6 +54,8 @@ public class ModComponentAdvSign extends ModComponent {
                 Collections.singleton(this.blockAdvSign),
                 null);
         this.tileEntityAdvSign.setRegistryName(TileEntityAdvSign.ID);
+        
+        Core.instance.command.addSubCommand(new CommandAdvSign());
         
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
             ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);

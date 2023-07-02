@@ -40,6 +40,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -51,14 +52,13 @@ import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.NetworkRegistry.ChannelBuilder;
@@ -81,7 +81,7 @@ public class Core {
     
     public final CreativeTabMod3 tab = new CreativeTabMod3(DEF.MOD_ID);
     
-    public CommandMod3 command;
+    public final CommandMod3 command = new CommandMod3();
     
     public final SimpleChannel network =
             ChannelBuilder.named(new ResourceLocation(DEF.MOD_ID, "main_channel"))
@@ -114,6 +114,7 @@ public class Core {
              .stream()
              .filter(e->!e.getValue().isEmpty())
              .forEach(e->context.registerConfig(e.getKey(), e.getValue()));
+        MinecraftForge.EVENT_BUS.register(this);
     }
     
     public List<IModComponent> getComponents() {
@@ -124,6 +125,11 @@ public class Core {
         if (this.versionCheck.get()) {
             Version.startVersionCheck();
         }
+    }
+    
+    @SubscribeEvent
+    protected void serverStarting(FMLServerStartingEvent event) {
+        event.getCommandDispatcher().register(command.register());
     }
     
     @EventHandler
@@ -184,11 +190,6 @@ public class Core {
         if (this.config.hasChanged()) {
             this.config.save();
         }
-    }
-    
-    @EventHandler
-    public void serverStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(this.command);
     }
     
     @SubscribeEvent
