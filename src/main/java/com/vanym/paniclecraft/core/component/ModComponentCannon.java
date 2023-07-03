@@ -23,6 +23,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -30,7 +31,6 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.IContainerFactory;
 
 public class ModComponentCannon extends ModComponent {
     
@@ -70,8 +70,7 @@ public class ModComponentCannon extends ModComponent {
                 Collections.singleton(this.blockCannon),
                 null);
         this.tileEntityCannon.setRegistryName(TileEntityCannon.ID);
-        this.containerCannon =
-                new ContainerType<>((IContainerFactory<ContainerCannon>)ContainerCannon::create);
+        this.containerCannon = IForgeContainerType.create(ContainerCannon::create);
         this.containerCannon.setRegistryName(TileEntityCannon.ID);
         
         ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
