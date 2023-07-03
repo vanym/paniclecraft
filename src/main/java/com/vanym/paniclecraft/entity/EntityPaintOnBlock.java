@@ -202,7 +202,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
     }
     
-    public void onEntityDestroy() {
+    @Override
+    public void onRemovedFromWorld() {
         this.unloadPictures();
     }
     
