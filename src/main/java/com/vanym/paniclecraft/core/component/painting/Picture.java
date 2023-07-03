@@ -10,20 +10,20 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.mojang.blaze3d.platform.TextureUtil;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagByteArray;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.nbt.ByteArrayNBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NumberNBT;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 
 public class Picture implements IPictureSize {
     
@@ -39,7 +39,7 @@ public class Picture implements IPictureSize {
     protected int packedWidth;
     protected int packedHeight;
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public Integer texture;
     // unused on server side
     public boolean imageChangeProcessed = false;
@@ -332,7 +332,7 @@ public class Picture implements IPictureSize {
         return this.getWidth() * this.getHeight() * Image.getPixelSize(this.hasAlpha);
     }
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ByteBuffer getImageAsDirectByteBuffer() {
         if (this.image != null) {
             byte[] data = this.image.getData();
@@ -464,69 +464,69 @@ public class Picture implements IPictureSize {
     public static final String TAG_IMAGE_RAWDATA = "Raw";
     public static final String TAG_IMAGE_PACKED = "Packed";
     
-    public void writeToNBT(NBTTagCompound nbtTag) {
-        nbtTag.setBoolean(TAG_EDITABLE, this.editable);
+    public void writeToNBT(CompoundNBT nbtTag) {
+        nbtTag.putBoolean(TAG_EDITABLE, this.editable);
         if (this.name != null) {
-            nbtTag.setString(TAG_NAME, this.name);
+            nbtTag.putString(TAG_NAME, this.name);
         }
-        NBTTagCompound nbtImageTag = new NBTTagCompound();
+        CompoundNBT nbtImageTag = new CompoundNBT();
         this.writeImageToNBT(nbtImageTag);
-        if (!nbtImageTag.hasNoTags()) {
-            nbtTag.setTag(TAG_IMAGE, nbtImageTag);
+        if (!nbtImageTag.isEmpty()) {
+            nbtTag.put(TAG_IMAGE, nbtImageTag);
         }
     }
     
-    public void readFromNBT(NBTTagCompound nbtTag) {
-        if (nbtTag.hasKey(TAG_EDITABLE)) {
+    public void readFromNBT(CompoundNBT nbtTag) {
+        if (nbtTag.contains(TAG_EDITABLE)) {
             this.editable = nbtTag.getBoolean(TAG_EDITABLE);
         }
-        if (nbtTag.hasKey(TAG_NAME)) {
+        if (nbtTag.contains(TAG_NAME)) {
             this.setName(nbtTag.getString(TAG_NAME));
         } else {
             this.name = null;
         }
-        if (nbtTag.hasKey(TAG_IMAGE)) {
-            NBTBase nbtImage = nbtTag.getTag(TAG_IMAGE);
+        if (nbtTag.contains(TAG_IMAGE)) {
+            INBT nbtImage = nbtTag.get(TAG_IMAGE);
             this.readImageFromNBT(nbtImage);
         }
     }
     
-    public void writeImageToNBT(NBTTagCompound nbtImageTag) {
+    public void writeImageToNBT(CompoundNBT nbtImageTag) {
         if (this.pack()) {
-            nbtImageTag.setByteArray(TAG_IMAGE_PACKED, this.packed);
-            nbtImageTag.setInteger(TAG_IMAGE_WIDTH, this.packedWidth);
-            nbtImageTag.setInteger(TAG_IMAGE_HEIGHT, this.packedHeight);
+            nbtImageTag.putByteArray(TAG_IMAGE_PACKED, this.packed);
+            nbtImageTag.putInt(TAG_IMAGE_WIDTH, this.packedWidth);
+            nbtImageTag.putInt(TAG_IMAGE_HEIGHT, this.packedHeight);
         } else if (this.image != null) {
-            nbtImageTag.setInteger(TAG_IMAGE_WIDTH, this.image.getWidth());
-            nbtImageTag.setInteger(TAG_IMAGE_HEIGHT, this.image.getHeight());
-            nbtImageTag.setByteArray(TAG_IMAGE_RAWDATA, this.image.getData());
+            nbtImageTag.putInt(TAG_IMAGE_WIDTH, this.image.getWidth());
+            nbtImageTag.putInt(TAG_IMAGE_HEIGHT, this.image.getHeight());
+            nbtImageTag.putByteArray(TAG_IMAGE_RAWDATA, this.image.getData());
         }
     }
     
-    public void readImageFromNBT(NBTBase nbtImage) {
+    public void readImageFromNBT(INBT nbtImage) {
         int width = 0;
         int height = 0;
         byte[] packed = null;
         byte[] raw = null;
-        if (nbtImage instanceof NBTTagByteArray) {
-            NBTTagByteArray nbtImageBytes = (NBTTagByteArray)nbtImage;
+        if (nbtImage instanceof ByteArrayNBT) {
+            ByteArrayNBT nbtImageBytes = (ByteArrayNBT)nbtImage;
             packed = nbtImageBytes.getByteArray();
-        } else if (nbtImage instanceof NBTTagCompound) {
-            NBTTagCompound nbtImageTag = (NBTTagCompound)nbtImage;
-            width = nbtImageTag.getInteger(TAG_IMAGE_WIDTH);
-            height = nbtImageTag.getInteger(TAG_IMAGE_HEIGHT);
-            NBTBase nbtImageRaw = nbtImageTag.getTag(TAG_IMAGE_RAWDATA);
-            if (nbtImageRaw instanceof NBTTagByteArray) {
-                NBTTagByteArray nbtImageRawBytes = (NBTTagByteArray)nbtImageRaw;
+        } else if (nbtImage instanceof CompoundNBT) {
+            CompoundNBT nbtImageTag = (CompoundNBT)nbtImage;
+            width = nbtImageTag.getInt(TAG_IMAGE_WIDTH);
+            height = nbtImageTag.getInt(TAG_IMAGE_HEIGHT);
+            INBT nbtImageRaw = nbtImageTag.get(TAG_IMAGE_RAWDATA);
+            if (nbtImageRaw instanceof ByteArrayNBT) {
+                ByteArrayNBT nbtImageRawBytes = (ByteArrayNBT)nbtImageRaw;
                 raw = nbtImageRawBytes.getByteArray();
             }
-            NBTBase nbtImagePacked = nbtImageTag.getTag(TAG_IMAGE_PACKED);
-            if (nbtImagePacked instanceof NBTTagByteArray) {
-                NBTTagByteArray nbtImagePackedBytes = (NBTTagByteArray)nbtImagePacked;
+            INBT nbtImagePacked = nbtImageTag.get(TAG_IMAGE_PACKED);
+            if (nbtImagePacked instanceof ByteArrayNBT) {
+                ByteArrayNBT nbtImagePackedBytes = (ByteArrayNBT)nbtImagePacked;
                 packed = nbtImagePackedBytes.getByteArray();
             }
-        } else if (nbtImage instanceof NBTPrimitive) {
-            NBTPrimitive nbtPrim = (NBTPrimitive)nbtImage;
+        } else if (nbtImage instanceof NumberNBT) {
+            NumberNBT nbtPrim = (NumberNBT)nbtImage;
             int rowSize = nbtPrim.getInt();
             width = rowSize;
             height = rowSize;
@@ -561,15 +561,15 @@ public class Picture implements IPictureSize {
     }
     
     public void unload() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
             this.unloadClient();
         }
     }
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected void unloadClient() {
         if (this.texture != null) {
-            TextureUtil.deleteTexture(this.texture);
+            TextureUtil.releaseTextureId(this.texture);
             this.texture = null;
         }
     }
