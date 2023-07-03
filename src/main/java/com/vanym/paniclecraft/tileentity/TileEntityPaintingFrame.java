@@ -7,11 +7,11 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
@@ -22,28 +22,32 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     protected final PictureHolder[] holders = new PictureHolder[N];
     
+    public TileEntityPaintingFrame() {
+        super(Core.instance.painting.tileEntityPaintingFrame);
+    }
+    
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
-        super.writeToNBT(nbtTag);
+    public CompoundNBT write(CompoundNBT nbtTag) {
+        super.write(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (this.holders[i] != null) {
-                NBTTagCompound pictureTag = new NBTTagCompound();
+                CompoundNBT pictureTag = new CompoundNBT();
                 this.holders[i].picture.writeToNBT(pictureTag);
-                nbtTag.setTag(TAG_PICTURE_I, pictureTag);
+                nbtTag.put(TAG_PICTURE_I, pictureTag);
             }
         }
         return nbtTag;
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound nbtTag) {
-        super.readFromNBT(nbtTag);
+    public void read(CompoundNBT nbtTag) {
+        super.read(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
-            if (nbtTag.hasKey(TAG_PICTURE_I)) {
+            if (nbtTag.contains(TAG_PICTURE_I)) {
                 Picture picture = this.createPicture(i);
-                picture.readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE_I));
+                picture.readFromNBT(nbtTag.getCompound(TAG_PICTURE_I));
             } else {
                 this.clearPicture(i);
             }
@@ -91,8 +95,8 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     public void rotateY(int rotUp) {
-        EnumFacing rotator = EnumFacing.UP;
-        EnumFacing begin = EnumFacing.SOUTH;
+        Direction rotator = Direction.UP;
+        Direction begin = Direction.SOUTH;
         Picture pictureUp = this.getPicture(rotator.ordinal());
         if (pictureUp != null) {
             pictureUp.rotate(rotUp);
@@ -103,9 +107,9 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         }
         for (int i = 0; i < rotUp; i++) {
             PictureHolder holderBegin = this.holders[begin.ordinal()];
-            EnumFacing current = begin;
+            Direction current = begin;
             while (true) {
-                EnumFacing next = GeometryUtils.rotateBy(current, rotator.getOpposite());
+                Direction next = GeometryUtils.rotateBy(current, rotator.getOpposite());
                 if (next == begin) {
                     break;
                 }
@@ -152,12 +156,12 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
                                  TileEntityPaintingFrame.this.getPos().getX(),
                                  TileEntityPaintingFrame.this.getPos().getY(),
                                  TileEntityPaintingFrame.this.getPos().getZ(),
-                                 EnumFacing.getFront(this.side));
+                                 Direction.byIndex(this.side));
         }
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public double getMaxRenderDistanceSquared() {
         return Core.instance.painting.clientConfig.renderPaintingFrameTileMaxRenderDistanceSquared;
     }
@@ -171,14 +175,14 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     @Override
-    public void invalidate() {
-        super.invalidate();
+    public void remove() {
+        super.remove();
         this.unloadPictures();
     }
     
     @Override
-    public void onChunkUnload() {
-        super.onChunkUnload();
+    public void onChunkUnloaded() {
+        super.onChunkUnloaded();
         this.unloadPictures();
     }
     

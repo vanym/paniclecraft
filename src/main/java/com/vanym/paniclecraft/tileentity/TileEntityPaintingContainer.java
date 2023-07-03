@@ -5,9 +5,15 @@ import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 
+import net.minecraft.tileentity.TileEntityType;
+
 public abstract class TileEntityPaintingContainer extends TileEntityBase
         implements
             ISidePictureProvider {
+    
+    public TileEntityPaintingContainer(TileEntityType<?> tileType) {
+        super(tileType);
+    }
     
     public abstract void onWorldUnload();
     
