@@ -9,25 +9,18 @@ import java.util.Objects;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.nbt.StringNBT;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TileEntityAdvSign extends TileEntityBase {
-
+    
     public static final String IN_MOD_ID = "advanced_sign";
     public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
@@ -54,7 +47,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     protected static final String TAG_ONSTICK = "OnStick";
     
     public TileEntityAdvSign() {
-        super(Core.instance.advSign.getTileEntities());
+        super(Core.instance.advSign.tileEntityAdvSign);
     }
     
     @Override
