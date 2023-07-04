@@ -1,64 +1,39 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
-public class ItemPaintRemover extends ItemPaintingTool implements IWithSubtypes {
+public class ItemPaintRemover extends ItemPaintingTool {
     
-    protected static final int DAMAGE_REMOVER = 0;
-    protected static final int DAMAGE_SMALLREMOVER = 1;
-    
-    protected static final Map<Integer, String> SUBTYPES;
-    static {
-        Map<Integer, String> subtypes = new HashMap<>();
-        subtypes.put(DAMAGE_REMOVER, "paintingtool_remover");
-        subtypes.put(DAMAGE_SMALLREMOVER, "paintingtool_remover_small");
-        SUBTYPES = Collections.unmodifiableMap(subtypes);
-    }
-    
-    public ItemPaintRemover() {
-        super();
-        this.setUnlocalizedName("paintremover");
-        this.setMaxStackSize(1);
-        this.setMaxDamage(0);
-        this.setHasSubtypes(true);
-    }
-    
-    public ItemStack getRemover() {
-        return new ItemStack(this, 1, DAMAGE_REMOVER);
-    }
-    
-    public ItemStack getSmallRemover() {
-        return new ItemStack(this, 1, DAMAGE_SMALLREMOVER);
-    }
-    
-    @Override
-    public String getUnlocalizedName(ItemStack stack) {
-        int damage = stack.getItemDamage();
-        String name = SUBTYPES.get(damage);
-        if (name == null) {
-            return this.getUnlocalizedName() + damage;
+    public static enum Type {
+        REMOVER("paintingtool_remover"),
+        SMALLREMOVER("paintingtool_remover_small");
+        
+        public final String id;
+        
+        Type(String id) {
+            this.id = id;
         }
-        return "item." + name;
+    }
+    
+    protected final Type type;
+    
+    public ItemPaintRemover(Type type) {
+        super(new Item.Properties().maxStackSize(1));
+        this.type = type;
+        this.setRegistryName(type.id);
     }
     
     @Override
-    public Map<Integer, String> getSubtypes() {
-        return SUBTYPES;
-    }
-    
-    @Override
-    public void getSubItems(CreativeTabs creativetab, NonNullList<ItemStack> list) {
-        if (!this.isInCreativeTab(creativetab)) {
+    public void fillItemGroup(ItemGroup creativetab, NonNullList<ItemStack> list) {
+        if (!this.isInGroup(creativetab)) {
             return;
         }
         if (!Core.instance.painting.clientConfig.forceUnhidePaintRemover
@@ -70,8 +45,7 @@ public class ItemPaintRemover extends ItemPaintingTool implements IWithSubtypes 
             return;
         }
         ItemPaintRemover remover = this;
-        list.add(remover.getRemover());
-        list.add(remover.getSmallRemover());
+        list.add(new ItemStack(remover));
     }
     
     @Override
@@ -90,10 +64,10 @@ public class ItemPaintRemover extends ItemPaintingTool implements IWithSubtypes 
         if (tagRadius != null) {
             return tagRadius;
         }
-        switch (itemStack.getItemDamage()) {
-            case DAMAGE_REMOVER:
+        switch (this.type) {
+            case REMOVER:
                 return getRadius(Core.instance.painting.config.removerRadiuses, picture);
-            case DAMAGE_SMALLREMOVER:
+            case SMALLREMOVER:
                 return getRadius(Core.instance.painting.config.smallRemoverRadiuses, picture);
             default:
                 return 0.1D;

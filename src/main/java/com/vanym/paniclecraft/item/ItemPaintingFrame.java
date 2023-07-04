@@ -16,35 +16,38 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class ItemPaintingFrame extends ItemBlock {
+public class ItemPaintingFrame extends BlockItem {
     
     public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
-    public static final EnumFacing FRONT;
-    public static final EnumFacing LEFT;
-    public static final EnumFacing BACK;
-    public static final EnumFacing RIGHT;
-    public static final EnumFacing BOTTOM;
-    public static final EnumFacing TOP;
+    public static final Direction FRONT;
+    public static final Direction LEFT;
+    public static final Direction BACK;
+    public static final Direction RIGHT;
+    public static final Direction BOTTOM;
+    public static final Direction TOP;
     
     static {
-        FRONT = EnumFacing.NORTH;
+        FRONT = Direction.NORTH;
         LEFT = FRONT.rotateY();
         BACK = LEFT.rotateY();
         RIGHT = BACK.rotateY();
-        BOTTOM = EnumFacing.DOWN;
-        TOP = EnumFacing.UP;
+        BOTTOM = Direction.DOWN;
+        TOP = Direction.UP;
         
-        TreeMap<EnumFacing, String> letters = new TreeMap<>();
+        TreeMap<Direction, String> letters = new TreeMap<>();
         letters.put(FRONT, "F");
         letters.put(LEFT, "L");
         letters.put(BACK, "K");
@@ -54,29 +57,29 @@ public class ItemPaintingFrame extends ItemBlock {
         SIDE_LETTERS = Collections.unmodifiableMap(letters);
     }
     
-    public static final List<EnumFacing> SIDE_ORDER =
+    public static final List<Direction> SIDE_ORDER =
             Arrays.asList(FRONT, RIGHT, TOP, LEFT, BACK, BOTTOM);
-    protected static final Map<EnumFacing, String> SIDE_LETTERS;
+    protected static final Map<Direction, String> SIDE_LETTERS;
     
     public ItemPaintingFrame(Block block) {
-        super(block);
+        super(block, new Item.Properties().group(Core.instance.tab));
         this.setRegistryName(block.getRegistryName());
     }
     
     @Override
     @Nullable
-    public EntityEquipmentSlot getEquipmentSlot(ItemStack stack) {
-        return EntityEquipmentSlot.HEAD;
+    public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
+        return EquipmentSlotType.HEAD;
     }
     
     @Override
-    public int getItemBurnTime(ItemStack fuel) {
-        if (fuel.hasTagCompound()) {
-            NBTTagCompound itemTag = fuel.getTagCompound();
+    public int getBurnTime(ItemStack fuel) {
+        if (fuel.hasTag()) {
+            CompoundNBT itemTag = fuel.getTag();
             if (SIDE_ORDER.stream()
-                          .map(EnumFacing::getIndex)
+                          .map(Direction::getIndex)
                           .map(ItemPaintingFrame::getPictureTag)
-                          .anyMatch(itemTag::hasKey)) {
+                          .anyMatch(itemTag::contains)) {
                 return 0;
             }
         }
@@ -85,25 +88,25 @@ public class ItemPaintingFrame extends ItemBlock {
     
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void addInformation(
             ItemStack itemStack,
             @Nullable World world,
-            List<String> list,
+            List<ITextComponent> list,
             ITooltipFlag flag) {
-        if (itemStack.hasTagCompound()) {
+        if (itemStack.hasTag()) {
             Map<String, String> mapLetters = new TreeMap<>();
             Map<String, Integer> mapCount = new TreeMap<>();
-            NBTTagCompound itemTag = itemStack.getTagCompound();
+            CompoundNBT itemTag = itemStack.getTag();
             for (int i = 0; i < SIDE_ORDER.size(); ++i) {
-                EnumFacing side = SIDE_ORDER.get(i);
+                Direction side = SIDE_ORDER.get(i);
                 final String TAG_PICTURE_I = getPictureTag(side.ordinal());
-                if (!itemTag.hasKey(TAG_PICTURE_I)) {
+                if (!itemTag.contains(TAG_PICTURE_I)) {
                     continue;
                 }
-                NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
+                CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE_I);
                 String info;
-                if (pictureTag.hasNoTags()) {
+                if (pictureTag.isEmpty()) {
                     info = "";
                 } else {
                     info = ItemPainting.pictureSizeInformation(pictureTag);
@@ -122,27 +125,27 @@ public class ItemPaintingFrame extends ItemBlock {
                 sb.append(info);
                 sb.append("×");
                 sb.append(count);
-                list.add(sb.toString());
+                list.add(new StringTextComponent(sb.toString()));
             });
         }
     }
     
-    public static ItemStack getItemWithPictures(Map<EnumFacing, Picture> map) {
+    public static ItemStack getItemWithPictures(Map<Direction, Picture> map) {
         ItemStack itemS = new ItemStack(Core.instance.painting.itemPaintingFrame);
         if (map == null) {
             return itemS;
         }
-        NBTTagCompound itemTag = new NBTTagCompound();
+        CompoundNBT itemTag = new CompoundNBT();
         map.forEach((pside, picture)-> {
             final String TAG_PICTURE_I = getPictureTag(pside);
-            NBTTagCompound pictureTag = new NBTTagCompound();
+            CompoundNBT pictureTag = new CompoundNBT();
             if (picture != null) {
                 picture.writeToNBT(pictureTag);
             }
-            itemTag.setTag(TAG_PICTURE_I, pictureTag);
+            itemTag.put(TAG_PICTURE_I, pictureTag);
         });
-        if (!itemTag.hasNoTags()) {
-            itemS.setTagCompound(itemTag);
+        if (!itemTag.isEmpty()) {
+            itemS.setTag(itemTag);
         }
         return itemS;
     }
@@ -151,30 +154,30 @@ public class ItemPaintingFrame extends ItemBlock {
         if (provider == null) {
             return getItemWithPictures(null);
         }
-        Map<EnumFacing, Picture> map = new HashMap<>();
+        Map<Direction, Picture> map = new HashMap<>();
         for (int i = 0; i < ISidePictureProvider.N; i++) {
             Picture picture = provider.getPicture(i);
             if (picture == null) {
                 continue;
             }
-            EnumFacing pside = EnumFacing.getFront(i);
+            Direction pside = Direction.byIndex(i);
             map.put(pside, picture);
         }
         return getItemWithPictures(map);
     }
     
-    public static ItemStack getItemWithEmptyPictures(EnumFacing... psides) {
+    public static ItemStack getItemWithEmptyPictures(Direction... psides) {
         if (psides == null) {
             return getItemWithPictures(null);
         }
-        Map<EnumFacing, Picture> map = new HashMap<>();
-        for (EnumFacing pside : psides) {
+        Map<Direction, Picture> map = new HashMap<>();
+        for (Direction pside : psides) {
             map.put(pside, null);
         }
         return getItemWithPictures(map);
     }
     
-    public static String getPictureTag(EnumFacing pside) {
+    public static String getPictureTag(Direction pside) {
         return getPictureTag(pside.ordinal());
     }
     
