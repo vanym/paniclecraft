@@ -16,6 +16,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
+import com.vanym.paniclecraft.client.gui.container.GuiPalette;
 import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.entity.EntityPaintOnBlockRenderer;
@@ -26,7 +27,8 @@ import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRende
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandPaintOnBlock;
 import com.vanym.paniclecraft.command.CommandPainting;
-import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.container.ContainerPalette;
+import com.vanym.paniclecraft.core.component.ModComponent.ModComponentObject;
 import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
 import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -37,7 +39,9 @@ import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPaintRemover;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
+import com.vanym.paniclecraft.item.ItemPaintingTool;
 import com.vanym.paniclecraft.item.ItemPalette;
+import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageOpenPaintingView;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
@@ -56,22 +60,25 @@ import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.init.Items;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class ModComponentPainting extends ModComponent {
     
@@ -86,13 +93,29 @@ public class ModComponentPainting extends ModComponent {
     @ModComponentObject
     public ItemPaintBrush itemPaintBrush;
     @ModComponentObject
+    public ItemPaintBrush itemPaintBrushSmall;
+    @ModComponentObject
+    public ItemPaintBrush itemPaintFiller;
+    @ModComponentObject
+    public ItemPaintBrush itemPaintColorPicker;
+    @ModComponentObject
     public ItemPaintRemover itemPaintRemover;
+    @ModComponentObject
+    public ItemPaintRemover itemPaintRemoverSmall;
     @ModComponentObject
     public ItemPalette itemPalette;
     @ModComponentObject
     public BlockPainting blockPainting;
     @ModComponentObject
     public BlockPaintingFrame blockPaintingFrame;
+    
+    @ModComponentObject
+    public TileEntityType<TileEntityPainting> tileEntityPainting;
+    @ModComponentObject
+    public TileEntityType<TileEntityPaintingFrame> tileEntityPaintingFrame;
+    
+    @ModComponentObject
+    public ContainerType<ContainerPalette> containerPalette;
     
     protected List<IRecipe> recipes = new ArrayList<>();
     
@@ -119,7 +142,56 @@ public class ModComponentPainting extends ModComponent {
     @SideOnly(Side.CLIENT)
     public ChangeableClientConfig clientConfig;
     
-    protected boolean enabled = false;
+    @Override
+    public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
+        FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        
+        this.blockPainting = new BlockPainting();
+        this.blockPaintingFrame = new BlockPaintingFrame();
+        
+        this.itemPainting = new ItemPainting();
+        this.itemPaintingFrame = new ItemPaintingFrame(this.blockPaintingFrame);
+        this.itemPaintBrush = new ItemPaintBrush(ItemPaintBrush.Type.BRUSH);
+        this.itemPaintBrushSmall = new ItemPaintBrush(ItemPaintBrush.Type.SMALLBRUSH);
+        this.itemPaintFiller = new ItemPaintBrush(ItemPaintBrush.Type.FILLER);
+        this.itemPaintColorPicker = new ItemPaintBrush(ItemPaintBrush.Type.COLORPICKER);
+        this.itemPaintRemover = new ItemPaintRemover(ItemPaintRemover.Type.REMOVER);
+        this.itemPaintRemoverSmall = new ItemPaintRemover(ItemPaintRemover.Type.SMALLREMOVER);
+        this.itemPalette = new ItemPalette();
+        
+        this.tileEntityPainting = new TileEntityType<>(
+                TileEntityPainting::new,
+                Collections.singleton(this.blockPainting),
+                null);
+        this.tileEntityPainting.setRegistryName(TileEntityPainting.ID);
+        this.tileEntityPaintingFrame = new TileEntityType<>(
+                TileEntityPaintingFrame::new,
+                Collections.singleton(this.blockPaintingFrame),
+                null);
+        this.tileEntityPaintingFrame.setRegistryName(TileEntityPaintingFrame.ID);
+        
+        this.containerPalette = new ContainerType<>(ContainerPalette::new);
+        this.containerPalette.setRegistryName(this.itemPalette.getRegistryName());
+        
+        this.getItems()
+            .stream()
+            .filter(ItemPaintingTool.class::isInstance)
+            .forEach(MinecraftForge.EVENT_BUS::register);
+    }
+    
+    @SubscribeEvent
+    protected void setup(FMLCommonSetupEvent event) {
+        Core.instance.network.registerMessage(32, MessagePaletteSetColor.class,
+                                              MessagePaletteSetColor::encode,
+                                              MessagePaletteSetColor::decode,
+                                              NetworkUtils.handleInWorld(MessagePaletteSetColor::handleInWorld));
+    }
+    
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    protected void setupClient(FMLClientSetupEvent event) {
+        ScreenManager.registerFactory(this.containerPalette, GuiPalette::new);
+    }
     
     @Override
     public void preInit(ModConfig config) {
@@ -485,11 +557,6 @@ public class ModComponentPainting extends ModComponent {
     @Override
     public String getName() {
         return "painting";
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return this.enabled;
     }
     
     @Override
