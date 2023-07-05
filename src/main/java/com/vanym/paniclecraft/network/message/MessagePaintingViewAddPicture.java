@@ -1,25 +1,18 @@
 package com.vanym.paniclecraft.network.message;
 
-import java.io.IOException;
-
-import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
+import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
-import com.vanym.paniclecraft.network.InWorldHandler;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class MessagePaintingViewAddPicture implements IMessage {
+public class MessagePaintingViewAddPicture {
     
-    int x, y;
-    ItemStack stack;
-    
-    public MessagePaintingViewAddPicture() {}
+    protected final int x, y;
+    protected final ItemStack stack;
     
     public MessagePaintingViewAddPicture(int x, int y, ItemStack stack) {
         this.x = x;
@@ -27,46 +20,36 @@ public class MessagePaintingViewAddPicture implements IMessage {
         this.stack = stack;
     }
     
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        PacketBuffer pb = new PacketBuffer(buf);
-        this.x = pb.readInt();
-        this.y = pb.readInt();
-        try {
-            this.stack = pb.readItemStack();
-        } catch (IOException e) {
-            this.stack = ItemStack.EMPTY;
-        }
+    public static void encode(MessagePaintingViewAddPicture message, PacketBuffer buf) {
+        buf.writeInt(message.x);
+        buf.writeInt(message.y);
+        buf.writeItemStack(message.stack);
     }
     
-    @Override
-    public void toBytes(ByteBuf buf) {
-        PacketBuffer pb = new PacketBuffer(buf);
-        pb.writeInt(this.x);
-        pb.writeInt(this.y);
-        pb.writeItemStack(this.stack);
+    public static MessagePaintingViewAddPicture decode(PacketBuffer buf) {
+        int x = buf.readInt();
+        int y = buf.readInt();
+        ItemStack stack = buf.readItemStack();
+        return new MessagePaintingViewAddPicture(x, y, stack);
     }
     
-    public static class Handler extends InWorldHandler<MessagePaintingViewAddPicture> {
-        
-        @Override
-        public void onMessageInWorld(MessagePaintingViewAddPicture message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            if (!(playerEntity.openContainer instanceof ContainerPaintingViewServer)) {
-                return;
-            }
-            ContainerPaintingViewServer view =
-                    (ContainerPaintingViewServer)playerEntity.openContainer;
-            if (!view.isEditable()) {
-                return;
-            }
-            Picture picture = new Picture(true);
-            if (message.stack == null || message.stack.isEmpty()
-                || !ItemPainting.fillPicture(picture, message.stack)) {
-                return;
-            }
-            view.addPicture(message.x, message.y, picture);
-            picture.unload();
+    public static void handleInWorld(
+            MessagePaintingViewAddPicture message,
+            NetworkEvent.Context ctx) {
+        ServerPlayerEntity player = ctx.getSender();
+        if (!ContainerPaintingViewBase.class.isInstance(player.openContainer)) {
+            return;
         }
+        ContainerPaintingViewBase view = (ContainerPaintingViewBase)player.openContainer;
+        if (!view.editable) {
+            return;
+        }
+        Picture picture = new Picture(true);
+        if (message.stack == null || message.stack.isEmpty()
+            || !ItemPainting.fillPicture(picture, message.stack)) {
+            return;
+        }
+        view.addPicture(message.x, message.y, picture);
+        picture.unload();
     }
 }

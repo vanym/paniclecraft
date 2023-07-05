@@ -190,10 +190,18 @@ public class ModComponentPainting extends ModComponent {
     
     @SubscribeEvent
     protected void setup(FMLCommonSetupEvent event) {
+        Core.instance.network.registerMessage(30, MessagePaintingToolUse.class,
+                                              MessagePaintingToolUse::encode,
+                                              MessagePaintingToolUse::decode,
+                                              NetworkUtils.handleInWorld(MessagePaintingToolUse::handleInWorld));
         Core.instance.network.registerMessage(32, MessagePaletteSetColor.class,
                                               MessagePaletteSetColor::encode,
                                               MessagePaletteSetColor::decode,
                                               NetworkUtils.handleInWorld(MessagePaletteSetColor::handleInWorld));
+        Core.instance.network.registerMessage(34, MessagePaintingViewAddPicture.class,
+                                              MessagePaintingViewAddPicture::encode,
+                                              MessagePaintingViewAddPicture::decode,
+                                              NetworkUtils.handleInWorld(MessagePaintingViewAddPicture::handleInWorld));
     }
     
     @SubscribeEvent

@@ -6,33 +6,24 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
-import com.vanym.paniclecraft.network.InWorldHandler;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class MessagePaintingToolUse implements IMessage {
+public class MessagePaintingToolUse {
     
-    int x, y, z, px, py;
-    byte side;
-    boolean tile;
-    
-    public MessagePaintingToolUse() {}
+    protected final BlockPos pos;
+    protected final int px, py;
+    protected final byte side;
+    protected final boolean tile;
     
     public MessagePaintingToolUse(BlockPos pos, int px, int py, byte side, boolean tile) {
-        this(pos.getX(), pos.getY(), pos.getZ(), px, py, side, tile);
-    }
-    
-    public MessagePaintingToolUse(int x, int y, int z, int px, int py, byte side, boolean tile) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.pos = pos;
         this.px = px;
         this.py = py;
         this.side = side;
@@ -41,7 +32,7 @@ public class MessagePaintingToolUse implements IMessage {
     
     @Override
     public int hashCode() {
-        return Objects.hash(this.x, this.y, this.z, this.px, this.py, this.side, this.tile);
+        return Objects.hash(this.pos, this.px, this.py, this.side, this.tile);
     }
     
     @Override
@@ -51,67 +42,52 @@ public class MessagePaintingToolUse implements IMessage {
     
     public boolean equals(MessagePaintingToolUse mes) {
         return mes != null
-            && this.x == mes.x
-            && this.y == mes.y
-            && this.z == mes.z
+            && this.pos != null
+            && this.pos.equals(mes.pos)
             && this.px == mes.px
             && this.py == mes.py
             && this.side == mes.side
             && this.tile == mes.tile;
     }
     
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.x = buf.readInt();
-        this.y = buf.readInt();
-        this.z = buf.readInt();
-        this.px = buf.readInt();
-        this.py = buf.readInt();
-        this.side = buf.readByte();
-        this.tile = buf.readBoolean();
+    public static void encode(MessagePaintingToolUse message, PacketBuffer buf) {
+        buf.writeBlockPos(message.pos);
+        buf.writeInt(message.px);
+        buf.writeInt(message.py);
+        buf.writeByte(message.side);
+        buf.writeBoolean(message.tile);
     }
     
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeInt(this.x);
-        buf.writeInt(this.y);
-        buf.writeInt(this.z);
-        buf.writeInt(this.px);
-        buf.writeInt(this.py);
-        buf.writeByte(this.side);
-        buf.writeBoolean(this.tile);
+    public static MessagePaintingToolUse decode(PacketBuffer buf) {
+        BlockPos pos = buf.readBlockPos();
+        int px = buf.readInt();
+        int py = buf.readInt();
+        byte side = buf.readByte();
+        boolean tile = buf.readBoolean();
+        return new MessagePaintingToolUse(pos, px, py, side, tile);
     }
     
-    protected BlockPos getPos() {
-        return new BlockPos(this.x, this.y, this.z);
-    }
-    
-    public static class Handler extends InWorldHandler<MessagePaintingToolUse> {
-        
-        @Override
-        public void onMessageInWorld(MessagePaintingToolUse message, MessageContext ctx) {
-            EntityPlayer player = ctx.getServerHandler().player;
-            ItemStack heldItem = player.getActiveItemStack();
-            if (!(heldItem.getItem() instanceof ItemPaintingTool)) {
-                return;
-            }
-            World world = player.world;
-            Picture picture = null;
-            WorldPictureProvider provider = null;
-            if (message.tile) {
-                provider = WorldPictureProvider.ANYTILE;
-            } else if (Core.instance.painting.config.allowPaintOnBlock) {
-                provider = WorldPictureProvider.PAINTONBLOCK;
-            }
-            if (provider != null) {
-                picture = provider.getOrCreatePicture(world, message.getPos(), message.side);
-            }
-            if (picture == null
-                || !player.canPlayerEdit(new BlockPos(message.x, message.y, message.z),
-                                         EnumFacing.getFront(message.side), heldItem)) {
-                return;
-            }
-            picture.usePaintingTool(heldItem, message.px, message.py);
+    public static void handleInWorld(MessagePaintingToolUse message, NetworkEvent.Context ctx) {
+        ServerPlayerEntity player = ctx.getSender();
+        ItemStack heldItem = player.getActiveItemStack();
+        if (!ItemPaintingTool.class.isInstance(heldItem.getItem())) {
+            return;
         }
+        World world = player.world;
+        Picture picture = null;
+        WorldPictureProvider provider = null;
+        if (message.tile) {
+            provider = WorldPictureProvider.ANYTILE;
+        } else if (Core.instance.painting.config.allowPaintOnBlock) {
+            provider = WorldPictureProvider.PAINTONBLOCK;
+        }
+        if (provider != null) {
+            picture = provider.getOrCreatePicture(world, message.pos, message.side);
+        }
+        if (picture == null
+            || !player.canPlayerEdit(message.pos, Direction.byIndex(message.side), heldItem)) {
+            return;
+        }
+        picture.usePaintingTool(heldItem, message.px, message.py);
     }
 }
