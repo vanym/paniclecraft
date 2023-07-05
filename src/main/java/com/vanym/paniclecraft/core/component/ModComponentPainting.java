@@ -16,6 +16,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
+import com.vanym.paniclecraft.client.gui.container.GuiPaintingEditView;
 import com.vanym.paniclecraft.client.gui.container.GuiPalette;
 import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
@@ -27,6 +28,8 @@ import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRende
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandPaintOnBlock;
 import com.vanym.paniclecraft.command.CommandPainting;
+import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
+import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.container.ContainerPalette;
 import com.vanym.paniclecraft.core.component.ModComponent.ModComponentObject;
 import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
@@ -71,6 +74,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -116,6 +120,8 @@ public class ModComponentPainting extends ModComponent {
     
     @ModComponentObject
     public ContainerType<ContainerPalette> containerPalette;
+    @ModComponentObject
+    public ContainerType<ContainerPaintingViewBase> containerPaintingView;
     
     protected List<IRecipe> recipes = new ArrayList<>();
     
@@ -172,6 +178,9 @@ public class ModComponentPainting extends ModComponent {
         
         this.containerPalette = new ContainerType<>(ContainerPalette::new);
         this.containerPalette.setRegistryName(this.itemPalette.getRegistryName());
+        this.containerPaintingView =
+                IForgeContainerType.create(ContainerPaintingViewClient::create);
+        this.containerPaintingView.setRegistryName("paintingview");
         
         this.getItems()
             .stream()
@@ -191,6 +200,7 @@ public class ModComponentPainting extends ModComponent {
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
         ScreenManager.registerFactory(this.containerPalette, GuiPalette::new);
+        ScreenManager.registerFactory(this.containerPaintingView, GuiPaintingEditView::create);
     }
     
     @Override

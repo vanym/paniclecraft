@@ -1,13 +1,19 @@
 package com.vanym.paniclecraft.container;
 
-import com.vanym.paniclecraft.Core;
+import java.util.function.Consumer;
+
 import com.vanym.paniclecraft.core.component.painting.FixedPictureSize;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
-import com.vanym.paniclecraft.network.message.MessageOpenPaintingView;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.ITextComponent;
 
 public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
     
@@ -15,20 +21,14 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
     
     protected boolean editable = false;
     
-    public ContainerPaintingViewServer(WorldPicturePoint point,
+    public ContainerPaintingViewServer(int id,
+            WorldPicturePoint point,
             IPictureSize pictureSize,
             int sizeX,
-            int sizeY) {
-        super(pictureSize, sizeX, sizeY);
+            int sizeY,
+            boolean editable) {
+        super(id, pictureSize, sizeX, sizeY, editable);
         this.point = point;
-    }
-    
-    public void setEditable(boolean editable) {
-        this.editable = editable;
-    }
-    
-    public boolean isEditable() {
-        return this.editable;
     }
     
     @Override
@@ -46,7 +46,7 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
         return false;
     }
     
-    public static ContainerPaintingViewServer makeFullView(WorldPicturePoint point, int maxRadius) {
+    public static Provider makeFullView(WorldPicturePoint point, int maxRadius) {
         Picture center = point.getPicture();
         if (center == null) {
             return null;
@@ -119,27 +119,58 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
                 break extendRight;
             }
         }
-        return new ContainerPaintingViewServer(
-                point.getNeighborPoint(-extendLeft, -extendUp),
-                size,
-                extendLeft + 1 + extendRight,
-                extendUp + 1 + extendDown);
+        WorldPicturePoint topLeftPoint = point.getNeighborPoint(-extendLeft, -extendUp);
+        int sizeX = extendLeft + 1 + extendRight;
+        int sizeY = extendUp + 1 + extendDown;
+        return new Provider(topLeftPoint, size, sizeX, sizeY);
     }
     
-    public static void openGui(EntityPlayerMP player, ContainerPaintingViewServer view) {
-        player.getNextWindowId();
-        player.closeContainer();
-        int windowId = player.currentWindowId;
-        Core.instance.network.sendTo(new MessageOpenPaintingView(
-                windowId,
-                view.pictureSize.getWidth(),
-                view.pictureSize.getHeight(),
-                view.sizeX,
-                view.sizeY,
-                view.point.provider.hasAlpha(),
-                view.editable), player);
-        player.openContainer = view;
-        player.openContainer.windowId = windowId;
-        player.openContainer.addListener(player);
+    public static class Provider implements INamedContainerProvider, Consumer<PacketBuffer> {
+        
+        protected final WorldPicturePoint point;
+        protected final IPictureSize pictureSize;
+        protected final int sizeX, sizeY;
+        
+        protected boolean editable = false;
+        
+        protected Provider(WorldPicturePoint topLeftPoint,
+                IPictureSize pictureSize,
+                int sizeX,
+                int sizeY) {
+            this.point = topLeftPoint;
+            this.pictureSize = pictureSize;
+            this.sizeX = sizeX;
+            this.sizeY = sizeY;
+        }
+        
+        public void setEditable(boolean editable) {
+            this.editable = editable;
+        }
+        
+        @Override
+        public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
+            return new ContainerPaintingViewServer(
+                    id,
+                    this.point,
+                    this.pictureSize,
+                    this.sizeX,
+                    this.sizeY,
+                    this.editable);
+        }
+        
+        @Override
+        public ITextComponent getDisplayName() {
+            return NarratorChatListener.field_216868_a;
+        }
+        
+        @Override
+        public void accept(PacketBuffer buf) {
+            buf.writeInt(this.pictureSize.getWidth());
+            buf.writeInt(this.pictureSize.getHeight());
+            buf.writeInt(this.sizeX);
+            buf.writeInt(this.sizeY);
+            buf.writeBoolean(this.point.provider.hasAlpha());
+            buf.writeBoolean(this.editable);
+        }
     }
 }
