@@ -6,6 +6,7 @@ import java.util.stream.Stream.Builder;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -14,23 +15,24 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent.HighlightBlock;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class PaintingSpecialSelectionBox {
     
     protected boolean onlyCancel = false;
@@ -67,13 +69,17 @@ public class PaintingSpecialSelectionBox {
     }
     
     @SubscribeEvent
-    public void drawSelectionBox(DrawBlockHighlightEvent event) {
-        final RayTraceResult target = event.getTarget();
-        if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
+    public void drawSelectionBox(HighlightBlock event) {
+        if (event.getTarget().getType() != RayTraceResult.Type.BLOCK) {
             return;
         }
-        EntityPlayer player = event.getPlayer();
-        ItemStack stack = Stream.of(EnumHand.MAIN_HAND, EnumHand.OFF_HAND)
+        BlockRayTraceResult target = event.getTarget();
+        Entity entity = event.getInfo().getRenderViewEntity();
+        if (!PlayerEntity.class.isInstance(entity)) {
+            return;
+        }
+        PlayerEntity player = (PlayerEntity)entity;
+        ItemStack stack = Stream.of(Hand.MAIN_HAND, Hand.OFF_HAND)
                                 .map(player::getHeldItem)
                                 .filter(s->!s.isEmpty())
                                 .findFirst()
@@ -86,12 +92,12 @@ public class PaintingSpecialSelectionBox {
         if (!tool.getPaintingToolType(stack).isPixelSelector()) {
             return;
         }
-        BlockPos pos = target.getBlockPos();
+        BlockPos pos = target.getPos();
         Picture picture = new WorldPicturePoint(
                 WorldPictureProvider.ANYTILE,
                 player.world,
                 pos,
-                target.sideHit.getIndex()).getPicture();
+                target.getFace().getIndex()).getPicture();
         if (picture == null) {
             return;
         }
@@ -99,7 +105,7 @@ public class PaintingSpecialSelectionBox {
         if (this.onlyCancel) {
             return;
         }
-        PaintingSide pside = PaintingSide.getSide(target.sideHit);
+        PaintingSide pside = PaintingSide.getSide(target.getFace());
         double radius = tool.getPaintingToolRadius(stack, picture);
         int width = picture.getWidth();
         int height = picture.getHeight();
@@ -166,16 +172,16 @@ public class PaintingSpecialSelectionBox {
     
     protected void drawLines(Stream<AxisAlignedBB> lines) {
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-                                            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                                            GlStateManager.SourceFactor.ONE,
-                                            GlStateManager.DestFactor.ZERO);
-        GlStateManager.glLineWidth(2.0F);
-        GlStateManager.disableTexture2D();
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                                         GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                         GlStateManager.SourceFactor.ONE,
+                                         GlStateManager.DestFactor.ZERO);
+        GlStateManager.lineWidth(2.0F);
+        GlStateManager.disableTexture();
         GlStateManager.depthMask(false);
         lines.forEach(box->this.drawLine(box));
         GlStateManager.depthMask(true);
-        GlStateManager.enableTexture2D();
+        GlStateManager.enableTexture();
         GlStateManager.disableBlend();
     }
     

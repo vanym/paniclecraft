@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
@@ -62,7 +63,8 @@ public class ItemPaintingFrame extends BlockItem {
     protected static final Map<Direction, String> SIDE_LETTERS;
     
     public ItemPaintingFrame(Block block) {
-        super(block, new Item.Properties().group(Core.instance.tab));
+        super(block, new Item.Properties().group(Core.instance.tab)
+                                          .setTEISR(()->ItemRendererPaintingFrame::create));
         this.setRegistryName(block.getRegistryName());
     }
     

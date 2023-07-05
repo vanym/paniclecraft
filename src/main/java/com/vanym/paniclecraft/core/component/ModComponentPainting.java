@@ -76,6 +76,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -123,6 +124,9 @@ public class ModComponentPainting extends ModComponent {
     @ModComponentObject
     public ContainerType<ContainerPaintingViewBase> containerPaintingView;
     
+    @OnlyIn(Dist.CLIENT)
+    public PictureTextureCache textureCache;
+    
     protected List<IRecipe> recipes = new ArrayList<>();
     
     protected ChangeableConfig myServerConfig = new ChangeableConfig();
@@ -134,8 +138,6 @@ public class ModComponentPainting extends ModComponent {
     protected TileEntityPaintingRenderer paintingTileRenderer;
     @SideOnly(Side.CLIENT)
     protected TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
-    @SideOnly(Side.CLIENT)
-    protected PictureTextureCache textureCache;
     @SideOnly(Side.CLIENT)
     protected ItemRendererPainting paintingItemRenderer;
     @SideOnly(Side.CLIENT)
@@ -151,6 +153,10 @@ public class ModComponentPainting extends ModComponent {
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        
+        DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
+            this.textureCache = new PictureTextureCache();
+        });
         
         this.blockPainting = new BlockPainting();
         this.blockPaintingFrame = new BlockPaintingFrame();
@@ -181,11 +187,6 @@ public class ModComponentPainting extends ModComponent {
         this.containerPaintingView =
                 IForgeContainerType.create(ContainerPaintingViewClient::create);
         this.containerPaintingView.setRegistryName("paintingview");
-        
-        this.getItems()
-            .stream()
-            .filter(ItemPaintingTool.class::isInstance)
-            .forEach(MinecraftForge.EVENT_BUS::register);
     }
     
     @SubscribeEvent
@@ -209,6 +210,13 @@ public class ModComponentPainting extends ModComponent {
     protected void setupClient(FMLClientSetupEvent event) {
         ScreenManager.registerFactory(this.containerPalette, GuiPalette::new);
         ScreenManager.registerFactory(this.containerPaintingView, GuiPaintingEditView::create);
+        
+        MinecraftForge.EVENT_BUS.register(this.textureCache);
+        
+        this.getItems()
+            .stream()
+            .filter(ItemPaintingTool.class::isInstance)
+            .forEach(MinecraftForge.EVENT_BUS::register);
     }
     
     @Override

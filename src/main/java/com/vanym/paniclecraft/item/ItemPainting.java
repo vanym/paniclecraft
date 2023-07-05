@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
+import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
@@ -41,7 +42,7 @@ public class ItemPainting extends ItemMod3 {
     public static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public ItemPainting() {
-        super(new Item.Properties());
+        super(new Item.Properties().setTEISR(()->ItemRendererPainting::create));
         this.setRegistryName("painting");
     }
     
