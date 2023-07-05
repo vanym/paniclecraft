@@ -65,6 +65,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
@@ -123,6 +124,9 @@ public class ModComponentPainting extends ModComponent {
     public ContainerType<ContainerPalette> containerPalette;
     @ModComponentObject
     public ContainerType<ContainerPaintingViewBase> containerPaintingView;
+    
+    @ModComponentObject
+    public EntityType<EntityPaintOnBlock> entityTypePaintOnBlock;
     
     @OnlyIn(Dist.CLIENT)
     public PictureTextureCache textureCache;
@@ -187,6 +191,9 @@ public class ModComponentPainting extends ModComponent {
         this.containerPaintingView =
                 IForgeContainerType.create(ContainerPaintingViewClient::create);
         this.containerPaintingView.setRegistryName("paintingview");
+        
+        this.entityTypePaintOnBlock = EntityPaintOnBlock.createType();
+        this.entityTypePaintOnBlock.setRegistryName(EntityPaintOnBlock.ID);
     }
     
     @SubscribeEvent

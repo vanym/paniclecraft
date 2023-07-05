@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
@@ -21,50 +20,54 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
+import net.minecraft.block.AbstractButtonBlock;
+import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockBasePressurePlate;
-import net.minecraft.block.BlockBrewingStand;
-import net.minecraft.block.BlockButton;
-import net.minecraft.block.BlockCactus;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.BlockFenceGate;
-import net.minecraft.block.BlockPane;
-import net.minecraft.block.BlockRail;
-import net.minecraft.block.BlockRailBase;
-import net.minecraft.block.BlockRailBase.EnumRailDirection;
-import net.minecraft.block.BlockRailDetector;
-import net.minecraft.block.BlockRailPowered;
-import net.minecraft.block.BlockRedstoneWire;
-import net.minecraft.block.BlockSnow;
-import net.minecraft.block.BlockStairs;
-import net.minecraft.block.BlockVine;
-import net.minecraft.block.BlockWall;
-import net.minecraft.block.material.EnumPushReaction;
-import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BrewingStandBlock;
+import net.minecraft.block.CactusBlock;
+import net.minecraft.block.DetectorRailBlock;
+import net.minecraft.block.FenceBlock;
+import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.PaneBlock;
+import net.minecraft.block.PoweredRailBlock;
+import net.minecraft.block.RailBlock;
+import net.minecraft.block.RedstoneWireBlock;
+import net.minecraft.block.SnowBlock;
+import net.minecraft.block.StairsBlock;
+import net.minecraft.block.VineBlock;
+import net.minecraft.block.WallBlock;
+import net.minecraft.block.material.PushReaction;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SSpawnObjectPacket;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.properties.RailShape;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.eventbus.api.Event;
 
 public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
@@ -90,11 +93,13 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     protected boolean proceeded = false;
     
     public EntityPaintOnBlock(World world) {
-        super(world);
-        this.setSize(1.0F, 1.0F);
+        this(Core.instance.painting.entityTypePaintOnBlock, world);
+    }
+    
+    public EntityPaintOnBlock(EntityType<? extends EntityPaintOnBlock> type, World world) {
+        super(type, world);
         this.noClip = true;
-        this.isImmuneToFire = true;
-        this.setEntityInvulnerable(true);
+        this.setInvulnerable(true);
         
         EntityDataManager orig = this.dataManager;
         this.dataManager = this.picturesDataManager;
@@ -181,7 +186,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
     protected boolean killIfEmpty() {
         if (this.isEmpty()) {
-            this.setDead();
+            this.remove();
             return true;
         }
         return false;
@@ -192,7 +197,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    protected void entityInit() {}
+    protected void registerData() {}
     
     protected void unloadPictures() {
         for (PictureHolder holder : this.holders) {
@@ -212,7 +217,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public void onUpdate() {
+    public void tick() {
         if (!this.world.isRemote && !this.proceeded) {
             this.clearEmpty();
             this.killIfEmpty();
@@ -221,10 +226,10 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public void move(MoverType type, double x, double y, double z) {}
+    public void move(MoverType type, Vec3d pos) {}
     
     @Override
-    public boolean isEntityInvulnerable(DamageSource source) {
+    public boolean isInvulnerableTo(DamageSource source) {
         return true;
     }
     
@@ -234,8 +239,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public EnumPushReaction getPushReaction() {
-        return EnumPushReaction.IGNORE;
+    public PushReaction getPushReaction() {
+        return PushReaction.IGNORE;
     }
     
     @Override
@@ -244,36 +249,41 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean isInRangeToRenderDist(double dist) {
         return dist <= Core.instance.painting.clientConfig.renderPaintOnBlockMaxRenderDistanceSquared;
     }
     
     @Override
-    protected void writeEntityToNBT(NBTTagCompound nbtTag) {
+    protected void writeAdditional(CompoundNBT nbtTag) {
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (this.holders[i] != null) {
-                NBTTagCompound pictureTag = new NBTTagCompound();
+                CompoundNBT pictureTag = new CompoundNBT();
                 this.holders[i].picture.writeToNBT(pictureTag);
-                nbtTag.setTag(TAG_PICTURE_I, pictureTag);
+                nbtTag.put(TAG_PICTURE_I, pictureTag);
             }
         }
     }
     
     @Override
-    protected void readEntityFromNBT(NBTTagCompound nbtTag) {
+    protected void readAdditional(CompoundNBT nbtTag) {
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
-            if (nbtTag.hasKey(TAG_PICTURE_I)) {
+            if (nbtTag.contains(TAG_PICTURE_I)) {
                 PictureHolder holder = this.createHolder(i);
-                holder.picture.readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE_I));
+                holder.picture.readFromNBT(nbtTag.getCompound(TAG_PICTURE_I));
                 holder.empty = false;
             } else {
                 this.clearPicture(i);
             }
             this.picturesDataManager.setPictureDirty(i);
         }
+    }
+    
+    @Override
+    public IPacket<?> createSpawnPacket() {
+        return new SSpawnObjectPacket(this);
     }
     
     protected class PictureHolder implements IPictureHolder {
@@ -322,7 +332,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             BlockPos pos = EntityPaintOnBlock.this.getBlockPos();
             return String.format("PaintOnBlock[x=%d, y=%d, z=%d, side=%s]",
                                  pos.getX(), pos.getY(), pos.getZ(),
-                                 EnumFacing.getFront(this.side));
+                                 Direction.byIndex(this.side));
         }
     }
     
@@ -361,16 +371,6 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         
         public void setPictureDirty(int side) {
             this.pictureEntries[side].setDirty(true);
-        }
-        
-        @Override
-        public <T> void setDirty(DataParameter<T> key) {
-            if (key instanceof PictureParameter) {
-                PictureParameter picKey = (PictureParameter)key;
-                this.pictureEntries[picKey.side].setDirty(true);
-            } else {
-                super.setDirty(key);
-            }
         }
         
         @Override
@@ -431,6 +431,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
         
         @Override
+        @OnlyIn(Dist.CLIENT)
         public void setEntryValues(List<EntityDataManager.DataEntry<?>> entries) {
             super.setEntryValues(entries);
             for (EntityDataManager.DataEntry<?> entry : entries) {
@@ -455,7 +456,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             
             @Override
             public void setValue(ItemStack stack) {
-                if (stack.hasTagCompound()) {
+                if (stack.hasTag()) {
                     PictureHolder holder = EntityPaintOnBlock.this.createHolder(this.side);
                     if (ItemPainting.fillPicture(holder.picture, stack)) {
                         holder.empty = false;
@@ -482,7 +483,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         public final int side;
         
         public PictureParameter(int id, int side) {
-            super(id, DataSerializers.ITEM_STACK);
+            super(id, DataSerializers.ITEMSTACK);
             this.side = side;
         }
     }
@@ -499,9 +500,18 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         dataManager.register(entry.getKey(), entry.getValue());
     }
     
+    public static EntityType<EntityPaintOnBlock> createType() {
+        return EntityType.Builder.<EntityPaintOnBlock>create(EntityPaintOnBlock::new,
+                                                             EntityClassification.MISC)
+                                 .disableSummoning()
+                                 .immuneToFire()
+                                 .size(1.0F, 1.0F)
+                                 .build(ID.toString());
+    }
+    
     public static int clearArea(World world, AxisAlignedBB box) {
         List<Entity> list = world.getEntitiesWithinAABB(EntityPaintOnBlock.class, box);
-        list.forEach(e->e.setDead());
+        list.forEach(e->e.remove());
         return list.size();
     }
     
@@ -520,7 +530,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
         entityPON = new EntityPaintOnBlock(world);
         entityPON.setBlockPos(pos);
-        if (world.spawnEntity(entityPON)) {
+        if (world.addEntity(entityPON)) {
             return entityPON.createPicture(side);
         } else {
             return null;
@@ -528,20 +538,21 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     public static EntityPaintOnBlock getEntity(World world, BlockPos pos) {
-        if (!world.isBlockLoaded(pos)) {
+        if (!world.isAreaLoaded(pos, 0)) {
             return null;
         }
-        Chunk chunk = world.getChunkFromBlockCoords(pos);
+        Chunk chunk = world.getChunkAt(pos);
         ClassInheritanceMultiMap<Entity>[] lists = chunk.getEntityLists();
         int listIndex = pos.getY() / 16;
         if (listIndex < 0 || listIndex >= lists.length) {
             return null;
         }
         ClassInheritanceMultiMap<Entity> list = lists[listIndex];
-        return StreamSupport.stream(list.getByClass(EntityPaintOnBlock.class).spliterator(), false)
-                            .filter(e->pos.equals(e.getBlockPos()))
-                            .findAny()
-                            .orElse(null);
+        return list.func_219790_a(EntityPaintOnBlock.class)
+                   .stream()
+                   .filter(e->pos.equals(e.getBlockPos()))
+                   .findAny()
+                   .orElse(null);
     }
     
     public static Picture getExistingPicture(World world, BlockPos pos, int side) {
@@ -556,45 +567,44 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         boolean valid;
         boolean air = false;
         boolean liquid = false;
-        IBlockState state = world.getBlockState(pos);
+        BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
-        EnumFacing pside = EnumFacing.getFront(side);
+        Direction pside = Direction.byIndex(side);
         if (block.isAir(state, world, pos)) {
             valid = false;
             air = true;
         } else if (state.getMaterial().isLiquid()) {
             valid = false;
             liquid = true;
-        } else if (state.isOpaqueCube()) {
-            IBlockState neighborState = world.getBlockState(pos.offset(pside));
-            valid = !neighborState.isOpaqueCube();
-        } else if (state.getBlockFaceShape(world, pos, pside) == BlockFaceShape.SOLID) {
+        } else if (state.isOpaqueCube(world, pos)) {
+            BlockPos offpos = pos.offset(pside);
+            BlockState neighborState = world.getBlockState(pos.offset(pside));
+            valid = !neighborState.isOpaqueCube(world, offpos);
+        } else if (Block.hasSolidSide(state, world, pos, pside)) {
             valid = true;
-        } else if (Stream.of(BlockStairs.class, BlockFence.class, BlockWall.class, BlockPane.class,
-                             BlockFenceGate.class, BlockBrewingStand.class,
-                             BlockBasePressurePlate.class, BlockButton.class, BlockCactus.class,
-                             BlockSnow.class, BlockRedstoneWire.class, BlockVine.class)
+        } else if (Stream.of(StairsBlock.class, FenceBlock.class, WallBlock.class, PaneBlock.class,
+                             FenceGateBlock.class, BrewingStandBlock.class,
+                             AbstractPressurePlateBlock.class, AbstractButtonBlock.class,
+                             CactusBlock.class, SnowBlock.class,
+                             RedstoneWireBlock.class, VineBlock.class)
                          .anyMatch(clazz->clazz.isAssignableFrom(block.getClass()))) {
             valid = true;
-        } else if (Stream.of(Blocks.RAIL, Blocks.GOLDEN_RAIL,
+        } else if (Stream.of(Blocks.RAIL, Blocks.POWERED_RAIL,
                              Blocks.ACTIVATOR_RAIL, Blocks.DETECTOR_RAIL)
                          .anyMatch(block::equals)) {
-            PropertyEnum<BlockRailBase.EnumRailDirection> shape;
-            if (Stream.of(Blocks.GOLDEN_RAIL, Blocks.ACTIVATOR_RAIL).anyMatch(block::equals)) {
-                shape = BlockRailPowered.SHAPE;
+            EnumProperty<RailShape> shape;
+            if (Stream.of(Blocks.POWERED_RAIL, Blocks.ACTIVATOR_RAIL).anyMatch(block::equals)) {
+                shape = PoweredRailBlock.SHAPE;
             } else if (block.equals(Blocks.DETECTOR_RAIL)) {
-                shape = BlockRailDetector.SHAPE;
+                shape = DetectorRailBlock.SHAPE;
             } else {
-                shape = BlockRail.SHAPE;
+                shape = RailBlock.SHAPE;
             }
-            EnumRailDirection value = state.getValue(shape);
+            RailShape value = state.get(shape);
             valid = value != null && !value.isAscending();
         } else {
-            AxisAlignedBB box = state.getBoundingBox(world, pos);
-            AxisAlignedBB absoluteBox = box.offset(pos);
-            List<AxisAlignedBB> list = new ArrayList<>();
-            state.addCollisionBoxToList(world, pos, absoluteBox, list, null, false);
-            valid = !list.isEmpty() && list.stream().allMatch(absoluteBox::equals);
+            VoxelShape shape = state.getShape(world, pos);
+            valid = shape.toBoundingBoxList().size() == 1;
         }
         BlockSideValidForPaint event =
                 new BlockSideValidForPaint(world, pos, state, side, valid, air, liquid);
@@ -624,7 +634,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         public BlockSideValidForPaint(
                 World world,
                 BlockPos pos,
-                IBlockState state,
+                BlockState state,
                 int side,
                 boolean valid,
                 boolean air,
