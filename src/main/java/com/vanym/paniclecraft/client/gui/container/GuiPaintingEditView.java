@@ -15,45 +15,45 @@ import java.net.URLConnection;
 
 import javax.imageio.ImageIO;
 
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.utils.IconUtils;
+import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Image;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
-import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkDirection;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class GuiPaintingEditView extends GuiPaintingView {
     
-    protected final GuiButton buttonImport =
-            new GuiButton(2, 0, 0, 60, 20, I18n.format("gui.paintingview.import"));
-    protected final GuiButton buttonImportSave =
-            new GuiButton(3, 0, 0, 60, 20, I18n.format("gui.paintingview.importsave"));
-    protected final GuiButton buttonImportCancel =
-            new GuiButton(4, 0, 0, 60, 20, I18n.format("gui.paintingview.importcancel"));
-    protected GuiTextField textImport;
+    protected final Button buttonImport;
+    protected final Button buttonImportSave;
+    protected final Button buttonImportCancel;
+    protected TextFieldWidget textImport;
     
     protected BufferedImage importImage;
     protected DynamicTexture importTexture;
@@ -66,37 +66,46 @@ public class GuiPaintingEditView extends GuiPaintingView {
     protected int mouseMoveOffsetX;
     protected int mouseMoveOffsetY;
     
-    public GuiPaintingEditView(ContainerPaintingViewClient view) {
-        super(view);
+    public GuiPaintingEditView(ContainerPaintingViewClient view, ITextComponent title) {
+        super(view, title);
+        String textImport = I18n.format("gui.paintingview.import");
+        this.buttonImport = new Button(0, 0, 60, 20, textImport, b->this.paintingImport());
+        String textImportSave = I18n.format("gui.paintingview.importsave");
+        this.buttonImportSave =
+                new Button(0, 0, 60, 20, textImportSave, b->this.paintingImportSave());
+        String textImportCancel = I18n.format("gui.paintingview.importcancel");
+        this.buttonImportCancel =
+                new Button(0, 0, 60, 20, textImportCancel, b->this.paintingImportCancel());
         this.buttonImportSave.visible = false;
         this.buttonImportCancel.visible = false;
     }
     
     @Override
-    public void initGui() {
-        super.initGui();
-        this.buttonList.add(this.buttonImport);
-        this.buttonList.add(this.buttonImportSave);
-        this.buttonList.add(this.buttonImportCancel);
-        Keyboard.enableRepeatEvents(true);
+    public void init() {
+        super.init();
+        this.addButton(this.buttonImport);
+        this.addButton(this.buttonImportSave);
+        this.addButton(this.buttonImportCancel);
+        this.minecraft.keyboardListener.enableRepeatEvents(true);
         this.updateButtons();
     }
     
     @Override
-    public void setWorldAndResolution(Minecraft mc, int width, int height) {
+    public void init(Minecraft mc, int width, int height) {
         if (this.textImport == null) {
-            this.textImport = new GuiTextField(1, mc.fontRenderer, 0, 0, 60, 20);
+            this.textImport = new TextFieldWidget(mc.fontRenderer, 0, 0, 60, 20, "image location");
             this.textImport.setMaxStringLength(65536);
         }
-        super.setWorldAndResolution(mc, width, height);
-        this.buttonImport.x = this.buttonExport.x - 5 - this.buttonImport.width;
+        super.init(mc, width, height);
+        this.buttonImport.x = this.buttonExport.x - 5 - this.buttonImport.getWidth();
         this.buttonImport.y = this.buttonExport.y;
         this.textImport.x = Math.min(this.controlsX, this.viewX);
         this.textImport.y = this.buttonImport.y;
-        this.textImport.width = this.buttonImport.x - 5 - this.textImport.x;
+        this.textImport.setWidth(this.buttonImport.x - 5 - this.textImport.x);
         this.buttonImportSave.x = this.buttonImport.x;
         this.buttonImportSave.y = this.buttonImport.y;
-        this.buttonImportCancel.x = this.buttonImportSave.x - 5 - this.buttonImportCancel.width;
+        this.buttonImportCancel.x =
+                this.buttonImportSave.x - 5 - this.buttonImportCancel.getWidth();
         this.buttonImportCancel.y = this.buttonImportSave.y;
     }
     
@@ -106,7 +115,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         this.textImport.setVisible(!importing);
         this.buttonImportSave.visible = importing;
         this.buttonImportCancel.visible = importing;
-        this.buttonImportSave.enabled = false; // to prevent double click
+        this.buttonImportSave.active = false; // to prevent double click
     }
     
     protected void setImportTextureX(int x) {
@@ -128,9 +137,9 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
-        super.drawScreen(mouseX, mouseY, renderPartialTicks);
-        this.textImport.drawTextBox();
+    public void render(int mouseX, int mouseY, float renderPartialTicks) {
+        super.render(mouseX, mouseY, renderPartialTicks);
+        this.textImport.render(mouseX, mouseY, renderPartialTicks);
     }
     
     @Override
@@ -176,10 +185,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
             for (int x = Math.max(0, this.importTextureX / pictureWidth); x < w; ++x) {
                 Picture picture = this.view.getPicture(x, y);
                 if (picture != null && picture.isEditable()) {
-                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 } else {
                     final float c = 32.0F / 255.0F;
-                    GlStateManager.color(c, c, c, 0.75F);
+                    GlStateManager.color4f(c, c, c, 0.75F);
                 }
                 int paintingX = x * pictureWidth;
                 int paintingEndX = paintingX + pictureWidth;
@@ -208,16 +217,16 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buf = tessellator.getBuffer();
                 buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-                buf.pos(canvasX, canvasEndY, (double)this.zLevel)
+                buf.pos(canvasX, canvasEndY, (double)this.blitOffset)
                    .tex(icon.getMinU(), icon.getMaxV())
                    .endVertex();
-                buf.pos(canvasEndX, canvasEndY, (double)this.zLevel)
+                buf.pos(canvasEndX, canvasEndY, (double)this.blitOffset)
                    .tex(icon.getMaxU(), icon.getMaxV())
                    .endVertex();
-                buf.pos(canvasEndX, canvasY, (double)this.zLevel)
+                buf.pos(canvasEndX, canvasY, (double)this.blitOffset)
                    .tex(icon.getMaxU(), icon.getMinV())
                    .endVertex();
-                buf.pos(canvasX, canvasY, (double)this.zLevel)
+                buf.pos(canvasX, canvasY, (double)this.blitOffset)
                    .tex(icon.getMinU(), icon.getMinV())
                    .endVertex();
                 tessellator.draw();
@@ -227,22 +236,22 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    public void updateScreen() {
-        super.updateScreen();
-        this.textImport.updateCursorCounter();
-        this.buttonImportSave.enabled = true;
+    public void tick() {
+        super.tick();
+        this.textImport.tick();
+        this.buttonImportSave.active = true;
     }
     
     @Override
-    protected void mouseClicked(int x, int y, int eventButton) throws IOException {
-        this.mouseClickedMovingImage(x, y, eventButton);
-        super.mouseClicked(x, y, eventButton);
-        this.textImport.mouseClicked(x, y, eventButton);
+    public boolean mouseClicked(double x, double y, int eventButton) {
+        return this.mouseClickedMovingImage(x, y, eventButton)
+            || super.mouseClicked(x, y, eventButton)
+            || this.textImport.mouseClicked(x, y, eventButton);
     }
     
-    protected void mouseClickedMovingImage(int x, int y, int eventButton) {
+    protected boolean mouseClickedMovingImage(double x, double y, int eventButton) {
         if (eventButton != 0 || this.importImage == null) {
-            return;
+            return false;
         }
         int vmx = this.getViewMouseX();
         int vmy = this.getViewMouseY();
@@ -250,55 +259,47 @@ public class GuiPaintingEditView extends GuiPaintingView {
             || vmy < this.importTextureY
             || vmx >= this.getImportTextureEndX()
             || vmy >= this.getImportTextureEndY()) {
-            return;
+            return false;
         }
         this.mouseMoveOffsetX = this.importTextureX - vmx;
         this.mouseMoveOffsetY = this.importTextureY - vmy;
         this.mouseMove = true;
+        return true;
     }
     
     @Override
-    protected void mouseReleased(int x, int y, int eventButton) {
-        super.mouseReleased(x, y, eventButton);
-        if (eventButton == 0) {
+    public boolean mouseReleased(double x, double y, int eventButton) {
+        boolean changed = false;
+        if (this.mouseMove && eventButton == 0) {
             this.mouseMove = false;
+            changed = true;
         }
+        return super.mouseReleased(x, y, eventButton) || changed;
     }
     
     @Override
-    protected void mouseClickMove(int x, int y, int button, long timeSinceMouseClick) {
-        super.mouseClickMove(x, y, button, timeSinceMouseClick);
+    public boolean mouseDragged(double x, double y, int button, double dragX, double dragY) {
         if (this.mouseMove) {
             this.importTextureX = this.mouseMoveOffsetX + this.getViewMouseX();
             this.importTextureY = this.mouseMoveOffsetY + this.getViewMouseY();
         }
+        return super.mouseDragged(x, y, button, dragX, dragY) || this.mouseMove;
     }
     
     protected int getViewMouseX() {
-        int real = Mouse.getEventX();
-        int realViewX = this.viewX * this.mc.displayWidth / this.width;
-        int realViewWidth = this.getViewWidth() * this.mc.displayWidth / this.width;
+        int real = (int)this.minecraft.mouseHelper.getMouseX();
+        int displayWidth = this.minecraft.mainWindow.getWidth();
+        int realViewX = this.viewX * displayWidth / this.width;
+        int realViewWidth = this.getViewWidth() * displayWidth / this.width;
         return (real - realViewX) * this.view.getWidth() / realViewWidth;
     }
     
     protected int getViewMouseY() {
-        int real = this.mc.displayHeight - Mouse.getEventY() - 1;
-        int realViewY = this.viewY * this.mc.displayHeight / this.height;
-        int realViewHeight = this.getViewHeight() * this.mc.displayHeight / this.height;
+        int real = (int)this.minecraft.mouseHelper.getMouseY();
+        int displayHeight = this.minecraft.mainWindow.getHeight();
+        int realViewY = this.viewY * displayHeight / this.height;
+        int realViewHeight = this.getViewHeight() * displayHeight / this.height;
         return (real - realViewY) * this.view.getHeight() / realViewHeight;
-    }
-    
-    @Override
-    public void actionPerformed(GuiButton button) {
-        if (button.id == this.buttonImport.id) {
-            this.paintingImport();
-        } else if (button.id == this.buttonImportSave.id) {
-            this.paintingImportSave();
-        } else if (button.id == this.buttonImportCancel.id) {
-            this.paintingImportCancel();
-        } else {
-            super.actionPerformed(button);
-        }
     }
     
     protected void paintingImport() {
@@ -311,9 +312,9 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 img = readfile(text);
             }
         } catch (Exception e) {
-            TextComponentTranslation message =
-                    new TextComponentTranslation("painting.import.failure", e.getMessage());
-            this.mc.ingameGUI.getChatGUI().printChatMessage(message);
+            TranslationTextComponent message =
+                    new TranslationTextComponent("painting.import.failure", e.getMessage());
+            this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
             return;
         }
         this.textImport.setSelectionPos(0);
@@ -328,19 +329,21 @@ public class GuiPaintingEditView extends GuiPaintingView {
             Picture picture = new Picture(convertToImage(this.importImage));
             this.view.addPicture(this.importTextureX, this.importTextureY, picture);
             ItemStack stack = ItemPainting.getPictureAsItem(picture);
-            FMLEmbeddedChannel channel = Core.instance.getChannel(Side.CLIENT);
             MessagePaintingViewAddPicture message = new MessagePaintingViewAddPicture(
                     this.importTextureX,
                     this.importTextureY,
                     stack);
-            FMLProxyPacket packet = (FMLProxyPacket)channel.generatePacketFrom(message);
+            IPacket<?> packet =
+                    Core.instance.network.toVanillaPacket(message, NetworkDirection.PLAY_TO_SERVER);
             picture.unload();
-            if (packet.payload().capacity() >= 32767) {
-                // See C17PacketCustomPayload
+            PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
+            packet.writePacketData(buf);
+            if (buf.capacity() >= 32767) {
+                // See CCustomPayloadPacket
                 throw new IllegalArgumentException();
             }
-            this.mc.getConnection().sendPacket(packet);
-        } catch (IllegalArgumentException e) {
+            this.minecraft.getConnection().sendPacket(packet);
+        } catch (IllegalArgumentException | IOException e) {
             final int step = 80; // split to pass 32k payload limit
             for (int y = 0; y < this.importImage.getHeight(); y += step) {
                 for (int x = 0; x < this.importImage.getWidth(); x += step) {
@@ -370,7 +373,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         }
         this.importImage = img;
         if (img != null) {
-            this.importTexture = new DynamicTexture(img);
+            this.importTexture = new DynamicTexture(convertToNativeImage(img));
             this.importTextureWidth = img.getWidth();
             this.importTextureHeight = img.getHeight();
             this.moveCenter();
@@ -405,84 +408,84 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    protected void keyTyped(char character, int key) {
+    public boolean charTyped(char character, int key) {
         if (character == 22 /* Ctrl+v */) {
             if (this.loadClipboardImage()) {
-                return;
+                return true;
             }
-            this.textImport.setFocused(true);
+            this.textImport.setFocused2(true);
         }
-        if (this.textImport.textboxKeyTyped(character, key)) {
-            return;
+        if (this.textImport.charTyped(character, key)) {
+            return true;
         }
         switch (key) {
             case 28: // enter
             case 156: // enter numpad
                 if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
                     this.paintingImport();
-                    return;
+                    return true;
                 }
             case 205: { // right
                 int moveX;
-                if (GuiScreen.isCtrlKeyDown()) {
+                if (Screen.hasControlDown()) {
                     moveX = this.view.getWidth() - this.importTextureWidth;
-                } else if (GuiScreen.isShiftKeyDown()) {
+                } else if (Screen.hasShiftDown()) {
                     moveX = this.importTextureX +
                             Math.min(this.importTextureWidth, this.view.pictureSize.getWidth());
                 } else {
                     moveX = this.importTextureX + 1;
                 }
                 this.setImportTextureX(moveX);
-                return;
+                return true;
             }
             case 203: { // left
                 int moveX;
-                if (GuiScreen.isCtrlKeyDown()) {
+                if (Screen.hasControlDown()) {
                     moveX = 0;
-                } else if (GuiScreen.isShiftKeyDown()) {
+                } else if (Screen.hasShiftDown()) {
                     moveX = this.importTextureX -
                             Math.min(this.importTextureWidth, this.view.pictureSize.getWidth());
                 } else {
                     moveX = this.importTextureX - 1;
                 }
                 this.setImportTextureX(moveX);
-                return;
+                return true;
             }
             case 208: { // down
                 int moveY;
-                if (GuiScreen.isCtrlKeyDown()) {
+                if (Screen.hasControlDown()) {
                     moveY = this.view.getHeight() - this.importTextureHeight;
-                } else if (GuiScreen.isShiftKeyDown()) {
+                } else if (Screen.hasShiftDown()) {
                     moveY = this.importTextureY +
                             Math.min(this.importTextureHeight, this.view.pictureSize.getHeight());
                 } else {
                     moveY = this.importTextureY + 1;
                 }
                 this.setImportTextureY(moveY);
-                return;
+                return true;
             }
             case 200: { // up
                 int moveY;
-                if (GuiScreen.isCtrlKeyDown()) {
+                if (Screen.hasControlDown()) {
                     moveY = 0;
-                } else if (GuiScreen.isShiftKeyDown()) {
+                } else if (Screen.hasShiftDown()) {
                     moveY = this.importTextureY -
                             Math.min(this.importTextureHeight, this.view.pictureSize.getHeight());
                 } else {
                     moveY = this.importTextureY - 1;
                 }
                 this.setImportTextureY(moveY);
-                return;
+                return true;
             }
             case 57: // space
-                if (GuiScreen.isCtrlKeyDown()) {
+                if (Screen.hasControlDown()) {
                     this.fillFull();
                 } else {
                     this.moveCenter();
                 }
-                return;
+                return true;
         }
-        super.keyTyped(character, key);
+        return super.charTyped(character, key);
     }
     
     protected boolean loadClipboardImage() {
@@ -498,10 +501,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    public void onGuiClosed() {
-        Keyboard.enableRepeatEvents(false);
+    public void onClose() {
+        this.minecraft.keyboardListener.enableRepeatEvents(false);
         this.clearImportImage();
-        super.onGuiClosed();
+        super.onClose();
     }
     
     protected static BufferedImage download(String urltext) throws IOException {
@@ -517,6 +520,25 @@ public class GuiPaintingEditView extends GuiPaintingView {
         return ImageIO.read(input);
     }
     
+    protected static NativeImage convertToNativeImage(
+            BufferedImage img,
+            int x,
+            int y,
+            int w,
+            int h) {
+        NativeImage image = new NativeImage(w, h, false);
+        for (int py = 0; py < image.getHeight(); ++py) {
+            for (int px = 0; px < image.getWidth(); ++px) {
+                image.setPixelRGBA(px, py, img.getRGB(px + x, py + y));
+            }
+        }
+        return image;
+    }
+    
+    protected static NativeImage convertToNativeImage(BufferedImage img) {
+        return convertToNativeImage(img, 0, 0, img.getWidth(), img.getHeight());
+    }
+    
     protected static Image convertToImage(BufferedImage img, int x, int y, int w, int h) {
         Image image = new Image(w, h, true);
         for (int py = 0; py < image.getHeight(); ++py) {
@@ -530,5 +552,14 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     protected static Image convertToImage(BufferedImage img) {
         return convertToImage(img, 0, 0, img.getWidth(), img.getHeight());
+    }
+    
+    public static GuiPaintingView create(
+            ContainerPaintingViewBase view,
+            PlayerInventory playerInv,
+            ITextComponent title) {
+        ContainerPaintingViewClient viewClient = (ContainerPaintingViewClient)view;
+        return view.editable ? new GuiPaintingEditView(viewClient, title)
+                             : new GuiPaintingView(viewClient, title);
     }
 }
