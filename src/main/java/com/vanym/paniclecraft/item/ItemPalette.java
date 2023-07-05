@@ -10,7 +10,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class ItemPalette extends ItemMod3 {
@@ -18,7 +17,7 @@ public class ItemPalette extends ItemMod3 {
     protected final INamedContainerProvider containerProvider =
             new SimpleNamedContainerProvider(
                     (id, inventory, player)->new ContainerPalette(id, inventory),
-                    new TranslationTextComponent("container.palette"));
+                    ContainerPalette.NAME);
     
     public ItemPalette() {
         super(new Item.Properties().maxStackSize(1));

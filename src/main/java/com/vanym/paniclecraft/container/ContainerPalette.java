@@ -2,31 +2,37 @@ package com.vanym.paniclecraft.container;
 
 import java.awt.Color;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.container.slot.SlotWithValidCheck;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.inventory.InventoryPalette;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class ContainerPalette extends ContainerBase implements IInventoryChangedListener {
     
+    public static final ITextComponent NAME = new TranslationTextComponent("container.palette");
+    
     public final InventoryPalette inventoryPalette = new InventoryPalette();
     
-    public final InventoryPlayer inventoryPlayer;
+    public final PlayerInventory inventoryPlayer;
     
-    public ContainerPalette(InventoryPlayer playerInv) {
+    public ContainerPalette(int id, PlayerInventory playerInv) {
+        super(Core.instance.painting.containerPalette, id);
         this.inventoryPlayer = playerInv;
-        this.addSlotToContainer(new SlotWithValidCheck(this.inventoryPalette, 0, 8, 18));
+        this.addSlot(new SlotWithValidCheck(this.inventoryPalette, 0, 8, 18));
         this.addPlayerInventorySlots(playerInv);
-        this.inventoryPalette.addInventoryChangeListener(this);
+        this.inventoryPalette.addListener(this);
     }
     
     public Color getColor() {
@@ -55,7 +61,7 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     }
     
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int slotNum) {
+    public ItemStack transferStackInSlot(PlayerEntity player, int slotNum) {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = (Slot)this.inventorySlots.get(slotNum);
         
@@ -95,7 +101,7 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     }
     
     @Override
-    public void onContainerClosed(EntityPlayer entityPlayer) {
+    public void onContainerClosed(PlayerEntity entityPlayer) {
         super.onContainerClosed(entityPlayer);
         if (!entityPlayer.world.isRemote) {
             this.clearContainer(entityPlayer, entityPlayer.world, this.inventoryPalette);
@@ -103,8 +109,8 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     }
     
     @Override
-    public boolean canInteractWith(EntityPlayer player) {
-        return ItemPalette.canBePalette(player.getHeldItem(EnumHand.MAIN_HAND))
-            || ItemPalette.canBePalette(player.getHeldItem(EnumHand.OFF_HAND));
+    public boolean canInteractWith(PlayerEntity player) {
+        return ItemPalette.canBePalette(player.getHeldItem(Hand.MAIN_HAND))
+            || ItemPalette.canBePalette(player.getHeldItem(Hand.OFF_HAND));
     }
 }

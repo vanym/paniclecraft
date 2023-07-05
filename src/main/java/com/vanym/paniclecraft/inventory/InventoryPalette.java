@@ -1,16 +1,15 @@
 package com.vanym.paniclecraft.inventory;
 
-import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 
-import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class InventoryPalette extends InventoryBasic {
+public class InventoryPalette extends Inventory {
     
     public InventoryPalette() {
-        super(Core.instance.painting.itemPalette.getUnlocalizedName() + ".inv", false, 1);
+        super(1);
     }
     
     @Override
