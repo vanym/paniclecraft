@@ -64,7 +64,7 @@ public class CommandAdvSign extends TreeCommandBase {
             } else {
                 throw REQUIRES_ADVSIGN_EXCEPTION_TYPE.create();
             }
-            return 0;
+            return 1;
         }
     }
 }

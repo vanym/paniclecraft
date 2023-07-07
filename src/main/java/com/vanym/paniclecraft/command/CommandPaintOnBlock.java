@@ -2,20 +2,25 @@ package com.vanym.paniclecraft.command;
 
 import java.util.UUID;
 
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.BlockPosArgument;
+import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
@@ -48,35 +53,55 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             return "cleararea";
         }
         
-        @Override
         public int getRequiredPermissionLevel() {
             return 3;
         }
         
         @Override
-        public void execute(MinecraftServer server, ICommandSender sender, String[] args)
-                throws CommandException {
-            if (args.length != 1 && args.length != 4) {
-                throw new WrongUsageException(this.getUsage(sender));
+        public LiteralArgumentBuilder<CommandSource> register() {
+            DoubleArgumentType radiusArgumentType = DoubleArgumentType.doubleArg(0.0D, 1024.0D);
+            return Commands.literal(this.getName())
+                           .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                           .then(Commands.argument("radius", radiusArgumentType)
+                                         .executes(this::execute)
+                                         .then(Commands.argument("location", Vec3Argument.vec3())
+                                                       .executes(this::execute)));
+        }
+        
+        public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
+            CommandSource source = context.getSource();
+            double radius = DoubleArgumentType.getDouble(context, "radius");
+            Vec3d coords;
+            try {
+                coords = Vec3Argument.getLocation(context, "location").getPosition(source);
+            } catch (IllegalArgumentException e) {
+                coords = source.getPos();
             }
-            double radius = parseDouble(args[0], 0.0D, 1024.0D);
-            BlockPos coords = sender.getPosition();
-            if (args.length == 4) {
-                coords = parseBlockPos(sender, args, 1, true);
-            }
-            World world = sender.getEntityWorld();
-            AxisAlignedBB box = GeometryUtils.getPointBox(coords.getX() + 0.5D,
-                                                          coords.getY() + 0.5D,
-                                                          coords.getZ() + 0.5D)
+            World world = source.getWorld();
+            AxisAlignedBB box = GeometryUtils.getPointBox(coords.getX(),
+                                                          coords.getY(),
+                                                          coords.getZ())
                                              .grow(radius);
             int count = EntityPaintOnBlock.clearArea(world, box);
-            String name = world.provider.getDimensionType().getName();
-            String line = this.getTranslationPrefix() + ".clear";
-            notifyCommandListener(sender, this, line, count, name, box.toString().substring(3));
+            String name = world.getWorldInfo().getWorldName();
+            source.sendFeedback(new TranslationTextComponent(
+                    this.getTranslationPrefix() + ".clear",
+                    count,
+                    name,
+                    box.toString().substring(3)), true);
+            return count;
         }
     }
     
     protected class CommandInfo extends CommandBase {
+        
+        protected final Dynamic3CommandExceptionType REQUIRES_PAINTONBLOCK_EXCEPTION_TYPE =
+                new Dynamic3CommandExceptionType(
+                        (x, y, z)->new TranslationTextComponent(
+                                this.getTranslationPrefix() + ".nopaintonblock",
+                                x,
+                                y,
+                                z));
         
         public CommandInfo() {}
         
@@ -85,30 +110,33 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             return "info";
         }
         
-        @Override
         public int getRequiredPermissionLevel() {
             return 2;
         }
         
         @Override
-        public void execute(MinecraftServer server, ICommandSender sender, String[] args)
-                throws CommandException {
+        public LiteralArgumentBuilder<CommandSource> register() {
+            return Commands.literal(this.getName())
+                           .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                           .executes(this::execute)
+                           .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                         .executes(this::execute));
+        }
+        
+        public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
+            CommandSource source = context.getSource();
             BlockPos pos;
-            if (args.length == 0) {
-                EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
-                RayTraceResult target = CommandUtils.rayTraceBlocks(player);
-                pos = target.getBlockPos();
-            } else if (args.length == 3) {
-                pos = parseBlockPos(sender, args, 0, true);
-            } else {
-                throw new WrongUsageException(this.getUsage(sender));
+            try {
+                pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
+            } catch (IllegalArgumentException e) {
+                pos = CommandUtils.rayTraceBlocks(source.asPlayer()).getPos();
             }
             EntityPaintOnBlock entityPOB =
-                    EntityPaintOnBlock.getEntity(sender.getEntityWorld(), pos);
+                    EntityPaintOnBlock.getEntity(source.getWorld(), pos);
             if (entityPOB == null) {
-                throw new CommandException(
-                        this.getTranslationPrefix() + ".nopaintonblock",
-                        new Object[]{pos.getX(), pos.getY(), pos.getZ()});
+                throw this.REQUIRES_PAINTONBLOCK_EXCEPTION_TYPE.create(pos.getX(),
+                                                                       pos.getY(),
+                                                                       pos.getZ());
             }
             String name = entityPOB.getClass().getSimpleName();
             int id = entityPOB.getEntityId();
@@ -119,7 +147,8 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                                         entityPos.getY(),
                                         entityPos.getZ(),
                                         id, uuid.toString());
-            sender.sendMessage(new TextComponentString(line));
+            source.sendFeedback(new StringTextComponent(line), false);
+            return 1;
         }
     }
     
@@ -130,7 +159,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         }
         
         @Override
-        public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+        public boolean checkPermission(CommandSource source) {
             if (!this.edit && !this.to
                 && Core.instance.painting.server.freePaintOnBlockView) {
                 return true;
@@ -144,7 +173,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                 && Core.instance.painting.server.freePaintOnBlockEditViewTo) {
                 return true;
             } else {
-                return super.checkPermission(server, sender);
+                return super.checkPermission(source);
             }
         }
     }
