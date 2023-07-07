@@ -1,31 +1,40 @@
 package com.vanym.paniclecraft.recipe;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
+import com.google.gson.JsonObject;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.FixedPictureSize;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.JSONUtils;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
+public class RecipePaintingCombine extends ShapedRecipe {
     
     protected int sizeX;
     protected int sizeY;
     
-    public RecipePaintingCombine(int sizeX, int sizeY) {
-        super(getItemStack(sizeX, sizeY), getRecipe(sizeX, sizeY));
+    public RecipePaintingCombine(ResourceLocation id, int sizeX, int sizeY) {
+        super(id, "", sizeX, sizeY,
+              NonNullList.withSize(sizeX * sizeY,
+                                   Ingredient.fromStacks(ItemPainting.getSizedItem(getDummySize()))),
+              getItemStack(sizeX, sizeY));
         this.sizeX = sizeX;
         this.sizeY = sizeY;
     }
     
     @Override
-    public boolean matches(InventoryCrafting inv, World world) {
+    public boolean matches(CraftingInventory inv, World world) {
         if (!super.matches(inv, world)) {
             return false;
         }
@@ -60,16 +69,16 @@ public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
     }
     
     @Override
-    public ItemStack getCraftingResult(InventoryCrafting inv) {
+    public ItemStack getCraftingResult(CraftingInventory inv) {
         Picture[][] pictures = getAsPictures(this.getItemMatrix(inv));
         Picture picture = Picture.merge(pictures);
         return ItemPainting.getPictureAsItem(picture);
     }
     
-    protected ItemStack[][] getItemMatrix(InventoryCrafting inv) {
+    protected ItemStack[][] getItemMatrix(CraftingInventory inv) {
         int offsetX = 0, offsetY = 0;
         while (true) {
-            ItemStack stack = inv.getStackInRowAndColumn(offsetX, offsetY);
+            ItemStack stack = getStackInRowAndColumn(inv, offsetX, offsetY);
             if (!stack.isEmpty()) {
                 break;
             }
@@ -93,10 +102,22 @@ public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
         for (int y = 0; y < output.length; y++) {
             ItemStack[] row = output[y];
             for (int x = 0; x < row.length; x++) {
-                row[x] = inv.getStackInRowAndColumn(x + offsetX, y + offsetY);
+                row[x] = getStackInRowAndColumn(inv, x + offsetX, y + offsetY);
             }
         }
         return output;
+    }
+    
+    @Override
+    public IRecipeSerializer<?> getSerializer() {
+        return Core.instance.painting.recipeTypePaintingCombine;
+    }
+    
+    protected static ItemStack getStackInRowAndColumn(
+            CraftingInventory inv,
+            int offsetX,
+            int offsetY) {
+        return inv.getStackInSlot(offsetX + offsetY * inv.getWidth());
     }
     
     protected static Picture[][] getAsPictures(ItemStack[][] stacks) {
@@ -122,13 +143,28 @@ public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
         return ItemPainting.getSizedItem(sizeX * size.getWidth(), sizeY * size.getHeight());
     }
     
-    protected static Object[] getRecipe(int sizeX, int sizeY) {
-        IPictureSize size = getDummySize();
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(false); // mirrored
-        list.addAll(Collections.nCopies(sizeY, String.join("", Collections.nCopies(sizeX, "p"))));
-        list.add(Character.valueOf('p'));
-        list.add(ItemPainting.getSizedItem(size));
-        return list.toArray();
+    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>>
+            implements
+                IRecipeSerializer<RecipePaintingCombine> {
+        
+        @Override
+        public RecipePaintingCombine read(ResourceLocation recipeId, JsonObject json) {
+            int width = JSONUtils.getInt(json, "width");
+            int height = JSONUtils.getInt(json, "height");
+            return new RecipePaintingCombine(recipeId, width, height);
+        }
+        
+        @Override
+        public RecipePaintingCombine read(ResourceLocation recipeId, PacketBuffer buf) {
+            int width = buf.readVarInt();
+            int height = buf.readVarInt();
+            return new RecipePaintingCombine(recipeId, width, height);
+        }
+        
+        @Override
+        public void write(PacketBuffer buf, RecipePaintingCombine recipe) {
+            buf.writeVarInt(recipe.getWidth());
+            buf.writeVarInt(recipe.getHeight());
+        }
     }
 }

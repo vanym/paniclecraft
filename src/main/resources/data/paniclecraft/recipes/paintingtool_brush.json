@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "w",
+    "s"
+  ],
+  "key": {
+    "w": {
+      "item": "minecraft:white_wool"
+    },
+    "s": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "result": {
+    "item": "paniclecraft:paintingtool_brush"
+  }
+}

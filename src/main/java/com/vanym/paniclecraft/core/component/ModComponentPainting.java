@@ -69,6 +69,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.SpecialRecipeSerializer;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -127,6 +129,19 @@ public class ModComponentPainting extends ModComponent {
     
     @ModComponentObject
     public EntityType<EntityPaintOnBlock> entityTypePaintOnBlock;
+    
+    @ModComponentObject
+    public IRecipeSerializer<?> recipeTypeColorizeByDye;
+    @ModComponentObject
+    public IRecipeSerializer<?> recipeTypeColorizeByFiller;
+    @ModComponentObject
+    public IRecipeSerializer<?> recipeTypePaintingCombine;
+    @ModComponentObject
+    public IRecipeSerializer<?> recipeTypePaintingFrame;
+    @ModComponentObject
+    public IRecipeSerializer<?> recipeTypePaintingFrameAdd;
+    @ModComponentObject
+    public IRecipeSerializer<?> recipeTypePaintingFrameRemove;
     
     @OnlyIn(Dist.CLIENT)
     public PictureTextureCache textureCache;
@@ -194,6 +209,20 @@ public class ModComponentPainting extends ModComponent {
         
         this.entityTypePaintOnBlock = EntityPaintOnBlock.createType();
         this.entityTypePaintOnBlock.setRegistryName(EntityPaintOnBlock.ID);
+        
+        this.recipeTypeColorizeByDye = new SpecialRecipeSerializer<>(
+                RecipeColorizeByDye::new).setRegistryName("colorize_by_dye");
+        this.recipeTypeColorizeByFiller = new SpecialRecipeSerializer<>(
+                RecipeColorizeByFiller::new).setRegistryName("colorize_by_filler");
+        this.recipeTypePaintingCombine =
+                new RecipePaintingCombine.Serializer().setRegistryName("painting_combine");
+        this.recipeTypePaintingFrame =
+                new RecipePaintingFrame.Serializer().setRegistryName("paintingframe");
+        this.recipeTypePaintingFrameAdd =
+                new RecipePaintingFrameAddPainting.Serializer().setRegistryName("paintingframe_add_painting");
+        this.recipeTypePaintingFrameRemove = new SpecialRecipeSerializer<>(
+                RecipePaintingFrameRemovePainting::new).setRegistryName("paintingframe_remove_painting");
+        
     }
     
     @SubscribeEvent

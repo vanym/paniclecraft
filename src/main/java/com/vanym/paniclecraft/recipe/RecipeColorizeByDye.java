@@ -1,21 +1,25 @@
 package com.vanym.paniclecraft.recipe;
 
-import java.util.Optional;
-
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.item.DyeColor;
+import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.SpecialRecipe;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.DyeUtils;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
+public class RecipeColorizeByDye extends SpecialRecipe {
+    
+    public RecipeColorizeByDye(ResourceLocation id) {
+        super(id);
+    }
     
     @Override
-    public boolean matches(InventoryCrafting inv, World world) {
+    public boolean matches(CraftingInventory inv, World world) {
         int items = 0;
         int dyes = 0;
         for (int i = 0; i < inv.getSizeInventory(); i++) {
@@ -25,7 +29,7 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
             }
             if (slot.getItem() instanceof IColorizeable) {
                 ++items;
-            } else if (DyeUtils.isDye(slot)) {
+            } else if (slot.getItem() instanceof DyeItem) {
                 ++dyes;
             }
         }
@@ -33,7 +37,7 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
     }
     
     @Override
-    public ItemStack getCraftingResult(InventoryCrafting inv) {
+    public ItemStack getCraftingResult(CraftingInventory inv) {
         ItemStack itemstack = ItemStack.EMPTY;
         int[] aint = new int[3];
         int i = 0;
@@ -74,11 +78,12 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
                     ++j;
                 }
             } else {
-                Optional<EnumDyeColor> color = DyeUtils.colorFromStack(slot);
-                if (!color.isPresent()) {
+                if (!DyeItem.class.isInstance(slot.getItem())) {
                     return ItemStack.EMPTY;
                 }
-                float[] afloat = color.get().getColorComponentValues();
+                DyeItem dyeItem = (DyeItem)slot.getItem();
+                DyeColor color = dyeItem.getDyeColor();
+                float[] afloat = color.getColorComponentValues();
                 int j1 = (int)(afloat[0] * 255.0F);
                 int k1 = (int)(afloat[1] * 255.0F);
                 l1 = (int)(afloat[2] * 255.0F);
@@ -109,17 +114,12 @@ public class RecipeColorizeByDye extends IForgeRegistryEntry.Impl<IRecipe> imple
     }
     
     @Override
-    public ItemStack getRecipeOutput() {
-        return ItemStack.EMPTY;
-    }
-    
-    @Override
-    public boolean isDynamic() {
-        return true;
-    }
-    
-    @Override
     public boolean canFit(int width, int height) {
         return width * height >= 2;
+    }
+    
+    @Override
+    public IRecipeSerializer<?> getSerializer() {
+        return Core.instance.painting.recipeTypeColorizeByDye;
     }
 }

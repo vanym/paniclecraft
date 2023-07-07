@@ -26,6 +26,7 @@ import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
+import com.vanym.paniclecraft.recipe.RecipeDummy;
 import com.vanym.paniclecraft.server.ServerProxy;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -100,6 +101,7 @@ public class Core {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         ModLoadingContext context = ModLoadingContext.get();
         bus.addListener(this::setup);
+        RecipeDummy.REGISTER.register(bus);
         EnumMap<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders =
                 new EnumMap<>(ModConfig.Type.class);
         configBuilders.entrySet().stream().forEach(e->e.setValue(new ForgeConfigSpec.Builder()));

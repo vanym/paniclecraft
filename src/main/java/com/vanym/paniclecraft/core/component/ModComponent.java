@@ -17,6 +17,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -48,6 +49,11 @@ public abstract class ModComponent implements IModComponent {
         this.getEntities().forEach(e.getRegistry()::register);
     }
     
+    @SubscribeEvent
+    public void registerRecipes(RegistryEvent.Register<IRecipeSerializer<?>> e) {
+        this.getRecipes().forEach(e.getRegistry()::register);
+    }
+    
     @Override
     public List<Item> getItems() {
         return this.getObjects(Item.class);
@@ -70,6 +76,11 @@ public abstract class ModComponent implements IModComponent {
     @SuppressWarnings("rawtypes")
     public List<EntityType> getEntities() {
         return this.getObjects(EntityType.class);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public List<IRecipeSerializer> getRecipes() {
+        return this.getObjects(IRecipeSerializer.class);
     }
     
     protected final <T> List<T> getObjects(Class<T> clazz) {

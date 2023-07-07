@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " b",
+    "b "
+  ],
+  "key": {
+    "b": {
+      "item": "minecraft:glass_bottle"
+    }
+  },
+  "result": {
+    "item": "paniclecraft:paintingtool_colorpicker"
+  }
+}

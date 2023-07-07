@@ -1,0 +1,16 @@
+{
+  "type": "paniclecraft:paintingframe",
+  "pattern": [
+    "sss",
+    "sps",
+    "sss"
+  ],
+  "key": {
+    "p": {
+      "item": "paniclecraft:painting"
+    },
+    "s": {
+      "tag": "forge:rods/wooden"
+    }
+  }
+}
