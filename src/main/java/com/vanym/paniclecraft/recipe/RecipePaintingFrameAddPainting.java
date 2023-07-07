@@ -54,6 +54,11 @@ public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreReci
         return frame;
     }
     
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
+    
     protected static Object[] getRecipe(int offsetX, int offsetY) {
         ArrayList<Object> list = new ArrayList<>();
         list.add(false); // mirrored

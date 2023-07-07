@@ -107,4 +107,9 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
         }
         return list;
     }
+    
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
 }

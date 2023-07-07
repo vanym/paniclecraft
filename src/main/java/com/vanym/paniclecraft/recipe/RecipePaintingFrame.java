@@ -20,4 +20,9 @@ public class RecipePaintingFrame extends RecipeRegister.ShapedOreRecipe {
         RecipeUtils.addPainting(frame, painting, ItemPaintingFrame.FRONT);
         return frame;
     }
+    
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
 }

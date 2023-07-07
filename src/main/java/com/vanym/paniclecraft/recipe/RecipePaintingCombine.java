@@ -99,6 +99,11 @@ public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
         return output;
     }
     
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
+    
     protected static Picture[][] getAsPictures(ItemStack[][] stacks) {
         Picture[][] sizes = new Picture[stacks.length][];
         for (int y = 0; y < stacks.length; ++y) {
