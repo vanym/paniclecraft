@@ -86,6 +86,11 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
     }
     
     @Override
+    public boolean isDynamic() {
+        return true;
+    }
+    
+    @Override
     public IRecipeSerializer<?> getSerializer() {
         return Core.instance.painting.recipeTypePaintingFrameAdd;
     }

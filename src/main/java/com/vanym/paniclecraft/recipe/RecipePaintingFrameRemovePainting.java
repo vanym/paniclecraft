@@ -113,6 +113,11 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     }
     
     @Override
+    public boolean isDynamic() {
+        return true;
+    }
+    
+    @Override
     public IRecipeSerializer<?> getSerializer() {
         return Core.instance.painting.recipeTypePaintingFrameRemove;
     }

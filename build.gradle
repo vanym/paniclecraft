@@ -89,6 +89,28 @@ apply from: 'dependencies.gradle'
 
 jar.finalizedBy('reobfJar')
 
+task determinizeJar(type: Zip) {
+    def jarPath = jar.archivePath
+    from zipTree(jarPath)
+    archiveName = jarPath.name
+    destinationDir = temporaryDir
+    doLast {
+        copy {
+            from archivePath
+            into jarPath.parent
+        }
+        archivePath.delete()
+    }
+}
+
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+determinizeJar.dependsOn('reobfJar')
+jar.finalizedBy('determinizeJar')
+
 processResources {
     exclude '.cache'
 
