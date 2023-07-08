@@ -43,6 +43,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -103,6 +104,9 @@ public class Core {
         bus.addListener(this::setup);
         RecipeDummy.REGISTER.register(bus);
         this.command.addSubCommand(new CommandVersion());
+        if (ModList.get().isLoaded("computercraft")) {
+            this.components.add(com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.instance());
+        }
         EnumMap<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders =
                 new EnumMap<>(ModConfig.Type.class);
         configBuilders.entrySet().stream().forEach(e->e.setValue(new ForgeConfigSpec.Builder()));

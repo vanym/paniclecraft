@@ -13,11 +13,11 @@ import dan200.computercraft.api.turtle.ITurtleUpgrade;
 import dan200.computercraft.api.turtle.TurtleSide;
 import dan200.computercraft.api.turtle.TurtleUpgradeType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class TurtlePaintBrush implements ITurtleUpgrade {
     
@@ -28,12 +28,6 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     @Override
     public ResourceLocation getUpgradeID() {
         return ID;
-    }
-    
-    @Override
-    public int getLegacyUpgradeID() {
-        // See https://computercraft.info/wiki/Turtle_Upgrade_IDs
-        return 245;
     }
     
     @Override
@@ -48,7 +42,7 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     
     @Override
     public ItemStack getCraftingItem() {
-        return Core.instance.painting.itemPaintBrush.getBrush();
+        return new ItemStack(Core.instance.painting.itemPaintBrush);
     }
     
     @Override
@@ -57,7 +51,7 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public Pair<IBakedModel, Matrix4f> getModel(ITurtleAccess turtle, TurtleSide side) {
         float xOffset = side == TurtleSide.Left ? -0.40625f : 0.40625f;
         // @formatter:off
@@ -68,8 +62,10 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
             0.0f, 0.0f, 0.0f, 1.0f
         );
         // @formatter:on
-        Minecraft mc = Minecraft.getMinecraft();
-        return Pair.of(mc.getRenderItem().getItemModelMesher().getItemModel(this.getCraftingItem()),
+        Minecraft mc = Minecraft.getInstance();
+        return Pair.of(mc.getItemRenderer()
+                         .getItemModelMesher()
+                         .getItemModel(this.getCraftingItem()),
                        transform);
     }
 }

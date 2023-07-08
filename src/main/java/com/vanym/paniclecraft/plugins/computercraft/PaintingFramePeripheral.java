@@ -9,18 +9,18 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 
 public class PaintingFramePeripheral extends PicturePeripheral {
     
     protected final ISidePictureProvider sideProvider;
-    protected EnumFacing pside;
+    protected Direction pside;
     
     public PaintingFramePeripheral(ISidePictureProvider sideProvider) {
         this(sideProvider, null);
     }
     
-    public PaintingFramePeripheral(ISidePictureProvider sideProvider, EnumFacing pside) {
+    public PaintingFramePeripheral(ISidePictureProvider sideProvider, Direction pside) {
         this.sideProvider = sideProvider;
         this.pside = pside;
     }
@@ -32,7 +32,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     
     @PeripheralMethod(31)
     protected Object getAvailableSides() {
-        return Arrays.stream(EnumFacing.VALUES)
+        return Arrays.stream(Direction.values())
                      .collect(Collectors.toMap(f->f.ordinal() + 1, f->f.getName2()));
     }
     
@@ -44,7 +44,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     @PeripheralMethod(33)
     protected void setSide(String name) throws LuaException, InterruptedException {
         try {
-            this.pside = Arrays.stream(EnumFacing.VALUES)
+            this.pside = Arrays.stream(Direction.values())
                                .filter(f->f.getName2().equalsIgnoreCase(name))
                                .findAny()
                                .get();
