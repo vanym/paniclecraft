@@ -104,7 +104,7 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
         }
         final ItemStack p = new ItemStack(Core.instance.painting.itemPainting);
         final ItemStack f = new ItemStack(Core.instance.painting.itemPaintingFrame);
-        NonNullList<Ingredient> ingredients = NonNullList.from(Ingredient.EMPTY);
+        NonNullList<Ingredient> ingredients = NonNullList.create();
         IntStream.range(0, input.length)
                  .mapToObj(i->input[i])
                  .map(b->b == 'p' ? p : b == 'f' ? f : ItemStack.EMPTY)
