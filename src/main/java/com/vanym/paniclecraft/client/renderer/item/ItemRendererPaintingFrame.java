@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
@@ -7,16 +8,16 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
-import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
+import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
-public class ItemRendererPaintingFrame extends TileEntityItemStackRenderer {
+@OnlyIn(Dist.CLIENT)
+public class ItemRendererPaintingFrame extends ItemStackTileEntityRenderer {
     
     public final TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
     
@@ -29,21 +30,21 @@ public class ItemRendererPaintingFrame extends TileEntityItemStackRenderer {
     }
     
     @Override
-    public void renderByItem(ItemStack stack, float partialTicks) {
+    public void renderByItem(ItemStack stack) {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
         int[] obtainedTextures = new int[ISidePictureProvider.N];
-        NBTTagCompound itemTag = stack.getTagCompound();
+        CompoundNBT itemTag = stack.getTag();
         if (itemTag == null) {
-            itemTag = new NBTTagCompound();
+            itemTag = new CompoundNBT();
         }
         for (int i = 0; i < ISidePictureProvider.N; ++i) {
             final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
             obtainedTextures[i] = -1;
-            if (!itemTag.hasKey(TAG_PICTURE_I)) {
+            if (!itemTag.contains(TAG_PICTURE_I)) {
                 continue;
             }
-            NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
-            NBTBase imageTag = pictureTag.getTag(Picture.TAG_IMAGE);
+            CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE_I);
+            INBT imageTag = pictureTag.get(Picture.TAG_IMAGE);
             Picture picture = tilePF.createPicture(i);
             obtainedTextures[i] = this.textureCache.obtainTexture(imageTag);
             if (obtainedTextures[i] >= 0) {
@@ -60,9 +61,13 @@ public class ItemRendererPaintingFrame extends TileEntityItemStackRenderer {
                 continue;
             }
             final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
-            NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
-            NBTBase imageTag = pictureTag.getTag(Picture.TAG_IMAGE);
+            CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE_I);
+            INBT imageTag = pictureTag.get(Picture.TAG_IMAGE);
             this.textureCache.putTexture(imageTag, picture.texture);
         }
+    }
+    
+    public static ItemRendererPaintingFrame create() {
+        return new ItemRendererPaintingFrame(Core.instance.painting.textureCache);
     }
 }

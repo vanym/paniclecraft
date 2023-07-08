@@ -2,8 +2,6 @@ package com.vanym.paniclecraft.command;
 
 import com.vanym.paniclecraft.DEF;
 
-import net.minecraft.command.ICommand;
-
 public class CommandMod3 extends TreeCommandBase {
     
     public static final String NAME = DEF.MOD_ID;

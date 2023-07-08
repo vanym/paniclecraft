@@ -4,31 +4,24 @@ import java.util.List;
 import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.IModComponent;
 
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class CreativeTabMod3 extends CreativeTabs {
+public class CreativeTabMod3 extends ItemGroup {
     
     public CreativeTabMod3(String modid) {
         super(modid);
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
-    public String getTranslatedTabLabel() {
-        return DEF.MOD_NAME;
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public ItemStack getTabIconItem() {
+    @OnlyIn(Dist.CLIENT)
+    public ItemStack createIcon() {
         return Core.instance.getComponents()
                             .stream()
                             .filter(IModComponent::isEnabled)
@@ -37,7 +30,7 @@ public class CreativeTabMod3 extends CreativeTabs {
                             .flatMap(List::stream)
                             .flatMap(item-> {
                                 NonNullList<ItemStack> list = NonNullList.create();
-                                item.getSubItems(this, list);
+                                item.fillItemGroup(this, list);
                                 return list.stream();
                             })
                             .findFirst()
@@ -45,8 +38,8 @@ public class CreativeTabMod3 extends CreativeTabs {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
-    public void displayAllRelevantItems(NonNullList<ItemStack> stacks) {
+    @OnlyIn(Dist.CLIENT)
+    public void fill(NonNullList<ItemStack> stacks) {
         for (IModComponent component : Core.instance.getComponents()) {
             if (!component.isEnabled()) {
                 continue;
@@ -55,7 +48,7 @@ public class CreativeTabMod3 extends CreativeTabs {
             if (items == null) {
                 continue;
             }
-            items.forEach(item->item.getSubItems(this, stacks));
+            items.forEach(item->item.fillItemGroup(this, stacks));
         }
     }
 }

@@ -1,72 +1,43 @@
 package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
-import com.vanym.paniclecraft.network.InWorldHandler;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class MessageChessMove implements IMessage {
+public class MessageChessMove {
     
-    int x;
-    int y;
-    int z;
-    ChessGame.Move move;
-    
-    public MessageChessMove() {}
+    protected final BlockPos pos;
+    protected final ChessGame.Move move;
     
     public MessageChessMove(BlockPos pos, ChessGame.Move move) {
-        this(pos.getX(), pos.getY(), pos.getZ(), move);
-    }
-    
-    public MessageChessMove(int x, int y, int z, ChessGame.Move move) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.pos = pos;
         this.move = move;
     }
     
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.x = buf.readInt();
-        this.y = buf.readInt();
-        this.z = buf.readInt();
-        try {
-            this.move = new ChessGame.Move(ByteBufUtils.readUTF8String(buf));
-        } catch (IllegalArgumentException e) {
-        }
+    public static void encode(MessageChessMove message, PacketBuffer buf) {
+        buf.writeBlockPos(message.pos);
+        buf.writeString(message.move.toString(false));
     }
     
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeInt(this.x);
-        buf.writeInt(this.y);
-        buf.writeInt(this.z);
-        ByteBufUtils.writeUTF8String(buf, this.move.toString(false));
+    public static MessageChessMove decode(PacketBuffer buf) {
+        BlockPos pos = buf.readBlockPos();
+        ChessGame.Move move = new ChessGame.Move(buf.readString());
+        return new MessageChessMove(pos, move);
     }
     
-    protected BlockPos getPos() {
-        return new BlockPos(this.x, this.y, this.z);
-    }
-    
-    public static class Handler extends InWorldHandler<MessageChessMove> {
-        
-        @Override
-        public void onMessageInWorld(MessageChessMove message, MessageContext ctx) {
-            EntityPlayer playerEntity = ctx.getServerHandler().player;
-            TileEntity tile = playerEntity.world.getTileEntity(message.getPos());
-            if (message.move != null && tile instanceof TileEntityChessDesk
-                && playerEntity.getDistanceSq(message.x + 0.5D, message.y + 0.5D,
-                                              message.z + 0.5D) <= 64.0D) {
-                TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
-                tileCD.move(message.move, playerEntity);
-            }
+    public static void handleInWorld(MessageChessMove message, NetworkEvent.Context ctx) {
+        PlayerEntity player = ctx.getSender();
+        TileEntity tile = player.world.getTileEntity(message.pos);
+        if (message.move != null && tile instanceof TileEntityChessDesk
+            && player.getDistanceSq(new Vec3d(tile.getPos()).add(0.5D, 0.5D, 0.5D)) <= 64.0D) {
+            TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
+            tileCD.move(message.move, player);
         }
     }
 }

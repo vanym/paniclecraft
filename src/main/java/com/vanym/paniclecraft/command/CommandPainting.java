@@ -3,20 +3,22 @@ package com.vanym.paniclecraft.command;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.FixedPictureSize;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
 
 public class CommandPainting extends TreeCommandBase {
@@ -47,7 +49,7 @@ public class CommandPainting extends TreeCommandBase {
         }
         
         @Override
-        public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+        public boolean checkPermission(CommandSource source) {
             if (!this.edit && !this.to
                 && Core.instance.painting.server.freePaintingView) {
                 return true;
@@ -61,7 +63,7 @@ public class CommandPainting extends TreeCommandBase {
                 && Core.instance.painting.server.freePaintingEditViewTo) {
                 return true;
             } else {
-                return super.checkPermission(server, sender);
+                return super.checkPermission(source);
             }
         }
     }
@@ -73,7 +75,6 @@ public class CommandPainting extends TreeCommandBase {
             return "givetemplate";
         }
         
-        @Override
         public int getRequiredPermissionLevel() {
             return 2;
         }
@@ -90,7 +91,7 @@ public class CommandPainting extends TreeCommandBase {
         }
         
         protected ITextComponent createLine(Iterable<IPictureSize> sizes) {
-            ITextComponent message = new TextComponentString("");
+            ITextComponent message = new StringTextComponent("");
             boolean f = true;
             for (IPictureSize size : sizes) {
                 if (!f) {
@@ -105,7 +106,7 @@ public class CommandPainting extends TreeCommandBase {
         
         protected ITextComponent createTemplate(IPictureSize size) {
             ITextComponent template =
-                    new TextComponentString(
+                    new StringTextComponent(
                             String.format("%d×%d", size.getWidth(), size.getHeight()));
             ItemStack stack = ItemPainting.getSizedItem(size);
             stack.setCount(stack.getMaxStackSize());
@@ -118,25 +119,41 @@ public class CommandPainting extends TreeCommandBase {
         }
         
         @Override
-        public void execute(MinecraftServer server, ICommandSender sender, String[] args)
-                throws CommandException {
+        public LiteralArgumentBuilder<CommandSource> register() {
+            IntegerArgumentType widthArgumentType =
+                    IntegerArgumentType.integer(1, Core.instance.painting.MAX_WIDTH);
+            IntegerArgumentType heightArgumentType =
+                    IntegerArgumentType.integer(1, Core.instance.painting.MAX_HEIGHT);
+            IntegerArgumentType sizeArgumentType =
+                    IntegerArgumentType.integer(1, Math.min(widthArgumentType.getMaximum(),
+                                                            heightArgumentType.getMaximum()));
+            return Commands.literal(this.getName())
+                           .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                           .executes(this::execute)
+                           .then(Commands.argument("size", sizeArgumentType)
+                                         .executes(this::execute))
+                           .then(Commands.argument("width", widthArgumentType)
+                                         .then(Commands.argument("height", heightArgumentType)
+                                                       .executes(this::execute)));
+        }
+        
+        public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
             SortedSet<IPictureSize> sizes = new TreeSet<>();
-            if (args.length == 0) {
+            try {
+                int width, height;
+                try {
+                    width = height = IntegerArgumentType.getInteger(context, "size");
+                } catch (IllegalArgumentException e) {
+                    width = IntegerArgumentType.getInteger(context, "width");
+                    height = IntegerArgumentType.getInteger(context, "height");
+                }
+                sizes.addAll(this.createSizesSet(new FixedPictureSize(width, height)));
+            } catch (IllegalArgumentException e) {
                 sizes.addAll(this.createSizesSet(new FixedPictureSize(16)));
                 sizes.addAll(this.createSizesSet(Core.instance.painting.config.paintingDefaultSize));
-            } else if (args.length == 1) {
-                int row = parseInt(args[0]);
-                IPictureSize size = new FixedPictureSize(row);
-                sizes.addAll(this.createSizesSet(size));
-            } else if (args.length == 2) {
-                int width = parseInt(args[0]);
-                int height = parseInt(args[1]);
-                IPictureSize size = new FixedPictureSize(width, height);
-                sizes.addAll(this.createSizesSet(size));
-            } else {
-                throw new WrongUsageException(this.getUsage(sender));
             }
-            sender.sendMessage(this.createLine(sizes));
+            context.getSource().sendFeedback(this.createLine(sizes), false);
+            return sizes.size();
         }
     }
 }

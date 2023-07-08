@@ -7,11 +7,11 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingContainer;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.block.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer {
     
     public TileEntityPaintingFrameRenderer() {
@@ -20,10 +20,10 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
     }
     
     @Override
-    protected IBlockState getActualState(TileEntityPaintingContainer tile) {
+    protected BlockState getActualState(TileEntityPaintingContainer tile) {
         BlockPaintingFrame block = Core.instance.painting.blockPaintingFrame;
-        IBlockState state = tile.hasWorld() ? tile.getWorld().getBlockState(tile.getPos())
-                                            : block.getDefaultState();
+        BlockState state = tile.hasWorld() ? tile.getWorld().getBlockState(tile.getPos())
+                                           : block.getDefaultState();
         return block.getActualState(state, (TileEntityPaintingFrame)tile);
     }
     

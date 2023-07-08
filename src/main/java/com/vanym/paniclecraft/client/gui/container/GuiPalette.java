@@ -1,39 +1,36 @@
 package com.vanym.paniclecraft.client.gui.container;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.Arrays;
 
-import org.lwjgl.input.Keyboard;
-
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.ColorChartTexture;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
 import com.vanym.paniclecraft.container.ContainerPalette;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
-import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IContainerListener;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
-public class GuiPalette extends GuiContainer implements IContainerListener {
+@OnlyIn(Dist.CLIENT)
+public class GuiPalette extends ContainerScreen<ContainerPalette> implements IContainerListener {
     
     protected static final ResourceLocation GUI_TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/guis/palette.png");
@@ -46,28 +43,24 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     protected GuiColorChart chart;
     protected GuiColorPicker picker;
     
-    protected final ContainerPalette container;
-    
-    public GuiPalette(ContainerPalette container) {
-        super(container);
-        this.container = container;
+    public GuiPalette(ContainerPalette container, PlayerInventory playerInv, ITextComponent title) {
+        super(container, playerInv, title);
     }
     
     @Override
-    public void initGui() {
-        super.initGui();
+    public void init() {
+        super.init();
         if (chartTexture == null) {
             chartTexture = new ColorChartTexture(CHART_TEXTURE);
-            this.mc.getTextureManager().loadTexture(CHART_TEXTURE, chartTexture);
+            this.minecraft.getTextureManager().loadTexture(CHART_TEXTURE, chartTexture);
         }
         this.chart =
                 new GuiColorChart(chartTexture, this.guiLeft, this.guiTop, this.xSize, this.ySize);
         this.picker = new GuiColorPicker(this.guiLeft + 8, this.guiTop + 38, 16, 16);
-        Keyboard.enableRepeatEvents(true);
+        this.minecraft.keyboardListener.enableRepeatEvents(true);
         for (int i = 0; i < this.textColor.length; ++i) {
             this.textColor[i] = new GuiOneColorField(
-                    i + 2,
-                    this.fontRenderer,
+                    this.font,
                     this.guiLeft + 40,
                     this.guiTop + 42 - i * 12,
                     26,
@@ -81,8 +74,7 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
             this.textColor[i].setEnableBackgroundDrawing(true);
         }
         this.textHex = new GuiHexColorField(
-                1,
-                this.fontRenderer,
+                this.font,
                 this.guiLeft + 8,
                 this.guiTop + 58);
         this.textHex.setSetter(rgb->this.sendColor(new Color(rgb)));
@@ -91,33 +83,33 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     }
     
     @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
-        Keyboard.enableRepeatEvents(false);
+    public void onClose() {
+        super.onClose();
+        this.minecraft.keyboardListener.enableRepeatEvents(false);
         this.container.removeListener(this);
     }
     
     @Override
-    public void updateScreen() {
-        super.updateScreen();
-        this.textHex.updateCursorCounter();
-        Arrays.stream(this.textColor).forEach(t->t.updateCursorCounter());
+    public void tick() {
+        super.tick();
+        this.textHex.tick();
+        Arrays.stream(this.textColor).forEach(t->t.tick());
     }
     
     @Override
-    protected void keyTyped(char character, int key) throws IOException {
-        if (this.textHex.textboxKeyTyped(character, key)) {
-            return;
+    public boolean charTyped(char character, int key) {
+        if (this.textHex.charTyped(character, key)) {
+            return true;
         }
         for (int i = 0; i < this.textColor.length; ++i) {
             if (this.textColorKeyTyped(i, character, key)) {
-                return;
+                return true;
             }
         }
         if (this.switchTextTyped(character, key)) {
-            return;
+            return true;
         }
-        super.keyTyped(character, key);
+        return super.charTyped(character, key);
     }
     
     protected boolean switchTextTyped(char character, int key) {
@@ -137,7 +129,7 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
         }
         int last = this.textColor.length - 1;
         for (int i = 0; i <= last; ++i) {
-            GuiTextField textOne = this.textColor[i];
+            GuiOneColorField textOne = this.textColor[i];
             if (!textOne.isFocused()) {
                 continue;
             }
@@ -163,7 +155,7 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     protected boolean textColorKeyTyped(int i, char character, int key) {
         GuiOneColorField textOne = this.textColor[i];
         String previousText = textOne.getText();
-        if (!textOne.textboxKeyTyped(character, key)) {
+        if (!textOne.charTyped(character, key)) {
             return false;
         }
         String text = textOne.getText();
@@ -193,36 +185,36 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     }
     
     @Override
-    protected void mouseClicked(int x, int y, int eventButton) throws IOException {
-        this.textHex.mouseClicked(x, y, eventButton);
-        Arrays.stream(this.textColor).forEach(t->t.mouseClicked(x, y, eventButton));
-        super.mouseClicked(x, y, eventButton);
-        this.chart.mouseClicked(x, y, eventButton);
-        this.picker.mouseClicked(x, y, eventButton);
+    public boolean mouseClicked(double x, double y, int eventButton) {
+        return this.textHex.mouseClicked(x, y, eventButton)
+            || Arrays.stream(this.textColor).anyMatch(t->t.mouseClicked(x, y, eventButton))
+            || super.mouseClicked(x, y, eventButton)
+            || this.chart.mouseClicked((int)x, (int)y, eventButton)
+            || this.picker.mouseClicked((int)x, (int)y, eventButton);
     }
     
     @Override
-    public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
-        this.drawDefaultBackground();
-        super.drawScreen(mouseX, mouseY, renderPartialTicks);
+    public void render(int mouseX, int mouseY, float renderPartialTicks) {
+        this.renderBackground();
+        super.render(mouseX, mouseY, renderPartialTicks);
         this.renderHoveredToolTip(mouseX, mouseY);
     }
     
     protected void drawInventoriesNames() {
-        String palette = InventoryUtils.getTranslatedName(this.container.inventoryPalette);
-        this.fontRenderer.drawString(palette, 8, 6, 0x404040);
-        String player = InventoryUtils.getTranslatedName(this.container.inventoryPlayer);
-        this.fontRenderer.drawString(player, 8, this.ySize - 96 + 2, 0x404040);
+        this.font.drawString(this.title.getFormattedText(), 8, 6, 0x404040);
+        this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(),
+                             8, this.ySize - 96 + 2, 0x404040);
     }
     
     protected void drawRGBLabels() {
         final String letters = "BGR";
         for (int i = 0; i < this.textColor.length; ++i) {
-            int yoffset = this.textColor[i].getEnableBackgroundDrawing() ? 2 : 0;
-            this.fontRenderer.drawString(letters.charAt(i) + ": ",
-                                         -this.guiLeft + this.textColor[i].x - 11,
-                                         -this.guiTop + this.textColor[i].y + yoffset,
-                                         0x404040);
+            GuiOneColorField field = this.textColor[i];
+            int yoffset = (field.getAdjustedWidth() - field.getWidth()) / -4;
+            this.font.drawString(letters.charAt(i) + ": ",
+                                 -this.guiLeft + field.x - 11,
+                                 -this.guiTop + field.y + yoffset,
+                                 0x404040);
         }
     }
     
@@ -235,22 +227,22 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     }
     
     @Override
-    public void drawGuiContainerBackgroundLayer(float f, int i, int j) {
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.renderEngine.bindTexture(GUI_TEXTURE);
-        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-        this.chart.drawChart(this.mc);
+    public void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindTexture(GUI_TEXTURE);
+        this.blit(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+        this.chart.drawChart(this.minecraft);
         Color color = this.getColor();
         if (color == null) {
             color = new Color(0);
         }
-        drawRect(this.picker.xPosition, this.picker.yPosition,
-                 this.picker.xPosition + this.picker.width,
-                 this.picker.yPosition + this.picker.height,
-                 color.getRGB());
+        fill(this.picker.xPosition, this.picker.yPosition,
+             this.picker.xPosition + this.picker.width,
+             this.picker.yPosition + this.picker.height,
+             color.getRGB());
         RenderHelper.disableStandardItemLighting();
-        this.textHex.drawTextBox();
-        Arrays.stream(this.textColor).forEach(t->t.drawTextBox());
+        this.textHex.render(mouseX, mouseY, partialTicks);
+        Arrays.stream(this.textColor).forEach(t->t.render(mouseX, mouseY, partialTicks));
     }
     
     protected void sendColor(Color color) {
@@ -299,12 +291,7 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     @Override
     public void sendWindowProperty(Container container, int id, int level) {}
     
-    @Override
-    public void sendAllWindowProperties(Container container, IInventory inv) {
-        this.sendSlotContents(container, 0, inv.getStackInSlot(0));
-    }
-    
-    protected class GuiColorPicker extends Gui {
+    protected class GuiColorPicker extends AbstractGui {
         
         public int width;
         public int height;
@@ -321,26 +308,27 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
             this.enabled = true;
         }
         
-        public void mouseClicked(int x, int y, int eventButton) {
+        public boolean mouseClicked(int x, int y, int eventButton) {
             if (!this.enabled || (eventButton != 0 /* left */ && eventButton != 1 /* right */)) {
-                return;
+                return false;
             }
             x -= this.xPosition;
             y -= this.yPosition;
             if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
-                return;
+                return false;
             }
             ItemStack stack = GuiPalette.this.container.inventoryPlayer.getItemStack();
             IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
             if (colorizeable == null) {
-                return;
+                return false;
             }
             int rgb = colorizeable.getColor(stack);
             GuiPalette.this.sendColor(new Color(rgb));
+            return true;
         }
     }
     
-    protected class GuiColorChart extends Gui {
+    protected class GuiColorChart extends AbstractGui {
         
         public int width;
         public int height;
@@ -362,38 +350,38 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
             this.visible = true;
         }
         
-        public void mouseClicked(int x, int y, int eventButton) {
+        public boolean mouseClicked(int x, int y, int eventButton) {
             if (!this.enabled || eventButton != 0 /* left */) {
-                return;
+                return false;
             }
             x -= this.xPosition;
             y -= this.yPosition;
             if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
-                return;
+                return false;
             }
             Color color = this.chart.getColor(x, y);
             if (color == null || color.getAlpha() == 0) {
-                return;
+                return false;
             }
             GuiPalette.this.sendColor(color);
+            return true;
         }
         
         public void drawChart(Minecraft mc) {
             if (!this.visible) {
                 return;
             }
-            mc.getTextureManager().bindTexture(this.chart.textureLocation);
-            this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 0, this.width,
-                                       this.height);
+            mc.getTextureManager().bindTexture(this.chart.getTextureLocation());
+            this.blit(this.xPosition, this.yPosition, 0, 0, this.width, this.height);
         }
     }
     
-    protected static class GuiOneColorField extends GuiTextField {
+    protected static class GuiOneColorField extends TextFieldWidget {
         
         protected static final String NUM_CHARS = "0123456789";
         
-        public GuiOneColorField(int id, FontRenderer font, int x, int y, int width, int height) {
-            super(id, font, x, y, width, height);
+        public GuiOneColorField(FontRenderer font, int x, int y, int width, int height) {
+            super(font, x, y, width, height, "");
         }
         
         @Override
@@ -411,6 +399,10 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
             this.setText(Integer.toString(num));
         }
         
+        protected int getSelectionEnd() {
+            return this.selectionEnd;
+        }
+        
         @Override
         public void writeText(String text) {
             StringBuilder sb = new StringBuilder();
@@ -425,8 +417,8 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
         }
         
         @Override
-        public boolean textboxKeyTyped(char character, int key) {
-            if (!super.textboxKeyTyped(character, key)) {
+        public boolean charTyped(char character, int key) {
+            if (!super.charTyped(character, key)) {
                 return false;
             }
             this.checkNum();

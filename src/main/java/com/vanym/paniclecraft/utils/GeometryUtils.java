@@ -1,16 +1,17 @@
 package com.vanym.paniclecraft.utils;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumFacing.AxisDirection;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Direction.AxisDirection;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.VoxelShapes;
 
 public class GeometryUtils {
     
-    protected static final AxisAlignedBB FULL_BLOCK = Block.FULL_BLOCK_AABB;
+    protected static final AxisAlignedBB FULL_BLOCK = VoxelShapes.fullCube().getBoundingBox();
     
     public static AxisAlignedBB getFullBlockBox() {
         return FULL_BLOCK;
@@ -50,37 +51,42 @@ public class GeometryUtils {
     
     public static AxisAlignedBB getBoundsBySide(int side, double width) {
         AxisAlignedBB box = setMaxZ(FULL_BLOCK, width);
-        EnumFacing zdir = EnumFacing.getFront(side).getOpposite();
+        Direction zdir = Direction.byIndex(side).getOpposite();
         TileOnSide tside = getZTileOnSide(zdir);
         return tside.fromSideCoords(box);
     }
     
-    public static boolean isTouchingSide(EnumFacing side, AxisAlignedBB box) {
+    public static boolean isTouchingSide(Direction side, AxisAlignedBB box) {
         if (box == null) {
             return false;
         }
-        EnumFacing zdir = side.getOpposite();
+        Direction zdir = side.getOpposite();
         TileOnSide tside = getZTileOnSide(zdir);
         AxisAlignedBB sideBox = tside.toSideCoords(box);
         return sideBox.minZ <= 0.0D;
     }
     
-    public static Vec3d getInBlockVec(RayTraceResult target) {
-        return target.hitVec.subtract(new Vec3d(target.getBlockPos()));
+    public static Vec3d getInBlockVec(BlockRayTraceResult target) {
+        return target.getHitVec().subtract(new Vec3d(target.getPos()));
     }
     
-    public static EnumFacing getDirectionByVec(Vec3d lookVec) {
-        return EnumFacing.getFacingFromVector((float)lookVec.x, (float)lookVec.y, (float)lookVec.z);
+    public static Direction getDirectionByVec(Vec3d lookVec) {
+        return Direction.getFacingFromVector((float)lookVec.x, (float)lookVec.y, (float)lookVec.z);
     }
     
-    public static RayTraceResult rayTraceBlocks(EntityPlayer player, double distance) {
-        Vec3d pos = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
+    public static BlockRayTraceResult rayTraceBlocks(PlayerEntity player, double distance) {
+        Vec3d pos = player.getEyePosition(1.0F);
         Vec3d look = player.getLookVec();
         Vec3d posTo = pos.add(look.scale(distance));
-        return player.world.rayTraceBlocks(pos, posTo);
+        return player.world.rayTraceBlocks(new RayTraceContext(
+                pos,
+                posTo,
+                RayTraceContext.BlockMode.OUTLINE,
+                RayTraceContext.FluidMode.NONE,
+                player));
     }
     
-    public static EnumFacing rotateBy(EnumFacing dir, EnumFacing axis) {
+    public static Direction rotateBy(Direction dir, Direction axis) {
         if (dir == null) {
             return null;
         }
@@ -94,8 +100,8 @@ public class GeometryUtils {
         return dir;
     }
     
-    protected static TileOnSide getZTileOnSide(EnumFacing zdir) {
-        EnumFacing xdir = EnumFacing.getFront((zdir.ordinal() + 2) % 6);
+    protected static TileOnSide getZTileOnSide(Direction zdir) {
+        Direction xdir = Direction.byIndex((zdir.ordinal() + 2) % 6);
         return new TileOnSide(xdir, zdir);
     }
 }

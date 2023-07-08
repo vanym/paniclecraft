@@ -37,7 +37,7 @@ public class CannonPeripheral extends PeripheralBase {
     
     @PeripheralMethod(3)
     public double getMaxStrength() {
-        return Core.instance.cannon.config.maxStrength;
+        return Core.instance.cannon.maxStrength.get();
     }
     
     @PeripheralMethod(10)

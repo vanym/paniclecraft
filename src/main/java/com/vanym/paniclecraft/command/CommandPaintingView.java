@@ -1,22 +1,23 @@
 package com.vanym.paniclecraft.command;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
-
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.command.CommandUtils.NopaintingException;
 import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class CommandPaintingView extends CommandBase {
     
@@ -43,14 +44,8 @@ public class CommandPaintingView extends CommandBase {
         return sb.toString();
     }
     
-    @Override
-    public int getRequiredPermissionLevel() {
-        return 2;
-    }
-    
-    @Override
-    public String getUsage(ICommandSender sender) {
-        return super.getTranslationPrefix() + ".usage";
+    protected boolean checkPermission(CommandSource source) {
+        return source.hasPermissionLevel(2);
     }
     
     @Override
@@ -59,46 +54,42 @@ public class CommandPaintingView extends CommandBase {
     }
     
     @Override
-    public boolean isUsernameIndex(String[] args, int index) {
-        return super.isUsernameIndex(args, index) || (this.to && index == 0);
-    }
-    
-    @Override
-    public List<String> getTabCompletions(
-            MinecraftServer server,
-            ICommandSender sender,
-            String[] args,
-            @Nullable BlockPos pos) {
-        if (this.to && args.length == 1) {
-            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
-        }
-        return super.getTabCompletions(server, sender, args, pos);
-    }
-    
-    @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args)
-            throws CommandException {
-        EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
-        EntityPlayerMP viewer;
-        int i = 0;
+    public LiteralArgumentBuilder<CommandSource> register() {
+        RequiredArgumentBuilder<CommandSource, Integer> maxRadius =
+                Commands.argument("maxRadius", IntegerArgumentType.integer(1, 4096));
         if (this.to) {
-            if (args.length == i) {
-                throw new WrongUsageException(this.getUsage(sender));
-            }
-            viewer = getPlayer(server, sender, args[i++]);
+            return Commands.literal(this.getName())
+                           .requires(this::checkPermission)
+                           .then(Commands.argument("viewer", EntityArgument.player())
+                                         .executes(this::execute)
+                                         .then(maxRadius)
+                                         .executes(this::execute));
+        } else {
+            return Commands.literal(this.getName())
+                           .requires(this::checkPermission)
+                           .executes(this::execute)
+                           .then(maxRadius)
+                           .executes(this::execute);
+        }
+    }
+    
+    public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        ServerPlayerEntity player = context.getSource().asPlayer();
+        ServerPlayerEntity viewer;
+        if (this.to) {
+            viewer = EntityArgument.getPlayer(context, "viewer");
         } else {
             viewer = player;
         }
-        int maxRadius;
-        if (args.length == i) {
-            maxRadius = 1024;
-        } else if (args.length == (i + 1)) {
-            maxRadius = parseInt(args[i++]);
-        } else {
-            throw new WrongUsageException(this.getUsage(sender));
-        }
+        int maxRadius = ((Supplier<Integer>)()-> {
+            try {
+                return IntegerArgumentType.getInteger(context, "maxRadius");
+            } catch (IllegalArgumentException e) {
+                return 1024;
+            }
+        }).get();
         try {
-            ContainerPaintingViewServer view =
+            ContainerPaintingViewServer.Provider view =
                     Arrays.stream(this.providers)
                           .map(CommandUtils.makeProviderRayTraceMapper(player))
                           .map(p->ContainerPaintingViewServer.makeFullView(p, maxRadius))
@@ -106,9 +97,10 @@ public class CommandPaintingView extends CommandBase {
                           .findFirst()
                           .get();
             view.setEditable(this.edit);
-            ContainerPaintingViewServer.openGui(viewer, view);
+            NetworkHooks.openGui(viewer, view, view);
+            return 1;
         } catch (NoSuchElementException e) {
-            throw new NopaintingException();
+            throw CommandUtils.REQUIRES_PAINTING_EXCEPTION_TYPE.create();
         }
     }
 }

@@ -3,67 +3,47 @@ package com.vanym.paniclecraft;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.vanym.paniclecraft.client.ClientProxy;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
-import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
-import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.Version;
 import com.vanym.paniclecraft.core.component.IModComponent;
-import com.vanym.paniclecraft.core.component.IModComponent.IServerSideConfig;
 import com.vanym.paniclecraft.core.component.ModComponentAdvSign;
 import com.vanym.paniclecraft.core.component.ModComponentBroom;
 import com.vanym.paniclecraft.core.component.ModComponentCannon;
 import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
-import com.vanym.paniclecraft.network.message.MessageComponentConfig;
+import com.vanym.paniclecraft.recipe.RecipeDummy;
+import com.vanym.paniclecraft.server.ServerProxy;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.world.World;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.ModMetadata;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.common.network.IGuiHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.NetworkRegistry.ChannelBuilder;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
-@Mod(
-    modid = DEF.MOD_ID,
-    name = DEF.MOD_NAME,
-    version = DEF.VERSION,
-    acceptedMinecraftVersions = "[1.12.2]",
-    guiFactory = "com.vanym.paniclecraft.client.gui.config.GuiModConfigFactory")
-public class Core implements IGuiHandler {
+@Mod(DEF.MOD_ID)
+public class Core {
     
-    @Instance(DEF.MOD_ID)
     public static Core instance;
-    
-    @SidedProxy(
-        clientSide = "com.vanym.paniclecraft.client.ClientProxy",
-        serverSide = "com.vanym.paniclecraft.server.ServerProxy",
-        modId = DEF.MOD_ID)
     public static IProxy proxy;
     
     public final ModComponentBroom broom = new ModComponentBroom();
@@ -74,168 +54,66 @@ public class Core implements IGuiHandler {
     public final ModComponentPortableWorkbench portableworkbench =
             new ModComponentPortableWorkbench();
     
-    public CreativeTabMod3 tab;
+    public final CreativeTabMod3 tab = new CreativeTabMod3(DEF.MOD_ID);
     
-    public CommandMod3 command;
+    public final CommandMod3 command = new CommandMod3();
     
-    public ModConfig config;
-    
-    public final SimpleNetworkWrapper network =
-            NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
+    public final SimpleChannel network =
+            ChannelBuilder.named(new ResourceLocation(DEF.MOD_ID, "main_channel"))
+                          .clientAcceptedVersions("1"::equals)
+                          .serverAcceptedVersions("1"::equals)
+                          .networkProtocolVersion(()->"1")
+                          .simpleChannel();
     
     protected final List<IModComponent> components = new ArrayList<>(
             Arrays.asList(this.broom, this.advSign, this.painting,
                           this.deskgame, this.cannon,
                           this.portableworkbench));
     
+    protected final ForgeConfigSpec.BooleanValue versionCheck;
+    
+    public Core() {
+        instance = this;
+        proxy = DistExecutor.runForDist(()->ClientProxy::new, ()->ServerProxy::new);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        ModLoadingContext context = ModLoadingContext.get();
+        bus.addListener(this::setup);
+        MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
+        RecipeDummy.REGISTER.register(bus);
+        this.command.addSubCommand(new CommandVersion());
+        if (ModList.get().isLoaded("computercraft")) {
+            this.components.add(com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.instance());
+        }
+        EnumMap<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders =
+                new EnumMap<>(ModConfig.Type.class);
+        configBuilders.putAll(Arrays.stream(ModConfig.Type.values())
+                                    .collect(Collectors.toMap(Function.identity(),
+                                                              e->new ForgeConfigSpec.Builder())));
+        ForgeConfigSpec.Builder commonBuilder = configBuilders.get(ModConfig.Type.COMMON);
+        this.versionCheck = commonBuilder.define("versionCheck", true);
+        Map<ModConfig.Type, ForgeConfigSpec.Builder> initConfigBuilders =
+                Collections.unmodifiableMap(configBuilders);
+        Core.instance.getComponents().forEach(comp->comp.init(initConfigBuilders));
+        EnumMap<ModConfig.Type, ForgeConfigSpec> specs = new EnumMap<>(ModConfig.Type.class);
+        configBuilders.entrySet().stream().forEach(e->specs.put(e.getKey(), e.getValue().build()));
+        specs.entrySet()
+             .stream()
+             .filter(e->!e.getValue().isEmpty())
+             .forEach(e->context.registerConfig(e.getKey(), e.getValue()));
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+    
     public List<IModComponent> getComponents() {
         return Collections.unmodifiableList(this.components);
     }
     
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        ModMetadata modMeta = event.getModMetadata();
-        modMeta.modId = DEF.MOD_ID;
-        modMeta.name = DEF.MOD_NAME;
-        modMeta.authorList = Arrays.asList(new String[]{"ee_man"});
-        modMeta.url = "https://github.com/vanym/paniclecraft";
-        modMeta.description = "Create, Play or Draw and Clean up After";
-        modMeta.version = DEF.VERSION;
-        modMeta.autogenerated = false;
-        
-        this.config = new ModConfig(event.getSuggestedConfigurationFile());
-        
-        this.command = new CommandMod3();
-        this.command.addSubCommand(new CommandVersion());
-        
-        MinecraftForge.EVENT_BUS.register(this);
-        
-        if (this.config.getBoolean("creativeTab", "general", true, "")) {
-            this.tab = new CreativeTabMod3(DEF.MOD_ID);
-        }
-        
-        if (this.config.getBoolean("versionCheck", "general", true, "")) {
+    protected void setup(FMLCommonSetupEvent event) {
+        if (this.versionCheck.get()) {
             Version.startVersionCheck();
         }
-        
-        if (Loader.isModLoaded("computercraft")) {
-            this.components.add(com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.instance());
-        }
-        
-        this.preInitCommon();
-        
-        for (IModComponent component : Core.instance.getComponents()) {
-            component.preInit(this.config);
-        }
-        proxy.preInit(this.config);
     }
     
-    protected void preInitCommon() {
-        Core.instance.network.registerMessage(MessageComponentConfig.Handler.class,
-                                              MessageComponentConfig.class, 5, Side.CLIENT);
-    }
-    
-    @EventHandler
-    public void init(FMLInitializationEvent event) {
-        NetworkRegistry.INSTANCE.registerGuiHandler(instance, instance);
-        for (IModComponent component : Core.instance.getComponents()) {
-            component.init(this.config);
-        }
-        proxy.init(this.config);
-    }
-    
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        proxy.postInit(this.config);
-        if (this.config.hasChanged()) {
-            this.config.save();
-        }
-    }
-    
-    @EventHandler
-    public void serverStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(this.command);
-    }
-    
-    @SubscribeEvent
-    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-        if (!event.getModID().equals(DEF.MOD_ID)) {
-            return;
-        }
-        for (IModComponent component : Core.instance.getComponents()) {
-            component.configChanged(this.config);
-        }
-        proxy.configChanged(this.config);
-        this.sendConfigToAllPlayers();
-        if (this.config.hasChanged()) {
-            this.config.save();
-        }
-    }
-    
-    public FMLEmbeddedChannel getChannel(Side source) {
-        return NetworkRegistry.INSTANCE.getChannel(DEF.MOD_ID, source);
-    }
-    
-    @SubscribeEvent
-    public void onConnectionFromClient(FMLNetworkEvent.ServerConnectionFromClientEvent event) {
-        this.sendConfigToPlayer(event.getManager());
-    }
-    
-    protected void sendConfigToAllPlayers() {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        if (server != null && server.isServerRunning()) {
-            PlayerList manager = server.getPlayerList();
-            manager.getPlayers()
-                   .stream()
-                   .map(p->p.connection.netManager)
-                   .forEach(this::sendConfigToPlayer);
-        }
-    }
-    
-    protected void sendConfigToPlayer(NetworkManager manager) {
-        Core.instance.getComponents().forEach(manager.isLocalChannel() ? component-> {
-            IServerSideConfig config = component.getServerSideConfig();
-            if (config != null) {
-                component.setServerSideConfig(config);
-            }
-        } : component-> {
-            MessageComponentConfig message = new MessageComponentConfig(component);
-            if (message.isEmpty()) {
-                return;
-            }
-            FMLEmbeddedChannel channel = Core.instance.getChannel(Side.SERVER);
-            Packet<?> packet = channel.generatePacketFrom(message);
-            manager.sendPacket(packet);
-        });
-    }
-    
-    @Override
-    public Object getServerGuiElement(
-            int ID,
-            EntityPlayer player,
-            World world,
-            int x,
-            int y,
-            int z) {
-        if (ID >= 0 && ID < GUIs.values().length) {
-            return GUIs.values()[ID].getServerGuiElement(ID, player, world, x, y, z);
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public Object getClientGuiElement(
-            int ID,
-            EntityPlayer player,
-            World world,
-            int x,
-            int y,
-            int z) {
-        if (ID >= 0 && ID < GUIs.values().length) {
-            return GUIs.values()[ID].getClientGuiElement(ID, player, world, x, y, z);
-        } else {
-            return null;
-        }
+    protected void serverStarting(FMLServerStartingEvent event) {
+        event.getCommandDispatcher().register(this.command.register());
     }
 }

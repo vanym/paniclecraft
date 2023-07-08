@@ -5,14 +5,14 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class PaintingFramePeripheralProvider implements IPeripheralProvider {
     
     @Override
-    public IPeripheral getPeripheral(World world, BlockPos pos, EnumFacing side) {
+    public IPeripheral getPeripheral(World world, BlockPos pos, Direction side) {
         TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;

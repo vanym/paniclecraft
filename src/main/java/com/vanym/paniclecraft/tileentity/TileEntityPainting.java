@@ -2,15 +2,15 @@ package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class TileEntityPainting extends TileEntityPaintingContainer {
     
@@ -21,20 +21,24 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     public static final String TAG_PICTURE = "Picture";
     
+    public TileEntityPainting() {
+        super(Core.instance.painting.tileEntityPainting);
+    }
+    
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
-        super.writeToNBT(nbtTag);
-        NBTTagCompound pictureTag = new NBTTagCompound();
+    public CompoundNBT write(CompoundNBT nbtTag) {
+        super.write(nbtTag);
+        CompoundNBT pictureTag = new CompoundNBT();
         this.getPicture().writeToNBT(pictureTag);
-        nbtTag.setTag(TAG_PICTURE, pictureTag);
+        nbtTag.put(TAG_PICTURE, pictureTag);
         return nbtTag;
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound nbtTag) {
-        super.readFromNBT(nbtTag);
-        if (nbtTag.hasKey(TAG_PICTURE)) {
-            this.getPicture().readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE));
+    public void read(CompoundNBT nbtTag) {
+        super.read(nbtTag);
+        if (nbtTag.contains(TAG_PICTURE)) {
+            this.getPicture().readFromNBT(nbtTag.getCompound(TAG_PICTURE));
         }
     }
     
@@ -44,7 +48,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     @Override
     public Picture getPicture(int side) {
-        if (side == this.getBlockMetadata()) {
+        if (side == this.getBlockState().get(BlockPainting.FACING).getIndex()) {
             return this.getPicture();
         } else {
             return null;
@@ -52,7 +56,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     }
     
     protected Picture getNeighborPicture(int offsetX, int offsetY) {
-        int side = this.getBlockMetadata();
+        int side = this.getBlockState().get(BlockPainting.FACING).getIndex();
         return new WorldPicturePoint(
                 WorldPictureProvider.PAINTING,
                 this.getWorld(),
@@ -64,7 +68,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     public String toString() {
         return String.format("Painting[x=%d, y=%d, z=%d, facing=%s]",
                              this.getPos().getX(), this.getPos().getY(), this.getPos().getZ(),
-                             EnumFacing.getFront(this.getBlockMetadata()));
+                             this.getBlockState().get(BlockPainting.FACING));
     }
     
     protected class PictureHolder extends TileEntityPaintingContainer.PictureHolder {
@@ -81,20 +85,19 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public double getMaxRenderDistanceSquared() {
         return Core.instance.painting.clientConfig.renderPaintingTileMaxRenderDistanceSquared;
     }
     
     @Override
-    public void invalidate() {
-        super.invalidate();
+    public void remove() {
+        super.remove();
         this.picture.unload();
     }
     
     @Override
-    public void onChunkUnload() {
-        super.onChunkUnload();
+    public void onChunkUnloaded() {
         this.picture.unload();
     }
     

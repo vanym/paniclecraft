@@ -2,8 +2,8 @@ package com.vanym.paniclecraft.core.component.painting;
 
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 
-import net.minecraftforge.fml.common.eventhandler.Event;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class AnyBlockValidForPaintEventHandler {
     

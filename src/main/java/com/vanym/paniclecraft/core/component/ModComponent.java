@@ -13,23 +13,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import com.vanym.paniclecraft.DEF;
-import com.vanym.paniclecraft.block.IWithCustomStateMapper;
-import com.vanym.paniclecraft.item.IWithSubtypes;
-
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.entity.EntityType;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public abstract class ModComponent implements IModComponent {
     
@@ -44,40 +35,23 @@ public abstract class ModComponent implements IModComponent {
     }
     
     @SubscribeEvent
-    public void registerRecipes(RegistryEvent.Register<IRecipe> e) {
-        this.getRecipes().forEach(e.getRegistry()::register);
+    public void registerContainers(RegistryEvent.Register<ContainerType<?>> e) {
+        this.getContainers().forEach(e.getRegistry()::register);
     }
     
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    public void registerModels(ModelRegistryEvent event) {
-        this.getBlocks().forEach(this::registerModel);
-        this.getItems().forEach(this::registerModel);
+    public void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> e) {
+        this.getTileEntities().forEach(e.getRegistry()::register);
     }
     
-    @SideOnly(Side.CLIENT)
-    protected void registerModel(Block block) {
-        if (block instanceof IWithCustomStateMapper) {
-            IWithCustomStateMapper mapper = (IWithCustomStateMapper)block;
-            ModelLoader.setCustomStateMapper(block, mapper.getStateMapper());
-        }
+    @SubscribeEvent
+    public void registerEntities(RegistryEvent.Register<EntityType<?>> e) {
+        this.getEntities().forEach(e.getRegistry()::register);
     }
     
-    @SideOnly(Side.CLIENT)
-    protected void registerModel(Item item) {
-        Stream<ImmutablePair<Integer, ResourceLocation>> st;
-        if (item instanceof IWithSubtypes) {
-            IWithSubtypes ty = (IWithSubtypes)item;
-            st = ty.getSubtypes()
-                   .entrySet()
-                   .stream()
-                   .map(e->ImmutablePair.of(e.getKey(), e.getValue()))
-                   .map(e->ImmutablePair.of(e.left, new ResourceLocation(DEF.MOD_ID, e.right)));
-        } else {
-            st = Stream.of(ImmutablePair.of(0, item.getRegistryName()));
-        }
-        st.map(e->ImmutablePair.of(e.left, new ModelResourceLocation(e.right, "inventory")))
-          .forEach(e->ModelLoader.setCustomModelResourceLocation(item, e.left, e.right));
+    @SubscribeEvent
+    public void registerRecipes(RegistryEvent.Register<IRecipeSerializer<?>> e) {
+        this.getRecipes().forEach(e.getRegistry()::register);
     }
     
     @Override
@@ -89,8 +63,24 @@ public abstract class ModComponent implements IModComponent {
         return this.getObjects(Block.class);
     }
     
-    public List<IRecipe> getRecipes() {
-        return this.getObjects(IRecipe.class);
+    @SuppressWarnings("rawtypes")
+    public List<ContainerType> getContainers() {
+        return this.getObjects(ContainerType.class);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public List<TileEntityType> getTileEntities() {
+        return this.getObjects(TileEntityType.class);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public List<EntityType> getEntities() {
+        return this.getObjects(EntityType.class);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public List<IRecipeSerializer> getRecipes() {
+        return this.getObjects(IRecipeSerializer.class);
     }
     
     protected final <T> List<T> getObjects(Class<T> clazz) {

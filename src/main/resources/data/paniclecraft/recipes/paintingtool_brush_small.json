@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "f",
+    "s"
+  ],
+  "key": {
+    "f": {
+      "tag": "forge:feathers"
+    },
+    "s": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "result": {
+    "item": "paniclecraft:paintingtool_brush_small"
+  }
+}

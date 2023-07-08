@@ -10,27 +10,29 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
+import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.IHasContainer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
-public class GuiPaintingView extends GuiScreen {
+@OnlyIn(Dist.CLIENT)
+public class GuiPaintingView extends Screen implements IHasContainer<ContainerPaintingViewBase> {
     
     protected static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
     
@@ -48,23 +50,29 @@ public class GuiPaintingView extends GuiScreen {
     protected int controlsX;
     protected int controlsEndX;
     
-    protected final GuiButton buttonExport =
-            new GuiButton(1, 0, 0, 60, 20, I18n.format("gui.paintingview.export"));
+    protected final Button buttonExport;
     
-    public GuiPaintingView(ContainerPaintingViewClient view) {
+    public GuiPaintingView(ContainerPaintingViewClient view, ITextComponent title) {
+        super(title);
         this.view = view;
+        String textExport = I18n.format("gui.paintingview.export");
+        this.buttonExport = new Button(0, 0, 60, 20, textExport, b->this.paintingExport());
     }
     
     @Override
-    public void initGui() {
-        super.initGui();
-        this.mc.player.openContainer = this.view;
-        this.buttonList.add(this.buttonExport);
+    public ContainerPaintingViewBase getContainer() {
+        return this.view;
     }
     
     @Override
-    public void setWorldAndResolution(Minecraft mc, int width, int height) {
-        super.setWorldAndResolution(mc, width, height);
+    public void init() {
+        super.init();
+        this.addButton(this.buttonExport);
+    }
+    
+    @Override
+    public void init(Minecraft mc, int width, int height) {
+        super.init(mc, width, height);
         int viewMaxWidth = this.width - (PADDING_LEFT + PADDING_RIGHT);
         int viewMaxHeight = this.height - (PADDING_TOP + PADDING_BOTTOM);
         this.viewStep = Math.min(viewMaxWidth / this.view.sizeX, viewMaxHeight / this.view.sizeY);
@@ -73,8 +81,8 @@ public class GuiPaintingView extends GuiScreen {
         int center = (width / 2);
         this.controlsX = Math.min(this.viewX, center - 100);
         this.controlsEndX = Math.max(this.getViewEndX(), center + 100);
-        this.buttonExport.x = this.controlsEndX - this.buttonExport.width;
-        this.buttonExport.y = height - this.buttonExport.height - 5;
+        this.buttonExport.x = this.controlsEndX - this.buttonExport.getWidth();
+        this.buttonExport.y = height - this.buttonExport.getHeight() - 5;
     }
     
     protected int getViewWidth() {
@@ -94,17 +102,17 @@ public class GuiPaintingView extends GuiScreen {
     }
     
     @Override
-    public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
-        this.drawDefaultBackground();
+    public void render(int mouseX, int mouseY, float renderPartialTicks) {
+        this.renderBackground();
         this.drawPainting();
         {
             StringBuilder sb = new StringBuilder();
             sb.append(this.view.getWidth());
             sb.append("×");
             sb.append(this.view.getHeight());
-            this.fontRenderer.drawString(sb.toString(), 2, 2, 0x7f7f7f);
+            this.font.drawString(sb.toString(), 2, 2, 0x7f7f7f);
         }
-        super.drawScreen(mouseX, mouseY, renderPartialTicks);
+        super.render(mouseX, mouseY, renderPartialTicks);
     }
     
     protected void drawPainting() {
@@ -118,40 +126,35 @@ public class GuiPaintingView extends GuiScreen {
                     continue;
                 }
                 TextureAtlasSprite icon = TileEntityPaintingRenderer.bindTexture(picture);
-                this.drawTexturedModalRect(this.viewX + x * this.viewStep,
-                                           this.viewY + y * this.viewStep,
-                                           icon, this.viewStep, this.viewStep);
+                blit(this.viewX + x * this.viewStep,
+                     this.viewY + y * this.viewStep,
+                     this.blitOffset,
+                     this.viewStep, this.viewStep,
+                     icon);
             }
         }
         GlStateManager.disableBlend();
     }
     
-    @Override
-    public void actionPerformed(GuiButton button) {
-        if (button.id == this.buttonExport.id) {
-            this.paintingExport();
-        }
-    }
-    
     protected void paintingExport() {
-        File dir = new File(this.mc.mcDataDir, "paintings");
+        File dir = new File(this.minecraft.gameDir, "paintings");
         dir.mkdir();
         File file = getTimestampedPNGFileForDirectory(dir);
         ITextComponent message;
         try {
             FileOutputStream output = new FileOutputStream(file);
             this.view.savePainting(output);
-            TextComponentString link = new TextComponentString(file.getName());
+            StringTextComponent link = new StringTextComponent(file.getName());
             Style style = link.getStyle();
             style.setClickEvent(new ClickEvent(
                     ClickEvent.Action.OPEN_FILE,
                     file.getAbsolutePath()));
             style.setUnderlined(true);
-            message = new TextComponentTranslation("painting.export.success", link);
+            message = new TranslationTextComponent("painting.export.success", link);
         } catch (IOException e) {
-            message = new TextComponentTranslation("painting.export.failure", e.getMessage());
+            message = new TranslationTextComponent("painting.export.failure", e.getMessage());
         }
-        this.mc.ingameGUI.getChatGUI().printChatMessage(message);
+        this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
     }
     
     protected void paintingCopy() {
@@ -161,28 +164,30 @@ public class GuiPaintingView extends GuiScreen {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             ImageSelection selection = new ImageSelection(img);
             clipboard.setContents(selection, null);
-            message = new TextComponentTranslation("painting.export.copy.success");
+            message = new TranslationTextComponent("painting.export.copy.success");
         } catch (Exception e) {
-            message = new TextComponentTranslation("painting.export.copy.failure", e.getMessage());
+            message = new TranslationTextComponent("painting.export.copy.failure", e.getMessage());
         }
-        this.mc.ingameGUI.getChatGUI().printChatMessage(message);
+        this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
     }
     
     @Override
-    protected void keyTyped(char character, int key) {
+    public boolean charTyped(char character, int key) {
         if (character == 3 /* Ctrl+c */) {
             this.paintingCopy();
-            return;
+            return true;
         }
-        if (key == 1 || key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
-            this.mc.player.closeScreen();
+        if (key == 1 || key == this.minecraft.gameSettings.keyBindInventory.getKey().getKeyCode()) {
+            this.minecraft.player.closeScreen();
+            return true;
         }
+        return false;
     }
     
     @Override
-    public void onGuiClosed() {
-        if (this.mc.player != null) {
-            this.view.onContainerClosed(this.mc.player);
+    public void removed() {
+        if (this.minecraft.player != null) {
+            this.view.onContainerClosed(this.minecraft.player);
         }
     }
     

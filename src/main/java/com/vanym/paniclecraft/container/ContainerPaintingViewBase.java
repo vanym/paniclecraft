@@ -9,14 +9,13 @@ import com.vanym.paniclecraft.core.component.painting.ImageUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public abstract class ContainerPaintingViewBase extends Container {
     
@@ -25,27 +24,35 @@ public abstract class ContainerPaintingViewBase extends Container {
     
     public final IPictureSize pictureSize;
     
+    public final boolean editable;
+    
     protected final PictureInv inv = new PictureInv();
     
-    protected ContainerPaintingViewBase(IPictureSize pictureSize, int sizeX, int sizeY) {
+    protected ContainerPaintingViewBase(int id,
+            IPictureSize pictureSize,
+            int sizeX,
+            int sizeY,
+            boolean editable) {
+        super(Core.instance.painting.containerPaintingView, id);
         this.pictureSize = pictureSize;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
+        this.editable = editable;
         for (int y = 0; y < this.sizeY; ++y) {
             for (int x = 0; x < this.sizeX; ++x) {
                 int i = y * this.sizeX + x;
-                this.addSlotToContainer(new Slot(this.inv, i, x * 16, y * 16));
+                this.addSlot(new Slot(this.inv, i, x * 16, y * 16));
             }
         }
     }
     
     @Override
-    public boolean canInteractWith(EntityPlayer player) {
+    public boolean canInteractWith(PlayerEntity player) {
         return true;
     }
     
     @Override
-    public void onContainerClosed(EntityPlayer player) {
+    public void onContainerClosed(PlayerEntity player) {
         this.inv.closeInventory(player);
     }
     
@@ -84,7 +91,7 @@ public abstract class ContainerPaintingViewBase extends Container {
                                 (x, y)->this.getPicture(x, y));
     }
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public java.awt.image.BufferedImage getPaintingAsImage() {
         return ImageUtils.getPaintingAsImage(this.pictureSize, this.sizeX, this.sizeY,
                                              (x, y)->this.getPicture(x, y));
@@ -156,16 +163,6 @@ public abstract class ContainerPaintingViewBase extends Container {
         }
         
         @Override
-        public String getName() {
-            return "PictureInv";
-        }
-        
-        @Override
-        public boolean hasCustomName() {
-            return false;
-        }
-        
-        @Override
         public int getInventoryStackLimit() {
             return 1;
         }
@@ -174,15 +171,15 @@ public abstract class ContainerPaintingViewBase extends Container {
         public void markDirty() {}
         
         @Override
-        public boolean isUsableByPlayer(EntityPlayer player) {
+        public boolean isUsableByPlayer(PlayerEntity player) {
             return true;
         }
         
         @Override
-        public void openInventory(EntityPlayer player) {}
+        public void openInventory(PlayerEntity player) {}
         
         @Override
-        public void closeInventory(EntityPlayer player) {
+        public void closeInventory(PlayerEntity player) {
             this.clear();
         }
         
@@ -200,26 +197,8 @@ public abstract class ContainerPaintingViewBase extends Container {
         }
         
         @Override
-        public ITextComponent getDisplayName() {
-            return null;
-        }
-        
-        @Override
         public boolean isEmpty() {
             return false;
-        }
-        
-        @Override
-        public int getField(int id) {
-            return 0;
-        }
-        
-        @Override
-        public void setField(int id, int value) {}
-        
-        @Override
-        public int getFieldCount() {
-            return 0;
         }
     }
 }

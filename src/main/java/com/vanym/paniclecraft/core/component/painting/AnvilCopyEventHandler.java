@@ -4,7 +4,7 @@ import com.vanym.paniclecraft.Core;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.AnvilUpdateEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class AnvilCopyEventHandler {
     

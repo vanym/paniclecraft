@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
-public class GuiHexColorField extends GuiTextField {
+@OnlyIn(Dist.CLIENT)
+public class GuiHexColorField extends TextFieldWidget {
     
     protected static final String NUM_CHARS = "0123456789ABCDEFabcdef";
     
@@ -27,12 +27,12 @@ public class GuiHexColorField extends GuiTextField {
     
     protected Consumer<Integer> setter;
     
-    public GuiHexColorField(int id, FontRenderer font, int x, int y) {
-        this(id, font, x, y, 50, 12);
+    public GuiHexColorField(FontRenderer font, int x, int y) {
+        this(font, x, y, 50, 12);
     }
     
-    public GuiHexColorField(int id, FontRenderer font, int x, int y, int width, int height) {
-        super(id, font, x, y, width, height);
+    public GuiHexColorField(FontRenderer font, int x, int y, int width, int height) {
+        super(font, x, y, width, height, "");
         this.setMaxStringLength(7);
         this.setFocused(false);
     }
@@ -64,6 +64,10 @@ public class GuiHexColorField extends GuiTextField {
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         this.isEnabled = enabled;
+    }
+    
+    protected int getSelectionEnd() {
+        return this.selectionEnd;
     }
     
     @Override
@@ -115,9 +119,9 @@ public class GuiHexColorField extends GuiTextField {
     }
     
     @Override
-    public boolean textboxKeyTyped(char character, int key) {
+    public boolean charTyped(char character, int key) {
         String previousText = this.getText();
-        if (!super.textboxKeyTyped(character, key)) {
+        if (!super.charTyped(character, key)) {
             return false;
         }
         this.checkPrefix();
@@ -161,7 +165,7 @@ public class GuiHexColorField extends GuiTextField {
     }
     
     @Override
-    public void drawTextBox() {
+    public void renderButton(int x, int y, float partialTicks) {
         if (!this.getVisible()) {
             return;
         }
@@ -185,7 +189,7 @@ public class GuiHexColorField extends GuiTextField {
         this.setText(sb.toString());
         this.setCursorPosition(convertPos(pos));
         this.setSelectionPos(convertPos(sel));
-        super.drawTextBox();
+        super.renderButton(x, y, partialTicks);
         this.setText(text);
         this.setMaxStringLength(7);
         this.setCursorPosition(pos);

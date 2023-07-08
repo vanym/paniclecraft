@@ -1,21 +1,22 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
-import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
+import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
-public class ItemRendererPainting extends TileEntityItemStackRenderer {
+@OnlyIn(Dist.CLIENT)
+public class ItemRendererPainting extends ItemStackTileEntityRenderer {
     
     public final TileEntityPaintingRenderer paintingTileRenderer;
     
@@ -28,19 +29,19 @@ public class ItemRendererPainting extends TileEntityItemStackRenderer {
     }
     
     @Override
-    public void renderByItem(ItemStack item, float partialTicks) {
+    public void renderByItem(ItemStack item) {
         TileEntityPainting tilePainting = new TileEntityPainting();
         Picture picture = tilePainting.getPicture();
-        NBTTagCompound nbtPictureTag = null;
-        if (item.hasTagCompound()) {
-            NBTTagCompound itemTag = item.getTagCompound();
-            if (itemTag.hasKey(ItemPainting.TAG_PICTURE)) {
-                nbtPictureTag = itemTag.getCompoundTag(ItemPainting.TAG_PICTURE);
+        CompoundNBT nbtPictureTag = null;
+        if (item.hasTag()) {
+            CompoundNBT itemTag = item.getTag();
+            if (itemTag.contains(ItemPainting.TAG_PICTURE)) {
+                nbtPictureTag = itemTag.getCompound(ItemPainting.TAG_PICTURE);
             }
         }
-        NBTBase nbtImageTag = null;
-        if (nbtPictureTag != null && !nbtPictureTag.hasNoTags()) {
-            nbtImageTag = nbtPictureTag.getTag(Picture.TAG_IMAGE);
+        INBT nbtImageTag = null;
+        if (nbtPictureTag != null && !nbtPictureTag.isEmpty()) {
+            nbtImageTag = nbtPictureTag.get(Picture.TAG_IMAGE);
         }
         int obtainedTexture = this.textureCache.obtainTexture(nbtImageTag);
         if (obtainedTexture >= 0) {
@@ -53,5 +54,9 @@ public class ItemRendererPainting extends TileEntityItemStackRenderer {
         if (obtainedTexture < 0) {
             this.textureCache.putTexture(nbtImageTag, picture.texture);
         }
+    }
+    
+    public static ItemRendererPainting create() {
+        return new ItemRendererPainting(Core.instance.painting.textureCache);
     }
 }

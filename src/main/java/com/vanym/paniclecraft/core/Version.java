@@ -12,24 +12,25 @@ import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 
-import net.minecraftforge.common.ForgeVersion;
-import net.minecraftforge.common.ForgeVersion.Status;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.versioning.ComparableVersion;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.VersionChecker;
+import net.minecraftforge.fml.VersionChecker.Status;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.versions.forge.ForgeVersion;
+import net.minecraftforge.versions.mcp.MCPVersion;
 
 public class Version {
     
@@ -49,7 +50,10 @@ public class Version {
     protected static String homepage = null;
     
     public static String getVersion() {
-        return DEF.VERSION;
+        return ModList.get()
+                      .getModContainerByObject(Core.instance)
+                      .map(m->m.getModInfo().getVersion().toString())
+                      .orElse("unknown");
     }
     
     public static Status getStatus() {
@@ -75,27 +79,27 @@ public class Version {
         putResultToForgeVersion(result);
     }
     
-    @SuppressWarnings("deprecation")
     protected static void putResultToForgeVersion(CheckResult result) {
         try {
-            // @formatter:off
-            Map<ModContainer, ForgeVersion.CheckResult> results =
-                    net.minecraftforge.fml.relauncher.
-                    ReflectionHelper.getPrivateValue(ForgeVersion.class, null, "results");
-            Constructor<ForgeVersion.CheckResult> constructor =
-                    net.minecraftforge.fml.relauncher.
-                    ReflectionHelper.findConstructor(ForgeVersion.CheckResult.class,
-                                                     Status.class, ComparableVersion.class,
-                                                     Map.class, String.class);
-            // @formatter:on
+            Map<IModInfo, VersionChecker.CheckResult> results =
+                    ObfuscationReflectionHelper.getPrivateValue(VersionChecker.class, null,
+                                                                "results");
+            Constructor<VersionChecker.CheckResult> constructor =
+                    ObfuscationReflectionHelper.findConstructor(VersionChecker.CheckResult.class,
+                                                                Status.class,
+                                                                ComparableVersion.class,
+                                                                Map.class, String.class);
             ComparableVersion version = null;
             if (result.target != null) {
                 version = new ComparableVersion(result.target);
             }
-            ForgeVersion.CheckResult forgeResult =
+            VersionChecker.CheckResult forgeResult =
                     constructor.newInstance(result.status, version, null, result.homepage);
             if (forgeResult != null) {
-                ModContainer mod = FMLCommonHandler.instance().findContainerFor(Core.instance);
+                IModInfo mod = ModList.get()
+                                      .getModContainerByObject(Core.instance)
+                                      .orElseThrow(NoSuchElementException::new)
+                                      .getModInfo();
                 results.put(mod, forgeResult);
             }
         } catch (Exception e) {
@@ -126,8 +130,9 @@ public class Version {
             Map<String, Object> json = new Gson().fromJson(data, Map.class);
             @SuppressWarnings("unchecked")
             Map<String, String> promos = (Map<String, String>)json.get("promos");
-            String rec = promos.get(MinecraftForge.MC_VERSION + "-recommended");
-            String lat = promos.get(MinecraftForge.MC_VERSION + "-latest");
+            String mcVersion = MCPVersion.getMCVersion();
+            String rec = promos.get(mcVersion + "-recommended");
+            String lat = promos.get(mcVersion + "-latest");
             ComparableVersion current = new ComparableVersion(getVersion());
             String homepage = (String)json.get("homepage");
             Status status = Status.BETA;
@@ -184,9 +189,9 @@ public class Version {
         URIBuilder builder = new URIBuilder(uri);
         builder.addParameter("paniclecraft", getVersion());
         builder.addParameter("forge", ForgeVersion.getVersion());
-        builder.addParameter("minecraft", MinecraftForge.MC_VERSION);
-        Side side = FMLCommonHandler.instance().getSide();
-        builder.addParameter("side", Objects.toString(side).toLowerCase());
+        builder.addParameter("minecraft", MCPVersion.getMCVersion());
+        String side = DistExecutor.runForDist(()->()->"client", ()->()->"server");
+        builder.addParameter("side", side);
         try {
             return builder.build();
         } catch (URISyntaxException e) {

@@ -1,179 +1,123 @@
 package com.vanym.paniclecraft.core.component;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockCannon;
+import com.vanym.paniclecraft.client.gui.container.GuiCannon;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererCannon;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityCannonRenderer;
-import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.container.ContainerCannon;
+import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageCannonSet;
-import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
-import io.netty.buffer.ByteBuf;
+import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.extensions.IForgeContainerType;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class ModComponentCannon extends ModComponent {
     
     @ModComponentObject
     public BlockCannon blockCannon;
     @ModComponentObject
-    public ItemBlock itemCannon;
+    public BlockItem itemCannon;
     
     @ModComponentObject
-    protected IRecipe recipeCannon;
+    public TileEntityType<TileEntityCannon> tileEntityCannon;
     
-    protected ChangeableConfig myServerConfig = new ChangeableConfig();
-    public ChangeableConfig config = this.myServerConfig;
+    @ModComponentObject
+    public ContainerType<ContainerCannon> containerCannon;
     
-    @SideOnly(Side.CLIENT)
+    public Supplier<Double> maxStrength;
+    public Supplier<Integer> pickupDelay;
+    public Supplier<Integer> shootTimeout;
+    
+    @OnlyIn(Dist.CLIENT)
     public TileEntityCannonRenderer tileCannonRenderer;
-    @SideOnly(Side.CLIENT)
-    public ItemRendererCannon itemCannonRenderer;
     
-    protected boolean enabled = false;
+    @OnlyIn(Dist.CLIENT)
+    protected ForgeConfigSpec.BooleanValue renderTileCannon;
     
     @Override
-    public void preInit(ModConfig config) {
-        if (!config.getBoolean(ENABLE_FLAG, this.getName(), true, "")) {
-            return;
-        }
-        this.enabled = true;
-        MinecraftForge.EVENT_BUS.register(this);
+    public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
+        FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        
         this.blockCannon = new BlockCannon();
-        this.itemCannon = new ItemBlock(this.blockCannon);
+        this.itemCannon = new BlockItem(
+                this.blockCannon,
+                new Item.Properties().group(Core.instance.tab)
+                                     .setTEISR(()->ItemRendererCannon::createRegistered));
         this.itemCannon.setRegistryName(this.blockCannon.getRegistryName());
-        GameRegistry.registerTileEntity(TileEntityCannon.class, TileEntityCannon.ID);
-        boolean craftingRecipeCannon =
-                config.getBoolean("craftingRecipeCannon", this.getName(), true, "");
-        if (craftingRecipeCannon) {
-            this.recipeCannon = new ShapedOreRecipe(
-                    this.itemCannon,
-                    "i  ",
-                    " i ",
-                    "idi",
-                    Character.valueOf('i'),
-                    "ingotIron",
-                    Character.valueOf('d'),
-                    Blocks.DISPENSER).flow();
-        }
+        this.tileEntityCannon = new TileEntityType<>(
+                TileEntityCannon::new,
+                Collections.singleton(this.blockCannon),
+                null);
+        this.tileEntityCannon.setRegistryName(TileEntityCannon.ID);
+        this.containerCannon = IForgeContainerType.create(ContainerCannon::create);
+        this.containerCannon.setRegistryName(TileEntityCannon.ID);
         
-        Core.instance.network.registerMessage(MessageCannonSet.Handler.class,
-                                              MessageCannonSet.class, 51, Side.SERVER);
+        ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
+        serverBuilder.push(this.getName());
+        ForgeConfigSpec.DoubleValue maxStrength =
+                serverBuilder.defineInRange("maxStrength", 5.0D, 0.0D, 16.0D);
+        this.maxStrength = ()->maxStrength.get();
+        ForgeConfigSpec.IntValue pickupDelay =
+                serverBuilder.comment("shooted items pickup delay in game ticks")
+                             .defineInRange("pickupDelay", 25, 0, Short.MAX_VALUE);
+        this.pickupDelay = ()->pickupDelay.get();
+        ForgeConfigSpec.IntValue shootTimeout =
+                serverBuilder.comment("shoot timeout in game ticks")
+                             .defineInRange("shootTimeout", 2, 0, Short.MAX_VALUE);
+        this.shootTimeout = ()->shootTimeout.get();
+        serverBuilder.pop();
         
-        this.configChanged(config);
+        DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
+            ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
+            clientBuilder.push(CLIENT_RENDER);
+            this.renderTileCannon = clientBuilder.define("cannonTile", true);
+            clientBuilder.pop();
+        });
     }
     
-    @Override
-    public void configChanged(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
-        this.myServerConfig.read(config);
+    @SubscribeEvent
+    protected void setup(FMLCommonSetupEvent event) {
+        Core.instance.network.registerMessage(51, MessageCannonSet.class,
+                                              MessageCannonSet::encode,
+                                              MessageCannonSet::decode,
+                                              NetworkUtils.handleInWorld(MessageCannonSet::handleInWorld));
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void initClient(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    protected void setupClient(FMLClientSetupEvent event) {
+        ScreenManager.registerFactory(this.containerCannon, GuiCannon::new);
         this.tileCannonRenderer = new TileEntityCannonRenderer();
         this.tileCannonRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
-        this.itemCannonRenderer = new ItemRendererCannon();
-        this.itemCannon.setTileEntityItemStackRenderer(this.itemCannonRenderer);
-        MinecraftForge.EVENT_BUS.register(this.itemCannonRenderer);
-        this.configChangedClient(config);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void configChangedClient(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
-        config.restartless();
-        boolean cannonTile = config.getBoolean("cannonTile", CLIENT_RENDER, true, "");
-        if (cannonTile) {
+        if (this.renderTileCannon.get()) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCannon.class,
                                                          this.tileCannonRenderer);
-        } else {
-            TileEntityRendererDispatcher.instance.renderers.remove(TileEntityCannon.class,
-                                                                   this.tileCannonRenderer);
         }
-        config.restartlessReset();
     }
     
     @Override
     public String getName() {
         return "cannon";
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-    
-    @Override
-    public void setServerSideConfig(IServerSideConfig config) {
-        this.config = (ChangeableConfig)config;
-    }
-    
-    @Override
-    public IServerSideConfig getServerSideConfig() {
-        return this.myServerConfig;
-    }
-    
-    public class ChangeableConfig implements IServerSideConfig {
-        
-        public double maxStrength = 5.0D;
-        public int pickupDelay = 25;
-        public int shootTimeout = 2;
-        
-        protected ChangeableConfig() {}
-        
-        protected ChangeableConfig(ChangeableConfig config) {
-            this.maxStrength = config.maxStrength;
-            this.pickupDelay = config.pickupDelay;
-            this.shootTimeout = config.shootTimeout;
-        }
-        
-        public ChangeableConfig read(ModConfig config) {
-            config.restartless();
-            final String category = ModComponentCannon.this.getName();
-            this.maxStrength = config.getDouble("maxStrength", category, 5.0D, 0.0D, 16.0D, "");
-            this.shootTimeout = config.getInt("shootTimeout", category, 2, 0, Short.MAX_VALUE,
-                                              "shoot timeout in game ticks");
-            this.pickupDelay = config.getInt("pickupDelay", category, 25, 0, Short.MAX_VALUE,
-                                             "shooted items pickup delay in game ticks");
-            config.restartlessReset();
-            return this;
-        }
-        
-        @Override
-        public void fromBytes(ByteBuf buf) {
-            this.maxStrength = buf.readDouble();
-            this.pickupDelay = buf.readInt();
-            this.shootTimeout = buf.readInt();
-        }
-        
-        @Override
-        public void toBytes(ByteBuf buf) {
-            buf.writeDouble(this.maxStrength);
-            buf.writeInt(this.pickupDelay);
-            buf.writeInt(this.shootTimeout);
-        }
-        
-        @Override
-        public IServerSideConfig copy() {
-            return new ChangeableConfig(this);
-        }
     }
 }

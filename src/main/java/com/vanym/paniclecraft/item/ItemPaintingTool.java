@@ -19,25 +19,29 @@ import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 
 public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool {
     
@@ -47,24 +51,24 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     
     protected static final DecimalFormat NUMBER_FORMATTER = new DecimalFormat("#.##");
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected Set<MessagePaintingToolUse> brushUseMessages;
     
-    @SideOnly(Side.CLIENT)
-    public void initClient() {
-        this.brushUseMessages = new HashSet<>();
+    public ItemPaintingTool(Item.Properties properties) {
+        super(properties);
+        DistExecutor.runWhenOn(Dist.CLIENT, ()->()->this.brushUseMessages = new HashSet<>());
     }
     
     @Override
-    public void onUsingTick(ItemStack stack, EntityLivingBase player, int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+    public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
             this.onUsingTickClient(stack, player, count);
         }
     }
     
-    @SideOnly(Side.CLIENT)
-    protected void onUsingTickClient(ItemStack stack, EntityLivingBase player, int count) {
-        Minecraft mc = Minecraft.getMinecraft();
+    @OnlyIn(Dist.CLIENT)
+    protected void onUsingTickClient(ItemStack stack, LivingEntity player, int count) {
+        Minecraft mc = Minecraft.getInstance();
         MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
         if (mes != null) {
             this.brushUseMessages.add(mes);
@@ -76,17 +80,17 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     public void onPlayerStoppedUsing(
             ItemStack stack,
             World world,
-            EntityLivingBase player,
+            LivingEntity player,
             int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
             this.flashBrushUseMessages();
         }
     }
     
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void renderWorldLast(RenderWorldLastEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         ItemStack itemStack = mc.player.getActiveItemStack();
         if (itemStack != null && itemStack.getItem() == this) {
             MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
@@ -96,7 +100,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         }
     }
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void flashBrushUseMessages() {
         for (MessagePaintingToolUse mes : this.brushUseMessages) {
             Core.instance.network.sendToServer(mes);
@@ -104,15 +108,17 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         this.brushUseMessages.clear();
     }
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static MessagePaintingToolUse makeBrushUseMessage(
             World world,
-            RayTraceResult target) {
-        if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
+            RayTraceResult atarget) {
+        if (!BlockRayTraceResult.class.isInstance(atarget)
+            || atarget.getType() != RayTraceResult.Type.BLOCK) {
             return null;
         }
-        BlockPos pos = target.getBlockPos();
-        int side = target.sideHit.getIndex();
+        BlockRayTraceResult target = (BlockRayTraceResult)atarget;
+        BlockPos pos = target.getPos();
+        int side = target.getFace().getIndex();
         boolean tile = true;
         IPictureSize picture = WorldPictureProvider.ANYTILE.getPicture(world, pos, side);
         if (picture == null) {
@@ -138,7 +144,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     }
     
     @Override
-    public int getMaxItemUseDuration(ItemStack itemstack) {
+    public int getUseDuration(ItemStack itemstack) {
         return 72000;
     }
     
@@ -151,65 +157,54 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     @Override
     public ActionResult<ItemStack> onItemRightClick(
             World world,
-            EntityPlayer player,
-            EnumHand hand) {
+            PlayerEntity player,
+            Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
-        return new ActionResult<>(EnumActionResult.FAIL, stack);
+        return new ActionResult<>(ActionResultType.FAIL, stack);
     }
     
     @Override
-    public EnumActionResult onItemUse(
-            EntityPlayer entityPlayer,
-            World world,
-            BlockPos pos,
-            EnumHand hand,
-            EnumFacing facing,
-            float hitX,
-            float hitY,
-            float hitZ) {
-        int side = facing.getIndex();
+    public ActionResultType onItemUse(ItemUseContext context) {
+        PlayerEntity entityPlayer = context.getPlayer();
+        World world = context.getWorld();
+        BlockPos pos = context.getPos();
+        Hand hand = context.getHand();
+        int side = context.getFace().getIndex();
         if (WorldPictureProvider.ANYTILE.getPicture(world, pos, side) != null
             || (Core.instance.painting.config.allowPaintOnBlock
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.setActiveHand(hand);
-            if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
                 this.brushUseMessages.clear();
             }
-            return EnumActionResult.SUCCESS;
+            return ActionResultType.SUCCESS;
         }
-        return EnumActionResult.FAIL;
+        return ActionResultType.FAIL;
     }
     
     @Override
-    public boolean isFull3D() {
-        return true;
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void addInformation(
             ItemStack itemStack,
             @Nullable World world,
-            List<String> list,
+            List<ITextComponent> list,
             ITooltipFlag flag) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            if (itemTag.hasKey(TAG_RADIUS)) {
+        if (itemStack.hasTag()) {
+            CompoundNBT itemTag = itemStack.getTag();
+            if (itemTag.contains(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
-                StringBuilder sb = new StringBuilder();
-                sb.append(I18n.format("item.paintingtool.radius"));
-                sb.append(": ");
-                sb.append(NUMBER_FORMATTER.format(radius));
-                list.add(sb.toString());
+                list.add(new TranslationTextComponent(
+                        "item.paintingtool.radius").appendText(": ")
+                                                   .appendText(NUMBER_FORMATTER.format(radius)));
             }
         }
     }
     
     public static Double getTagRadius(ItemStack itemStack) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            if (itemTag.hasKey(TAG_RADIUS)) {
+        if (itemStack.hasTag()) {
+            CompoundNBT itemTag = itemStack.getTag();
+            if (itemTag.contains(TAG_RADIUS)) {
                 double radius = itemTag.getDouble(TAG_RADIUS);
                 return Math.min(MAX_RADIUS, radius);
             }

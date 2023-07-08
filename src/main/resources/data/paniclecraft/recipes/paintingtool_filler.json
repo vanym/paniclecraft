@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "w",
+    "b"
+  ],
+  "key": {
+    "w": {
+      "tag": "forge:dyes/white"
+    },
+    "b": {
+      "item": "minecraft:bowl"
+    }
+  },
+  "result": {
+    "item": "paniclecraft:paintingtool_filler"
+  }
+}

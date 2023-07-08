@@ -1,33 +1,39 @@
 package com.vanym.paniclecraft.item;
 
-import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.GUIs;
+import com.vanym.paniclecraft.container.ContainerPalette;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 public class ItemPalette extends ItemMod3 {
     
+    protected final INamedContainerProvider containerProvider =
+            new SimpleNamedContainerProvider(
+                    (id, inventory, player)->new ContainerPalette(id, inventory),
+                    ContainerPalette.NAME);
+    
     public ItemPalette() {
-        this.setUnlocalizedName("palette");
-        this.setMaxStackSize(1);
+        super(new Item.Properties().maxStackSize(1));
+        this.setRegistryName("palette");
     }
     
     @Override
     public ActionResult<ItemStack> onItemRightClick(
             World world,
-            EntityPlayer player,
-            EnumHand hand) {
+            PlayerEntity player,
+            Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
         if (!world.isRemote) {
-            player.openGui(Core.instance, GUIs.PALETTE.ordinal(), world,
-                           (int)player.posX, (int)player.posY, (int)player.posZ);
+            player.openContainer(this.containerProvider);
         }
-        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }
     
     public static boolean canBePalette(ItemStack stack) {

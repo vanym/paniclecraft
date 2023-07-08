@@ -1,21 +1,21 @@
 package com.vanym.paniclecraft.utils;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 public final class TileOnSide {
     
-    public final EnumFacing xDir;
-    public final EnumFacing yDir;
-    public final EnumFacing zDir;
+    public final Direction xDir;
+    public final Direction yDir;
+    public final Direction zDir;
     
-    public TileOnSide(EnumFacing xDir, EnumFacing zDir) {
+    public TileOnSide(Direction xDir, Direction zDir) {
         this(xDir, GeometryUtils.rotateBy(xDir, zDir), zDir);
     }
     
-    public TileOnSide(EnumFacing xDir, EnumFacing yDir, EnumFacing zDir) {
+    public TileOnSide(Direction xDir, Direction yDir, Direction zDir) {
         this.xDir = xDir;
         this.yDir = yDir;
         this.zDir = zDir;

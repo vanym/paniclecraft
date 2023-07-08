@@ -2,24 +2,30 @@ package com.vanym.paniclecraft.recipe;
 
 import java.awt.Color;
 
+import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.SpecialRecipe;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
+public class RecipeColorizeByFiller extends SpecialRecipe {
+    
+    public RecipeColorizeByFiller(ResourceLocation id) {
+        super(id);
+    }
     
     @Override
-    public boolean matches(InventoryCrafting inv, World world) {
+    public boolean matches(CraftingInventory inv, World world) {
         boolean filler = false;
         boolean colorizeable = false;
         for (int i = 0; i < inv.getSizeInventory(); ++i) {
@@ -51,7 +57,7 @@ public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> im
     }
     
     @Override
-    public ItemStack getCraftingResult(InventoryCrafting inv) {
+    public ItemStack getCraftingResult(CraftingInventory inv) {
         ItemStack fillerStack = ItemStack.EMPTY;
         ItemStack colorizeableStack = ItemStack.EMPTY;
         for (int i = 0; i < inv.getSizeInventory(); ++i) {
@@ -87,7 +93,7 @@ public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> im
     }
     
     @Override
-    public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
+    public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
         NonNullList<ItemStack> list =
                 NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
         for (int i = 0; i < list.size(); ++i) {
@@ -108,17 +114,12 @@ public class RecipeColorizeByFiller extends IForgeRegistryEntry.Impl<IRecipe> im
     }
     
     @Override
-    public ItemStack getRecipeOutput() {
-        return ItemStack.EMPTY;
-    }
-    
-    @Override
-    public boolean isDynamic() {
-        return true;
-    }
-    
-    @Override
     public boolean canFit(int width, int height) {
         return width * height >= 2;
+    }
+    
+    @Override
+    public IRecipeSerializer<?> getSerializer() {
+        return Core.instance.painting.recipeTypeColorizeByFiller;
     }
 }

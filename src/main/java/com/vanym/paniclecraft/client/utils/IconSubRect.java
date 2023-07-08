@@ -1,10 +1,13 @@
 package com.vanym.paniclecraft.client.utils;
 
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.vanym.paniclecraft.DEF;
 
-@SideOnly(Side.CLIENT)
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+@OnlyIn(Dist.CLIENT)
 public class IconSubRect extends TextureAtlasSprite {
     
     public IconSubRect(
@@ -14,10 +17,11 @@ public class IconSubRect extends TextureAtlasSprite {
             int iconHeight,
             int totalWidth,
             int totalHeight) {
-        super(String.format("Sub[x=%d, y=%d, w=%d, h=%d, tw=%d, th=%d]", x, y,
-                            iconWidth, iconHeight, totalWidth, totalHeight));
-        this.setIconWidth(iconWidth);
-        this.setIconHeight(iconHeight);
-        this.initSprite(totalWidth, totalHeight, x, y, false);
+        super(new ResourceLocation(
+                DEF.MOD_ID,
+                String.format("sub_x%dy%dw%dh%dtw%dth%d", x, y,
+                              iconWidth, iconHeight, totalWidth, totalHeight)),
+              iconWidth, iconHeight);
+        this.func_217789_a(totalWidth, totalHeight, x, y);
     }
 }

@@ -2,15 +2,16 @@ package com.vanym.paniclecraft.command;
 
 import java.util.Arrays;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.StringTextComponent;
 
 public class CommandPictureInfo extends CommandBase {
     
@@ -25,19 +26,22 @@ public class CommandPictureInfo extends CommandBase {
         return "pictureinfo";
     }
     
-    @Override
     public int getRequiredPermissionLevel() {
         return 2;
     }
     
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args)
-            throws CommandException {
-        if (args.length > 0) {
-            throw new WrongUsageException(this.getUsage(sender));
-        }
-        EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
+    public LiteralArgumentBuilder<CommandSource> register() {
+        return Commands.literal(this.getName())
+                       .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                       .executes(this::execute);
+    }
+    
+    public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        CommandSource source = context.getSource();
+        ServerPlayerEntity player = source.asPlayer();
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
-        sender.sendMessage(new TextComponentString(picture.toString()));
+        source.sendFeedback(new StringTextComponent(picture.toString()), false);
+        return 1;
     }
 }

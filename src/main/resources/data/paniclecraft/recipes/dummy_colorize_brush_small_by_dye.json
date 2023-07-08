@@ -1,0 +1,14 @@
+{
+  "type": "paniclecraft:dummy_shapeless",
+  "ingredients": [
+    {
+      "item": "paniclecraft:paintingtool_brush_small"
+    },
+    {
+      "tag": "forge:dyes"
+    }
+  ],
+  "result": {
+    "item": "paniclecraft:paintingtool_brush_small"
+  }
+}

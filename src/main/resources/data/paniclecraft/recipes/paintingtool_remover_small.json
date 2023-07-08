@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "f",
+    "s"
+  ],
+  "key": {
+    "f": {
+      "item": "minecraft:flint"
+    },
+    "s": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "result": {
+    "item": "paniclecraft:paintingtool_remover_small"
+  }
+}

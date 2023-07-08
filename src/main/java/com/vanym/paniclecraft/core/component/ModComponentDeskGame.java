@@ -1,28 +1,28 @@
 package com.vanym.paniclecraft.core.component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockChessDesk;
-import com.vanym.paniclecraft.client.renderer.item.ItemRendererChessDesk;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRenderer;
-import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.item.ItemChessDesk;
+import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
-import com.vanym.paniclecraft.recipe.RecipeRegister;
-import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
-import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class ModComponentDeskGame extends ModComponent {
     
@@ -31,99 +31,57 @@ public class ModComponentDeskGame extends ModComponent {
     @ModComponentObject
     public ItemChessDesk itemChessDesk;
     
-    protected List<IRecipe> recipes = new ArrayList<>();
+    @ModComponentObject
+    public TileEntityType<TileEntityChessDesk> tileEntityChessDesk;
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public TileEntityChessDeskRenderer tileChessDeskRenderer;
-    @SideOnly(Side.CLIENT)
-    public ItemRendererChessDesk itemChessDeskRenderer;
     
-    protected boolean enabled = false;
+    @OnlyIn(Dist.CLIENT)
+    protected ForgeConfigSpec.BooleanValue renderTileChessDesk;
     
     @Override
-    public void preInit(ModConfig config) {
-        if (!config.getBoolean(ENABLE_FLAG, this.getName(), true, "")) {
-            return;
-        }
-        this.enabled = true;
-        MinecraftForge.EVENT_BUS.register(this);
+    public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
+        FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        
         this.blockChessDesk = new BlockChessDesk();
         this.itemChessDesk = new ItemChessDesk(this.blockChessDesk);
-        GameRegistry.registerTileEntity(TileEntityChessDesk.class, TileEntityChessDesk.ID);
-        boolean craftingRecipeChessDesk =
-                config.getBoolean("craftingRecipeChessDesk", this.getName(), true, "");
-        if (craftingRecipeChessDesk) {
-            this.recipes.add(new ShapedOreRecipe(
-                    this.itemChessDesk,
-                    true,
-                    "w b",
-                    "ppp",
-                    Character.valueOf('w'),
-                    "woolWhite",
-                    Character.valueOf('b'),
-                    "woolBlack",
-                    Character.valueOf('p'),
-                    "plankWood").flow());
-        }
-        boolean craftingRecipeChessDeskClear =
-                config.getBoolean("craftingRecipeChessDeskClear", this.getName(), true,
-                                  "clear chess game using crafting");
-        if (craftingRecipeChessDeskClear) {
-            ShapelessOreRecipe recipe = new ShapelessOreRecipe(
-                    this.itemChessDesk,
-                    new ItemStack(this.itemChessDesk));
-            RecipeRegister.flowRegistryName(recipe, "%s_clear");
-            this.recipes.add(recipe);
-        }
+        this.tileEntityChessDesk = new TileEntityType<>(
+                TileEntityChessDesk::new,
+                Collections.singleton(this.blockChessDesk),
+                null);
+        this.tileEntityChessDesk.setRegistryName(TileEntityChessDesk.ID);
         
-        Core.instance.network.registerMessage(MessageChessMove.Handler.class,
-                                              MessageChessMove.class, 40,
-                                              Side.SERVER);
+        DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
+            ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
+            clientBuilder.push(CLIENT_RENDER);
+            this.renderTileChessDesk =
+                    clientBuilder.define("chessDeskTile", true);
+            clientBuilder.pop();
+        });
     }
     
-    @Override
-    public List<IRecipe> getRecipes() {
-        return this.recipes;
+    @SubscribeEvent
+    protected void setup(FMLCommonSetupEvent event) {
+        Core.instance.network.registerMessage(40, MessageChessMove.class,
+                                              MessageChessMove::encode,
+                                              MessageChessMove::decode,
+                                              NetworkUtils.handleInWorld(MessageChessMove::handleInWorld));
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void initClient(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    protected void setupClient(FMLClientSetupEvent event) {
         this.tileChessDeskRenderer = new TileEntityChessDeskRenderer();
         this.tileChessDeskRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
-        this.itemChessDeskRenderer = new ItemRendererChessDesk();
-        this.itemChessDesk.setTileEntityItemStackRenderer(this.itemChessDeskRenderer);
-        this.configChangedClient(config);
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void configChangedClient(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
-        config.restartless();
-        boolean chessDeskTile = config.getBoolean("chessDeskTile", CLIENT_RENDER, true, "");
-        if (chessDeskTile) {
+        if (this.renderTileChessDesk.get()) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChessDesk.class,
                                                          this.tileChessDeskRenderer);
-        } else {
-            TileEntityRendererDispatcher.instance.renderers.remove(TileEntityChessDesk.class,
-                                                                   this.tileChessDeskRenderer);
         }
-        config.restartlessReset();
     }
     
     @Override
     public String getName() {
         return "deskgame";
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return this.enabled;
     }
 }

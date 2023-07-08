@@ -1,87 +1,123 @@
 package com.vanym.paniclecraft.recipe;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.google.gson.JsonObject;
+import com.vanym.paniclecraft.DEF;
 
-import com.vanym.paniclecraft.Core;
-
-import net.minecraft.block.Block;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.Item;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class RecipeDummy {
     
-    public static List<IRecipe> getColorizeByDyeDummies() {
-        ItemStack brush = Core.instance.painting.itemPaintBrush.getBrush();
-        ItemStack smallBrush = Core.instance.painting.itemPaintBrush.getSmallBrush();
-        ItemStack filler = Core.instance.painting.itemPaintBrush.getFiller();
-        return Stream.of(brush, smallBrush, filler)
-                     .map(item->new Shapeless(item, item, "dye"))
-                     .peek(RecipeRegister.namer("%s_colorize_by_dye_dummy"))
-                     .collect(Collectors.toList());
+    public static final DeferredRegister<IRecipeSerializer<?>> REGISTER;
+    
+    protected static final IRecipeSerializer<?> DUMMY_SHAPED_SERIALIZER =
+            new ShapedRecipe.Serializer();
+    
+    protected static final IRecipeSerializer<?> DUMMY_SHAPELESS_SERIALIZER =
+            new ShapelessRecipe.Serializer();
+    
+    static {
+        REGISTER = new DeferredRegister<>(ForgeRegistries.RECIPE_SERIALIZERS, DEF.MOD_ID);
+        REGISTER.register("dummy_shaped", ()->DUMMY_SHAPED_SERIALIZER);
+        REGISTER.register("dummy_shapeless", ()->DUMMY_SHAPELESS_SERIALIZER);
     }
     
-    public static List<IRecipe> getColorizeByFillerDummies() {
-        ItemStack brush = Core.instance.painting.itemPaintBrush.getBrush();
-        ItemStack smallBrush = Core.instance.painting.itemPaintBrush.getSmallBrush();
-        ItemStack filler = Core.instance.painting.itemPaintBrush.getFiller();
-        return Stream.of(brush, smallBrush)
-                     .map(item->new Shapeless(item, item, filler))
-                     .peek(RecipeRegister.namer("%s_colorize_by_filler_dummy"))
-                     .collect(Collectors.toList());
-    }
-    
-    public static class Shaped extends RecipeRegister.ShapedOreRecipe {
+    public static class Shaped extends ShapedRecipe {
         
-        public Shaped(Block result, Object... recipe) {
-            super(result, recipe);
+        public Shaped(ResourceLocation id,
+                String group,
+                int recipeWidth,
+                int recipeHeight,
+                NonNullList<Ingredient> recipeItems,
+                ItemStack recipeOutput) {
+            super(id, group, recipeWidth, recipeHeight, recipeItems, recipeOutput);
         }
         
-        public Shaped(Item result, Object... recipe) {
-            super(result, recipe);
-        }
-        
-        public Shaped(ItemStack result, Object... recipe) {
-            super(result, recipe);
+        protected Shaped(ShapedRecipe recipe) {
+            this(recipe.getId(), recipe.getGroup(),
+                 recipe.getWidth(), recipe.getHeight(),
+                 recipe.getIngredients(), recipe.getRecipeOutput());
         }
         
         @Override
-        public boolean matches(InventoryCrafting inv, World world) {
+        public boolean matches(CraftingInventory inv, World world) {
             return false;
         }
         
         @Override
-        public ItemStack getCraftingResult(InventoryCrafting inv) {
+        public ItemStack getCraftingResult(CraftingInventory inv) {
             return ItemStack.EMPTY;
-        }
-    }
-    
-    public static class Shapeless extends RecipeRegister.ShapelessOreRecipe {
-        
-        public Shapeless(Block result, Object... recipe) {
-            super(result, recipe);
-        }
-        
-        public Shapeless(Item result, Object... recipe) {
-            super(result, recipe);
-        }
-        
-        public Shapeless(ItemStack result, Object... recipe) {
-            super(result, recipe);
         }
         
         @Override
-        public boolean matches(InventoryCrafting inv, World world) {
+        public IRecipeSerializer<?> getSerializer() {
+            return DUMMY_SHAPED_SERIALIZER;
+        }
+        
+        public static class Serializer extends ShapedRecipe.Serializer {
+            
+            @Override
+            public Shaped read(ResourceLocation recipeId, JsonObject json) {
+                return new Shaped(super.read(recipeId, json));
+            }
+            
+            @Override
+            public Shaped read(ResourceLocation recipeId, PacketBuffer buf) {
+                return new Shaped(super.read(recipeId, buf));
+            }
+        }
+    }
+    
+    public static class Shapeless extends ShapelessRecipe {
+        
+        public Shapeless(ResourceLocation id,
+                String group,
+                ItemStack recipeOutput,
+                NonNullList<Ingredient> recipeItems) {
+            super(id, group, recipeOutput, recipeItems);
+        }
+        
+        protected Shapeless(ShapelessRecipe recipe) {
+            this(recipe.getId(), recipe.getGroup(),
+                 recipe.getRecipeOutput(), recipe.getIngredients());
+        }
+        
+        @Override
+        public boolean matches(CraftingInventory inv, World world) {
             return false;
         }
         
         @Override
-        public ItemStack getCraftingResult(InventoryCrafting inv) {
+        public ItemStack getCraftingResult(CraftingInventory inv) {
             return ItemStack.EMPTY;
+        }
+        
+        @Override
+        public IRecipeSerializer<?> getSerializer() {
+            return DUMMY_SHAPELESS_SERIALIZER;
+        }
+        
+        public static class Serializer extends ShapelessRecipe.Serializer {
+            
+            @Override
+            public Shapeless read(ResourceLocation recipeId, JsonObject json) {
+                return new Shapeless(super.read(recipeId, json));
+            }
+            
+            @Override
+            public Shapeless read(ResourceLocation recipeId, PacketBuffer buf) {
+                return new Shapeless(super.read(recipeId, buf));
+            }
         }
     }
 }

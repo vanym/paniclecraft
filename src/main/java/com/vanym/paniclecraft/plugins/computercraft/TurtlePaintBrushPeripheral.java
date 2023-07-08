@@ -18,7 +18,7 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 public class TurtlePaintBrushPeripheral extends PeripheralBase {
@@ -34,7 +34,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return "paintbrush";
     }
     
-    protected boolean detectPicture(EnumFacing dir) throws LuaException, InterruptedException {
+    protected boolean detectPicture(Direction dir) throws LuaException, InterruptedException {
         return this.searchPicture(dir) != null;
     }
     
@@ -45,15 +45,15 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     
     @PeripheralMethod(1)
     protected boolean detectPictureUp() throws LuaException, InterruptedException {
-        return this.detectPicture(EnumFacing.UP);
+        return this.detectPicture(Direction.UP);
     }
     
     @PeripheralMethod(2)
     protected boolean detectPictureDown() throws LuaException, InterruptedException {
-        return this.detectPicture(EnumFacing.DOWN);
+        return this.detectPicture(Direction.DOWN);
     }
     
-    protected int getWidth(EnumFacing dir) throws LuaException, InterruptedException {
+    protected int getWidth(Direction dir) throws LuaException, InterruptedException {
         return this.findPicture(dir).getWidth();
     }
     
@@ -64,15 +64,15 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     
     @PeripheralMethod(4)
     protected int getWidthUp() throws LuaException, InterruptedException {
-        return this.getWidth(EnumFacing.UP);
+        return this.getWidth(Direction.UP);
     }
     
     @PeripheralMethod(5)
     protected int getWidthDown() throws LuaException, InterruptedException {
-        return this.getWidth(EnumFacing.DOWN);
+        return this.getWidth(Direction.DOWN);
     }
     
-    protected int getHeight(EnumFacing dir) throws LuaException, InterruptedException {
+    protected int getHeight(Direction dir) throws LuaException, InterruptedException {
         return this.findPicture(dir).getHeight();
     }
     
@@ -83,15 +83,15 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     
     @PeripheralMethod(7)
     protected int getHeightUp() throws LuaException, InterruptedException {
-        return this.getHeight(EnumFacing.UP);
+        return this.getHeight(Direction.UP);
     }
     
     @PeripheralMethod(8)
     protected int getHeightDown() throws LuaException, InterruptedException {
-        return this.getHeight(EnumFacing.DOWN);
+        return this.getHeight(Direction.DOWN);
     }
     
-    protected boolean isEditable(EnumFacing dir) throws LuaException, InterruptedException {
+    protected boolean isEditable(Direction dir) throws LuaException, InterruptedException {
         return this.findPicture(dir).isEditable();
     }
     
@@ -102,15 +102,15 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     
     @PeripheralMethod(10)
     protected boolean isEditableUp() throws LuaException, InterruptedException {
-        return this.isEditable(EnumFacing.UP);
+        return this.isEditable(Direction.UP);
     }
     
     @PeripheralMethod(11)
     protected boolean isEditableDown() throws LuaException, InterruptedException {
-        return this.isEditable(EnumFacing.DOWN);
+        return this.isEditable(Direction.DOWN);
     }
     
-    protected boolean useBrush(EnumFacing dir, int px, int py)
+    protected boolean useBrush(Direction dir, int px, int py)
             throws LuaException, InterruptedException {
         ItemStack stack = this.getSelectedStack();
         if (stack == null || stack.isEmpty() || !(stack.getItem() instanceof IPaintingTool)) {
@@ -128,12 +128,12 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     
     @PeripheralMethod(21)
     protected boolean useBrushUp(int px, int py) throws LuaException, InterruptedException {
-        return this.useBrush(EnumFacing.UP, px, py);
+        return this.useBrush(Direction.UP, px, py);
     }
     
     @PeripheralMethod(22)
     protected boolean useBrushDown(int px, int py) throws LuaException, InterruptedException {
-        return this.useBrush(EnumFacing.DOWN, px, py);
+        return this.useBrush(Direction.DOWN, px, py);
     }
     
     @PeripheralMethod(31)
@@ -164,12 +164,12 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return true;
     }
     
-    protected Picture searchPicture(EnumFacing dir) {
+    protected Picture searchPicture(Direction dir) {
         if (dir == null) {
             dir = this.turtle.getDirection();
         }
         BlockPos pos = this.turtle.getPosition().offset(dir);
-        EnumFacing pside = dir.getOpposite();
+        Direction pside = dir.getOpposite();
         for (WorldPictureProvider provider : this.getProviders()) {
             WorldPicturePoint point = new WorldPicturePoint(
                     provider,
@@ -184,7 +184,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return null;
     }
     
-    protected Picture findPicture(EnumFacing dir) throws LuaException {
+    protected Picture findPicture(Direction dir) throws LuaException {
         Picture picture = this.searchPicture(dir);
         if (picture == null) {
             throw new LuaException("cannot find picture");

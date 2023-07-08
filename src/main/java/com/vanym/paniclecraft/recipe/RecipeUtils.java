@@ -5,28 +5,24 @@ import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 
 public class RecipeUtils {
     
-    public static void addPainting(ItemStack frame, ItemStack painting, EnumFacing pside) {
-        if (!frame.hasTagCompound()) {
-            frame.setTagCompound(new NBTTagCompound());
-        }
-        NBTTagCompound inputItemTag = painting.getTagCompound();
-        NBTTagCompound pictureTag;
-        if (painting.hasTagCompound() && inputItemTag.hasKey(ItemPainting.TAG_PICTURE)) {
-            NBTTagCompound inputPictureTag = inputItemTag.getCompoundTag(ItemPainting.TAG_PICTURE);
-            pictureTag = (NBTTagCompound)inputPictureTag.copy();
+    public static void addPainting(ItemStack frame, ItemStack painting, Direction pside) {
+        CompoundNBT inputPictureTag = painting.getChildTag(ItemPainting.TAG_PICTURE);
+        CompoundNBT pictureTag;
+        if (inputPictureTag != null) {
+            pictureTag = inputPictureTag.copy();
         } else {
-            pictureTag = new NBTTagCompound();
+            pictureTag = new CompoundNBT();
         }
         if (painting.hasDisplayName()) {
-            pictureTag.setString(Picture.TAG_NAME, painting.getDisplayName());
+            pictureTag.putString(Picture.TAG_NAME, painting.getDisplayName().getFormattedText());
         }
-        NBTTagCompound outputItemTag = frame.getTagCompound();
+        CompoundNBT outputItemTag = frame.getOrCreateTag();
         final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
-        outputItemTag.setTag(TAG_PICTURE_I, pictureTag);
+        outputItemTag.put(TAG_PICTURE_I, pictureTag);
     }
 }

@@ -1,15 +1,13 @@
 package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.container.ContainerCannon;
-import com.vanym.paniclecraft.network.InWorldHandler;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class MessageCannonSet implements IMessage {
+public class MessageCannonSet {
     
     public static enum Field {
         DIRECTION {
@@ -38,49 +36,43 @@ public class MessageCannonSet implements IMessage {
         }
     }
     
-    Field field;
-    double value;
-    
-    public MessageCannonSet() {}
+    public final Field field;
+    public final double value;
     
     public MessageCannonSet(Field field, double value) {
         this.field = field;
         this.value = value;
     }
     
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        byte fieldByte = buf.readByte();
-        if (fieldByte >= 0 && fieldByte < Field.values().length) {
-            this.field = Field.values()[fieldByte];
-        } else {
-            this.field = null;
-        }
-        this.value = buf.readDouble();
-    }
-    
-    @Override
-    public void toBytes(ByteBuf buf) {
-        if (this.field != null) {
-            buf.writeByte(this.field.ordinal());
+    public static void encode(MessageCannonSet message, PacketBuffer buf) {
+        if (message.field != null) {
+            buf.writeByte(message.field.ordinal());
         } else {
             buf.writeByte(-1);
         }
-        buf.writeDouble(this.value);
+        buf.writeDouble(message.value);
     }
     
-    public static class Handler extends InWorldHandler<MessageCannonSet> {
-        
-        @Override
-        public void onMessageInWorld(MessageCannonSet message, MessageContext ctx) {
-            EntityPlayer playerEntity = ctx.getServerHandler().player;
-            if (playerEntity.openContainer instanceof ContainerCannon) {
-                ContainerCannon containerCannon = (ContainerCannon)playerEntity.openContainer;
-                TileEntityCannon tileCannon = containerCannon.cannon;
-                if (message.field != null) {
-                    message.field.set(tileCannon, message.value);
-                    tileCannon.markForUpdate();
-                }
+    public static MessageCannonSet decode(PacketBuffer buf) {
+        byte fieldByte = buf.readByte();
+        Field field;
+        if (fieldByte >= 0 && fieldByte < Field.values().length) {
+            field = Field.values()[fieldByte];
+        } else {
+            field = null;
+        }
+        double value = buf.readDouble();
+        return new MessageCannonSet(field, value);
+    }
+    
+    public static void handleInWorld(MessageCannonSet message, NetworkEvent.Context ctx) {
+        PlayerEntity playerEntity = ctx.getSender();
+        if (playerEntity.openContainer instanceof ContainerCannon) {
+            ContainerCannon containerCannon = (ContainerCannon)playerEntity.openContainer;
+            TileEntityCannon tileCannon = containerCannon.cannon;
+            if (message.field != null) {
+                message.field.set(tileCannon, message.value);
+                tileCannon.markForUpdate();
             }
         }
     }
