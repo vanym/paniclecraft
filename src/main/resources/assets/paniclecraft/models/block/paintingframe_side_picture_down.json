@@ -1,0 +1,13 @@
+{
+    "parent": "paniclecraft:block/painting",
+    "elements": [
+        {
+            "from": [ 0,  0,  0],
+            "to":   [16, 16,  1],
+            "faces": {
+                "north": { "uv": [  0,  0, 16, 16 ], "texture": "#texture", "cullface": "north", "tintindex": 0 },
+                "south": { "uv": [  0,  0, 16, 16 ], "texture": "#texture" }
+            }
+        }
+    ]
+}

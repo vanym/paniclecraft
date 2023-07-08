@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "i  ",
+    " i ",
+    "idi"
+  ],
+  "key": {
+    "i": {
+      "tag": "forge:ingots/iron"
+    },
+    "d": {
+      "item": "minecraft:dispenser"
+    }
+  },
+  "result": {
+    "item": "paniclecraft:cannon"
+  }
+}

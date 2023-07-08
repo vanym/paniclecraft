@@ -1,0 +1,157 @@
+package com.vanym.paniclecraft.block;
+
+import javax.annotation.Nullable;
+
+import com.vanym.paniclecraft.client.gui.GuiChess;
+import com.vanym.paniclecraft.item.ItemChessDesk;
+import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalBlock;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+
+public class BlockChessDesk extends BlockContainerMod3 {
+    
+    public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+    
+    protected static final VoxelShape CHESS_DESK_SHAPE =
+            VoxelShapes.create(0.0D, 0.0D, 0.0D, 1.0D, 3.0D / 16.0D, 1.0D);
+    
+    public BlockChessDesk() {
+        super(Block.Properties.create(Material.WOOD)
+                              .sound(SoundType.WOOD)
+                              .hardnessAndResistance(0.5F)
+                              .noDrops());
+        this.setRegistryName("chess_desk");
+        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
+    }
+    
+    @Override
+    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+        return new TileEntityChessDesk();
+    }
+    
+    @Override
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+    }
+    
+    @Override
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing());
+    }
+    
+    @Override
+    public BlockState rotate(BlockState state, Rotation rot) {
+        return state.with(FACING, rot.rotate(state.get(FACING)));
+    }
+    
+    @Override
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.toRotation(state.get(FACING)));
+    }
+    
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            IBlockReader worldIn,
+            BlockPos pos,
+            ISelectionContext context) {
+        return CHESS_DESK_SHAPE;
+    }
+    
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public boolean hasCustomBreakingProgress(BlockState state) {
+        return true;
+    }
+    
+    @Override
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    }
+    
+    @Override
+    public boolean onBlockActivated(
+            BlockState state,
+            World world,
+            BlockPos pos,
+            PlayerEntity player,
+            Hand hand,
+            BlockRayTraceResult hit) {
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+            TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getTileEntity(pos);
+            Minecraft.getInstance().displayGuiScreen(new GuiChess(tileCD));
+        }
+        return true;
+    }
+    
+    @Override
+    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getTileEntity(pos);
+        spawnAsEntity(world, pos, ItemChessDesk.getSavedDesk(tileCD));
+        super.onBlockHarvested(world, pos, state, player);
+    }
+    
+    @Override
+    public void onBlockPlacedBy(
+            World world,
+            BlockPos pos,
+            BlockState state,
+            @Nullable LivingEntity placer,
+            ItemStack stack) {
+        if (!stack.hasTag()) {
+            return;
+        }
+        CompoundNBT tag = stack.getTag();
+        if (!tag.contains(ItemChessDesk.TAG_MOVES, 9)) {
+            return;
+        }
+        ListNBT list = tag.getList(ItemChessDesk.TAG_MOVES, 10);
+        TileEntity tile = world.getTileEntity(pos);
+        if (!TileEntityChessDesk.class.isInstance(tile)) {
+            return;
+        }
+        TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
+        tileCD.readMovesFromNBT(list);
+    }
+    
+    @Override
+    public ItemStack getPickBlock(
+            BlockState state,
+            RayTraceResult target,
+            IBlockReader world,
+            BlockPos pos,
+            PlayerEntity player) {
+        TileEntityChessDesk tile = (TileEntityChessDesk)world.getTileEntity(pos);
+        return ItemChessDesk.getSavedDesk(tile);
+    }
+}

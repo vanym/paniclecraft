@@ -1,0 +1,14 @@
+{
+  "type": "paniclecraft:dummy_shapeless",
+  "ingredients": [
+    {
+      "item": "paniclecraft:paintingtool_brush_small"
+    },
+    {
+      "item": "paniclecraft:paintingtool_filler"
+    }
+  ],
+  "result": {
+    "item": "paniclecraft:paintingtool_brush_small"
+  }
+}

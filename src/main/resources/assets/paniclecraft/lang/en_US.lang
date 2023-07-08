@@ -1,0 +1,80 @@
+item.broom.name=Broom
+
+item.advanced_sign.name=Advanced Sign
+item.advanced_sign.showtext=Press <shift> to see text
+
+item.paintingblock.name=Canvas
+item.painting.uneditable=Uneditable
+tile.paintingframe.name=Canvas Frame
+item.paintingtool_brush.name=Paint Brush
+item.paintingtool_brush_small.name=Small Paint Brush
+item.paintingtool_filler.name=Paint Filler
+item.paintingtool_colorpicker.name=Color Picker
+item.paintingtool_remover.name=Paint Chipper
+item.paintingtool_remover_small.name=Paint Knife
+item.paintingtool.radius=Radius
+item.palette.name=Palette
+item.palette.inv=Palette
+
+gui.paintingview.export=Export
+painting.export.success=Saved painting as %s
+painting.export.failure=Couldn't save painting: %s
+painting.export.copy.success=Copy painting to clipboard
+painting.export.copy.failure=Couldn't copy painting: %s
+gui.paintingview.import=Import
+gui.paintingview.importsave=Save
+gui.paintingview.importcancel=Cancel
+painting.import.failure=Couldn't import image: %s
+
+tile.cannon.name=Cannon
+tile.cannon.inv=Cannon
+gui.cannon.direction=Direction
+gui.cannon.height=Height
+gui.cannon.strength=Strength
+
+tile.chess_desk.name=Chess Board
+item.chess_desk.moves=Moves: %d
+item.chess_desk.player.white.one=W: %s
+item.chess_desk.player.white.many=W: %s (%d)
+item.chess_desk.player.black.one=B: %s
+item.chess_desk.player.black.many=B: %s (%d)
+chess.export.copy.success=Copy chess notation to clipboard
+
+item.portable_workbench.name=Portable Workbench
+
+commands.paniclecraft.exception.playerless=Only players can use this command
+commands.paniclecraft.exception.noblock=Can't find block you looking at
+commands.paniclecraft.exception.noadvsign=Can't find advsign you looking at
+commands.paniclecraft.exception.nopainting=Can't find picture you looking at
+
+commands.paniclecraft.pictureresize.success=Picture successfully resized from %d×%d to %d×%d
+commands.paniclecraft.pictureresize.failure=Failed to resize picture
+
+commands.paniclecraft.painting.view.usage=/paniclecraft painting view [<maxRadius>]
+commands.paniclecraft.painting.viewto.usage=/paniclecraft painting viewto <player> [<maxRadius>]
+
+commands.paniclecraft.painting.pictureinfo.usage=/paniclecraft painting pictureinfo
+commands.paniclecraft.painting.resize.usage=/paniclecraft painting resize [<width>] [<height>]
+
+commands.paniclecraft.painting.givetemplate.usage=/paniclecraft painting givetemplate [<width>] [<height>]
+
+commands.paniclecraft.paintonblock.view.usage=/paniclecraft paintonblock view [<maxRadius>]
+commands.paniclecraft.paintonblock.viewto.usage=/paniclecraft paintonblock viewto <player> [<maxRadius>]
+
+commands.paniclecraft.paintonblock.pictureinfo.usage=/paniclecraft paintonblock pictureinfo
+commands.paniclecraft.paintonblock.resize.usage=/paniclecraft paintonblock resize [<width>] [<height>]
+
+commands.paniclecraft.paintonblock.cleararea.usage=/paniclecraft paintonblock cleararea <radius> [<pos>]
+commands.paniclecraft.paintonblock.cleararea.clear=Clear paint from %d blocks in %s%s
+
+commands.paniclecraft.paintonblock.info.usage=/paniclecraft paintonblock info [<pos>]
+commands.paniclecraft.paintonblock.info.nopaintonblock=No paint on block found at %d %d %d
+
+commands.paniclecraft.version.usage=/paniclecraft version
+commands.paniclecraft.version.pending=paniclecraft %s, version check not done
+commands.paniclecraft.version.failed=paniclecraft %s, version check failed
+commands.paniclecraft.version.up_to_date=paniclecraft %s, up to date
+commands.paniclecraft.version.outdated=paniclecraft %s, outdated, recommended: %s
+commands.paniclecraft.version.ahead=paniclecraft %s, ahead, recommended: %s
+commands.paniclecraft.version.beta=paniclecraft %s, ahead beta, latest: %s
+commands.paniclecraft.version.beta_outdated=paniclecraft %s, outdated beta, latest: %s

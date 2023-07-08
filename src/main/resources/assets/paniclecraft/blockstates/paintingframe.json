@@ -1,0 +1,93 @@
+{
+    "multipart": [
+        {
+            "apply": {
+                "model": "paniclecraft:paintingframe_base"
+            }
+        },
+        {
+            "when": { "down": false },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_empty",
+                "x": 90,
+                "y": 180
+            }
+        },
+        {
+            "when": { "down": true },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_picture_down",
+                "x": 90
+            }
+        },
+        {
+            "when": { "up": false },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_empty",
+                "x": 270,
+                "y": 180
+            }
+        },
+        {
+            "when": { "up": true },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_picture_up",
+                "x": 270
+            }
+        },
+        {
+            "when": { "north": false },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_empty"
+            }
+        },
+        {
+            "when": { "north": true },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_picture_north"
+            }
+        },
+        {
+            "when": { "south": false },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_empty",
+                "y": 180
+            }
+        },
+        {
+            "when": { "south": true },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_picture_south",
+                "y": 180
+            }
+        },
+        {
+            "when": { "west": false },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_empty",
+                "y": 270
+            }
+        },
+        {
+            "when": { "west": true },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_picture_west",
+                "y": 270
+            }
+        },
+        {
+            "when": { "east": false },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_empty",
+                "y": 90
+            }
+        },
+        {
+            "when": { "east": true },
+            "apply": {
+                "model": "paniclecraft:paintingframe_side_picture_east",
+                "y": 90
+            }
+        }
+    ]
+}

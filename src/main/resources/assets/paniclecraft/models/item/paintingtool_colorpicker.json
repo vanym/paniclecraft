@@ -1,0 +1,7 @@
+{
+    "parent": "item/handheld",
+    "textures": {
+        "layer0": "paniclecraft:items/paintingtool_colorpicker_head",
+        "layer1": "paniclecraft:items/paintingtool_colorpicker_body"
+    }
+}

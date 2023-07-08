@@ -7,6 +7,10 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 
+authors="ee_man"
+displayURL="https://github.com/vanym/paniclecraft"
+description="Create, Play or Draw and Clean up After"
+
 [[dependencies.${mod_id}]]
     modId="forge"
     mandatory=true

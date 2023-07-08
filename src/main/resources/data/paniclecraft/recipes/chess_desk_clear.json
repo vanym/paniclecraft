@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "paniclecraft:chess_desk"
+    }
+  ],
+  "result": {
+    "item": "paniclecraft:chess_desk"
+  }
+}

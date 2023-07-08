@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  1",
+    "12 ",
+    "11 "
+  ],
+  "key": {
+    "1": {
+      "tag": "forge:rods/wooden"
+    },
+    "2": {
+      "tag": "forge:string"
+    }
+  },
+  "result": {
+    "item": "paniclecraft:broom"
+  }
+}
