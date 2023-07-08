@@ -102,6 +102,7 @@ public class Core {
         ModLoadingContext context = ModLoadingContext.get();
         bus.addListener(this::setup);
         RecipeDummy.REGISTER.register(bus);
+        this.command.addSubCommand(new CommandVersion());
         EnumMap<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders =
                 new EnumMap<>(ModConfig.Type.class);
         configBuilders.entrySet().stream().forEach(e->e.setValue(new ForgeConfigSpec.Builder()));
