@@ -82,7 +82,7 @@ public class Version {
     protected static void putResultToForgeVersion(CheckResult result) {
         try {
             Map<IModInfo, VersionChecker.CheckResult> results =
-                    ObfuscationReflectionHelper.getPrivateValue(ForgeVersion.class, null,
+                    ObfuscationReflectionHelper.getPrivateValue(VersionChecker.class, null,
                                                                 "results");
             Constructor<VersionChecker.CheckResult> constructor =
                     ObfuscationReflectionHelper.findConstructor(VersionChecker.CheckResult.class,
