@@ -19,7 +19,7 @@ public class IconSubRect extends TextureAtlasSprite {
             int totalHeight) {
         super(new ResourceLocation(
                 DEF.MOD_ID,
-                String.format("sub[x=%d, y=%d, w=%d, h=%d, tw=%d, th=%d]", x, y,
+                String.format("sub_x%dy%dw%dh%dtw%dth%d", x, y,
                               iconWidth, iconHeight, totalWidth, totalHeight)),
               iconWidth, iconHeight);
         this.func_217789_a(totalWidth, totalHeight, x, y);
