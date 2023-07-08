@@ -72,7 +72,6 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -235,7 +234,7 @@ public class ModComponentPainting extends ModComponent {
     }
     
     @SubscribeEvent(priority = EventPriority.NORMAL)
-    protected void configChanged(ModConfigEvent event) {
+    protected void configChanged(ModConfig.ConfigReloading event) {
         if (event.getConfig().getType() != ModConfig.Type.SERVER
             || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
             return;
@@ -277,7 +276,7 @@ public class ModComponentPainting extends ModComponent {
     
     @SubscribeEvent(priority = EventPriority.NORMAL)
     @OnlyIn(Dist.CLIENT)
-    protected void configChangedClient(ModConfigEvent event) {
+    protected void configChangedClient(ModConfig.ConfigReloading event) {
         if (event.getConfig().getType() != ModConfig.Type.CLIENT
             || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
             return;
@@ -480,7 +479,7 @@ public class ModComponentPainting extends ModComponent {
         }
         
         @SubscribeEvent(priority = EventPriority.HIGH)
-        protected void configChanged(ModConfigEvent event) {
+        protected void configChanged(ModConfig.ModConfigEvent event) {
             if (event.getConfig().getType() != ModConfig.Type.SERVER
                 || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
                 return;
@@ -586,7 +585,7 @@ public class ModComponentPainting extends ModComponent {
         }
         
         @SubscribeEvent(priority = EventPriority.HIGH)
-        protected void configChanged(ModConfigEvent event) {
+        protected void configChanged(ModConfig.ModConfigEvent event) {
             if (event.getConfig().getType() != ModConfig.Type.SERVER
                 || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
                 return;
@@ -695,7 +694,7 @@ public class ModComponentPainting extends ModComponent {
         }
         
         @SubscribeEvent(priority = EventPriority.HIGH)
-        protected void configChanged(ModConfigEvent event) {
+        protected void configChanged(ModConfig.ModConfigEvent event) {
             if (event.getConfig().getType() != ModConfig.Type.CLIENT
                 || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
                 return;
