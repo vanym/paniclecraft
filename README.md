@@ -1,7 +1,7 @@
 PanicleCraft
 ============
 
-PanicleCraft is a Minecraft mod with miscellaneous things: paint brushes, drawable paintings, chess, broom and more…
+PanicleCraft is a Minecraft mod with miscellaneous things: paint brushes, drawable paintings, graffiti, chess, broom and more…
 
 ## Building
 
