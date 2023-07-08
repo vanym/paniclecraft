@@ -1,0 +1,20 @@
+
+repositories {
+    maven {
+        name = "cc-tweaked"
+        url = "https://squiddev.cc/maven/"
+    }
+    maven {
+        name = "jei"
+        url "https://dvs1.progwml6.com/files/maven/"
+    }
+}
+
+dependencies {
+    // cc-tweaked-1.14.4-1.89.2.jar fdd91cac6e58aa92e6fc39498a9cc255
+    compileOnly fg.deobf("org.squiddev:cc-tweaked-${minecraft_version}:${cc_tweaked_version}")
+    runtimeOnly fg.deobf("org.squiddev:cc-tweaked-${minecraft_version}:${cc_tweaked_version}")
+    // jei-1.14.4-6.0.1.30.jar 7035ad97dbc39942bce45ec02bf882d5
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
+}
