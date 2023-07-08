@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.vanym.paniclecraft.client.ClientProxy;
 import com.vanym.paniclecraft.command.CommandMod3;
@@ -84,7 +86,9 @@ public class Core {
         }
         EnumMap<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders =
                 new EnumMap<>(ModConfig.Type.class);
-        configBuilders.entrySet().stream().forEach(e->e.setValue(new ForgeConfigSpec.Builder()));
+        configBuilders.putAll(Arrays.stream(ModConfig.Type.values())
+                                    .collect(Collectors.toMap(Function.identity(),
+                                                              e->new ForgeConfigSpec.Builder())));
         ForgeConfigSpec.Builder commonBuilder = configBuilders.get(ModConfig.Type.COMMON);
         this.versionCheck = commonBuilder.define("versionCheck", true);
         Map<ModConfig.Type, ForgeConfigSpec.Builder> initConfigBuilders =
