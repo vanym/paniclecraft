@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -95,7 +96,7 @@ public class Version {
             if (forgeResult != null) {
                 IModInfo mod = ModList.get()
                                       .getModContainerByObject(Core.instance)
-                                      .orElseThrow()
+                                      .orElseThrow(NoSuchElementException::new)
                                       .getModInfo();
                 results.put(mod, forgeResult);
             }
