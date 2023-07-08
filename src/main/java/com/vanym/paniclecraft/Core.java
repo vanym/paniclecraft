@@ -58,6 +58,9 @@ public class Core {
     
     public final SimpleChannel network =
             ChannelBuilder.named(new ResourceLocation(DEF.MOD_ID, "main_channel"))
+                          .clientAcceptedVersions("1"::equals)
+                          .serverAcceptedVersions("1"::equals)
+                          .networkProtocolVersion(()->"1")
                           .simpleChannel();
     
     protected final List<IModComponent> components = new ArrayList<>(
