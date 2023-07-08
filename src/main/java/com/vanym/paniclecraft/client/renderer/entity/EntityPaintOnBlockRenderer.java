@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,7 +66,8 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     
     protected static final TextureAtlasSprite FULL_SPRITE = IconUtils.full(16, 16);
     
-    public int renderPictureType = 2;
+    protected final Supplier<Integer> renderPictureTypeSup =
+            ()->Core.instance.painting.clientConfig.renderPaintOnBlockPartPictureType;
     
     protected final FaceBakery faceBakery = new FaceBakery();
     protected BlockRendererDispatcher blockRenderer;
@@ -114,7 +116,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         }
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buf = tessellator.getBuffer();
-        if (this.renderPictureType >= 0) {
+        if (this.renderPictureTypeSup.get() >= 0) {
             if (theProfiler != null) {
                 theProfiler.startSection("picture");
             }
@@ -147,7 +149,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                                    y - entityPOB.posY + pside.getYOffset() * expandY,
                                    z - entityPOB.posZ + pside.getZOffset() * expandZ);
                 buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-                if (this.renderPictureType > 0) {
+                if (this.renderPictureTypeSup.get() > 0) {
                     render.renderModelSmooth(world, pictureModel, state, pos,
                                              buf, true, new Random(rand), rand,
                                              EmptyModelData.INSTANCE);

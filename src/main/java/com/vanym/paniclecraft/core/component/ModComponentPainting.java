@@ -1,16 +1,14 @@
 package com.vanym.paniclecraft.core.component;
 
 import java.awt.Color;
-import java.util.ArrayList;
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -21,8 +19,6 @@ import com.vanym.paniclecraft.client.gui.container.GuiPalette;
 import com.vanym.paniclecraft.client.renderer.PaintingSpecialSelectionBox;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.entity.EntityPaintOnBlockRenderer;
-import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
-import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.command.CommandMod3;
@@ -31,7 +27,6 @@ import com.vanym.paniclecraft.command.CommandPainting;
 import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.container.ContainerPalette;
-import com.vanym.paniclecraft.core.component.ModComponent.ModComponentObject;
 import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
 import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -45,30 +40,23 @@ import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.NetworkUtils;
-import com.vanym.paniclecraft.network.message.MessageOpenPaintingView;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByDye;
 import com.vanym.paniclecraft.recipe.RecipeColorizeByFiller;
-import com.vanym.paniclecraft.recipe.RecipeDummy;
 import com.vanym.paniclecraft.recipe.RecipePaintingCombine;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
-import com.vanym.paniclecraft.recipe.RecipeRegister;
-import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
-import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.SpecialRecipeSerializer;
 import net.minecraft.tileentity.TileEntityType;
@@ -78,12 +66,13 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeContainerType;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -143,39 +132,40 @@ public class ModComponentPainting extends ModComponent {
     @ModComponentObject
     public IRecipeSerializer<?> recipeTypePaintingFrameRemove;
     
+    public Config config;
+    public ServerConfig server;
+    
     @OnlyIn(Dist.CLIENT)
     public PictureTextureCache textureCache;
     
-    protected List<IRecipe> recipes = new ArrayList<>();
-    
-    protected ChangeableConfig myServerConfig = new ChangeableConfig();
-    public ChangeableConfig config = this.myServerConfig;
-    
-    public ChangeableServerConfig server = new ChangeableServerConfig();
-    
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected TileEntityPaintingRenderer paintingTileRenderer;
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
-    @SideOnly(Side.CLIENT)
-    protected ItemRendererPainting paintingItemRenderer;
-    @SideOnly(Side.CLIENT)
-    protected ItemRendererPaintingFrame paintingFrameItemRenderer;
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected PaintingSpecialSelectionBox paintingSpecialSelectionBox;
-    @SideOnly(Side.CLIENT)
-    protected EntityPaintOnBlockRenderer paintOnBlockRenderer;
     
-    @SideOnly(Side.CLIENT)
-    public ChangeableClientConfig clientConfig;
+    @OnlyIn(Dist.CLIENT)
+    public ClientConfig clientConfig;
     
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
+        
+        ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
+        this.config = new Config(serverBuilder);
+        this.server = new ServerConfig(serverBuilder);
         
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
             this.textureCache = new PictureTextureCache();
+            this.paintingSpecialSelectionBox = null;
+            ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
+            this.clientConfig = new ClientConfig(clientBuilder);
         });
+        
+        Arrays.asList(new CommandPainting(), new CommandPaintOnBlock())
+              .forEach(Core.instance.command::addSubCommand);
         
         this.blockPainting = new BlockPainting();
         this.blockPaintingFrame = new BlockPaintingFrame();
@@ -222,11 +212,13 @@ public class ModComponentPainting extends ModComponent {
                 new RecipePaintingFrameAddPainting.Serializer().setRegistryName("paintingframe_add_painting");
         this.recipeTypePaintingFrameRemove = new SpecialRecipeSerializer<>(
                 RecipePaintingFrameRemovePainting::new).setRegistryName("paintingframe_remove_painting");
-        
     }
     
     @SubscribeEvent
     protected void setup(FMLCommonSetupEvent event) {
+        MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
+        MinecraftForge.EVENT_BUS.register(new PaintOnBlockEventHandler());
+        
         Core.instance.network.registerMessage(30, MessagePaintingToolUse.class,
                                               MessagePaintingToolUse::encode,
                                               MessagePaintingToolUse::decode,
@@ -239,75 +231,15 @@ public class ModComponentPainting extends ModComponent {
                                               MessagePaintingViewAddPicture::encode,
                                               MessagePaintingViewAddPicture::decode,
                                               NetworkUtils.handleInWorld(MessagePaintingViewAddPicture::handleInWorld));
+        this.applyConfig();
     }
     
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    protected void setupClient(FMLClientSetupEvent event) {
-        ScreenManager.registerFactory(this.containerPalette, GuiPalette::new);
-        ScreenManager.registerFactory(this.containerPaintingView, GuiPaintingEditView::create);
-        
-        MinecraftForge.EVENT_BUS.register(this.textureCache);
-        
-        this.getItems()
-            .stream()
-            .filter(ItemPaintingTool.class::isInstance)
-            .forEach(MinecraftForge.EVENT_BUS::register);
-    }
-    
-    @Override
-    public void preInit(ModConfig config) {
-        if (!config.getBoolean(ENABLE_FLAG, this.getName(), true, "")) {
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    protected void configChanged(ModConfigEvent event) {
+        if (event.getConfig().getType() != ModConfig.Type.SERVER
+            || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
             return;
         }
-        this.enabled = true;
-        MinecraftForge.EVENT_BUS.register(this);
-        
-        this.itemPainting = new ItemPainting();
-        this.itemPaintBrush = new ItemPaintBrush();
-        this.itemPaintRemover = new ItemPaintRemover();
-        this.itemPalette = new ItemPalette();
-        
-        this.blockPainting = new BlockPainting();
-        GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID);
-        
-        this.blockPaintingFrame = new BlockPaintingFrame();
-        this.itemPaintingFrame = new ItemPaintingFrame(this.blockPaintingFrame);
-        GameRegistry.registerTileEntity(TileEntityPaintingFrame.class, TileEntityPaintingFrame.ID);
-        
-        EntityRegistry.registerModEntity(EntityPaintOnBlock.ID, EntityPaintOnBlock.class,
-                                         EntityPaintOnBlock.IN_MOD_ID, 33,
-                                         Core.instance, 64, 1, true);
-        
-        MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
-        MinecraftForge.EVENT_BUS.register(new PaintOnBlockEventHandler());
-        
-        Arrays.asList(new CommandPainting(), new CommandPaintOnBlock())
-              .forEach(Core.instance.command::addSubCommand);
-        
-        Core.instance.network.registerMessage(MessagePaintingToolUse.Handler.class,
-                                              MessagePaintingToolUse.class, 30,
-                                              Side.SERVER);
-        Core.instance.network.registerMessage(MessagePaletteSetColor.Handler.class,
-                                              MessagePaletteSetColor.class, 32,
-                                              Side.SERVER);
-        Core.instance.network.registerMessage(MessageOpenPaintingView.Handler.class,
-                                              MessageOpenPaintingView.class, 33,
-                                              Side.CLIENT);
-        Core.instance.network.registerMessage(MessagePaintingViewAddPicture.Handler.class,
-                                              MessagePaintingViewAddPicture.class, 34,
-                                              Side.SERVER);
-        this.initRecipe(config);
-        this.configChanged(config);
-    }
-    
-    @Override
-    public void configChanged(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
-        this.myServerConfig.read(config);
-        this.server.read(config);
         this.applyConfig();
     }
     
@@ -324,249 +256,47 @@ public class ModComponentPainting extends ModComponent {
         }
     }
     
-    protected void initRecipe(Configuration config) {
-        if (config.getBoolean("craftingRecipePaintBrush", this.getName(), true, "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintBrush.getBrush(),
-                    "w",
-                    "s",
-                    Character.valueOf('w'),
-                    "woolWhite",
-                    Character.valueOf('s'),
-                    "stickWood").name();
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipeSmallPaintBrush", this.getName(), true, "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintBrush.getSmallBrush(),
-                    "f",
-                    "s",
-                    Character.valueOf('f'),
-                    "feather",
-                    Character.valueOf('s'),
-                    "stickWood").name();
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipePaintFiller", this.getName(), true, "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintBrush.getFiller(),
-                    "w",
-                    "b",
-                    Character.valueOf('w'),
-                    "dyeWhite",
-                    Character.valueOf('b'),
-                    Items.BOWL).name();
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipeColorPicker", this.getName(), true, "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintBrush.getColorPicker(),
-                    false,
-                    " b",
-                    "b ",
-                    Character.valueOf('b'),
-                    Items.GLASS_BOTTLE).name();
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipePaintRemoverFromStick", this.getName(), false, "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintRemover.getRemover(),
-                    "i",
-                    "s",
-                    Character.valueOf('i'),
-                    "ingotIron",
-                    Character.valueOf('s'),
-                    "stickWood");
-            RecipeRegister.useName(recipe, "%s_stick");
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipePaintRemoverFromBrush", this.getName(), false, "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintRemover.getRemover(),
-                    "i",
-                    "b",
-                    Character.valueOf('i'),
-                    "ingotIron",
-                    Character.valueOf('b'),
-                    this.itemPaintBrush.getBrush());
-            RecipeRegister.useName(recipe, "%s_brush");
-            ForgeRegistries.RECIPES.register(recipe);
-        }
-        if (config.getBoolean("craftingRecipeSmallPaintRemoverFromStick", this.getName(), false,
-                              "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintRemover.getSmallRemover(),
-                    "f",
-                    "s",
-                    Character.valueOf('f'),
-                    Items.FLINT,
-                    Character.valueOf('s'),
-                    "stickWood");
-            RecipeRegister.useName(recipe, "%s_stick");
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipeSmallPaintRemoverFromBrush", this.getName(), false,
-                              "")) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    this.itemPaintRemover.getSmallRemover(),
-                    "f",
-                    "b",
-                    Character.valueOf('f'),
-                    Items.FLINT,
-                    Character.valueOf('b'),
-                    this.itemPaintBrush.getSmallBrush());
-            RecipeRegister.useName(recipe, "%s_brush");
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipeColorizeByDye", this.getName(), true, "")) {
-            RecipeColorizeByDye recipe = new RecipeColorizeByDye();
-            recipe.setRegistryName(DEF.MOD_ID, "colorize_by_dye");
-            this.recipes.add(recipe);
-            this.recipes.addAll(RecipeDummy.getColorizeByDyeDummies());
-        }
-        if (config.getBoolean("craftingRecipeColorizeByFiller", this.getName(), true, "")) {
-            RecipeColorizeByFiller recipe = new RecipeColorizeByFiller();
-            recipe.setRegistryName(DEF.MOD_ID, "colorize_by_filler");
-            this.recipes.add(recipe);
-            this.recipes.addAll(RecipeDummy.getColorizeByFillerDummies());
-        }
-        if (config.getBoolean("craftingRecipePalette", this.getName(), false, "")) {
-            ShapelessOreRecipe recipe = new ShapelessOreRecipe(
-                    new ItemStack(this.itemPalette),
-                    "slabWood",
-                    "dyeRed",
-                    "dyeGreen",
-                    "dyeBlue").flow();
-            this.recipes.add(recipe);
-        }
-        int paintingsAmount = config.getInt("craftingRecipePaintingAmount", this.getName(), 8,
-                                            0, 64, "\'0\' to disable");
-        if (paintingsAmount > 0) {
-            ShapedOreRecipe recipe = new ShapedOreRecipe(
-                    new ItemStack(this.itemPainting, paintingsAmount),
-                    "wsw",
-                    "scs",
-                    "wsw",
-                    Character.valueOf('w'),
-                    "plankWood",
-                    Character.valueOf('s'),
-                    "stickWood",
-                    Character.valueOf('c'),
-                    "wool").flow();
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipePaintingClear", this.getName(), true, "")) {
-            ShapelessOreRecipe recipe =
-                    new ShapelessOreRecipe(this.itemPainting, this.itemPainting);
-            RecipeRegister.flowRegistryName(recipe, "%s_clear");
-            this.recipes.add(recipe);
-        }
-        {
-            final Pattern combinePattern =
-                    Pattern.compile("^(?:(0*([2-3])x0*([2-3]))|(0*(1)x0*([2-3]))|(0*([2-3])x0*(1)))$");
-            Property prop = config.get(this.getName(), "craftingRecipePaintingCombine",
-                                       new String[]{"2x2"}, null, combinePattern);
-            prop.setValidValues(new String[]{"2x1", "1x2", "2x2",
-                                             "3x1", "3x2", "1x3", "2x3", "3x3"});
-            prop.setComment("" + prop.getDefault());
-            String[] paintingCombines = prop.getStringList();
-            Arrays.stream(paintingCombines)
-                  .map(combinePattern::matcher)
-                  .filter(Matcher::matches)
-                  .map(m-> {
-                      int i = 7;
-                      for (; i > 3 && m.group(i) == null; i -= 3) {
-                      } // formatter does not understand ';' beauty :(
-                      int x = Integer.parseInt(m.group(i + 1));
-                      int y = Integer.parseInt(m.group(i + 2));
-                      RecipePaintingCombine r = new RecipePaintingCombine(x, y);
-                      r.setRegistryName(DEF.MOD_ID, String.format("painting_combine_%dx%d", x, y));
-                      return r;
-                  })
-                  .forEach(this.recipes::add);
-        }
-        if (config.getBoolean("craftingRecipePaintingFrame", this.getName(), true, "")) {
-            RecipePaintingFrame recipe = new RecipePaintingFrame(
-                    "sss",
-                    "sps",
-                    "sss",
-                    Character.valueOf('p'),
-                    this.itemPainting,
-                    Character.valueOf('s'),
-                    "stickWood");
-            RecipeRegister.flowRegistryName(recipe);
-            this.recipes.add(recipe);
-        }
-        if (config.getBoolean("craftingRecipePaintingFrameAdd", this.getName(), true, "")) {
-            RecipePaintingFrameAddPainting.createAllVariants()
-                                          .forEach(ForgeRegistries.RECIPES::register);
-        }
-        if (config.getBoolean("craftingRecipePaintingFrameRemove", this.getName(), true, "")) {
-            RecipePaintingFrameRemovePainting recipe = new RecipePaintingFrameRemovePainting();
-            RecipeRegister.flowRegistryName(recipe, "%s_remove_painting");
-            this.recipes.add(recipe);
-        }
-    }
-    
-    @Override
-    public List<IRecipe> getRecipes() {
-        return this.recipes;
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void preInitClient(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
-        this.paintingSpecialSelectionBox = null;
-        this.clientConfig = new ChangeableClientConfig();
-        this.itemPaintBrush.initClient();
-        this.itemPaintRemover.initClient();
-    }
-    
-    @Override
-    @SideOnly(Side.CLIENT)
-    @SuppressWarnings("deprecation")
-    public void initClient(ModConfig config) {
-        if (!this.isEnabled()) {
-            return;
-        }
-        this.textureCache = new PictureTextureCache();
-        this.paintingTileRenderer = new TileEntityPaintingRenderer();
-        this.paintingItemRenderer = new ItemRendererPainting(this.textureCache);
-        this.itemPainting.setTileEntityItemStackRenderer(this.paintingItemRenderer);
-        this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
-        this.paintingFrameItemRenderer = new ItemRendererPaintingFrame(this.textureCache);
-        this.itemPaintingFrame.setTileEntityItemStackRenderer(this.paintingFrameItemRenderer);
-        this.paintOnBlockRenderer = new EntityPaintOnBlockRenderer();
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    protected void setupClient(FMLClientSetupEvent event) {
+        ScreenManager.registerFactory(this.containerPalette, GuiPalette::new);
+        ScreenManager.registerFactory(this.containerPaintingView, GuiPaintingEditView::create);
         
         MinecraftForge.EVENT_BUS.register(this.textureCache);
-        RenderingRegistry.registerEntityRenderingHandler(EntityPaintOnBlock.class,
-                                                         this.paintOnBlockRenderer);
         
-        this.clientConfig = new ChangeableClientConfig().read(config);
+        this.paintingTileRenderer = new TileEntityPaintingRenderer();
+        this.paintingTileRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+        this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
+        this.paintingFrameTileRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+        
+        RenderingRegistry.registerEntityRenderingHandler(EntityPaintOnBlock.class,
+                                                         EntityPaintOnBlockRenderer::new);
+        
         this.applyConfigClient();
     }
     
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void configChangedClient(ModConfig config) {
-        if (!this.isEnabled()) {
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    @OnlyIn(Dist.CLIENT)
+    protected void configChangedClient(ModConfigEvent event) {
+        if (event.getConfig().getType() != ModConfig.Type.CLIENT
+            || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
             return;
         }
-        this.clientConfig.read(config);
         this.applyConfigClient();
     }
     
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected void applyConfigClient() {
         if (this.clientConfig.perFrameBrushUse) {
-            MinecraftForge.EVENT_BUS.register(this.itemPaintBrush);
-            MinecraftForge.EVENT_BUS.register(this.itemPaintRemover);
+            this.getItems()
+                .stream()
+                .filter(ItemPaintingTool.class::isInstance)
+                .forEach(MinecraftForge.EVENT_BUS::register);
         } else {
-            MinecraftForge.EVENT_BUS.unregister(this.itemPaintBrush);
-            MinecraftForge.EVENT_BUS.unregister(this.itemPaintRemover);
+            this.getItems()
+                .stream()
+                .filter(ItemPaintingTool.class::isInstance)
+                .forEach(MinecraftForge.EVENT_BUS::unregister);
         }
         
         this.paintingTileRenderer.renderFrameType =
@@ -577,8 +307,11 @@ public class ModComponentPainting extends ModComponent {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPainting.class,
                                                          this.paintingTileRenderer);
         } else {
-            TileEntityRendererDispatcher.instance.renderers.remove(TileEntityPainting.class,
-                                                                   this.paintingTileRenderer);
+            TileEntityRendererDispatcher dispatcher = TileEntityRendererDispatcher.instance;
+            synchronized (dispatcher) {
+                dispatcher.renderers.remove(TileEntityPainting.class,
+                                            this.paintingTileRenderer);
+            }
         }
         
         this.paintingFrameTileRenderer.renderFrameType =
@@ -589,12 +322,12 @@ public class ModComponentPainting extends ModComponent {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPaintingFrame.class,
                                                          this.paintingFrameTileRenderer);
         } else {
-            TileEntityRendererDispatcher.instance.renderers.remove(TileEntityPaintingFrame.class,
-                                                                   this.paintingFrameTileRenderer);
+            TileEntityRendererDispatcher dispatcher = TileEntityRendererDispatcher.instance;
+            synchronized (dispatcher) {
+                dispatcher.renderers.remove(TileEntityPaintingFrame.class,
+                                            this.paintingFrameTileRenderer);
+            }
         }
-        
-        this.paintOnBlockRenderer.renderPictureType =
-                this.clientConfig.renderPaintOnBlockPartPictureType;
         
         if (this.paintingSpecialSelectionBox != null) {
             MinecraftForge.EVENT_BUS.unregister(this.paintingSpecialSelectionBox);
@@ -610,10 +343,14 @@ public class ModComponentPainting extends ModComponent {
     }
     
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void registerItemColors(ColorHandlerEvent.Item event) {
-        event.getItemColors()
-             .registerItemColorHandler(this.itemPaintBrush.color(), this.itemPaintBrush);
+        ItemColors colors = event.getItemColors();
+        this.getItems()
+            .stream()
+            .filter(ItemPaintBrush.class::isInstance)
+            .map(ItemPaintBrush.class::cast)
+            .forEach(i->colors.register(i.color(), i));
     }
     
     @Override
@@ -621,29 +358,8 @@ public class ModComponentPainting extends ModComponent {
         return "painting";
     }
     
-    @Override
-    public void setServerSideConfig(IServerSideConfig config) {
-        this.config = (ChangeableConfig)config;
-    }
-    
-    @Override
-    public IServerSideConfig getServerSideConfig() {
-        return this.myServerConfig;
-    }
-    
-    protected static final String[] DEFAULT_BRUSH_RADIUSES = new String[]{"1: 1.5",
-                                                                          "12: 2.5",
-                                                                          "16: 3.5",
-                                                                          "24: 5.2",
-                                                                          "32: 6.2",
-                                                                          "48: 7.5",
-                                                                          "64: 10.5"};
-    
-    protected static final String[] DEFAULT_SMALL_BRUSH_RADIUSES = new String[]{"1: 0.1"};
-    
-    public class ChangeableConfig implements IServerSideConfig {
+    public class Config {
         
-        public int paintingPlaceStack = 2;
         public final IPictureSize paintingDefaultSize = new DefaultPictureSize();
         public final IPictureSize paintOnBlockDefaultSize = new DefaultPaintOnBlockSize();
         
@@ -653,28 +369,47 @@ public class ModComponentPainting extends ModComponent {
         public final SortedMap<Integer, Double> removerRadiuses;
         public final SortedMap<Integer, Double> smallRemoverRadiuses;
         
-        public boolean allowPaintOnBlock = false;
-        public boolean anyBlockValidForPaint = false;
+        public int paintingPlaceStack = 2;
+        protected final ForgeConfigSpec.IntValue paintingPlaceStackSpec;
+        protected int paintingDefaultWidth = 16;
+        protected final ForgeConfigSpec.IntValue paintingDefaultWidthSpec;
+        protected int paintingDefaultHeight = 16;
+        protected final ForgeConfigSpec.IntValue paintingDefaultHeightSpec;
         
-        public boolean copyOnAnvil = true;
-        public int copyOnAnvilCost = 5;
+        public boolean allowPaintOnBlock = false;
+        protected final ForgeConfigSpec.BooleanValue allowPaintOnBlockSpec;
+        public boolean anyBlockValidForPaint = false;
+        protected final ForgeConfigSpec.BooleanValue anyBlockValidForPaintSpec;
+        protected int paintOnBlockDefaultWidth = 16;
+        protected final ForgeConfigSpec.IntValue paintOnBlockDefaultWidthSpec;
+        protected int paintOnBlockDefaultHeight = 16;
+        protected final ForgeConfigSpec.IntValue paintOnBlockDefaultHeightSpec;
         
         public int paintingMaxCraftableWidth = 64;
+        protected final ForgeConfigSpec.IntValue paintingMaxCraftableWidthSpec;
         public int paintingMaxCraftableHeight = 64;
+        protected final ForgeConfigSpec.IntValue paintingMaxCraftableHeightSpec;
         
-        protected int paintingDefaultWidth = 16;
-        protected int paintingDefaultHeight = 16;
-        
-        protected int paintOnBlockDefaultWidth = 16;
-        protected int paintOnBlockDefaultHeight = 16;
+        public boolean copyOnAnvil = true;
+        protected final ForgeConfigSpec.BooleanValue copyOnAnvilSpec;
+        public int copyOnAnvilCost = 5;
+        protected final ForgeConfigSpec.IntValue copyOnAnvilCostSpec;
         
         protected final SortedMap<Integer, Double> iBrushRadiuses = new TreeMap<>();
+        protected final ForgeConfigSpec.ConfigValue<
+            List<? extends String>> brushRadiusesSpecSpecial;
         protected final SortedMap<Integer, Double> iSmallBrushRadiuses = new TreeMap<>();
+        protected final ForgeConfigSpec.ConfigValue<
+            List<? extends String>> smallBrushRadiusesSpecSpecial;
         
         protected final SortedMap<Integer, Double> iRemoverRadiuses = new TreeMap<>();
+        protected final ForgeConfigSpec.ConfigValue<
+            List<? extends String>> removerRadiusesSpecSpecial;
         protected final SortedMap<Integer, Double> iSmallRemoverRadiuses = new TreeMap<>();
+        protected final ForgeConfigSpec.ConfigValue<
+            List<? extends String>> smallRemoverRadiusesSpecSpecial;
         
-        protected ChangeableConfig() {
+        protected Config(ForgeConfigSpec.Builder serverBuilder) {
             this.brushRadiuses = Collections.unmodifiableSortedMap(this.iBrushRadiuses);
             this.smallBrushRadiuses = Collections.unmodifiableSortedMap(this.iSmallBrushRadiuses);
             
@@ -689,93 +424,88 @@ public class ModComponentPainting extends ModComponent {
             
             this.iRemoverRadiuses.putAll(this.iBrushRadiuses);
             this.iSmallRemoverRadiuses.putAll(this.iSmallBrushRadiuses);
-        }
-        
-        protected ChangeableConfig(ChangeableConfig config) {
-            this();
-            this.paintingPlaceStack = config.paintingPlaceStack;
-            this.allowPaintOnBlock = config.allowPaintOnBlock;
-            this.anyBlockValidForPaint = config.anyBlockValidForPaint;
-            this.copyOnAnvil = config.copyOnAnvil;
-            this.copyOnAnvilCost = config.copyOnAnvilCost;
-            this.paintingMaxCraftableWidth = config.paintingMaxCraftableWidth;
-            this.paintingMaxCraftableHeight = config.paintingMaxCraftableHeight;
-            this.paintingDefaultWidth = config.paintingDefaultWidth;
-            this.paintingDefaultHeight = config.paintingDefaultHeight;
-            this.paintOnBlockDefaultWidth = config.paintOnBlockDefaultWidth;
-            this.paintOnBlockDefaultHeight = config.paintOnBlockDefaultHeight;
             
-            this.iBrushRadiuses.clear();
-            this.iBrushRadiuses.putAll(config.iBrushRadiuses);
-            this.iSmallBrushRadiuses.clear();
-            this.iSmallBrushRadiuses.putAll(config.iSmallBrushRadiuses);
+            FMLJavaModLoadingContext.get().getModEventBus().register(this);
             
-            this.iRemoverRadiuses.clear();
-            this.iRemoverRadiuses.putAll(config.iRemoverRadiuses);
-            this.iSmallRemoverRadiuses.clear();
-            this.iSmallRemoverRadiuses.putAll(config.iSmallRemoverRadiuses);
-        }
-        
-        public ChangeableConfig read(ModConfig config) {
-            final String category = ModComponentPainting.this.getName();
-            config.restartless();
-            this.paintingPlaceStack = config.getInt("paintingPlaceStack", category, 2, 0, 64, "");
-            this.paintingDefaultWidth =
-                    config.getInt("paintingDefaultWidth", category, 16, 1,
-                                  ModComponentPainting.this.MAX_WIDTH, "");
-            this.paintingDefaultHeight =
-                    config.getInt("paintingDefaultHeight", category, 16, 1,
-                                  ModComponentPainting.this.MAX_HEIGHT,
-                                  "(recommended to equals width)");
-            this.allowPaintOnBlock = config.getBoolean("allowPaintOnBlock", category, false, "");
-            this.paintOnBlockDefaultWidth =
-                    config.getInt("paintOnBlockDefaultWidth", category, 16, 1,
-                                  ModComponentPainting.this.MAX_WIDTH, "");
-            this.paintOnBlockDefaultHeight =
-                    config.getInt("paintOnBlockDefaultHeight", category, 16, 1,
-                                  ModComponentPainting.this.MAX_HEIGHT,
-                                  "(highly recommended to equals width)");
-            this.anyBlockValidForPaint =
-                    config.getBoolean("anyBlockValidForPaint", category, false, "");
-            this.paintingMaxCraftableWidth =
-                    config.getInt("paintingMaxCraftableWidth", category, 64, 1,
-                                  ModComponentPainting.this.MAX_WIDTH, "");
-            this.paintingMaxCraftableHeight =
-                    config.getInt("paintingMaxCraftableHeight", category, 64, 1,
-                                  ModComponentPainting.this.MAX_HEIGHT, "");
-            this.copyOnAnvil = config.getBoolean("copyOnAnvil", category, true, "");
-            this.copyOnAnvilCost = config.getInt("copyOnAnvilCost", category, 5, 0, 40, "");
+            serverBuilder.push(ModComponentPainting.this.getName());
+            this.paintingPlaceStackSpec =
+                    serverBuilder.defineInRange("paintingPlaceStack", 2, 0, 64);
+            this.paintingDefaultWidthSpec =
+                    serverBuilder.defineInRange("paintingDefaultWidth", 16, 1,
+                                                ModComponentPainting.this.MAX_WIDTH);
+            this.paintingDefaultHeightSpec =
+                    serverBuilder.comment("(recommended to equals width)")
+                                 .defineInRange("paintingDefaultHeight", 16, 1,
+                                                ModComponentPainting.this.MAX_HEIGHT);
+            this.allowPaintOnBlockSpec = serverBuilder.define("allowPaintOnBlock", false);
+            this.anyBlockValidForPaintSpec = serverBuilder.define("anyBlockValidForPaint", false);
+            this.paintOnBlockDefaultWidthSpec =
+                    serverBuilder.defineInRange("paintOnBlockDefaultWidth", 16, 1,
+                                                ModComponentPainting.this.MAX_WIDTH);
+            this.paintOnBlockDefaultHeightSpec =
+                    serverBuilder.comment("(highly recommended to equals width)")
+                                 .defineInRange("paintOnBlockDefaultHeight", 16, 1,
+                                                ModComponentPainting.this.MAX_HEIGHT);
+            this.paintingMaxCraftableWidthSpec =
+                    serverBuilder.defineInRange("paintingMaxCraftableWidth", 64, 1,
+                                                ModComponentPainting.this.MAX_WIDTH);
+            this.paintingMaxCraftableHeightSpec =
+                    serverBuilder.defineInRange("paintingMaxCraftableHeight", 64, 1,
+                                                ModComponentPainting.this.MAX_HEIGHT);
+            this.copyOnAnvilSpec = serverBuilder.define("copyOnAnvil", true);
+            this.copyOnAnvilCostSpec = serverBuilder.defineInRange("copyOnAnvilCost", 5, 0, 40);
             
             final String RADIUSES_COMMENT = "radius depending on picture size\n";
-            
-            this.iBrushRadiuses.clear();
-            this.iBrushRadiuses.putAll(getRadiuses(config, "brushRadiuses", category,
-                                                   DEFAULT_BRUSH_RADIUSES, RADIUSES_COMMENT));
-            this.iSmallBrushRadiuses.clear();
-            this.iSmallBrushRadiuses.putAll(getRadiuses(config, "smallBrushRadiuses", category,
-                                                        DEFAULT_SMALL_BRUSH_RADIUSES,
-                                                        RADIUSES_COMMENT));
-            this.iRemoverRadiuses.clear();
-            this.iRemoverRadiuses.putAll(getRadiuses(config, "removerRadiuses", category,
-                                                     DEFAULT_BRUSH_RADIUSES, RADIUSES_COMMENT));
-            this.iSmallRemoverRadiuses.clear();
-            this.iSmallRemoverRadiuses.putAll(getRadiuses(config, "smallRemoverRadiuses", category,
-                                                          DEFAULT_SMALL_BRUSH_RADIUSES,
-                                                          RADIUSES_COMMENT));
-            config.restartlessReset();
-            return this;
+            this.brushRadiusesSpecSpecial =
+                    serverBuilder.comment(RADIUSES_COMMENT)
+                                 .defineList("brushRadiuses",
+                                             Arrays.asList(DEFAULT_BRUSH_RADIUSES),
+                                             ModComponentPainting::validateRadius);
+            this.smallBrushRadiusesSpecSpecial =
+                    serverBuilder.comment(RADIUSES_COMMENT)
+                                 .defineList("smallBrushRadiuses",
+                                             Arrays.asList(DEFAULT_SMALL_BRUSH_RADIUSES),
+                                             ModComponentPainting::validateRadius);
+            this.removerRadiusesSpecSpecial =
+                    serverBuilder.comment(RADIUSES_COMMENT)
+                                 .defineList("removerRadiuses",
+                                             Arrays.asList(DEFAULT_BRUSH_RADIUSES),
+                                             ModComponentPainting::validateRadius);
+            this.smallRemoverRadiusesSpecSpecial =
+                    serverBuilder.comment(RADIUSES_COMMENT)
+                                 .defineList("smallRemoverRadiuses",
+                                             Arrays.asList(DEFAULT_SMALL_BRUSH_RADIUSES),
+                                             ModComponentPainting::validateRadius);
+            serverBuilder.pop();
+        }
+        
+        @SubscribeEvent(priority = EventPriority.HIGH)
+        protected void configChanged(ModConfigEvent event) {
+            if (event.getConfig().getType() != ModConfig.Type.SERVER
+                || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
+                return;
+            }
+            this.configChanged();
+        }
+        
+        protected void configChanged() {
+            putValues(this);
+            parseRadiuses(this.brushRadiusesSpecSpecial.get(), this.iBrushRadiuses);
+            parseRadiuses(this.smallBrushRadiusesSpecSpecial.get(), this.iSmallBrushRadiuses);
+            parseRadiuses(this.removerRadiusesSpecSpecial.get(), this.iRemoverRadiuses);
+            parseRadiuses(this.smallRemoverRadiusesSpecSpecial.get(), this.iSmallRemoverRadiuses);
         }
         
         protected class DefaultPictureSize implements IPictureSize {
             
             @Override
             public int getWidth() {
-                return ChangeableConfig.this.paintingDefaultWidth;
+                return Config.this.paintingDefaultWidth;
             }
             
             @Override
             public int getHeight() {
-                return ChangeableConfig.this.paintingDefaultHeight;
+                return Config.this.paintingDefaultHeight;
             }
         }
         
@@ -783,216 +513,239 @@ public class ModComponentPainting extends ModComponent {
             
             @Override
             public int getWidth() {
-                return ChangeableConfig.this.paintOnBlockDefaultWidth;
+                return Config.this.paintOnBlockDefaultWidth;
             }
             
             @Override
             public int getHeight() {
-                return ChangeableConfig.this.paintOnBlockDefaultHeight;
+                return Config.this.paintOnBlockDefaultHeight;
             }
         }
-        
-        @Override
-        public void fromBytes(ByteBuf buf) {
-            this.paintingPlaceStack = buf.readInt();
-            this.allowPaintOnBlock = buf.readBoolean();
-            this.anyBlockValidForPaint = buf.readBoolean();
-            this.copyOnAnvil = buf.readBoolean();
-            this.copyOnAnvilCost = buf.readInt();
-            this.paintingMaxCraftableWidth = buf.readInt();
-            this.paintingMaxCraftableHeight = buf.readInt();
-            this.paintingDefaultWidth = buf.readInt();
-            this.paintingDefaultHeight = buf.readInt();
-            this.paintOnBlockDefaultWidth = buf.readInt();
-            this.paintOnBlockDefaultHeight = buf.readInt();
-            readMap(buf, this.iBrushRadiuses);
-            readMap(buf, this.iSmallBrushRadiuses);
-            readMap(buf, this.iRemoverRadiuses);
-            readMap(buf, this.iSmallRemoverRadiuses);
-        }
-        
-        @Override
-        public void toBytes(ByteBuf buf) {
-            buf.writeInt(this.paintingPlaceStack);
-            buf.writeBoolean(this.allowPaintOnBlock);
-            buf.writeBoolean(this.anyBlockValidForPaint);
-            buf.writeBoolean(this.copyOnAnvil);
-            buf.writeInt(this.copyOnAnvilCost);
-            buf.writeInt(this.paintingMaxCraftableWidth);
-            buf.writeInt(this.paintingMaxCraftableHeight);
-            buf.writeInt(this.paintingDefaultWidth);
-            buf.writeInt(this.paintingDefaultHeight);
-            buf.writeInt(this.paintOnBlockDefaultWidth);
-            buf.writeInt(this.paintOnBlockDefaultHeight);
-            writeMap(buf, this.iBrushRadiuses);
-            writeMap(buf, this.iSmallBrushRadiuses);
-            writeMap(buf, this.iRemoverRadiuses);
-            writeMap(buf, this.iSmallRemoverRadiuses);
-        }
-        
-        @Override
-        public IServerSideConfig copy() {
-            return new ChangeableConfig(this);
-        }
     }
     
-    public class ChangeableServerConfig {
+    protected static final String[] DEFAULT_BRUSH_RADIUSES = new String[]{"1: 1.5",
+                                                                          "12: 2.5",
+                                                                          "16: 3.5",
+                                                                          "24: 5.2",
+                                                                          "32: 6.2",
+                                                                          "48: 7.5",
+                                                                          "64: 10.5"};
+    
+    protected static final String[] DEFAULT_SMALL_BRUSH_RADIUSES = new String[]{"1: 0.1"};
+    
+    public class ServerConfig {
         
         public boolean freePaintingView = true;
+        protected final ForgeConfigSpec.BooleanValue freePaintingViewSpec;
         public boolean freePaintingEditView = false;
+        protected final ForgeConfigSpec.BooleanValue freePaintingEditViewSpec;
         public boolean freePaintingViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue freePaintingViewToSpec;
         public boolean freePaintingEditViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue freePaintingEditViewToSpec;
         public boolean freePaintOnBlockView = true;
+        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockViewSpec;
         public boolean freePaintOnBlockEditView = false;
+        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockEditViewSpec;
         public boolean freePaintOnBlockViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockViewToSpec;
         public boolean freePaintOnBlockEditViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockEditViewToSpec;
         
-        protected ChangeableServerConfig() {}
-        
-        public ChangeableServerConfig read(ModConfig config) {
-            final String category = ModComponentPainting.this.getName();
-            config.restartless();
+        protected ServerConfig(ForgeConfigSpec.Builder serverBuilder) {
+            FMLJavaModLoadingContext.get().getModEventBus().register(this);
+            
+            serverBuilder.push(ModComponentPainting.this.getName());
             final String COMMENT_PREFIX =
                     String.format("allow any player use command:\n/%s ", CommandMod3.NAME);
-            this.freePaintingView =
-                    config.getBoolean("freePaintingView", category, true,
-                                      COMMENT_PREFIX + "painting view" + "\n");
-            this.freePaintingEditView =
-                    config.getBoolean("freePaintingEditView", category, false,
-                                      COMMENT_PREFIX + "painting editview" + "\n");
-            this.freePaintingViewTo =
-                    config.getBoolean("freePaintingViewTo", category, false,
-                                      COMMENT_PREFIX + "painting viewto" + "\n");
-            this.freePaintingEditViewTo =
-                    config.getBoolean("freePaintingEditViewTo", category, false,
-                                      COMMENT_PREFIX + "painting editviewto" + "\n");
-            this.freePaintOnBlockView =
-                    config.getBoolean("freePaintOnBlockView", category, true,
-                                      COMMENT_PREFIX + "paintonblock view" + "\n");
-            this.freePaintOnBlockEditView =
-                    config.getBoolean("freePaintOnBlockEditView", category, false,
-                                      COMMENT_PREFIX + "paintonblock editview" + "\n");
-            this.freePaintOnBlockViewTo =
-                    config.getBoolean("freePaintOnBlockViewTo", category, false,
-                                      COMMENT_PREFIX + "paintonblock viewto" + "\n");
-            this.freePaintOnBlockEditViewTo =
-                    config.getBoolean("freePaintOnBlockEditViewTo", category, false,
-                                      COMMENT_PREFIX + "paintonblock editviewto" + "\n");
-            config.restartlessReset();
-            return this;
+            this.freePaintingViewSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "painting view" + "\n")
+                                 .define("freePaintingView", true);
+            this.freePaintingEditViewSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "painting editview" + "\n")
+                                 .define("freePaintingEditView", false);
+            this.freePaintingViewToSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "painting viewto" + "\n")
+                                 .define("freePaintingViewTo", false);
+            this.freePaintingEditViewToSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "painting editviewto" + "\n")
+                                 .define("freePaintingEditViewTo", false);
+            this.freePaintOnBlockViewSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "paintonblock view" + "\n")
+                                 .define("freePaintOnBlockView", true);
+            this.freePaintOnBlockEditViewSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "paintonblock editview" + "\n")
+                                 .define("freePaintOnBlockEditView", false);
+            this.freePaintOnBlockViewToSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "paintonblock viewto" + "\n")
+                                 .define("freePaintOnBlockViewTo", false);
+            this.freePaintOnBlockEditViewToSpec =
+                    serverBuilder.comment(COMMENT_PREFIX + "paintonblock editviewto" + "\n")
+                                 .define("freePaintOnBlockEditViewTo", false);
+            serverBuilder.pop();
+        }
+        
+        @SubscribeEvent(priority = EventPriority.HIGH)
+        protected void configChanged(ModConfigEvent event) {
+            if (event.getConfig().getType() != ModConfig.Type.SERVER
+                || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
+                return;
+            }
+            this.configChanged();
+        }
+        
+        protected void configChanged() {
+            putValues(this);
         }
     }
     
-    @SideOnly(Side.CLIENT)
-    public class ChangeableClientConfig {
+    public class ClientConfig {
+        
         public boolean perFrameBrushUse = true;
+        protected final ForgeConfigSpec.BooleanValue perFrameBrushUseSpec;
         
         public boolean forceUnhidePaintRemover = false;
+        protected final ForgeConfigSpec.BooleanValue forceUnhidePaintRemoverSpec;
         
         public boolean paintingFrameInfoSideLetters = false;
+        protected final ForgeConfigSpec.BooleanValue paintingFrameInfoSideLettersSpec;
         
         public boolean renderPaintingTile = true;
+        protected final ForgeConfigSpec.BooleanValue renderPaintingTileSpec;
         public int renderPaintingTilePartFrameType = 1;
+        protected final ForgeConfigSpec.IntValue renderPaintingTilePartFrameTypeSpec;
         public int renderPaintingTilePartPictureType = 2;
+        protected final ForgeConfigSpec.IntValue renderPaintingTilePartPictureTypeSpec;
         public double renderPaintingTileMaxRenderDistanceSquared = Math.pow(128.0D, 2);
+        protected final ForgeConfigSpec.DoubleValue renderPaintingTileMaxRenderDistanceSpec;
         public boolean renderPaintingFrameTile = true;
+        protected final ForgeConfigSpec.BooleanValue renderPaintingFrameTileSpec;
         public int renderPaintingFrameTilePartFrameType = 0;
+        protected final ForgeConfigSpec.IntValue renderPaintingFrameTilePartFrameTypeSpec;
         public int renderPaintingFrameTilePartPictureType = 2;
+        protected final ForgeConfigSpec.IntValue renderPaintingFrameTilePartPictureTypeSpec;
         public double renderPaintingFrameTileMaxRenderDistanceSquared = Math.pow(128.0D, 2);
+        protected final ForgeConfigSpec.DoubleValue renderPaintingFrameTileMaxRenderDistanceSpec;
         public int renderPaintOnBlockPartPictureType = 2;
+        protected final ForgeConfigSpec.IntValue renderPaintOnBlockPartPictureTypeSpec;
         public double renderPaintOnBlockMaxRenderDistanceSquared = Math.pow(256.0D, 2);
+        protected final ForgeConfigSpec.DoubleValue renderPaintOnBlockMaxRenderDistanceSpec;
         public boolean renderProfiling = false;
+        protected final ForgeConfigSpec.BooleanValue renderProfilingSpec;
         public boolean paintingSpecialSelectionBox = true;
+        protected final ForgeConfigSpec.BooleanValue paintingSpecialSelectionBoxSpec;
         public Color paintingSpecialSelectionBoxColor = null;
+        protected final ForgeConfigSpec.ConfigValue<
+            String> paintingSpecialSelectionBoxColorSpecSpecial;
         public boolean paintingNoneSelectionBox = false;
+        protected final ForgeConfigSpec.BooleanValue paintingNoneSelectionBoxSpec;
         
-        public ChangeableClientConfig() {}
-        
-        public ChangeableClientConfig read(ModConfig config) {
-            config.restartless();
-            final String category = ModComponentPainting.this.getName();
-            this.perFrameBrushUse = config.getBoolean("perFrameBrushUse", category, true, "");
-            this.forceUnhidePaintRemover =
-                    config.getBoolean("forceUnhidePaintRemover", category, false,
-                                      "show paint remover in creative tab even\n if paint on block is not allowed");
-            this.paintingFrameInfoSideLetters =
-                    config.getBoolean("paintingFrameInfoSideLetters", category, false, "");
+        protected ClientConfig(ForgeConfigSpec.Builder clientBuilder) {
+            FMLJavaModLoadingContext.get().getModEventBus().register(this);
             
+            clientBuilder.push(ModComponentPainting.this.getName());
+            this.perFrameBrushUseSpec = clientBuilder.define("perFrameBrushUse", true);
+            this.forceUnhidePaintRemoverSpec =
+                    clientBuilder.comment("show paint remover in creative tab even\n if paint on block is not allowed")
+                                 .define("forceUnhidePaintRemover", true);
+            this.paintingFrameInfoSideLettersSpec =
+                    clientBuilder.define("paintingFrameInfoSideLetters", false);
+            clientBuilder.pop();
+            
+            clientBuilder.push(CLIENT_RENDER);
             final String PART_RENDER_TYPE = String.join("\n", "render type of specific part",
                                                         "-1: disable", "0: smooth lighting off",
                                                         "1: smooth lighting minimum",
                                                         "2: smooth lighting maximum", "");
-            
-            this.renderPaintingTile = config.getBoolean("paintingTile", CLIENT_RENDER, true, "");
-            this.renderPaintingTilePartFrameType =
-                    config.getInt("paintingTilePartFrameType", CLIENT_RENDER,
-                                  1, -1, 2, PART_RENDER_TYPE);
-            this.renderPaintingTilePartPictureType =
-                    config.getInt("paintingTilePartPictureType", CLIENT_RENDER,
-                                  2, -1, 2, PART_RENDER_TYPE);
+            this.renderPaintingTileSpec = clientBuilder.define("paintingTile", true);
+            this.renderPaintingTilePartFrameTypeSpec =
+                    clientBuilder.comment(PART_RENDER_TYPE)
+                                 .defineInRange("paintingTilePartFrameType", 1, -1, 2);
+            this.renderPaintingTilePartPictureTypeSpec =
+                    clientBuilder.comment(PART_RENDER_TYPE)
+                                 .defineInRange("paintingTilePartPictureType", 2, -1, 2);
+            this.renderPaintingTileMaxRenderDistanceSpec =
+                    clientBuilder.defineInRange("renderPaintingTileMaxRenderDistance",
+                                                128.0D, 0.0D, 1024.0D);
+            this.renderPaintingFrameTileSpec = clientBuilder.define("paintingFrameTile", true);
+            this.renderPaintingFrameTilePartFrameTypeSpec =
+                    clientBuilder.comment(PART_RENDER_TYPE)
+                                 .defineInRange("paintingFrameTilePartFrameType", 0, -1, 2);
+            this.renderPaintingFrameTilePartPictureTypeSpec =
+                    clientBuilder.comment(PART_RENDER_TYPE)
+                                 .defineInRange("paintingFrameTilePartPictureType", 2, -1, 2);
+            this.renderPaintingFrameTileMaxRenderDistanceSpec =
+                    clientBuilder.defineInRange("renderPaintingFrameTileMaxRenderDistance",
+                                                128.0D, 0.0D, 1024.0D);
+            this.renderPaintOnBlockPartPictureTypeSpec =
+                    clientBuilder.comment(PART_RENDER_TYPE)
+                                 .defineInRange("paintOnBlockPartPictureType", 2, -1, 2);
+            this.renderPaintOnBlockMaxRenderDistanceSpec =
+                    clientBuilder.defineInRange("renderPaintOnBlockMaxRenderDistance",
+                                                256.0D, 0.0D, 1024.0D);
+            this.renderProfilingSpec = clientBuilder.define("paintingRenderProfiling", false);
+            this.paintingSpecialSelectionBoxSpec =
+                    clientBuilder.define("paintingSpecialSelectionBox", true);
+            this.paintingSpecialSelectionBoxColorSpecSpecial =
+                    clientBuilder.comment("Color of selection box. Example: #00ff00")
+                                 .define("paintingSpecialSelectionBoxColor", "");
+            this.paintingNoneSelectionBoxSpec =
+                    clientBuilder.define("paintingNoneSelectionBox", false);
+            clientBuilder.pop();
+        }
+        
+        @SubscribeEvent(priority = EventPriority.HIGH)
+        protected void configChanged(ModConfigEvent event) {
+            if (event.getConfig().getType() != ModConfig.Type.CLIENT
+                || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
+                return;
+            }
+            this.configChanged();
+        }
+        
+        protected void configChanged() {
+            putValues(this);
             this.renderPaintingTileMaxRenderDistanceSquared =
-                    Math.pow(config.getFloat("renderPaintingTileMaxRenderDistance", CLIENT_RENDER,
-                                             128.0F, 0.0F, 1024.0F, ""),
-                             2);
-            this.renderPaintingFrameTile =
-                    config.getBoolean("paintingFrameTile", CLIENT_RENDER, true, "");
-            this.renderPaintingFrameTilePartFrameType =
-                    config.getInt("paintingFrameTilePartFrameType", CLIENT_RENDER,
-                                  0, -1, 2, PART_RENDER_TYPE);
-            this.renderPaintingFrameTilePartPictureType =
-                    config.getInt("paintingFrameTilePartPictureType", CLIENT_RENDER,
-                                  2, -1, 2, PART_RENDER_TYPE);
-            this.renderPaintOnBlockMaxRenderDistanceSquared =
-                    Math.pow(config.getFloat("renderPaintOnBlockMaxRenderDistance", CLIENT_RENDER,
-                                             256.0F, 0.0F, 1024.0F, ""),
-                             2);
-            this.renderPaintOnBlockPartPictureType =
-                    config.getInt("paintOnBlockPartPictureType", CLIENT_RENDER,
-                                  2, -1, 2, PART_RENDER_TYPE);
+                    Math.pow(this.renderPaintingTileMaxRenderDistanceSpec.get(), 2.0D);
             this.renderPaintingFrameTileMaxRenderDistanceSquared =
-                    Math.pow(config.getFloat("renderPaintingFrameTileMaxRenderDistance",
-                                             CLIENT_RENDER,
-                                             128.0F, 0.0F, 1024.0F, ""),
-                             2);
-            this.renderProfiling =
-                    config.getBoolean("paintingRenderProfiling", CLIENT_RENDER, false, "");
-            this.paintingSpecialSelectionBox =
-                    config.getBoolean("paintingSpecialSelectionBox", CLIENT_RENDER, true, "");
-            String paintingSpecialSelectionBoxColorString =
-                    config.getString("paintingSpecialSelectionBoxColor", CLIENT_RENDER, "",
-                                     "Color of selection box. Example: #00ff00");
+                    Math.pow(this.renderPaintingFrameTileMaxRenderDistanceSpec.get(), 2.0D);
+            this.renderPaintOnBlockMaxRenderDistanceSquared =
+                    Math.pow(this.renderPaintOnBlockMaxRenderDistanceSpec.get(), 2.0D);
             try {
                 this.paintingSpecialSelectionBoxColor =
-                        Color.decode(paintingSpecialSelectionBoxColorString);
+                        Color.decode(this.paintingSpecialSelectionBoxColorSpecSpecial.get());
             } catch (NumberFormatException e) {
                 this.paintingSpecialSelectionBoxColor = null;
             }
-            this.paintingNoneSelectionBox =
-                    config.getBoolean("paintingNoneSelectionBox", CLIENT_RENDER, false, "");
-            config.restartlessReset();
-            return this;
         }
     }
     
-    protected static final Pattern RADIUS_LINE =
-            Pattern.compile("^\\d+: *(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+))[dDfF]?$");
-    
-    protected static SortedMap<Integer, Double> getRadiuses(
-            ModConfig config,
-            String name,
-            String category,
-            String[] defaultValues,
-            String comment) {
-        Property prop = config.get(category, name, defaultValues, null, RADIUS_LINE);
-        prop.setComment(comment + " [default: " + prop.getDefault() + "]");
-        SortedMap<Integer, Double> map = new TreeMap<>();
-        parseRadiuses(prop.getStringList(), map);
-        return map;
+    protected static void putValues(Object obj) {
+        Arrays.stream(obj.getClass().getDeclaredFields())
+              .filter(f->ForgeConfigSpec.ConfigValue.class.isAssignableFrom(f.getType()))
+              .filter(f->f.getName().endsWith("Spec"))
+              .forEach(f-> {
+                  try {
+                      ForgeConfigSpec.ConfigValue<?> v = (ForgeConfigSpec.ConfigValue<?>)f.get(obj);
+                      String specName = f.getName();
+                      String name = specName.substring(0, specName.length() - 4);
+                      Field fv = obj.getClass().getDeclaredField(name);
+                      if (fv != null) {
+                          fv.set(obj, v.get());
+                      }
+                  } catch (NoSuchFieldException
+                           | SecurityException
+                           | IllegalArgumentException
+                           | IllegalAccessException e) {
+                  }
+              });
     }
     
-    protected static void parseRadiuses(String[] lines, Map<Integer, Double> radiuses) {
+    protected static void parseRadiuses(
+            Collection<? extends String> list,
+            Map<Integer, Double> radiuses) {
         radiuses.clear();
-        for (String line : lines) {
+        for (String line : list) {
             parseRadius(line, radiuses);
         }
     }
@@ -1010,20 +763,21 @@ public class ModComponentPainting extends ModComponent {
         }
     }
     
-    protected static void readMap(ByteBuf buf, Map<Integer, Double> map) {
-        map.clear();
-        IntStream.range(0, buf.readInt()).forEach(i-> {
-            int size = buf.readInt();
-            double radius = buf.readDouble();
-            map.put(size, radius);
-        });
+    protected static boolean validateRadius(Object line) {
+        return line instanceof String && validateRadius((String)line);
     }
     
-    protected static void writeMap(ByteBuf buf, Map<Integer, Double> map) {
-        buf.writeInt(map.size());
-        map.forEach((s, r)-> {
-            buf.writeInt(s);
-            buf.writeDouble(r);
-        });
+    protected static boolean validateRadius(String line) {
+        int cut = line.indexOf(':');
+        if (cut == -1) {
+            return false;
+        }
+        try {
+            Integer.parseInt(line.substring(0, cut));
+            Double.parseDouble(line.substring(cut + 1));
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
