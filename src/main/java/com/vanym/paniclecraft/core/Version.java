@@ -22,7 +22,6 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -51,7 +50,10 @@ public class Version {
     protected static String homepage = null;
     
     public static String getVersion() {
-        return DEF.VERSION;
+        return ModList.get()
+                      .getModContainerByObject(Core.instance)
+                      .map(m->m.getModInfo().getVersion().toString())
+                      .orElse("unknown");
     }
     
     public static Status getStatus() {
