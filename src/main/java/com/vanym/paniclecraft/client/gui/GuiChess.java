@@ -11,7 +11,8 @@ import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -56,7 +57,7 @@ public class GuiChess extends Screen {
         this.updateButtons();
     }
     
-    protected void actionPerformed(Button button) {
+    protected void actionPerformed(AbstractButton button) {
         ChessGame game = this.tileChess.getGame();
         if (button instanceof GuiSquareButton) {
             GuiSquareButton buttonSquare = (GuiSquareButton)button;
@@ -140,15 +141,19 @@ public class GuiChess extends Screen {
     }
     
     @Override
-    public boolean charTyped(char character, int key) {
-        if (character == 3 /* Ctrl+c */) {
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        InputMappings.Input inputCode = InputMappings.getInputByCode(key, scanCode);
+        if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(inputCode)) {
+            key = 256;
+        }
+        if (super.keyPressed(key, scanCode, modifiers)) {
+            return true;
+        }
+        if (Screen.isCopy(key)) {
             this.movesCopy();
             return true;
         }
-        if (key == this.minecraft.gameSettings.keyBindInventory.getKey().getKeyCode()) {
-            key = 1;
-        }
-        return super.charTyped(character, key);
+        return false;
     }
     
     @Override
@@ -259,10 +264,15 @@ public class GuiChess extends Screen {
         }
     }
     
-    protected abstract class GuiChessButton extends Button {
+    protected abstract class GuiChessButton extends AbstractButton {
         
         public GuiChessButton(int x, int y) {
-            super(x, y, 20, 20, "", GuiChess.this::actionPerformed);
+            super(x, y, 20, 20, "");
+        }
+        
+        @Override
+        public void onPress() {
+            GuiChess.this.actionPerformed(this);
         }
         
         protected abstract byte getPiece();
