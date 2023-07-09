@@ -23,7 +23,7 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NumberNBT;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class Picture implements IPictureSize {
     
@@ -561,7 +561,7 @@ public class Picture implements IPictureSize {
     }
     
     public void unload() {
-        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+        if (EffectiveSide.get().isClient()) {
             this.unloadClient();
         }
     }

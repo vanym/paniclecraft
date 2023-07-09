@@ -41,7 +41,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool {
     
@@ -61,7 +61,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+        if (EffectiveSide.get().isClient()) {
             this.onUsingTickClient(stack, player, count);
         }
     }
@@ -82,7 +82,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             World world,
             LivingEntity player,
             int count) {
-        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+        if (EffectiveSide.get().isClient()) {
             this.flashBrushUseMessages();
         }
     }
@@ -175,7 +175,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.setActiveHand(hand);
-            if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+            if (EffectiveSide.get().isClient()) {
                 this.brushUseMessages.clear();
             }
             return ActionResultType.SUCCESS;

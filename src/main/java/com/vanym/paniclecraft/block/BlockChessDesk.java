@@ -36,6 +36,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class BlockChessDesk extends BlockContainerMod3 {
     
@@ -106,7 +107,7 @@ public class BlockChessDesk extends BlockContainerMod3 {
             PlayerEntity player,
             Hand hand,
             BlockRayTraceResult hit) {
-        if (world.isRemote) {
+        if (EffectiveSide.get().isClient()) {
             TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getTileEntity(pos);
             Minecraft.getInstance().displayGuiScreen(new GuiChess(tileCD));
         }
