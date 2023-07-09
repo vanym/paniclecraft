@@ -31,7 +31,7 @@ public class SlotPortableCrafting extends CraftingResultSlot {
               .filter(held->held.getItem().isDamageable())
               .findFirst()
               .ifPresent(held->held.damageItem(1, player, ItemUtils.onBroken(held)));
-        player.openContainer.detectAndSendChanges();
+        player.inventory.markDirty();
         return super.onTake(player, stack);
     }
 }
