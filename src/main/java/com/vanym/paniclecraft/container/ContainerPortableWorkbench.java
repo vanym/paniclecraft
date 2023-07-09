@@ -18,9 +18,10 @@ public class ContainerPortableWorkbench extends ContainerWorkbench {
                 player,
                 this.craftMatrix,
                 this.craftResult,
-                original.slotNumber,
+                original.getSlotIndex(),
                 original.xDisplayPosition,
                 original.yDisplayPosition);
+        slot.slotNumber = original.slotNumber;
         this.inventorySlots.set(0, slot);
     }
     
