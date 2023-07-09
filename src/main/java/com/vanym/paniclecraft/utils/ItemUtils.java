@@ -20,7 +20,7 @@ public class ItemUtils {
     
     public static <T extends LivingEntity> Consumer<T> onBroken(ItemStack stack) {
         return e->Arrays.stream(EquipmentSlotType.values())
-                        .filter(slot->e.getItemStackFromSlot(slot) == stack)
+                        .filter(slot->!stack.isEmpty() && stack == e.getItemStackFromSlot(slot))
                         .findAny()
                         .ifPresent(e::sendBreakAnimation);
     }
