@@ -67,6 +67,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -230,10 +231,12 @@ public class ModComponentPainting extends ModComponent {
                                               MessagePaintingViewAddPicture::encode,
                                               MessagePaintingViewAddPicture::decode,
                                               NetworkUtils.handleInWorld(MessagePaintingViewAddPicture::handleInWorld));
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(EventPriority.NORMAL, this::configChanged);
         this.applyConfig();
     }
     
-    @SubscribeEvent(priority = EventPriority.NORMAL)
+    // Subscribes in setup
     protected void configChanged(ModConfig.ConfigReloading event) {
         if (event.getConfig().getType() != ModConfig.Type.SERVER
             || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
@@ -271,10 +274,12 @@ public class ModComponentPainting extends ModComponent {
         RenderingRegistry.registerEntityRenderingHandler(EntityPaintOnBlock.class,
                                                          EntityPaintOnBlockRenderer::new);
         
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(EventPriority.NORMAL, this::configChangedClient);
         this.applyConfigClient();
     }
     
-    @SubscribeEvent(priority = EventPriority.NORMAL)
+    // Subscribes in setupClient
     @OnlyIn(Dist.CLIENT)
     protected void configChangedClient(ModConfig.ConfigReloading event) {
         if (event.getConfig().getType() != ModConfig.Type.CLIENT
