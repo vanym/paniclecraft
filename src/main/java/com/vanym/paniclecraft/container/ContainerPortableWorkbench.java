@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.container;
 
+import java.util.stream.Stream;
+
 import com.vanym.paniclecraft.container.slot.SlotPortableCrafting;
 import com.vanym.paniclecraft.item.ItemWorkbench;
 
@@ -18,15 +20,17 @@ public class ContainerPortableWorkbench extends ContainerWorkbench {
                 player,
                 this.craftMatrix,
                 this.craftResult,
-                original.slotNumber,
+                original.getSlotIndex(),
                 original.xPos,
                 original.yPos);
+        slot.slotNumber = original.slotNumber;
         this.inventorySlots.set(0, slot);
     }
     
     @Override
     public boolean canInteractWith(EntityPlayer player) {
-        return ItemWorkbench.canBeWorkbench(player.getHeldItem(EnumHand.MAIN_HAND))
-            || ItemWorkbench.canBeWorkbench(player.getHeldItem(EnumHand.OFF_HAND));
+        return Stream.of(EnumHand.MAIN_HAND, EnumHand.OFF_HAND)
+                     .map(player::getHeldItem)
+                     .anyMatch(ItemWorkbench::canBeWorkbench);
     }
 }
