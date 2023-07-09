@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class MessageAdvSignOpenGui {
@@ -28,7 +28,7 @@ public class MessageAdvSignOpenGui {
     }
     
     public static void handleInWorld(MessageAdvSignOpenGui message, NetworkEvent.Context ctx) {
-        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+        if (ctx.getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
             Minecraft minecraft = Minecraft.getInstance();
             TileEntity tile = minecraft.world.getTileEntity(message.pos);
             if (tile instanceof TileEntityAdvSign) {

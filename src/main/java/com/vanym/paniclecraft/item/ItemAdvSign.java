@@ -37,7 +37,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 
 public class ItemAdvSign extends ItemMod3 {
     
@@ -163,7 +162,7 @@ public class ItemAdvSign extends ItemMod3 {
             tileAS.setEditor(player);
         }
         stack.shrink(1);
-        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT) {
+        if (world.isRemote) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getTileEntity(pos);
             Minecraft.getInstance().displayGuiScreen(new GuiEditAdvSign(tileAS));
         }
