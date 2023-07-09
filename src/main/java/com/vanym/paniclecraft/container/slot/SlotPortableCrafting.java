@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.container.slot;
 
+import java.util.stream.Stream;
+
 import com.vanym.paniclecraft.item.ItemWorkbench;
 import com.vanym.paniclecraft.utils.ItemUtils;
 
@@ -23,17 +25,13 @@ public class SlotPortableCrafting extends CraftingResultSlot {
     
     @Override
     public ItemStack onTake(PlayerEntity player, ItemStack stack) {
-        ItemStack heldStack = player.getHeldItem(Hand.MAIN_HAND);
-        if (ItemWorkbench.canBeWorkbench(heldStack)
-            && heldStack.getItem().getMaxDamage(heldStack) > 0) {
-            heldStack.damageItem(1, player, ItemUtils.onBroken(Hand.MAIN_HAND));
-        } else {
-            ItemStack offStack = player.getHeldItem(Hand.OFF_HAND);
-            if (ItemWorkbench.canBeWorkbench(offStack)
-                && offStack.getItem().getMaxDamage(offStack) > 0) {
-                offStack.damageItem(1, player, ItemUtils.onBroken(Hand.OFF_HAND));
-            }
-        }
+        Stream.of(Hand.MAIN_HAND, Hand.OFF_HAND)
+              .map(player::getHeldItem)
+              .filter(ItemWorkbench::canBeWorkbench)
+              .filter(held->held.getItem().isDamageable())
+              .findFirst()
+              .ifPresent(held->held.damageItem(1, player, ItemUtils.onBroken(held)));
+        player.openContainer.detectAndSendChanges();
         return super.onTake(player, stack);
     }
 }
