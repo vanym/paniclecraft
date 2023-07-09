@@ -47,7 +47,7 @@ public class ModComponentCannon extends ModComponent {
         }
         this.enabled = true;
         this.blockCannon = new BlockCannon();
-        GameRegistry.registerBlock(this.blockCannon, this.blockCannon.getName());
+        Core.instance.registerBlock(this.blockCannon);
         this.itemCannon = (ItemBlock)Item.getItemFromBlock(this.blockCannon);
         GameRegistry.registerTileEntity(TileEntityCannon.class, TileEntityCannon.ID.toString());
         boolean craftingRecipeCannon =

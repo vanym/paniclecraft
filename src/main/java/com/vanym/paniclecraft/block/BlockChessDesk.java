@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.block;
 import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
@@ -14,6 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -26,8 +26,13 @@ public class BlockChessDesk extends BlockContainerMod3 {
     public BlockChessDesk() {
         super(Material.wood);
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 3.0F / 16.0F, 1.0F);
-        this.setBlockName("chess_desk");
+        this.setRegistryName("chess_desk");
         this.setHardness(0.5F);
+    }
+    
+    @Override
+    public Class<? extends ItemBlock> getItemClass() {
+        return ItemChessDesk.class;
     }
     
     @Override
@@ -111,6 +116,6 @@ public class BlockChessDesk extends BlockContainerMod3 {
     @Override
     @SideOnly(Side.CLIENT)
     public String getItemIconName() {
-        return DEF.MOD_ID + ":" + this.getName();
+        return this.getTextureName();
     }
 }

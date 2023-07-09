@@ -134,12 +134,11 @@ public class ModComponentPainting extends ModComponent {
         Core.instance.registerItem(this.itemPalette);
         
         this.blockPainting = new BlockPainting();
-        GameRegistry.registerBlock(this.blockPainting, null, this.blockPainting.getName());
+        Core.instance.registerBlock(this.blockPainting);
         GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID.toString());
         
         this.blockPaintingFrame = new BlockPaintingFrame();
-        GameRegistry.registerBlock(this.blockPaintingFrame, ItemPaintingFrame.class,
-                                   this.blockPaintingFrame.getName());
+        Core.instance.registerBlock(this.blockPaintingFrame);
         this.itemPaintingFrame = (ItemPaintingFrame)Item.getItemFromBlock(this.blockPaintingFrame);
         GameRegistry.registerTileEntity(TileEntityPaintingFrame.class,
                                         TileEntityPaintingFrame.ID.toString());

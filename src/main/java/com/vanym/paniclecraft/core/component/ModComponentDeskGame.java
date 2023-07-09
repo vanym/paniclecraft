@@ -45,8 +45,7 @@ public class ModComponentDeskGame extends ModComponent {
         }
         this.enabled = true;
         this.blockChessDesk = new BlockChessDesk();
-        GameRegistry.registerBlock(this.blockChessDesk, ItemChessDesk.class,
-                                   this.blockChessDesk.getName());
+        Core.instance.registerBlock(this.blockChessDesk);
         this.itemChessDesk = (ItemChessDesk)Item.getItemFromBlock(this.blockChessDesk);
         MinecraftForge.EVENT_BUS.register(this.itemChessDesk);
         GameRegistry.registerTileEntity(TileEntityChessDesk.class,

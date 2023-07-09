@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.block;
 import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
@@ -29,7 +28,7 @@ public class BlockCannon extends BlockContainerMod3 {
     
     public BlockCannon() {
         super(Material.anvil);
-        this.setBlockName("cannon");
+        this.setRegistryName("cannon");
         this.setHardness(1.5F);
     }
     
@@ -125,6 +124,6 @@ public class BlockCannon extends BlockContainerMod3 {
     @Override
     @SideOnly(Side.CLIENT)
     public String getItemIconName() {
-        return DEF.MOD_ID + ":" + this.getName();
+        return this.getTextureName();
     }
 }

@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 public class ItemWorkbench extends ItemMod3 implements IFuelHandler {
     
     public ItemWorkbench(int damage) {
-        this.setUnlocalizedName("portable_workbench");
+        this.setRegistryName("portable_workbench");
         this.setMaxDamage(damage);
         this.setMaxStackSize(1);
     }

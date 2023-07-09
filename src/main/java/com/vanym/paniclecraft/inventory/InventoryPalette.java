@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 public class InventoryPalette extends InventoryBasic {
     
     public InventoryPalette() {
-        super(Core.instance.painting.itemPalette.getUnlocalizedName() + ".inv", false, 1);
+        super(Core.instance.painting.itemPalette.getUnlocalizedName() + ".inventory", false, 1);
     }
     
     @Override

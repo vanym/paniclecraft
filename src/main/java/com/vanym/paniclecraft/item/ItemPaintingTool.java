@@ -179,7 +179,8 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             if (itemTag.hasKey(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 StringBuilder sb = new StringBuilder();
-                sb.append(StatCollector.translateToLocal("item.paintingtool.radius"));
+                sb.append(StatCollector.translateToLocal(IMod3Item.getUnlocalizedName("paintingtool") +
+                    ".radius"));
                 sb.append(": ");
                 sb.append(NUMBER_FORMATTER.format(radius));
                 list.add(sb.toString());

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.vanym.paniclecraft.block.IMod3Block;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
@@ -20,7 +21,7 @@ import com.vanym.paniclecraft.core.component.ModComponentCannon;
 import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
-import com.vanym.paniclecraft.item.ItemMod3;
+import com.vanym.paniclecraft.item.IMod3Item;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
 
@@ -44,8 +45,10 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
@@ -182,8 +185,19 @@ public class Core implements IGuiHandler {
         }
     }
     
-    public void registerItem(ItemMod3 item) {
-        GameRegistry.registerItem(item, item.getName());
+    public void registerBlock(IMod3Block mod3Block) {
+        Block block = mod3Block.getBlock();
+        GameRegistry.registerBlock(block, mod3Block.getItemClass(),
+                                   mod3Block.getRegistryName(),
+                                   mod3Block.getItemArgs());
+        if (this.tab != null) {
+            block.setCreativeTab(Core.instance.tab);
+        }
+    }
+    
+    public void registerItem(IMod3Item mod3Item) {
+        Item item = mod3Item.getItem();
+        GameRegistry.registerItem(item, mod3Item.getRegistryName());
         if (this.tab != null) {
             item.setCreativeTab(this.tab);
             if (this.tab.iconitem == null) {

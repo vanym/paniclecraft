@@ -37,8 +37,7 @@ public class ItemPaintRemover extends ItemPaintingTool {
     public IIcon iconSmallRemover;
     
     public ItemPaintRemover() {
-        super();
-        this.setUnlocalizedName("paintremover");
+        this.setRegistryName("paintremover");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
@@ -59,7 +58,7 @@ public class ItemPaintRemover extends ItemPaintingTool {
         if (name == null) {
             return this.getUnlocalizedName() + damage;
         }
-        return "item." + name;
+        return IMod3Item.getUnlocalizedName(name);
     }
     
     @Override

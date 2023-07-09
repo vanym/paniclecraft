@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -30,8 +31,13 @@ public class BlockAdvSign extends BlockContainerMod3 {
     public BlockAdvSign() {
         super(Material.wood);
         this.setHardness(1.0F);
-        this.setBlockName("advanced_sign");
+        this.setRegistryName("advanced_sign");
         this.setBlockBounds(0.25F, 0.25F, 0.25F, 0.75F, 0.75F, 0.75F);
+    }
+    
+    @Override
+    public Class<? extends ItemBlock> getItemClass() {
+        return null;
     }
     
     @Override

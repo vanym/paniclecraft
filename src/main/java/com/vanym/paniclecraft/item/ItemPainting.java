@@ -27,13 +27,7 @@ public class ItemPainting extends ItemMod3 {
     public static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public ItemPainting() {
-        super();
-        this.setUnlocalizedName("paintingblock");
-    }
-    
-    @Override
-    public String getName() {
-        return "painting";
+        this.setRegistryName("painting");
     }
     
     @Override
@@ -137,7 +131,8 @@ public class ItemPainting extends ItemMod3 {
                 NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
                 if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                     !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(StatCollector.translateToLocal("item.painting.uneditable"));
+                    list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
+                        ".uneditable"));
                 }
                 list.add(pictureSizeInformation(pictureTag));
             }

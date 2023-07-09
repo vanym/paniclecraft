@@ -1,25 +1,23 @@
 package com.vanym.paniclecraft.item;
 
-import com.vanym.paniclecraft.DEF;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 
-public abstract class ItemMod3 extends Item {
-    public ItemMod3() {
-        super();
+public abstract class ItemMod3 extends Item implements IMod3Item {
+    
+    @Override
+    public String getUnlocalizedName() {
+        return IMod3Item.getUnlocalizedName(this.getRegistryName());
     }
     
     @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        this.itemIcon = iconRegister.registerIcon(DEF.MOD_ID + ":" + this.getName());
+    public String getUnlocalizedName(ItemStack stack) {
+        return this.getUnlocalizedName();
     }
     
-    public String getName() {
-        String unlocalizedName = this.getUnlocalizedName();
-        return unlocalizedName.substring(unlocalizedName.indexOf(".") + 1);
+    @Override
+    public String getItemStackDisplayName(ItemStack stack) {
+        return StatCollector.translateToLocal(this.getUnlocalizedName(stack)).trim();
     }
 }

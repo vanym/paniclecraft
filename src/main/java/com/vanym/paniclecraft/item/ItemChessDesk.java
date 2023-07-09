@@ -17,7 +17,6 @@ import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -25,7 +24,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
-public class ItemChessDesk extends ItemBlock {
+public class ItemChessDesk extends ItemBlockMod3 {
     
     public static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
     
@@ -85,7 +84,7 @@ public class ItemChessDesk extends ItemBlock {
         NBTTagCompound tag = stack.getTagCompound();
         if (tag.hasKey(TAG_MOVES)) {
             NBTTagList movesTag = tag.getTagList(TAG_MOVES, 10);
-            list.add(StatCollector.translateToLocalFormatted("item.chess_desk.moves",
+            list.add(StatCollector.translateToLocalFormatted(this.getUnlocalizedName() + ".moves",
                                                              movesTag.tagCount()));
             if (GuiScreen.isShiftKeyDown()) {
                 Map<NBTTagCompound, Integer> white = new HashMap<>(), black = new HashMap<>();
@@ -103,7 +102,7 @@ public class ItemChessDesk extends ItemBlock {
                     Map<NBTTagCompound, Integer> map = side ? white : black;
                     boolean many = map.size() > 1;
                     String translate =
-                            String.format("item.chess_desk.player.%s.%s",
+                            String.format(this.getUnlocalizedName() + ".player.%s.%s",
                                           side ? "white" : "black", many ? "many" : "one");
                     map.entrySet()
                        .stream()

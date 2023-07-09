@@ -24,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -45,10 +46,15 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     
     public BlockPaintingFrame() {
         super(Material.wood);
-        this.setBlockName("paintingframe");
+        this.setRegistryName("paintingframe");
         this.setHardness(0.6F);
         this.frameOutlineSize = (1.0D / 16D) * 2.0D;
         this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameOutlineSize));
+    }
+    
+    @Override
+    public Class<? extends ItemBlock> getItemClass() {
+        return ItemPaintingFrame.class;
     }
     
     @Override

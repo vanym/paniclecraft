@@ -45,7 +45,7 @@ public class ModComponentAdvSign extends ModComponent {
         this.enabled = true;
         this.blockAdvSign = new BlockAdvSign();
         this.itemAdvSign = new ItemAdvSign();
-        GameRegistry.registerBlock(this.blockAdvSign, null, this.blockAdvSign.getName());
+        Core.instance.registerBlock(this.blockAdvSign);
         Core.instance.registerItem(this.itemAdvSign);
         GameRegistry.registerTileEntity(TileEntityAdvSign.class, TileEntityAdvSign.ID.toString());
         boolean craftingRecipeEasy = config.getBoolean("craftingRecipeEasy", this.getName(), true,

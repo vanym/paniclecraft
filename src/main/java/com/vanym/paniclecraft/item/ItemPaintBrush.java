@@ -60,8 +60,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     public IIcon iconColorPickerBody;
     
     public ItemPaintBrush() {
-        super();
-        this.setUnlocalizedName("paintbrush");
+        this.setRegistryName("paintbrush");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
@@ -122,7 +121,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
         if (name == null) {
             return this.getUnlocalizedName() + damage;
         }
-        return "item." + name;
+        return IMod3Item.getUnlocalizedName(name);
     }
     
     @Override
