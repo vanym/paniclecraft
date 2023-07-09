@@ -9,6 +9,7 @@ import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.tileentity.SignTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.model.SignModel;
 import net.minecraft.util.ResourceLocation;
@@ -18,8 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvSign> {
     
-    protected static final ResourceLocation TEXTURE =
-            new ResourceLocation("textures/entity/sign.png");
+    protected static final ResourceLocation TEXTURE = SignTileEntityRenderer.field_217659_c;
     
     protected final SignModel modelSign = new SignModel();
     
