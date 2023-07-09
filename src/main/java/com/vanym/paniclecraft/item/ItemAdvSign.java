@@ -66,7 +66,7 @@ public class ItemAdvSign extends ItemMod3 {
                              .map(StringTextComponent::new)
                              .forEachOrdered(list::add);
                 } else {
-                    list.add(new TranslationTextComponent("item.advanced_sign.showtext"));
+                    list.add(new TranslationTextComponent(this.getTranslationKey() + ".showtext"));
                 }
             }
         }

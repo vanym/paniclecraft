@@ -10,6 +10,7 @@ import java.util.SortedMap;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
@@ -195,8 +196,8 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             if (itemTag.contains(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 list.add(new TranslationTextComponent(
-                        "item.paintingtool.radius").appendText(": ")
-                                                   .appendText(NUMBER_FORMATTER.format(radius)));
+                        "item." + DEF.MOD_ID + ".paintingtool.radius").appendText(": ")
+                                                                      .appendText(NUMBER_FORMATTER.format(radius)));
             }
         }
     }

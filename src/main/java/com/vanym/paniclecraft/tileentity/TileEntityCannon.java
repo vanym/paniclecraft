@@ -243,7 +243,7 @@ public class TileEntityCannon extends TileEntityBase
     @Override
     public ITextComponent getDisplayName() {
         return new TranslationTextComponent(
-                Core.instance.cannon.blockCannon.getRegistryName().getPath() + ".inv");
+                Core.instance.cannon.blockCannon.getTranslationKey() + ".inventory");
     }
     
     @Override

@@ -139,7 +139,8 @@ public class ItemPainting extends ItemMod3 {
                 CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE);
                 if (pictureTag.contains(Picture.TAG_EDITABLE) &&
                     !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(new TranslationTextComponent("item.painting.uneditable"));
+                    list.add(new TranslationTextComponent(
+                            this.getTranslationKey() + ".uneditable"));
                 }
                 list.add(new StringTextComponent(pictureSizeInformation(pictureTag)));
             }

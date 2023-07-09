@@ -1,20 +1,20 @@
-item.broom.name=Broom
+item.paniclecraft.broom=Broom
 
-item.advanced_sign.name=Advanced Sign
-item.advanced_sign.showtext=Press <shift> to see text
+item.paniclecraft.advanced_sign=Advanced Sign
+item.paniclecraft.advanced_sign.showtext=Press <shift> to see text
 
-item.paintingblock.name=Canvas
-item.painting.uneditable=Uneditable
-tile.paintingframe.name=Canvas Frame
-item.paintingtool_brush.name=Paint Brush
-item.paintingtool_brush_small.name=Small Paint Brush
-item.paintingtool_filler.name=Paint Filler
-item.paintingtool_colorpicker.name=Color Picker
-item.paintingtool_remover.name=Paint Chipper
-item.paintingtool_remover_small.name=Paint Knife
-item.paintingtool.radius=Radius
-item.palette.name=Palette
-item.palette.inv=Palette
+item.paniclecraft.painting=Canvas
+item.paniclecraft.painting.uneditable=Uneditable
+block.paniclecraft.paintingframe=Canvas Frame
+item.paniclecraft.paintingtool_brush=Paint Brush
+item.paniclecraft.paintingtool_brush_small=Small Paint Brush
+item.paniclecraft.paintingtool_filler=Paint Filler
+item.paniclecraft.paintingtool_colorpicker=Color Picker
+item.paniclecraft.paintingtool_remover=Paint Chipper
+item.paniclecraft.paintingtool_remover_small=Paint Knife
+item.paniclecraft.paintingtool.radius=Radius
+item.paniclecraft.palette=Palette
+item.paniclecraft.palette.inventory=Palette
 
 gui.paintingview.export=Export
 painting.export.success=Saved painting as %s
@@ -26,21 +26,21 @@ gui.paintingview.importsave=Save
 gui.paintingview.importcancel=Cancel
 painting.import.failure=Couldn't import image: %s
 
-tile.cannon.name=Cannon
-tile.cannon.inv=Cannon
+block.paniclecraft.cannon=Cannon
+block.paniclecraft.cannon.inventory=Cannon
 gui.cannon.direction=Direction
 gui.cannon.height=Height
 gui.cannon.strength=Strength
 
-tile.chess_desk.name=Chess Board
-item.chess_desk.moves=Moves: %d
-item.chess_desk.player.white.one=W: %s
-item.chess_desk.player.white.many=W: %s (%d)
-item.chess_desk.player.black.one=B: %s
-item.chess_desk.player.black.many=B: %s (%d)
+block.paniclecraft.chess_desk=Chess Board
+item.paniclecraft.chess_desk.moves=Moves: %d
+item.paniclecraft.chess_desk.player.white.one=W: %s
+item.paniclecraft.chess_desk.player.white.many=W: %s (%d)
+item.paniclecraft.chess_desk.player.black.one=B: %s
+item.paniclecraft.chess_desk.player.black.many=B: %s (%d)
 chess.export.copy.success=Copy chess notation to clipboard
 
-item.portable_workbench.name=Portable Workbench
+item.paniclecraft.portable_workbench=Portable Workbench
 
 commands.paniclecraft.exception.playerless=Only players can use this command
 commands.paniclecraft.exception.noblock=Can't find block you looking at

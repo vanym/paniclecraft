@@ -16,12 +16,8 @@ import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 public class ContainerPalette extends ContainerBase implements IInventoryChangedListener {
-    
-    public static final ITextComponent NAME = new TranslationTextComponent("container.palette");
     
     public final InventoryPalette inventoryPalette = new InventoryPalette();
     

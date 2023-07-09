@@ -67,7 +67,9 @@ public class ItemChessDesk extends BlockItem {
         CompoundNBT tag = stack.getTag();
         if (tag.contains(TAG_MOVES)) {
             ListNBT movesTag = tag.getList(TAG_MOVES, 10);
-            list.add(new TranslationTextComponent("item.chess_desk.moves", movesTag.size()));
+            list.add(new TranslationTextComponent(
+                    this.getTranslationKey() + ".moves",
+                    movesTag.size()));
             if (Screen.hasShiftDown()) {
                 Map<CompoundNBT, Integer> white = new HashMap<>(), black = new HashMap<>();
                 for (int i = 0; i < movesTag.size(); ++i) {
@@ -83,7 +85,7 @@ public class ItemChessDesk extends BlockItem {
                     Map<CompoundNBT, Integer> map = side ? white : black;
                     boolean many = map.size() > 1;
                     String translate =
-                            String.format("item.chess_desk.player.%s.%s",
+                            String.format(this.getTranslationKey() + ".player.%s.%s",
                                           side ? "white" : "black", many ? "many" : "one");
                     map.entrySet()
                        .stream()
