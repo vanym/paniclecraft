@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "paniclecraft:items/chess_desk"
+        "layer0": "paniclecraft:item/chess_desk"
     }
 }

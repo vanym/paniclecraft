@@ -1,6 +1,6 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "paniclecraft:items/broom"
+        "layer0": "paniclecraft:item/broom"
     }
 }

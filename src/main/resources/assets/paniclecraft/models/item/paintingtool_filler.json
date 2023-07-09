@@ -1,7 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "paniclecraft:items/paintingtool_filler_head",
-        "layer1": "paniclecraft:items/paintingtool_filler_body"
+        "layer0": "paniclecraft:item/paintingtool_filler_head",
+        "layer1": "paniclecraft:item/paintingtool_filler_body"
     }
 }

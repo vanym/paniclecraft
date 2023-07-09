@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "paniclecraft:items/portable_workbench"
+        "layer0": "paniclecraft:item/portable_workbench"
     }
 }

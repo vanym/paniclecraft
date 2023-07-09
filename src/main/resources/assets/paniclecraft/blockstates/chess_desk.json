@@ -1,8 +1,8 @@
 {
     "variants": {
-        "facing=north": { "model": "paniclecraft:chess_desk" },
-        "facing=south": { "model": "paniclecraft:chess_desk", "y": 180 },
-        "facing=west":  { "model": "paniclecraft:chess_desk", "y": 270 },
-        "facing=east":  { "model": "paniclecraft:chess_desk", "y": 90 }
+        "facing=north": { "model": "paniclecraft:block/chess_desk" },
+        "facing=south": { "model": "paniclecraft:block/chess_desk", "y": 180 },
+        "facing=west":  { "model": "paniclecraft:block/chess_desk", "y": 270 },
+        "facing=east":  { "model": "paniclecraft:block/chess_desk", "y": 90 }
     }
 }

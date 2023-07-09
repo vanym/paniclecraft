@@ -1,5 +1,5 @@
 {
     "variants": {
-        "normal": { "model": "paniclecraft:cannon" }
+        "": { "model": "paniclecraft:block/cannon" }
     }
 }

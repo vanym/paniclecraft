@@ -1,6 +1,6 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "paniclecraft:items/paintingtool_remover"
+        "layer0": "paniclecraft:item/paintingtool_remover"
     }
 }

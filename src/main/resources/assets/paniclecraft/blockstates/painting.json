@@ -1,10 +1,10 @@
 {
     "variants": {
-        "facing=down":  { "model": "paniclecraft:painting", "x": 90 },
-        "facing=up":    { "model": "paniclecraft:painting", "x": 270 },
-        "facing=north": { "model": "paniclecraft:painting" },
-        "facing=south": { "model": "paniclecraft:painting", "y": 180 },
-        "facing=west":  { "model": "paniclecraft:painting", "y": 270 },
-        "facing=east":  { "model": "paniclecraft:painting", "y": 90 }
+        "facing=down":  { "model": "paniclecraft:block/painting", "x": 90 },
+        "facing=up":    { "model": "paniclecraft:block/painting", "x": 270 },
+        "facing=north": { "model": "paniclecraft:block/painting" },
+        "facing=south": { "model": "paniclecraft:block/painting", "y": 180 },
+        "facing=west":  { "model": "paniclecraft:block/painting", "y": 270 },
+        "facing=east":  { "model": "paniclecraft:block/painting", "y": 90 }
     }
 }

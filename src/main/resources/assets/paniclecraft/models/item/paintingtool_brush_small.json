@@ -1,7 +1,7 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "paniclecraft:items/paintingtool_brush_small_head",
-        "layer1": "paniclecraft:items/paintingtool_brush_small_body"
+        "layer0": "paniclecraft:item/paintingtool_brush_small_head",
+        "layer1": "paniclecraft:item/paintingtool_brush_small_body"
     }
 }
