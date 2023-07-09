@@ -1,11 +1,11 @@
 package com.vanym.paniclecraft.block;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
 
 public abstract class BlockContainerMod3 extends BlockContainer {
     
@@ -15,13 +15,16 @@ public abstract class BlockContainerMod3 extends BlockContainer {
     }
     
     @Override
-    public Block setUnlocalizedName(String name) {
-        this.setRegistryName(DEF.MOD_ID, name);
-        return super.setUnlocalizedName(name);
+    public String getUnlocalizedName() {
+        return getUnlocalizedName(this.getRegistryName());
     }
     
-    public String getName() {
-        String unlocalizedName = this.getUnlocalizedName();
-        return unlocalizedName.substring(unlocalizedName.indexOf(".") + 1);
+    @Override
+    public String getLocalizedName() {
+        return I18n.format(this.getUnlocalizedName()).trim();
+    }
+    
+    public static String getUnlocalizedName(ResourceLocation id) {
+        return "block." + id.getResourceDomain() + "." + id.getResourcePath();
     }
 }

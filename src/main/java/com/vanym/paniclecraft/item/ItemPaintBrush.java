@@ -44,8 +44,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IWithSubtypes, I
     }
     
     public ItemPaintBrush() {
-        super();
-        this.setUnlocalizedName("paintbrush");
+        this.setRegistryName("paintbrush");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
@@ -90,7 +89,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IWithSubtypes, I
         if (name == null) {
             return this.getUnlocalizedName() + damage;
         }
-        return "item." + name;
+        return getUnlocalizedName(name);
     }
     
     @Override

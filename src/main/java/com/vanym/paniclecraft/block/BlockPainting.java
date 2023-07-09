@@ -41,7 +41,7 @@ public class BlockPainting extends BlockPaintingContainer {
     public BlockPainting() {
         super(Material.WOOD);
         this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-        this.setUnlocalizedName("painting");
+        this.setRegistryName("painting");
         this.setHardness(0.4F);
     }
     

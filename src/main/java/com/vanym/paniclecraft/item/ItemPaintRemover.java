@@ -26,8 +26,7 @@ public class ItemPaintRemover extends ItemPaintingTool implements IWithSubtypes 
     }
     
     public ItemPaintRemover() {
-        super();
-        this.setUnlocalizedName("paintremover");
+        this.setRegistryName("paintremover");
         this.setMaxStackSize(1);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
@@ -48,7 +47,7 @@ public class ItemPaintRemover extends ItemPaintingTool implements IWithSubtypes 
         if (name == null) {
             return this.getUnlocalizedName() + damage;
         }
-        return "item." + name;
+        return getUnlocalizedName(name);
     }
     
     @Override

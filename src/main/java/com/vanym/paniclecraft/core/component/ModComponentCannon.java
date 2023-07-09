@@ -5,6 +5,7 @@ import com.vanym.paniclecraft.block.BlockCannon;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererCannon;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityCannonRenderer;
 import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.item.ItemBlockMod3;
 import com.vanym.paniclecraft.network.message.MessageCannonSet;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
@@ -48,7 +49,7 @@ public class ModComponentCannon extends ModComponent {
         this.enabled = true;
         MinecraftForge.EVENT_BUS.register(this);
         this.blockCannon = new BlockCannon();
-        this.itemCannon = new ItemBlock(this.blockCannon);
+        this.itemCannon = new ItemBlockMod3(this.blockCannon);
         this.itemCannon.setRegistryName(this.blockCannon.getRegistryName());
         GameRegistry.registerTileEntity(TileEntityCannon.class, TileEntityCannon.ID);
         boolean craftingRecipeCannon =

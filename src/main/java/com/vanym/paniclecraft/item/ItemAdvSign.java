@@ -38,7 +38,7 @@ public class ItemAdvSign extends ItemMod3 {
     
     public ItemAdvSign() {
         this.setMaxStackSize(16);
-        this.setUnlocalizedName("advanced_sign");
+        this.setRegistryName("advanced_sign");
     }
     
     @Override
@@ -58,7 +58,8 @@ public class ItemAdvSign extends ItemMod3 {
                              .mapToObj(tagLines::getStringTagAt)
                              .forEachOrdered(list::add);
                 } else {
-                    list.add(I18n.format("item.advanced_sign.showtext"));
+                    list.add(I18n.format(this.getUnlocalizedName() +
+                        ".showtext"));
                 }
             }
         }

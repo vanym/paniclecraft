@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
@@ -38,9 +37,7 @@ public class ItemPainting extends ItemMod3 {
     public static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public ItemPainting() {
-        super();
-        this.setRegistryName(DEF.MOD_ID, "painting");
-        this.setUnlocalizedName("paintingblock");
+        this.setRegistryName("painting");
     }
     
     @Override
@@ -147,7 +144,8 @@ public class ItemPainting extends ItemMod3 {
                 NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
                 if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                     !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(I18n.format("item.painting.uneditable"));
+                    list.add(I18n.format(this.getUnlocalizedName() +
+                        ".uneditable"));
                 }
                 list.add(pictureSizeInformation(pictureTag));
             }

@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public class ItemPalette extends ItemMod3 {
     
     public ItemPalette() {
-        this.setUnlocalizedName("palette");
+        this.setRegistryName("palette");
         this.setMaxStackSize(1);
     }
     

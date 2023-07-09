@@ -29,7 +29,7 @@ public class BlockCannon extends BlockContainerMod3 {
     
     public BlockCannon() {
         super(Material.ANVIL);
-        this.setUnlocalizedName("cannon");
+        this.setRegistryName("cannon");
         this.setHardness(1.5F);
     }
     

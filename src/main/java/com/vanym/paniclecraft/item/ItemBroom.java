@@ -18,7 +18,7 @@ public class ItemBroom extends ItemMod3 {
     public final double distance;
     
     public ItemBroom(int maxDamage, double distance) {
-        this.setUnlocalizedName("broom");
+        this.setRegistryName("broom");
         this.setFull3D();
         this.setMaxDamage(maxDamage);
         this.setMaxStackSize(1);

@@ -229,7 +229,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     
     @Override
     public String getName() {
-        return Core.instance.cannon.blockCannon.getUnlocalizedName() + ".inv";
+        return Core.instance.cannon.blockCannon.getUnlocalizedName() + ".inventory";
     }
     
     @Override
