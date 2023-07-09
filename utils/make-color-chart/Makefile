@@ -40,6 +40,6 @@ color-chart-gui.png: flat-color-chart-scale4.png minecraft-color-chart-scale5.pn
 
 install: color-chart-gui.png
 	$(eval GIT_ROOT:=$(shell git rev-parse --show-toplevel))
-	install -m644 color-chart-gui.png $(GIT_ROOT)/src/main/resources/assets/paniclecraft/textures/guis/palette_color_chart.png
+	install -m644 color-chart-gui.png $(GIT_ROOT)/src/main/resources/assets/paniclecraft/textures/gui/palette_color_chart.png
 
 .PHONY: all install

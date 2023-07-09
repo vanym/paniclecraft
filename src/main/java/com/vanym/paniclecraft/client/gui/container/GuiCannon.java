@@ -23,7 +23,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiCannon extends GuiContainer {
     
     protected static final ResourceLocation GUI_TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/guis/cannon.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/gui/cannon.png");
     
     protected GuiCircularSlider sliderDir;
     protected GuiCircularSlider sliderHeight;

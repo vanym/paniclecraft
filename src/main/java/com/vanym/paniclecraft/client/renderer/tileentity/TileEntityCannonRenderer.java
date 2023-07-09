@@ -18,7 +18,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class TileEntityCannonRenderer extends TileEntitySpecialRenderer<TileEntityCannon> {
     
     protected static final ResourceLocation TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/models/cannon.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/entity/cannon.png");
     
     protected final ModelCannonBody body = new ModelCannonBody();
     protected final ModelCannonBody2 body2 = new ModelCannonBody2();

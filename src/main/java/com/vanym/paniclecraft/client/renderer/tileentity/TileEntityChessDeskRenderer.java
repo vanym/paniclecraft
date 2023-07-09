@@ -23,11 +23,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class TileEntityChessDeskRenderer extends TileEntitySpecialRenderer<TileEntityChessDesk> {
     
     protected static final ResourceLocation TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/models/chess_desk.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/entity/chess_desk.png");
     protected static final ResourceLocation TEXTURE_W =
-            new ResourceLocation(DEF.MOD_ID, "textures/models/chess_w.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/entity/chess_w.png");
     protected static final ResourceLocation TEXTURE_B =
-            new ResourceLocation(DEF.MOD_ID, "textures/models/chess_b.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/entity/chess_b.png");
     
     protected ModelChessPawn pawn = new ModelChessPawn();
     protected ModelChessBishop bishop = new ModelChessBishop();
