@@ -33,9 +33,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GuiPalette extends ContainerScreen<ContainerPalette> implements IContainerListener {
     
     protected static final ResourceLocation GUI_TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/guis/palette.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/gui/palette.png");
     protected static final ResourceLocation CHART_TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/guis/palette_color_chart.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/gui/palette_color_chart.png");
     protected static ColorChartTexture chartTexture;
     
     protected final GuiOneColorField[] textColor = new GuiOneColorField[3];

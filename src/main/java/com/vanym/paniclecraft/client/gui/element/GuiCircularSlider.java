@@ -23,7 +23,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GuiCircularSlider extends Widget {
     
     protected static final ResourceLocation BUTTON_TEXTURES =
-            new ResourceLocation(DEF.MOD_ID, "textures/guis/button_background.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/gui/button_background.png");
     
     protected static final Color LINE_COLOR = new Color(0x6F, 0x6F, 0x6F);
     protected static final int SEGMENTS = 64;

@@ -23,7 +23,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GuiChess extends Screen {
     
     protected static final ResourceLocation BUTTONS_TEXTURE =
-            new ResourceLocation(DEF.MOD_ID, "textures/guis/chess_buttons.png");
+            new ResourceLocation(DEF.MOD_ID, "textures/gui/chess_buttons.png");
     
     protected final GuiSquareButton[] fieldButtons = new GuiSquareButton[64];
     protected final GuiChooseButton[] chooseButtons = new GuiChooseButton[4];
