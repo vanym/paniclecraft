@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.container.slot;
 
 import com.vanym.paniclecraft.item.ItemWorkbench;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
@@ -25,12 +26,12 @@ public class SlotPortableCrafting extends CraftingResultSlot {
         ItemStack heldStack = player.getHeldItem(Hand.MAIN_HAND);
         if (ItemWorkbench.canBeWorkbench(heldStack)
             && heldStack.getItem().getMaxDamage(heldStack) > 0) {
-            heldStack.damageItem(1, player, (p)->p.sendBreakAnimation(Hand.MAIN_HAND));
+            heldStack.damageItem(1, player, ItemUtils.onBroken(Hand.MAIN_HAND));
         } else {
             ItemStack offStack = player.getHeldItem(Hand.OFF_HAND);
             if (ItemWorkbench.canBeWorkbench(offStack)
                 && offStack.getItem().getMaxDamage(offStack) > 0) {
-                offStack.damageItem(1, player, (p)->p.sendBreakAnimation(Hand.OFF_HAND));
+                offStack.damageItem(1, player, ItemUtils.onBroken(Hand.OFF_HAND));
             }
         }
         return super.onTake(player, stack);

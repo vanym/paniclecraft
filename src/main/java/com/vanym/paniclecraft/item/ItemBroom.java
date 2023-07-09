@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -62,7 +63,7 @@ public class ItemBroom extends ItemMod3 {
                 int itemSizeWas = e.getItem().getCount();
                 e.onCollideWithPlayer(player);
                 int itemSize = !e.isAlive() ? 0 : e.getItem().getCount();
-                stack.damageItem(itemSizeWas - itemSize, player, (p)->p.sendBreakAnimation(hand));
+                stack.damageItem(itemSizeWas - itemSize, player, ItemUtils.onBroken(hand));
             });
     }
     
