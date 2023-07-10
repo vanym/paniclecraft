@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 import javax.annotation.Nullable;
@@ -14,6 +15,7 @@ import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
@@ -31,7 +33,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemPaintingFrame extends BlockItem {
     
-    public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
+    protected static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
     public static final Direction FRONT;
     public static final Direction LEFT;
@@ -76,14 +78,10 @@ public class ItemPaintingFrame extends BlockItem {
     
     @Override
     public int getBurnTime(ItemStack fuel) {
-        if (fuel.hasTag()) {
-            CompoundNBT itemTag = fuel.getTag();
-            if (SIDE_ORDER.stream()
-                          .map(Direction::getIndex)
-                          .map(ItemPaintingFrame::getPictureTag)
-                          .anyMatch(itemTag::contains)) {
-                return 0;
-            }
+        if (Arrays.stream(Direction.values())
+                  .map(side->ItemPaintingFrame.getPictureTag(fuel, side))
+                  .anyMatch(Optional::isPresent)) {
+            return 0;
         }
         return -1;
     }
@@ -99,22 +97,13 @@ public class ItemPaintingFrame extends BlockItem {
         if (itemStack.hasTag()) {
             Map<String, String> mapLetters = new TreeMap<>();
             Map<String, Integer> mapCount = new TreeMap<>();
-            CompoundNBT itemTag = itemStack.getTag();
-            for (int i = 0; i < SIDE_ORDER.size(); ++i) {
-                Direction side = SIDE_ORDER.get(i);
-                final String TAG_PICTURE_I = getPictureTag(side.ordinal());
-                if (!itemTag.contains(TAG_PICTURE_I)) {
-                    continue;
-                }
-                CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE_I);
-                String info;
-                if (pictureTag.isEmpty()) {
-                    info = "";
-                } else {
-                    info = ItemPainting.pictureSizeInformation(pictureTag);
-                }
-                mapCount.put(info, mapCount.getOrDefault(info, 0) + 1);
-                mapLetters.put(info, mapLetters.getOrDefault(info, "") + SIDE_LETTERS.get(side));
+            for (Direction side : SIDE_ORDER) {
+                Optional<String> info =
+                        getPictureTag(itemStack, side).map(ItemPainting::pictureSizeInformation);
+                info.ifPresent(i-> {
+                    mapCount.put(i, mapCount.getOrDefault(i, 0) + 1);
+                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + SIDE_LETTERS.get(side));
+                });
             }
             Map mapInfo;
             if (Core.instance.painting.clientConfig.paintingFrameInfoSideLetters) {
@@ -133,23 +122,17 @@ public class ItemPaintingFrame extends BlockItem {
     }
     
     public static ItemStack getItemWithPictures(Map<Direction, Picture> map) {
-        ItemStack itemS = new ItemStack(Core.instance.painting.itemPaintingFrame);
-        if (map == null) {
-            return itemS;
+        ItemStack stack = new ItemStack(Core.instance.painting.itemPaintingFrame);
+        if (map == null || map.isEmpty()) {
+            return stack;
         }
-        CompoundNBT itemTag = new CompoundNBT();
         map.forEach((pside, picture)-> {
-            final String TAG_PICTURE_I = getPictureTag(pside);
-            CompoundNBT pictureTag = new CompoundNBT();
-            if (picture != null) {
-                picture.writeToNBT(pictureTag);
-            }
-            itemTag.put(TAG_PICTURE_I, pictureTag);
+            CompoundNBT pictureTag = Optional.ofNullable(picture)
+                                             .map(Picture::serializeNBT)
+                                             .orElseGet(CompoundNBT::new);
+            setPictureTag(stack, pside, pictureTag);
         });
-        if (!itemTag.isEmpty()) {
-            itemS.setTag(itemTag);
-        }
-        return itemS;
+        return stack;
     }
     
     public static ItemStack getFrameAsItem(ISidePictureProvider provider) {
@@ -179,11 +162,49 @@ public class ItemPaintingFrame extends BlockItem {
         return getItemWithPictures(map);
     }
     
-    public static String getPictureTag(Direction pside) {
-        return getPictureTag(pside.ordinal());
+    public static void setPictureTag(
+            ItemStack stack,
+            Direction pside,
+            CompoundNBT pictureTag) {
+        setPictureTag(stack, pside.getIndex(), pictureTag);
     }
     
-    public static String getPictureTag(int side) {
-        return String.format(TAG_PICTURE_N, side);
+    public static void setPictureTag(ItemStack stack, int side, CompoundNBT pictureTag) {
+        String name = String.format(TAG_PICTURE_N, side);
+        ItemUtils.getOrCreateBlockEntityTag(stack).put(name, pictureTag);
+    }
+    
+    public static Optional<CompoundNBT> getPictureTag(ItemStack stack, Direction pside) {
+        return getPictureTag(stack, pside.getIndex());
+    }
+    
+    public static Optional<CompoundNBT> getPictureTag(ItemStack stack, int side) {
+        String name = String.format(TAG_PICTURE_N, side);
+        return ItemUtils.getBlockEntityTag(stack)
+                        .filter(tag->tag.contains(name, 10))
+                        .map(tag->tag.getCompound(name));
+    }
+    
+    public static void removePictureTag(ItemStack stack, Direction pside) {
+        removePictureTag(stack, pside.getIndex());
+    }
+    
+    public static void removePictureTag(ItemStack stack, int side) {
+        String name = String.format(TAG_PICTURE_N, side);
+        ItemUtils.getBlockEntityTag(stack).ifPresent(tag->tag.remove(name));
+        ItemUtils.cleanBlockEntityTag(stack);
+    }
+    
+    public static void setPictureTagName(CompoundNBT pictureTag, String name) {
+        pictureTag.putString(Picture.TAG_NAME, name);
+    }
+    
+    public static Optional<String> removePictureTagName(CompoundNBT pictureTag) {
+        if (!pictureTag.contains(Picture.TAG_NAME, 8)) {
+            return Optional.empty();
+        }
+        String name = pictureTag.getString(Picture.TAG_NAME);
+        pictureTag.remove(Picture.TAG_NAME);
+        return Optional.of(name);
     }
 }

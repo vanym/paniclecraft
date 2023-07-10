@@ -9,7 +9,6 @@ import java.util.stream.Stream.Builder;
 
 import javax.annotation.Nullable;
 
-import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -26,7 +25,6 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
@@ -155,22 +153,19 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             BlockPos pos,
             BlockState state,
             @Nullable LivingEntity entity,
-            ItemStack itemStack) {
-        super.onBlockPlacedBy(world, pos, state, entity, itemStack);
-        if (!itemStack.hasTag()) {
+            ItemStack stack) {
+        super.onBlockPlacedBy(world, pos, state, entity, stack);
+        if (!stack.hasTag()) {
             return;
         }
         TileEntity tile = world.getTileEntity(pos);
-        if (tile != null && tile instanceof TileEntityPaintingFrame) {
+        if (tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-            CompoundNBT itemTag = itemStack.getTag();
-            for (int i = 0; i < ISidePictureProvider.N; i++) {
-                final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
-                if (!itemTag.contains(TAG_PICTURE_I)) {
-                    continue;
-                }
-                Picture picture = tilePF.createPicture(i);
-                picture.readFromNBT(itemTag.getCompound(TAG_PICTURE_I));
+            for (Direction pside : Direction.values()) {
+                ItemPaintingFrame.getPictureTag(stack, pside).ifPresent(tag-> {
+                    Picture picture = tilePF.createPicture(pside.ordinal());
+                    picture.deserializeNBT(tag);
+                });
             }
             int rot = getRotate(entity, Direction.UP, true);
             tilePF.rotateY(rot);

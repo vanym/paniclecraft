@@ -28,9 +28,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     @Override
     public CompoundNBT write(CompoundNBT nbtTag) {
         super.write(nbtTag);
-        CompoundNBT pictureTag = new CompoundNBT();
-        this.getPicture().writeToNBT(pictureTag);
-        nbtTag.put(TAG_PICTURE, pictureTag);
+        nbtTag.put(TAG_PICTURE, this.getPicture().serializeNBT());
         return nbtTag;
     }
     
@@ -38,7 +36,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     public void read(CompoundNBT nbtTag) {
         super.read(nbtTag);
         if (nbtTag.contains(TAG_PICTURE)) {
-            this.getPicture().readFromNBT(nbtTag.getCompound(TAG_PICTURE));
+            this.getPicture().deserializeNBT(nbtTag.getCompound(TAG_PICTURE));
         }
     }
     

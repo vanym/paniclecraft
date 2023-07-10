@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
@@ -63,13 +62,7 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
             return false;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        if (frame.hasTag()) {
-            CompoundNBT itemTag = frame.getTag();
-            if (itemTag.contains(ItemPaintingFrame.getPictureTag(this.side))) {
-                return false;
-            }
-        }
-        return true;
+        return !ItemPaintingFrame.getPictureTag(frame, this.side).isPresent();
     }
     
     @Override

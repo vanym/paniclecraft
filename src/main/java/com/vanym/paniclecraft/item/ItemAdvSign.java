@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
@@ -10,6 +11,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -51,25 +53,20 @@ public class ItemAdvSign extends ItemMod3 {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void addInformation(
-            ItemStack itemStack,
+            ItemStack stack,
             @Nullable World world,
             List<ITextComponent> list,
             ITooltipFlag flag) {
-        if (itemStack.hasTag()) {
-            CompoundNBT tag = itemStack.getTag();
-            if (tag.contains(TAG_SIGN, 10)) {
-                if (Screen.hasShiftDown()) {
-                    CompoundNBT signTag = tag.getCompound(TAG_SIGN);
-                    ListNBT tagLines = signTag.getList(TileEntityAdvSign.TAG_LINES, 8);
-                    IntStream.range(0, tagLines.size())
-                             .mapToObj(tagLines::getString)
-                             .map(StringTextComponent::new)
-                             .forEachOrdered(list::add);
-                } else {
-                    list.add(new TranslationTextComponent(this.getTranslationKey() + ".showtext"));
-                }
+        getLines(stack).ifPresent(lines-> {
+            if (Screen.hasShiftDown()) {
+                IntStream.range(0, lines.size())
+                         .mapToObj(lines::getString)
+                         .map(StringTextComponent::new)
+                         .forEachOrdered(list::add);
+            } else {
+                list.add(new TranslationTextComponent(this.getTranslationKey() + ".showtext"));
             }
-        }
+        });
     }
     
     @Override
@@ -84,12 +81,8 @@ public class ItemAdvSign extends ItemMod3 {
             PlayerEntity player,
             Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
-        if (stack.hasTag() && player.isSneaking()) {
-            CompoundNBT tag = stack.getTag();
-            tag.remove(TAG_SIGN);
-            if (tag.isEmpty()) {
-                stack.setTag(null);
-            }
+        if (getSign(stack).isPresent() && player.isSneaking()) {
+            removeSign(stack);
             return new ActionResult<>(ActionResultType.SUCCESS, stack);
         } else {
             return new ActionResult<>(ActionResultType.PASS, stack);
@@ -121,11 +114,7 @@ public class ItemAdvSign extends ItemMod3 {
                     tileAS.write(signTag, true);
                 }
                 if (signTag != null) {
-                    if (!stack.hasTag()) {
-                        stack.setTag(new CompoundNBT());
-                    }
-                    CompoundNBT tag = stack.getTag();
-                    tag.put(TAG_SIGN, signTag);
+                    setSign(stack, signTag);
                     return ActionResultType.SUCCESS;
                 }
             }
@@ -143,15 +132,9 @@ public class ItemAdvSign extends ItemMod3 {
             return ActionResultType.FAIL;
         }
         TileEntity tile = world.getTileEntity(pos);
-        if (tile != null && tile instanceof TileEntityAdvSign) {
+        if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            if (stack.hasTag()) {
-                CompoundNBT tag = stack.getTag();
-                if (tag.contains(TAG_SIGN, 10)) {
-                    CompoundNBT signTag = tag.getCompound(TAG_SIGN);
-                    tileAS.read(signTag, true);
-                }
-            }
+            getSign(stack).ifPresent(signTag->tileAS.read(signTag, true));
             if (facing == Direction.UP) {
                 tileAS.setStick(true);
                 double direction = Math.round(180.0D + player.rotationYaw);
@@ -175,11 +158,30 @@ public class ItemAdvSign extends ItemMod3 {
         if (tileAS == null || tileAS.lines.stream().allMatch(String::isEmpty)) {
             return stack;
         }
-        CompoundNBT tag = new CompoundNBT();
         CompoundNBT signTag = new CompoundNBT();
         tileAS.write(signTag, true);
-        tag.put(ItemAdvSign.TAG_SIGN, signTag);
-        stack.setTag(tag);
+        setSign(stack, signTag);
         return stack;
+    }
+    
+    protected static void setSign(ItemStack stack, CompoundNBT tag) {
+        ItemUtils.getOrCreateTag(stack).put(TAG_SIGN, tag);
+    }
+    
+    protected static void removeSign(ItemStack stack) {
+        CompoundNBT tag = stack.getTag();
+        tag.remove(TAG_SIGN);
+        ItemUtils.cleanTag(stack);
+    }
+    
+    public static Optional<CompoundNBT> getSign(ItemStack stack) {
+        return ItemUtils.getTag(stack)
+                        .filter(tag->tag.contains(TAG_SIGN, 10))
+                        .map(tag->tag.getCompound(TAG_SIGN));
+    }
+    
+    protected static Optional<ListNBT> getLines(ItemStack stack) {
+        return getSign(stack).filter(tag->tag.contains(TileEntityAdvSign.TAG_LINES, 9))
+                             .map(tag->tag.getList(TileEntityAdvSign.TAG_LINES, 8));
     }
 }

@@ -1,7 +1,9 @@
 package com.vanym.paniclecraft.recipe;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -16,7 +18,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 
@@ -34,17 +35,9 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
             return false;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        if (!frame.hasTag()) {
-            return false;
-        }
-        CompoundNBT itemTag = frame.getTag();
-        for (Direction pside : ItemPaintingFrame.SIDE_ORDER) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
-            if (itemTag.contains(TAG_PICTURE_I)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(Direction.values())
+                     .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                     .anyMatch(Optional::isPresent);
     }
     
     @Override
@@ -54,26 +47,17 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
         if (!frame.hasTag()) {
             return painting;
         }
-        CompoundNBT itemTag = frame.getTag();
-        CompoundNBT pictureTag = null;
-        for (Direction pside : ItemPaintingFrame.SIDE_ORDER) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
-            if (itemTag.contains(TAG_PICTURE_I)) {
-                pictureTag = itemTag.getCompound(TAG_PICTURE_I);
-                break;
-            }
-        }
+        CompoundNBT pictureTag =
+                ItemPaintingFrame.SIDE_ORDER.stream()
+                                            .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                                            .filter(Optional::isPresent)
+                                            .map(Optional::get)
+                                            .findFirst()
+                                            .orElse(null);
         if (pictureTag == null || pictureTag.isEmpty()) {
             return painting;
         }
-        CompoundNBT paintingItemTag = painting.getOrCreateTag();
-        CompoundNBT paintingItemPictureTag = (CompoundNBT)pictureTag.copy();
-        if (paintingItemPictureTag.contains(Picture.TAG_NAME)) {
-            painting.setDisplayName(new StringTextComponent(
-                    paintingItemPictureTag.getString(Picture.TAG_NAME)));
-            paintingItemPictureTag.remove(Picture.TAG_NAME);
-        }
-        paintingItemTag.put(ItemPainting.TAG_PICTURE, paintingItemPictureTag);
+        ItemPainting.setPictureTag(painting, pictureTag.copy());
         return painting;
     }
     
@@ -97,17 +81,11 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
         if (!frame.hasTag()) {
             return super.getRemainingItems(inv);
         }
-        CompoundNBT itemTag = frame.getTag();
         for (Direction pside : ItemPaintingFrame.SIDE_ORDER) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
-            if (!itemTag.contains(TAG_PICTURE_I)) {
-                continue;
+            if (ItemPaintingFrame.getPictureTag(frame, pside).isPresent()) {
+                ItemPaintingFrame.removePictureTag(frame, pside);
+                break;
             }
-            itemTag.remove(TAG_PICTURE_I);
-            if (itemTag.isEmpty()) {
-                frame.setTag(null);
-            }
-            break;
         }
         return list;
     }

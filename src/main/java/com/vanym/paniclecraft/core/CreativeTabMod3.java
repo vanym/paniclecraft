@@ -15,8 +15,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class CreativeTabMod3 extends ItemGroup {
     
-    public CreativeTabMod3(String modid) {
-        super(modid);
+    public CreativeTabMod3(String tabid) {
+        super(tabid);
+    }
+    
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public String getTranslationKey() {
+        return "itemgroup." + this.getTabLabel();
     }
     
     @Override

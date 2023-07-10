@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -12,6 +13,7 @@ import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -39,7 +41,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemPainting extends ItemMod3 {
     
-    public static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
+    protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public ItemPainting() {
         super(new Item.Properties().setTEISR(()->ItemRendererPainting::create));
@@ -133,52 +135,48 @@ public class ItemPainting extends ItemMod3 {
             @Nullable World world,
             List<ITextComponent> list,
             ITooltipFlag flag) {
-        if (itemStack.hasTag()) {
-            CompoundNBT itemTag = itemStack.getTag();
-            if (itemTag.contains(TAG_PICTURE, 10)) {
-                CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE);
-                if (pictureTag.contains(Picture.TAG_EDITABLE) &&
-                    !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(new TranslationTextComponent(
-                            this.getTranslationKey() + ".uneditable"));
-                }
-                list.add(new StringTextComponent(pictureSizeInformation(pictureTag)));
+        getPictureTag(itemStack).ifPresent(pictureTag-> {
+            if (pictureTag.contains(Picture.TAG_EDITABLE) &&
+                !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
+                list.add(new TranslationTextComponent(
+                        this.getTranslationKey() + ".uneditable"));
             }
-        }
+            list.add(new StringTextComponent(pictureSizeInformation(pictureTag)));
+        });
     }
     
     public static boolean fillPicture(Picture picture, ItemStack itemStack) {
-        if (itemStack.hasTag()) {
-            CompoundNBT itemTag = itemStack.getTag();
-            if (itemTag.contains(TAG_PICTURE)) {
-                CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE);
-                if (!pictureTag.isEmpty()) {
-                    picture.readFromNBT(pictureTag);
-                    if (itemStack.hasDisplayName()) {
-                        picture.setName(itemStack.getDisplayName().getFormattedText());
-                    }
-                    return true;
-                }
+        CompoundNBT pictureTag = getPictureTag(itemStack).orElse(null);
+        if (pictureTag != null && !pictureTag.isEmpty()) {
+            picture.deserializeNBT(pictureTag);
+            if (itemStack.hasDisplayName()) {
+                picture.setName(itemStack.getDisplayName().getFormattedText());
             }
+            return true;
         }
         return false;
     }
     
+    public static void setPictureTag(ItemStack stack, CompoundNBT pictureTag) {
+        ItemPaintingFrame.removePictureTagName(pictureTag)
+                         .map(StringTextComponent::new)
+                         .ifPresent(stack::setDisplayName);
+        ItemUtils.getOrCreateBlockEntityTag(stack).put(TAG_PICTURE, pictureTag);
+    }
+    
+    public static Optional<CompoundNBT> getPictureTag(ItemStack stack) {
+        return ItemUtils.getBlockEntityTag(stack)
+                        .filter(tag->tag.contains(TAG_PICTURE, 10))
+                        .map(tag->tag.getCompound(TAG_PICTURE));
+    }
+    
     public static ItemStack getPictureAsItem(Picture picture) {
-        ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
+        ItemStack stack = new ItemStack(Core.instance.painting.itemPainting);
         if (picture == null) {
-            return itemS;
+            return stack;
         }
-        CompoundNBT itemTag = new CompoundNBT();
-        itemS.setTag(itemTag);
-        CompoundNBT pictureTag = new CompoundNBT();
-        picture.writeToNBT(pictureTag);
-        if (pictureTag.contains(Picture.TAG_NAME)) {
-            itemS.setDisplayName(new StringTextComponent(pictureTag.getString(Picture.TAG_NAME)));
-            pictureTag.remove(Picture.TAG_NAME);
-        }
-        itemTag.put(TAG_PICTURE, pictureTag);
-        return itemS;
+        setPictureTag(stack, picture.serializeNBT());
+        return stack;
     }
     
     public static ItemStack getSizedItem(IPictureSize size) {
@@ -187,19 +185,20 @@ public class ItemPainting extends ItemMod3 {
     
     public static ItemStack getSizedItem(int width, int height) {
         ItemStack stack = new ItemStack(Core.instance.painting.itemPainting);
-        CompoundNBT itemTag = new CompoundNBT();
         CompoundNBT pictureTag = new CompoundNBT();
         CompoundNBT imageTag = new CompoundNBT();
         imageTag.putInt(Picture.TAG_IMAGE_WIDTH, width);
         imageTag.putInt(Picture.TAG_IMAGE_HEIGHT, height);
         pictureTag.put(Picture.TAG_IMAGE, imageTag);
-        itemTag.put(ItemPainting.TAG_PICTURE, pictureTag);
-        stack.setTag(itemTag);
+        setPictureTag(stack, pictureTag);
         return stack;
     }
     
     @OnlyIn(Dist.CLIENT)
     public static String pictureSizeInformation(CompoundNBT pictureTag) {
+        if (pictureTag.isEmpty()) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
         INBT imageTagBase = pictureTag.get(Picture.TAG_IMAGE);
         CompoundNBT imageTag;

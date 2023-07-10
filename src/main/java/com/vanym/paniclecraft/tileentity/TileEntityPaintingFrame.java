@@ -32,9 +32,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (this.holders[i] != null) {
-                CompoundNBT pictureTag = new CompoundNBT();
-                this.holders[i].picture.writeToNBT(pictureTag);
-                nbtTag.put(TAG_PICTURE_I, pictureTag);
+                nbtTag.put(TAG_PICTURE_I, this.holders[i].picture.serializeNBT());
             }
         }
         return nbtTag;
@@ -47,7 +45,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (nbtTag.contains(TAG_PICTURE_I)) {
                 Picture picture = this.createPicture(i);
-                picture.readFromNBT(nbtTag.getCompound(TAG_PICTURE_I));
+                picture.deserializeNBT(nbtTag.getCompound(TAG_PICTURE_I));
             } else {
                 this.clearPicture(i);
             }

@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
+import java.util.stream.IntStream;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
@@ -33,17 +35,16 @@ public class ItemRendererPaintingFrame extends ItemStackTileEntityRenderer {
     public void renderByItem(ItemStack stack) {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
         int[] obtainedTextures = new int[ISidePictureProvider.N];
-        CompoundNBT itemTag = stack.getTag();
-        if (itemTag == null) {
-            itemTag = new CompoundNBT();
-        }
+        CompoundNBT[] tags = IntStream.range(0, ISidePictureProvider.N)
+                                      .mapToObj(i->ItemPaintingFrame.getPictureTag(stack, i))
+                                      .map(o->o.orElse(null))
+                                      .toArray(CompoundNBT[]::new);
         for (int i = 0; i < ISidePictureProvider.N; ++i) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
             obtainedTextures[i] = -1;
-            if (!itemTag.contains(TAG_PICTURE_I)) {
+            if (tags[i] == null) {
                 continue;
             }
-            CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE_I);
+            CompoundNBT pictureTag = tags[i];
             INBT imageTag = pictureTag.get(Picture.TAG_IMAGE);
             Picture picture = tilePF.createPicture(i);
             obtainedTextures[i] = this.textureCache.obtainTexture(imageTag);
@@ -51,7 +52,7 @@ public class ItemRendererPaintingFrame extends ItemStackTileEntityRenderer {
                 picture.texture = obtainedTextures[i];
                 picture.imageChangeProcessed = true;
             } else if (pictureTag != null) {
-                picture.readFromNBT(pictureTag);
+                picture.deserializeNBT(pictureTag);
             }
         }
         this.paintingFrameTileRenderer.renderAtItem(tilePF);
@@ -60,8 +61,7 @@ public class ItemRendererPaintingFrame extends ItemStackTileEntityRenderer {
             if (picture == null || obtainedTextures[i] >= 0) {
                 continue;
             }
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
-            CompoundNBT pictureTag = itemTag.getCompound(TAG_PICTURE_I);
+            CompoundNBT pictureTag = tags[i];
             INBT imageTag = pictureTag.get(Picture.TAG_IMAGE);
             this.textureCache.putTexture(imageTag, picture.texture);
         }

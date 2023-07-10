@@ -23,9 +23,10 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NumberNBT;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 
-public class Picture implements IPictureSize {
+public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     
     protected IPictureHolder holder;
     protected boolean hasAlpha = false;
@@ -464,19 +465,23 @@ public class Picture implements IPictureSize {
     public static final String TAG_IMAGE_RAWDATA = "Raw";
     public static final String TAG_IMAGE_PACKED = "Packed";
     
-    public void writeToNBT(CompoundNBT nbtTag) {
+    @Override
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbtTag = new CompoundNBT();
         nbtTag.putBoolean(TAG_EDITABLE, this.editable);
         if (this.name != null) {
             nbtTag.putString(TAG_NAME, this.name);
         }
         CompoundNBT nbtImageTag = new CompoundNBT();
-        this.writeImageToNBT(nbtImageTag);
+        this.writeImage(nbtImageTag);
         if (!nbtImageTag.isEmpty()) {
             nbtTag.put(TAG_IMAGE, nbtImageTag);
         }
+        return nbtTag;
     }
     
-    public void readFromNBT(CompoundNBT nbtTag) {
+    @Override
+    public void deserializeNBT(CompoundNBT nbtTag) {
         if (nbtTag.contains(TAG_EDITABLE)) {
             this.editable = nbtTag.getBoolean(TAG_EDITABLE);
         }
@@ -487,11 +492,11 @@ public class Picture implements IPictureSize {
         }
         if (nbtTag.contains(TAG_IMAGE)) {
             INBT nbtImage = nbtTag.get(TAG_IMAGE);
-            this.readImageFromNBT(nbtImage);
+            this.readImage(nbtImage);
         }
     }
     
-    public void writeImageToNBT(CompoundNBT nbtImageTag) {
+    public void writeImage(CompoundNBT nbtImageTag) {
         if (this.pack()) {
             nbtImageTag.putByteArray(TAG_IMAGE_PACKED, this.packed);
             nbtImageTag.putInt(TAG_IMAGE_WIDTH, this.packedWidth);
@@ -503,7 +508,7 @@ public class Picture implements IPictureSize {
         }
     }
     
-    public void readImageFromNBT(INBT nbtImage) {
+    protected void readImage(INBT nbtImage) {
         int width = 0;
         int height = 0;
         byte[] packed = null;

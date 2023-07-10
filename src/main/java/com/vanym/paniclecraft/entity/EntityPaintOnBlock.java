@@ -259,9 +259,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (this.holders[i] != null) {
-                CompoundNBT pictureTag = new CompoundNBT();
-                this.holders[i].picture.writeToNBT(pictureTag);
-                nbtTag.put(TAG_PICTURE_I, pictureTag);
+                nbtTag.put(TAG_PICTURE_I, this.holders[i].picture.serializeNBT());
             }
         }
     }
@@ -272,7 +270,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (nbtTag.contains(TAG_PICTURE_I)) {
                 PictureHolder holder = this.createHolder(i);
-                holder.picture.readFromNBT(nbtTag.getCompound(TAG_PICTURE_I));
+                holder.picture.deserializeNBT(nbtTag.getCompound(TAG_PICTURE_I));
                 holder.empty = false;
             } else {
                 this.clearPicture(i);

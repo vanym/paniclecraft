@@ -1,11 +1,13 @@
 package com.vanym.paniclecraft.utils;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Hand;
 
 public class ItemUtils {
@@ -26,5 +28,31 @@ public class ItemUtils {
                         .filter(slot->stack == e.getItemStackFromSlot(slot))
                         .findAny()
                         .ifPresent(e::sendBreakAnimation);
+    }
+    
+    public static Optional<CompoundNBT> getTag(ItemStack stack) {
+        return Optional.ofNullable(stack.getTag());
+    }
+    
+    public static CompoundNBT getOrCreateTag(ItemStack stack) {
+        return stack.getOrCreateTag();
+    }
+    
+    public static void cleanTag(ItemStack stack) {
+        if (stack.hasTag() && stack.getTag().isEmpty()) {
+            stack.setTag(null);
+        }
+    }
+    
+    public static Optional<CompoundNBT> getBlockEntityTag(ItemStack stack) {
+        return getTag(stack);
+    }
+    
+    public static CompoundNBT getOrCreateBlockEntityTag(ItemStack stack) {
+        return getOrCreateTag(stack);
+    }
+    
+    public static void cleanBlockEntityTag(ItemStack stack) {
+        cleanTag(stack);
     }
 }

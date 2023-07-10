@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -11,6 +12,7 @@ import javax.annotation.Nullable;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererChessDesk;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.Screen;
@@ -29,7 +31,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemChessDesk extends BlockItem {
     
-    public static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
+    protected static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
     
     public ItemChessDesk(Block block) {
         super(block, new Item.Properties().group(Core.instance.tab)
@@ -45,11 +47,8 @@ public class ItemChessDesk extends BlockItem {
     
     @Override
     public int getBurnTime(ItemStack fuel) {
-        if (fuel.hasTag()) {
-            CompoundNBT itemTag = fuel.getTag();
-            if (itemTag.contains(TAG_MOVES)) {
-                return 0;
-            }
+        if (getMoves(fuel).isPresent()) {
+            return 0;
         }
         return -1;
     }
@@ -64,9 +63,9 @@ public class ItemChessDesk extends BlockItem {
         if (!stack.hasTag()) {
             return;
         }
-        CompoundNBT tag = stack.getTag();
-        if (tag.contains(TAG_MOVES)) {
-            ListNBT movesTag = tag.getList(TAG_MOVES, 10);
+        Optional<ListNBT> movesTagOpt = getMoves(stack);
+        if (movesTagOpt.isPresent()) {
+            ListNBT movesTag = movesTagOpt.get();
             list.add(new TranslationTextComponent(
                     this.getTranslationKey() + ".moves",
                     movesTag.size()));
@@ -109,11 +108,16 @@ public class ItemChessDesk extends BlockItem {
         if (tileCD == null || tileCD.moves.isEmpty()) {
             return stack;
         }
-        CompoundNBT tag = new CompoundNBT();
+        CompoundNBT tag = ItemUtils.getOrCreateBlockEntityTag(stack);
         ListNBT list = new ListNBT();
-        tileCD.writeMovesToNBT(list);
+        tileCD.writeMoves(list);
         tag.put(TAG_MOVES, list);
-        stack.setTag(tag);
         return stack;
+    }
+    
+    public static Optional<ListNBT> getMoves(ItemStack stack) {
+        return ItemUtils.getBlockEntityTag(stack)
+                        .filter(tag->tag.contains(TAG_MOVES, 9))
+                        .map(tag->tag.getList(TAG_MOVES, 10));
     }
 }
