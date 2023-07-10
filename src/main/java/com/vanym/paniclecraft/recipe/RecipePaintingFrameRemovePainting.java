@@ -1,7 +1,9 @@
 package com.vanym.paniclecraft.recipe;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -28,17 +30,9 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
             return false;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        if (!frame.hasTagCompound()) {
-            return false;
-        }
-        NBTTagCompound itemTag = frame.getTagCompound();
-        for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
-            if (itemTag.hasKey(TAG_PICTURE_I)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(EnumFacing.VALUES)
+                     .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                     .anyMatch(Optional::isPresent);
     }
     
     @Override
@@ -48,28 +42,17 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
         if (!frame.hasTagCompound()) {
             return painting;
         }
-        NBTTagCompound itemTag = frame.getTagCompound();
-        NBTTagCompound pictureTag = null;
-        for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
-            if (itemTag.hasKey(TAG_PICTURE_I)) {
-                pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
-                break;
-            }
-        }
+        NBTTagCompound pictureTag =
+                ItemPaintingFrame.SIDE_ORDER.stream()
+                                            .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                                            .filter(Optional::isPresent)
+                                            .map(Optional::get)
+                                            .findFirst()
+                                            .orElse(null);
         if (pictureTag == null || pictureTag.hasNoTags()) {
             return painting;
         }
-        if (!painting.hasTagCompound()) {
-            painting.setTagCompound(new NBTTagCompound());
-        }
-        NBTTagCompound paintingItemTag = painting.getTagCompound();
-        NBTTagCompound paintingItemPictureTag = (NBTTagCompound)pictureTag.copy();
-        if (paintingItemPictureTag.hasKey(Picture.TAG_NAME)) {
-            painting.setStackDisplayName(paintingItemPictureTag.getString(Picture.TAG_NAME));
-            paintingItemPictureTag.removeTag(Picture.TAG_NAME);
-        }
-        paintingItemTag.setTag(ItemPainting.TAG_PICTURE, paintingItemPictureTag);
+        ItemPainting.setPictureTag(painting, (NBTTagCompound)pictureTag.copy());
         return painting;
     }
     
@@ -93,17 +76,11 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
         if (!frame.hasTagCompound()) {
             return super.getRemainingItems(inv);
         }
-        NBTTagCompound itemTag = frame.getTagCompound();
         for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(pside);
-            if (!itemTag.hasKey(TAG_PICTURE_I)) {
-                continue;
+            if (ItemPaintingFrame.getPictureTag(frame, pside).isPresent()) {
+                ItemPaintingFrame.removePictureTag(frame, pside);
+                break;
             }
-            itemTag.removeTag(TAG_PICTURE_I);
-            if (itemTag.hasNoTags()) {
-                frame.setTagCompound(null);
-            }
-            break;
         }
         return list;
     }

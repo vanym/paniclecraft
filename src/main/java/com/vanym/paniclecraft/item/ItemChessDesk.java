@@ -4,12 +4,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
@@ -25,7 +27,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemChessDesk extends ItemBlockMod3 {
     
-    public static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
+    protected static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
     
     public ItemChessDesk(Block block) {
         super(block);
@@ -40,11 +42,8 @@ public class ItemChessDesk extends ItemBlockMod3 {
     
     @Override
     public int getItemBurnTime(ItemStack fuel) {
-        if (fuel.hasTagCompound()) {
-            NBTTagCompound itemTag = fuel.getTagCompound();
-            if (itemTag.hasKey(TAG_MOVES)) {
-                return 0;
-            }
+        if (getMoves(fuel).isPresent()) {
+            return 0;
         }
         return -1;
     }
@@ -59,9 +58,9 @@ public class ItemChessDesk extends ItemBlockMod3 {
         if (!stack.hasTagCompound()) {
             return;
         }
-        NBTTagCompound tag = stack.getTagCompound();
-        if (tag.hasKey(TAG_MOVES)) {
-            NBTTagList movesTag = tag.getTagList(TAG_MOVES, 10);
+        Optional<NBTTagList> movesTagOpt = getMoves(stack);
+        if (movesTagOpt.isPresent()) {
+            NBTTagList movesTag = movesTagOpt.get();
             list.add(I18n.format(this.getUnlocalizedName() + ".moves", movesTag.tagCount()));
             if (GuiScreen.isShiftKeyDown()) {
                 Map<NBTTagCompound, Integer> white = new HashMap<>(), black = new HashMap<>();
@@ -101,11 +100,16 @@ public class ItemChessDesk extends ItemBlockMod3 {
         if (tileCD == null || tileCD.moves.isEmpty()) {
             return stack;
         }
-        NBTTagCompound tag = new NBTTagCompound();
+        NBTTagCompound tag = ItemUtils.getOrCreateBlockEntityTag(stack);
         NBTTagList list = new NBTTagList();
-        tileCD.writeMovesToNBT(list);
+        tileCD.writeMoves(list);
         tag.setTag(TAG_MOVES, list);
-        stack.setTagCompound(tag);
         return stack;
+    }
+    
+    public static Optional<NBTTagList> getMoves(ItemStack stack) {
+        return ItemUtils.getBlockEntityTag(stack)
+                        .filter(tag->tag.hasKey(TAG_MOVES, 9))
+                        .map(tag->tag.getTagList(TAG_MOVES, 10));
     }
 }

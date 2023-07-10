@@ -32,13 +32,7 @@ public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreReci
             return false;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        if (frame.hasTagCompound()) {
-            NBTTagCompound itemTag = frame.getTagCompound();
-            if (itemTag.hasKey(ItemPaintingFrame.getPictureTag(this.side))) {
-                return false;
-            }
-        }
-        return true;
+        return !ItemPaintingFrame.getPictureTag(frame, this.side).isPresent();
     }
     
     @Override

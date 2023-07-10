@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.IModComponent;
 
 import net.minecraft.creativetab.CreativeTabs;
@@ -16,14 +15,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CreativeTabMod3 extends CreativeTabs {
     
-    public CreativeTabMod3(String modid) {
-        super(modid);
+    public CreativeTabMod3(String tabid) {
+        super(tabid);
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public String getTranslatedTabLabel() {
-        return DEF.MOD_NAME;
+        return "itemgroup." + this.getTabLabel();
     }
     
     @Override

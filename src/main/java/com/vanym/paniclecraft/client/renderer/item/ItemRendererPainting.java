@@ -31,13 +31,7 @@ public class ItemRendererPainting extends TileEntityItemStackRenderer {
     public void renderByItem(ItemStack item, float partialTicks) {
         TileEntityPainting tilePainting = new TileEntityPainting();
         Picture picture = tilePainting.getPicture();
-        NBTTagCompound nbtPictureTag = null;
-        if (item.hasTagCompound()) {
-            NBTTagCompound itemTag = item.getTagCompound();
-            if (itemTag.hasKey(ItemPainting.TAG_PICTURE)) {
-                nbtPictureTag = itemTag.getCompoundTag(ItemPainting.TAG_PICTURE);
-            }
-        }
+        NBTTagCompound nbtPictureTag = ItemPainting.getPictureTag(item).orElse(null);
         NBTBase nbtImageTag = null;
         if (nbtPictureTag != null && !nbtPictureTag.hasNoTags()) {
             nbtImageTag = nbtPictureTag.getTag(Picture.TAG_IMAGE);
@@ -47,7 +41,7 @@ public class ItemRendererPainting extends TileEntityItemStackRenderer {
             picture.texture = obtainedTexture;
             picture.imageChangeProcessed = true;
         } else if (nbtPictureTag != null) {
-            picture.readFromNBT(nbtPictureTag);
+            picture.deserializeNBT(nbtPictureTag);
         }
         this.paintingTileRenderer.renderAtItem(tilePainting);
         if (obtainedTexture < 0) {

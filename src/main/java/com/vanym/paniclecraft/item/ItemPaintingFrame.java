@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 import javax.annotation.Nullable;
@@ -13,6 +14,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
@@ -26,7 +28,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemPaintingFrame extends ItemBlockMod3 {
     
-    public static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
+    protected static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
     public static final EnumFacing FRONT;
     public static final EnumFacing LEFT;
@@ -70,14 +72,10 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
     
     @Override
     public int getItemBurnTime(ItemStack fuel) {
-        if (fuel.hasTagCompound()) {
-            NBTTagCompound itemTag = fuel.getTagCompound();
-            if (SIDE_ORDER.stream()
-                          .map(EnumFacing::getIndex)
-                          .map(ItemPaintingFrame::getPictureTag)
-                          .anyMatch(itemTag::hasKey)) {
-                return 0;
-            }
+        if (Arrays.stream(EnumFacing.VALUES)
+                  .map(side->ItemPaintingFrame.getPictureTag(fuel, side))
+                  .anyMatch(Optional::isPresent)) {
+            return 0;
         }
         return -1;
     }
@@ -93,22 +91,13 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
         if (itemStack.hasTagCompound()) {
             Map<String, String> mapLetters = new TreeMap<>();
             Map<String, Integer> mapCount = new TreeMap<>();
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            for (int i = 0; i < SIDE_ORDER.size(); ++i) {
-                EnumFacing side = SIDE_ORDER.get(i);
-                final String TAG_PICTURE_I = getPictureTag(side.ordinal());
-                if (!itemTag.hasKey(TAG_PICTURE_I)) {
-                    continue;
-                }
-                NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
-                String info;
-                if (pictureTag.hasNoTags()) {
-                    info = "";
-                } else {
-                    info = ItemPainting.pictureSizeInformation(pictureTag);
-                }
-                mapCount.put(info, mapCount.getOrDefault(info, 0) + 1);
-                mapLetters.put(info, mapLetters.getOrDefault(info, "") + SIDE_LETTERS.get(side));
+            for (EnumFacing side : SIDE_ORDER) {
+                Optional<String> info =
+                        getPictureTag(itemStack, side).map(ItemPainting::pictureSizeInformation);
+                info.ifPresent(i-> {
+                    mapCount.put(i, mapCount.getOrDefault(i, 0) + 1);
+                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + SIDE_LETTERS.get(side));
+                });
             }
             Map mapInfo;
             if (Core.instance.painting.clientConfig.paintingFrameInfoSideLetters) {
@@ -127,23 +116,17 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
     }
     
     public static ItemStack getItemWithPictures(Map<EnumFacing, Picture> map) {
-        ItemStack itemS = new ItemStack(Core.instance.painting.itemPaintingFrame);
-        if (map == null) {
-            return itemS;
+        ItemStack stack = new ItemStack(Core.instance.painting.itemPaintingFrame);
+        if (map == null || map.isEmpty()) {
+            return stack;
         }
-        NBTTagCompound itemTag = new NBTTagCompound();
         map.forEach((pside, picture)-> {
-            final String TAG_PICTURE_I = getPictureTag(pside);
-            NBTTagCompound pictureTag = new NBTTagCompound();
-            if (picture != null) {
-                picture.writeToNBT(pictureTag);
-            }
-            itemTag.setTag(TAG_PICTURE_I, pictureTag);
+            NBTTagCompound pictureTag = Optional.ofNullable(picture)
+                                                .map(Picture::serializeNBT)
+                                                .orElseGet(NBTTagCompound::new);
+            setPictureTag(stack, pside, pictureTag);
         });
-        if (!itemTag.hasNoTags()) {
-            itemS.setTagCompound(itemTag);
-        }
-        return itemS;
+        return stack;
     }
     
     public static ItemStack getFrameAsItem(ISidePictureProvider provider) {
@@ -173,11 +156,49 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
         return getItemWithPictures(map);
     }
     
-    public static String getPictureTag(EnumFacing pside) {
-        return getPictureTag(pside.ordinal());
+    public static void setPictureTag(
+            ItemStack stack,
+            EnumFacing pside,
+            NBTTagCompound pictureTag) {
+        setPictureTag(stack, pside.ordinal(), pictureTag);
     }
     
-    public static String getPictureTag(int side) {
-        return String.format(TAG_PICTURE_N, side);
+    public static void setPictureTag(ItemStack stack, int side, NBTTagCompound pictureTag) {
+        String name = String.format(TAG_PICTURE_N, side);
+        ItemUtils.getOrCreateBlockEntityTag(stack).setTag(name, pictureTag);
+    }
+    
+    public static Optional<NBTTagCompound> getPictureTag(ItemStack stack, EnumFacing pside) {
+        return getPictureTag(stack, pside.ordinal());
+    }
+    
+    public static Optional<NBTTagCompound> getPictureTag(ItemStack stack, int side) {
+        String name = String.format(TAG_PICTURE_N, side);
+        return ItemUtils.getBlockEntityTag(stack)
+                        .filter(tag->tag.hasKey(name, 10))
+                        .map(tag->tag.getCompoundTag(name));
+    }
+    
+    public static void removePictureTag(ItemStack stack, EnumFacing pside) {
+        removePictureTag(stack, pside.ordinal());
+    }
+    
+    public static void removePictureTag(ItemStack stack, int side) {
+        String name = String.format(TAG_PICTURE_N, side);
+        ItemUtils.getBlockEntityTag(stack).ifPresent(tag->tag.removeTag(name));
+        ItemUtils.cleanBlockEntityTag(stack);
+    }
+    
+    public static void setPictureTagName(NBTTagCompound pictureTag, String name) {
+        pictureTag.setString(Picture.TAG_NAME, name);
+    }
+    
+    public static Optional<String> removePictureTagName(NBTTagCompound pictureTag) {
+        if (!pictureTag.hasKey(Picture.TAG_NAME, 8)) {
+            return Optional.empty();
+        }
+        String name = pictureTag.getString(Picture.TAG_NAME);
+        pictureTag.removeTag(Picture.TAG_NAME);
+        return Optional.of(name);
     }
 }

@@ -21,6 +21,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -49,7 +50,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
         NBTTagList list = new NBTTagList();
-        this.writeMovesToNBT(list);
+        this.writeMoves(list);
         nbtTag.setTag(TAG_MOVES, list);
         return nbtTag;
     }
@@ -58,24 +59,22 @@ public class TileEntityChessDesk extends TileEntityBase {
     public void readFromNBT(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         NBTTagList list = nbtTag.getTagList(TAG_MOVES, 10);
-        this.readMovesFromNBT(list);
+        this.readMoves(list);
     }
     
-    public void writeMovesToNBT(NBTTagList listTag) {
-        for (Move move : this.imoves) {
-            NBTTagCompound moveTag = new NBTTagCompound();
-            move.writeToNBT(moveTag);
-            listTag.appendTag(moveTag);
-        }
+    public void writeMoves(NBTTagList listTag) {
+        this.imoves.stream()
+                   .map(Move::serializeNBT)
+                   .forEachOrdered(listTag::appendTag);
     }
     
-    public void readMovesFromNBT(NBTTagList listTag) {
+    public void readMoves(NBTTagList listTag) {
         this.game = new ChessGame();
         this.imoves.clear();
         for (int i = 0; i < listTag.tagCount(); i++) {
             NBTTagCompound tag = listTag.getCompoundTagAt(i);
             Move wrap = new Move();
-            wrap.readFromNBT(tag, i % 2 == 0);
+            wrap.deserializeNBT(tag, i % 2 == 0);
             ChessGame.Move move;
             if (wrap.move == null || (move = this.game.move(wrap.move)) == null) {
                 return;
@@ -146,7 +145,7 @@ public class TileEntityChessDesk extends TileEntityBase {
         return 16384.0D;
     }
     
-    public static class Move {
+    public static class Move implements INBTSerializable<NBTTagCompound> {
         public ChessGame.Move move;
         public UUID playerUUID;
         public String playerName;
@@ -165,7 +164,9 @@ public class TileEntityChessDesk extends TileEntityBase {
             this.playerName = wrap.playerName;
         }
         
-        public void writeToNBT(NBTTagCompound nbtTag) {
+        @Override
+        public NBTTagCompound serializeNBT() {
+            NBTTagCompound nbtTag = new NBTTagCompound();
             nbtTag.setString(TAG_MOVE, this.move.toString(false));
             NBTTagCompound playerTag = new NBTTagCompound();
             if (this.playerUUID != null) {
@@ -176,9 +177,15 @@ public class TileEntityChessDesk extends TileEntityBase {
                 playerTag.setString(TAG_PLAYERNAME, this.playerName);
             }
             nbtTag.setTag(TAG_PLAYER, playerTag);
+            return nbtTag;
         }
         
-        public void readFromNBT(NBTTagCompound nbtTag, boolean white) {
+        @Override
+        public void deserializeNBT(NBTTagCompound nbtTag) {
+            this.deserializeNBT(nbtTag, null);
+        }
+        
+        public void deserializeNBT(NBTTagCompound nbtTag, Boolean white) {
             try {
                 String str = nbtTag.getString(TAG_MOVE);
                 this.move = new ChessGame.Move(str, white);
