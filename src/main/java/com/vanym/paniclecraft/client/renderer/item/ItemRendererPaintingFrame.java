@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
+import java.util.stream.IntStream;
+
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
@@ -53,17 +55,16 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
         tilePF.blockType = Core.instance.painting.blockPaintingFrame;
         int[] obtainedTextures = new int[ISidePictureProvider.N];
-        NBTTagCompound itemTag = stack.getTagCompound();
-        if (itemTag == null) {
-            itemTag = new NBTTagCompound();
-        }
+        NBTTagCompound[] tags = IntStream.range(0, ISidePictureProvider.N)
+                                         .mapToObj(i->ItemPaintingFrame.getPictureTag(stack, i))
+                                         .map(o->o.orElse(null))
+                                         .toArray(NBTTagCompound[]::new);
         for (int i = 0; i < ISidePictureProvider.N; ++i) {
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
             obtainedTextures[i] = -1;
-            if (!itemTag.hasKey(TAG_PICTURE_I)) {
+            if (tags[i] == null) {
                 continue;
             }
-            NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
+            NBTTagCompound pictureTag = tags[i];
             NBTBase imageTag = pictureTag.getTag(Picture.TAG_IMAGE);
             Picture picture = tilePF.createPicture(i);
             obtainedTextures[i] = this.textureCache.obtainTexture(imageTag);
@@ -111,8 +112,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
             if (picture == null || obtainedTextures[i] >= 0) {
                 continue;
             }
-            final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
-            NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE_I);
+            NBTTagCompound pictureTag = tags[i];
             NBTBase imageTag = pictureTag.getTag(Picture.TAG_IMAGE);
             this.textureCache.putTexture(imageTag, picture.texture);
         }

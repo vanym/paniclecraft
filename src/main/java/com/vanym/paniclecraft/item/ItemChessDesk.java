@@ -4,10 +4,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -26,7 +28,7 @@ import net.minecraft.world.World;
 
 public class ItemChessDesk extends ItemBlockMod3 {
     
-    public static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
+    protected static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
     
     public ItemChessDesk(Block block) {
         super(block);
@@ -61,12 +63,9 @@ public class ItemChessDesk extends ItemBlockMod3 {
     @SuppressWarnings("deprecation")
     public void onFuelBurnTime(net.minecraftforge.event.FuelBurnTimeEvent event) {
         ItemStack fuel = event.fuel;
-        if (fuel.getItem() instanceof ItemChessDesk && fuel.hasTagCompound()) {
-            NBTTagCompound itemTag = fuel.getTagCompound();
-            if (itemTag.hasKey(TAG_MOVES)) {
-                event.burnTime = 0;
-                event.setResult(Event.Result.DENY);
-            }
+        if (fuel.getItem() instanceof ItemChessDesk && getMoves(fuel).isPresent()) {
+            event.burnTime = 0;
+            event.setResult(Event.Result.DENY);
         }
     }
     
@@ -78,12 +77,9 @@ public class ItemChessDesk extends ItemBlockMod3 {
             EntityPlayer player,
             List list,
             boolean advancedItemTooltips) {
-        if (!stack.hasTagCompound()) {
-            return;
-        }
-        NBTTagCompound tag = stack.getTagCompound();
-        if (tag.hasKey(TAG_MOVES)) {
-            NBTTagList movesTag = tag.getTagList(TAG_MOVES, 10);
+        Optional<NBTTagList> movesTagOpt = getMoves(stack);
+        if (movesTagOpt.isPresent()) {
+            NBTTagList movesTag = movesTagOpt.get();
             list.add(StatCollector.translateToLocalFormatted(this.getUnlocalizedName() + ".moves",
                                                              movesTag.tagCount()));
             if (GuiScreen.isShiftKeyDown()) {
@@ -126,11 +122,16 @@ public class ItemChessDesk extends ItemBlockMod3 {
         if (tileCD == null || tileCD.moves.isEmpty()) {
             return stack;
         }
-        NBTTagCompound tag = new NBTTagCompound();
+        NBTTagCompound tag = ItemUtils.getOrCreateBlockEntityTag(stack);
         NBTTagList list = new NBTTagList();
         tileCD.writeMovesToNBT(list);
         tag.setTag(TAG_MOVES, list);
-        stack.setTagCompound(tag);
         return stack;
+    }
+    
+    public static Optional<NBTTagList> getMoves(ItemStack stack) {
+        return ItemUtils.getBlockEntityTag(stack)
+                        .filter(tag->tag.hasKey(TAG_MOVES, 9))
+                        .map(tag->tag.getTagList(TAG_MOVES, 10));
     }
 }

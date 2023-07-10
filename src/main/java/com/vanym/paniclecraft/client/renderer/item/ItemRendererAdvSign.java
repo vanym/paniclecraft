@@ -9,7 +9,6 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.IItemRenderer;
 
 @SideOnly(Side.CLIENT)
@@ -67,13 +66,7 @@ public class ItemRendererAdvSign implements IItemRenderer {
             default:
             break;
         }
-        if (item.hasTagCompound()) {
-            NBTTagCompound tag = item.getTagCompound();
-            if (tag.hasKey(ItemAdvSign.TAG_SIGN, 10)) {
-                NBTTagCompound signTag = tag.getCompoundTag(ItemAdvSign.TAG_SIGN);
-                tileAS.readFromNBT(signTag, true);
-            }
-        }
+        ItemAdvSign.getSign(item).ifPresent(signTag->tileAS.readFromNBT(signTag, true));
         Core.instance.advSign.tileAdvSignRenderer.renderTileEntityAt(tileAS, 0.0D, 0.0D, 0.0D,
                                                                      0.0F, false, false, -1);
     }

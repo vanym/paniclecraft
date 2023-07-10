@@ -2,11 +2,13 @@ package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -36,35 +38,26 @@ public class ItemAdvSign extends ItemMod3 {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
-            ItemStack itemStack,
-            EntityPlayer entityPlayer,
+            ItemStack stack,
+            EntityPlayer player,
             List list,
             boolean advancedItemTooltips) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound tag = itemStack.getTagCompound();
-            if (tag.hasKey(TAG_SIGN, 10)) {
-                if (GuiScreen.isShiftKeyDown()) {
-                    NBTTagCompound signTag = tag.getCompoundTag(TAG_SIGN);
-                    NBTTagList tagLines = signTag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
-                    IntStream.range(0, tagLines.tagCount())
-                             .mapToObj(tagLines::getStringTagAt)
-                             .forEachOrdered(list::add);
-                } else {
-                    list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
-                        ".showtext"));
-                }
+        getLines(stack).ifPresent(lines-> {
+            if (GuiScreen.isShiftKeyDown()) {
+                IntStream.range(0, lines.tagCount())
+                         .mapToObj(lines::getStringTagAt)
+                         .forEachOrdered(list::add);
+            } else {
+                list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
+                    ".showtext"));
             }
-        }
+        });
     }
     
     @Override
     public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-        if (stack.hasTagCompound() && player.isSneaking()) {
-            NBTTagCompound tag = stack.getTagCompound();
-            tag.removeTag(TAG_SIGN);
-            if (tag.hasNoTags()) {
-                stack.setTagCompound(null);
-            }
+        if (player.isSneaking()) {
+            removeSign(stack);
         }
         return stack;
     }
@@ -99,11 +92,7 @@ public class ItemAdvSign extends ItemMod3 {
                     tileAS.writeToNBT(signTag, true);
                 }
                 if (signTag != null) {
-                    if (!stack.hasTagCompound()) {
-                        stack.setTagCompound(new NBTTagCompound());
-                    }
-                    NBTTagCompound tag = stack.getTagCompound();
-                    tag.setTag(TAG_SIGN, signTag);
+                    setSign(stack, signTag);
                     return true;
                 }
             }
@@ -122,15 +111,9 @@ public class ItemAdvSign extends ItemMod3 {
         }
         --stack.stackSize;
         TileEntity tile = world.getTileEntity(x, y, z);
-        if (tile != null && tile instanceof TileEntityAdvSign) {
+        if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            if (stack.hasTagCompound()) {
-                NBTTagCompound tag = stack.getTagCompound();
-                if (tag.hasKey(TAG_SIGN, 10)) {
-                    NBTTagCompound signTag = tag.getCompoundTag(TAG_SIGN);
-                    tileAS.readFromNBT(signTag, true);
-                }
-            }
+            getSign(stack).ifPresent(signTag->tileAS.readFromNBT(signTag, true));
             if (pside == ForgeDirection.UP) {
                 tileAS.setStick(true);
                 double direction = Math.round(180.0D + player.rotationYaw);
@@ -151,11 +134,30 @@ public class ItemAdvSign extends ItemMod3 {
         if (tileAS == null || tileAS.lines.stream().allMatch(String::isEmpty)) {
             return stack;
         }
-        NBTTagCompound tag = new NBTTagCompound();
         NBTTagCompound signTag = new NBTTagCompound();
         tileAS.writeToNBT(signTag, true);
-        tag.setTag(ItemAdvSign.TAG_SIGN, signTag);
-        stack.setTagCompound(tag);
+        setSign(stack, signTag);
         return stack;
+    }
+    
+    protected static void setSign(ItemStack stack, NBTTagCompound tag) {
+        ItemUtils.getOrCreateTag(stack).setTag(TAG_SIGN, tag);
+    }
+    
+    protected static void removeSign(ItemStack stack) {
+        NBTTagCompound tag = stack.getTagCompound();
+        tag.removeTag(TAG_SIGN);
+        ItemUtils.cleanTag(stack);
+    }
+    
+    public static Optional<NBTTagCompound> getSign(ItemStack stack) {
+        return ItemUtils.getTag(stack)
+                        .filter(tag->tag.hasKey(TAG_SIGN, 10))
+                        .map(tag->tag.getCompoundTag(TAG_SIGN));
+    }
+    
+    protected static Optional<NBTTagList> getLines(ItemStack stack) {
+        return getSign(stack).filter(tag->tag.hasKey(TileEntityAdvSign.TAG_LINES, 9))
+                             .map(tag->tag.getTagList(TileEntityAdvSign.TAG_LINES, 8));
     }
 }

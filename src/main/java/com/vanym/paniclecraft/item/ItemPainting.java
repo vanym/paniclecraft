@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPainting;
@@ -9,6 +10,7 @@ import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.ItemUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -24,7 +26,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 public class ItemPainting extends ItemMod3 {
     
-    public static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
+    protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public ItemPainting() {
         this.setRegistryName("painting");
@@ -125,52 +127,48 @@ public class ItemPainting extends ItemMod3 {
             EntityPlayer entityPlayer,
             List list,
             boolean advancedItemTooltips) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            if (itemTag.hasKey(TAG_PICTURE, 10)) {
-                NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
-                if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
-                    !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                    list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
-                        ".uneditable"));
-                }
-                list.add(pictureSizeInformation(pictureTag));
+        getPictureTag(itemStack).ifPresent(pictureTag-> {
+            if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
+                !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
+                list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
+                    ".uneditable"));
             }
-        }
+            list.add(pictureSizeInformation(pictureTag));
+        });
     }
     
     public static boolean fillPicture(Picture picture, ItemStack itemStack) {
-        if (itemStack.hasTagCompound()) {
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            if (itemTag.hasKey(TAG_PICTURE)) {
-                NBTTagCompound pictureTag = itemTag.getCompoundTag(TAG_PICTURE);
-                if (!pictureTag.hasNoTags()) {
-                    picture.readFromNBT(pictureTag);
-                    if (itemStack.hasDisplayName()) {
-                        picture.setName(itemStack.getDisplayName());
-                    }
-                    return true;
-                }
+        NBTTagCompound pictureTag = getPictureTag(itemStack).orElse(null);
+        if (pictureTag != null && !pictureTag.hasNoTags()) {
+            picture.readFromNBT(pictureTag);
+            if (itemStack.hasDisplayName()) {
+                picture.setName(itemStack.getDisplayName());
             }
+            return true;
         }
         return false;
     }
     
+    public static void setPictureTag(ItemStack stack, NBTTagCompound pictureTag) {
+        ItemPaintingFrame.removePictureTagName(pictureTag).ifPresent(stack::setStackDisplayName);
+        ItemUtils.getOrCreateBlockEntityTag(stack).setTag(TAG_PICTURE, pictureTag);
+    }
+    
+    public static Optional<NBTTagCompound> getPictureTag(ItemStack stack) {
+        return ItemUtils.getBlockEntityTag(stack)
+                        .filter(tag->tag.hasKey(TAG_PICTURE, 10))
+                        .map(tag->tag.getCompoundTag(TAG_PICTURE));
+    }
+    
     public static ItemStack getPictureAsItem(Picture picture) {
-        ItemStack itemS = new ItemStack(Core.instance.painting.itemPainting);
+        ItemStack stack = new ItemStack(Core.instance.painting.itemPainting);
         if (picture == null) {
-            return itemS;
+            return stack;
         }
-        NBTTagCompound itemTag = new NBTTagCompound();
-        itemS.setTagCompound(itemTag);
         NBTTagCompound pictureTag = new NBTTagCompound();
         picture.writeToNBT(pictureTag);
-        if (pictureTag.hasKey(Picture.TAG_NAME)) {
-            itemS.setStackDisplayName(pictureTag.getString(Picture.TAG_NAME));
-            pictureTag.removeTag(Picture.TAG_NAME);
-        }
-        itemTag.setTag(TAG_PICTURE, pictureTag);
-        return itemS;
+        setPictureTag(stack, pictureTag);
+        return stack;
     }
     
     public static ItemStack getSizedItem(IPictureSize size) {
@@ -179,19 +177,20 @@ public class ItemPainting extends ItemMod3 {
     
     public static ItemStack getSizedItem(int width, int height) {
         ItemStack stack = new ItemStack(Core.instance.painting.itemPainting);
-        NBTTagCompound itemTag = new NBTTagCompound();
         NBTTagCompound pictureTag = new NBTTagCompound();
         NBTTagCompound imageTag = new NBTTagCompound();
         imageTag.setInteger(Picture.TAG_IMAGE_WIDTH, width);
         imageTag.setInteger(Picture.TAG_IMAGE_HEIGHT, height);
         pictureTag.setTag(Picture.TAG_IMAGE, imageTag);
-        itemTag.setTag(ItemPainting.TAG_PICTURE, pictureTag);
-        stack.setTagCompound(itemTag);
+        setPictureTag(stack, pictureTag);
         return stack;
     }
     
     @SideOnly(Side.CLIENT)
     public static String pictureSizeInformation(NBTTagCompound pictureTag) {
+        if (pictureTag.hasNoTags()) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
         NBTBase imageTagBase = pictureTag.getTag(Picture.TAG_IMAGE);
         NBTTagCompound imageTag;

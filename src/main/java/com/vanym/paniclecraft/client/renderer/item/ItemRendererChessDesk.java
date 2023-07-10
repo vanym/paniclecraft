@@ -10,8 +10,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.client.IItemRenderer;
 
 @SideOnly(Side.CLIENT)
@@ -68,13 +66,7 @@ public class ItemRendererChessDesk implements IItemRenderer {
             default:
             break;
         }
-        if (stack.hasTagCompound()) {
-            NBTTagCompound tag = stack.getTagCompound();
-            if (tag.hasKey(ItemChessDesk.TAG_MOVES, 9)) {
-                NBTTagList list = tag.getTagList(ItemChessDesk.TAG_MOVES, 10);
-                tileChessDesk.readMovesFromNBT(list);
-            }
-        }
+        ItemChessDesk.getMoves(stack).ifPresent(list->tileChessDesk.readMovesFromNBT(list));
         Core.instance.deskgame.tileChessDeskRenderer.renderTileEntityAt(tileChessDesk, 0, 0, 0, 0);
     }
 }

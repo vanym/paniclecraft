@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.WorldUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -15,8 +16,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
@@ -90,20 +89,10 @@ public class BlockChessDesk extends BlockContainerMod3 {
             int z,
             EntityLivingBase entity,
             ItemStack stack) {
-        if (!stack.hasTagCompound()) {
-            return;
-        }
-        NBTTagCompound tag = stack.getTagCompound();
-        if (!tag.hasKey(ItemChessDesk.TAG_MOVES, 9)) {
-            return;
-        }
-        NBTTagList list = tag.getTagList(ItemChessDesk.TAG_MOVES, 10);
-        TileEntity tile = world.getTileEntity(x, y, z);
-        if (!TileEntityChessDesk.class.isInstance(tile)) {
-            return;
-        }
-        TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
-        tileCD.readMovesFromNBT(list);
+        ItemChessDesk.getMoves(stack).ifPresent(list-> {
+            WorldUtils.getTileEntity(world, x, y, z, TileEntityChessDesk.class)
+                      .ifPresent(tileCD->tileCD.readMovesFromNBT(list));
+        });
     }
     
     @Override

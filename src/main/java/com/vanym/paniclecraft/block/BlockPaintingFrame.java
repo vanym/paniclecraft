@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
@@ -26,7 +25,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
@@ -158,22 +156,19 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             int y,
             int z,
             EntityLivingBase entity,
-            ItemStack itemStack) {
-        super.onBlockPlacedBy(world, x, y, z, entity, itemStack);
-        if (!itemStack.hasTagCompound()) {
+            ItemStack stack) {
+        super.onBlockPlacedBy(world, x, y, z, entity, stack);
+        if (!stack.hasTagCompound()) {
             return;
         }
         TileEntity tile = world.getTileEntity(x, y, z);
-        if (tile != null && tile instanceof TileEntityPaintingFrame) {
+        if (tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-            NBTTagCompound itemTag = itemStack.getTagCompound();
-            for (int i = 0; i < ISidePictureProvider.N; i++) {
-                final String TAG_PICTURE_I = ItemPaintingFrame.getPictureTag(i);
-                if (!itemTag.hasKey(TAG_PICTURE_I)) {
-                    continue;
-                }
-                Picture picture = tilePF.createPicture(i);
-                picture.readFromNBT(itemTag.getCompoundTag(TAG_PICTURE_I));
+            for (ForgeDirection pside : ForgeDirection.VALID_DIRECTIONS) {
+                ItemPaintingFrame.getPictureTag(stack, pside).ifPresent(tag-> {
+                    Picture picture = tilePF.createPicture(pside.ordinal());
+                    picture.readFromNBT(tag);
+                });
             }
             int rot = getRotate(entity, ForgeDirection.UP, true);
             tilePF.rotateY(rot);
