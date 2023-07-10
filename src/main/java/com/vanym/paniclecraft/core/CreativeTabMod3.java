@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.core;
 import java.util.List;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.IModComponent;
 
 import cpw.mods.fml.relauncher.Side;
@@ -15,14 +14,14 @@ public class CreativeTabMod3 extends CreativeTabs {
     
     public Item iconitem;
     
-    public CreativeTabMod3(String modid) {
-        super(modid);
+    public CreativeTabMod3(String tabid) {
+        super(tabid);
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public String getTranslatedTabLabel() {
-        return DEF.MOD_NAME;
+        return "itemgroup." + this.getTabLabel();
     }
     
     @Override
