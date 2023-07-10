@@ -258,7 +258,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         min.mul(16.0F);
         max.mul(16.0F);
         Map<Direction, BlockPartFace> blockPartFaceMap =
-                Stream.of(Direction.values())
+                Arrays.stream(Direction.values())
                       .collect(Collectors.toMap(Function.identity(),
                                                 side-> {
                                                     Direction cullFace = null;

@@ -57,7 +57,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
         if (pictureTag == null || pictureTag.isEmpty()) {
             return painting;
         }
-        ItemPainting.setPictureTag(painting, pictureTag.copy());
+        ItemPainting.putPictureTag(painting, pictureTag.copy());
         return painting;
     }
     
@@ -82,8 +82,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
             return super.getRemainingItems(inv);
         }
         for (Direction pside : ItemPaintingFrame.SIDE_ORDER) {
-            if (ItemPaintingFrame.getPictureTag(frame, pside).isPresent()) {
-                ItemPaintingFrame.removePictureTag(frame, pside);
+            if (ItemPaintingFrame.removePictureTag(frame, pside).isPresent()) {
                 break;
             }
         }

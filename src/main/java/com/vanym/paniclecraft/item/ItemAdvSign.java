@@ -114,7 +114,7 @@ public class ItemAdvSign extends ItemMod3 {
                     tileAS.write(signTag, true);
                 }
                 if (signTag != null) {
-                    setSign(stack, signTag);
+                    putSign(stack, signTag);
                     return ActionResultType.SUCCESS;
                 }
             }
@@ -160,11 +160,11 @@ public class ItemAdvSign extends ItemMod3 {
         }
         CompoundNBT signTag = new CompoundNBT();
         tileAS.write(signTag, true);
-        setSign(stack, signTag);
+        putSign(stack, signTag);
         return stack;
     }
     
-    protected static void setSign(ItemStack stack, CompoundNBT tag) {
+    protected static void putSign(ItemStack stack, CompoundNBT tag) {
         ItemUtils.getOrCreateTag(stack).put(TAG_SIGN, tag);
     }
     

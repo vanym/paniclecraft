@@ -157,7 +157,7 @@ public class ItemPainting extends ItemMod3 {
         return false;
     }
     
-    public static void setPictureTag(ItemStack stack, CompoundNBT pictureTag) {
+    public static void putPictureTag(ItemStack stack, CompoundNBT pictureTag) {
         ItemPaintingFrame.removePictureTagName(pictureTag)
                          .map(StringTextComponent::new)
                          .ifPresent(stack::setDisplayName);
@@ -175,7 +175,7 @@ public class ItemPainting extends ItemMod3 {
         if (picture == null) {
             return stack;
         }
-        setPictureTag(stack, picture.serializeNBT());
+        putPictureTag(stack, picture.serializeNBT());
         return stack;
     }
     
@@ -190,7 +190,7 @@ public class ItemPainting extends ItemMod3 {
         imageTag.putInt(Picture.TAG_IMAGE_WIDTH, width);
         imageTag.putInt(Picture.TAG_IMAGE_HEIGHT, height);
         pictureTag.put(Picture.TAG_IMAGE, imageTag);
-        setPictureTag(stack, pictureTag);
+        putPictureTag(stack, pictureTag);
         return stack;
     }
     

@@ -154,7 +154,7 @@ public class BlockPainting extends BlockPaintingContainer {
     }
     
     public AxisAlignedBB getBlockBoundsBasedOnState(int meta) {
-        int side = Direction.byIndex(meta).getOpposite().ordinal();
+        int side = Direction.byIndex(meta).getOpposite().getIndex();
         return GeometryUtils.getBoundsBySide(side, this.getPaintingOutlineSize());
     }
     

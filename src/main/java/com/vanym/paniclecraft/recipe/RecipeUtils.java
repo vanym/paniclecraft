@@ -14,9 +14,9 @@ public class RecipeUtils {
                                              .map(CompoundNBT::copy)
                                              .orElseGet(CompoundNBT::new);
         if (painting.hasDisplayName()) {
-            ItemPaintingFrame.setPictureTagName(pictureTag,
+            ItemPaintingFrame.putPictureTagName(pictureTag,
                                                 painting.getDisplayName().getFormattedText());
         }
-        ItemPaintingFrame.setPictureTag(frame, pside, pictureTag);
+        ItemPaintingFrame.putPictureTag(frame, pside, pictureTag);
     }
 }

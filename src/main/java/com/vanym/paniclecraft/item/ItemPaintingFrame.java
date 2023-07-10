@@ -130,7 +130,7 @@ public class ItemPaintingFrame extends BlockItem {
             CompoundNBT pictureTag = Optional.ofNullable(picture)
                                              .map(Picture::serializeNBT)
                                              .orElseGet(CompoundNBT::new);
-            setPictureTag(stack, pside, pictureTag);
+            putPictureTag(stack, pside, pictureTag);
         });
         return stack;
     }
@@ -162,14 +162,14 @@ public class ItemPaintingFrame extends BlockItem {
         return getItemWithPictures(map);
     }
     
-    public static void setPictureTag(
+    public static void putPictureTag(
             ItemStack stack,
             Direction pside,
             CompoundNBT pictureTag) {
-        setPictureTag(stack, pside.getIndex(), pictureTag);
+        putPictureTag(stack, pside.getIndex(), pictureTag);
     }
     
-    public static void setPictureTag(ItemStack stack, int side, CompoundNBT pictureTag) {
+    public static void putPictureTag(ItemStack stack, int side, CompoundNBT pictureTag) {
         String name = String.format(TAG_PICTURE_N, side);
         ItemUtils.getOrCreateBlockEntityTag(stack).put(name, pictureTag);
     }
@@ -185,17 +185,19 @@ public class ItemPaintingFrame extends BlockItem {
                         .map(tag->tag.getCompound(name));
     }
     
-    public static void removePictureTag(ItemStack stack, Direction pside) {
-        removePictureTag(stack, pside.getIndex());
+    public static Optional<CompoundNBT> removePictureTag(ItemStack stack, Direction pside) {
+        return removePictureTag(stack, pside.getIndex());
     }
     
-    public static void removePictureTag(ItemStack stack, int side) {
+    public static Optional<CompoundNBT> removePictureTag(ItemStack stack, int side) {
         String name = String.format(TAG_PICTURE_N, side);
+        Optional<CompoundNBT> tagOpt = getPictureTag(stack, side);
         ItemUtils.getBlockEntityTag(stack).ifPresent(tag->tag.remove(name));
         ItemUtils.cleanBlockEntityTag(stack);
+        return tagOpt;
     }
     
-    public static void setPictureTagName(CompoundNBT pictureTag, String name) {
+    public static void putPictureTagName(CompoundNBT pictureTag, String name) {
         pictureTag.putString(Picture.TAG_NAME, name);
     }
     

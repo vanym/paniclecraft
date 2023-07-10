@@ -101,7 +101,7 @@ public class GeometryUtils {
     }
     
     protected static TileOnSide getZTileOnSide(Direction zdir) {
-        Direction xdir = Direction.byIndex((zdir.ordinal() + 2) % 6);
+        Direction xdir = Direction.byIndex((zdir.getIndex() + 2) % 6);
         return new TileOnSide(xdir, zdir);
     }
 }

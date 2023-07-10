@@ -10,18 +10,18 @@ import net.minecraft.item.ItemStack;
 
 public class InventoryUtils {
     
-    public static Stream<ItemStack> inventoryToStream(IInventory inv) {
-        return inventoryToStream(inv, false);
+    public static Stream<ItemStack> stream(IInventory inv) {
+        return stream(inv, false);
     }
     
-    public static Stream<ItemStack> inventoryToStream(IInventory inv, boolean onClosing) {
+    public static Stream<ItemStack> stream(IInventory inv, boolean onClosing) {
         return IntStream.range(0, inv.getSizeInventory())
                         .mapToObj(onClosing ? inv::removeStackFromSlot : inv::getStackInSlot);
     }
     
     public static ItemStack findItem(CraftingInventory inv, Item item) {
-        return inventoryToStream(inv).filter(s->item == s.getItem())
-                                     .findFirst()
-                                     .orElse(ItemStack.EMPTY);
+        return stream(inv).filter(s->item == s.getItem())
+                          .findFirst()
+                          .orElse(ItemStack.EMPTY);
     }
 }
