@@ -14,25 +14,25 @@ import net.minecraft.item.ItemStack;
 
 public class InventoryUtils {
     
-    public static Stream<ItemStack> inventoryToStream(IInventory inv) {
-        return inventoryToStream(inv, false);
+    public static Stream<ItemStack> stream(IInventory inv) {
+        return stream(inv, false);
     }
     
-    public static Stream<ItemStack> inventoryToStream(IInventory inv, boolean onClosing) {
+    public static Stream<ItemStack> stream(IInventory inv, boolean onClosing) {
         return IntStream.range(0, inv.getSizeInventory())
                         .mapToObj(onClosing ? inv::getStackInSlotOnClosing : inv::getStackInSlot);
     }
     
     public static void dropOnClosing(IInventory inv, EntityPlayer player) {
-        InventoryUtils.inventoryToStream(inv, true)
+        InventoryUtils.stream(inv, true)
                       .filter(s->s != null)
                       .forEach(s->player.dropPlayerItemWithRandomChoice(s, false));
     }
     
     public static ItemStack findItem(InventoryCrafting inv, Item item) {
-        return inventoryToStream(inv).filter(s->s != null && item == s.getItem())
-                                     .findFirst()
-                                     .orElse(null);
+        return stream(inv).filter(s->s != null && item == s.getItem())
+                          .findFirst()
+                          .orElse(null);
     }
     
     @SideOnly(Side.CLIENT)

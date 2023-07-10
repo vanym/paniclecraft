@@ -103,7 +103,7 @@ public class BlockCannon extends BlockContainerMod3 {
         TileEntity tile = world.getTileEntity(x, y, z);
         if (tile instanceof TileEntityCannon) {
             TileEntityCannon tileCannon = (TileEntityCannon)tile;
-            InventoryUtils.inventoryToStream(tileCannon)
+            InventoryUtils.stream(tileCannon)
                           .filter(Objects::nonNull)
                           .map(sk->new EntityItem(world, x + 0.5F, y + 0.3F, z + 0.5F, sk.copy()))
                           .forEach(world::spawnEntityInWorld);
