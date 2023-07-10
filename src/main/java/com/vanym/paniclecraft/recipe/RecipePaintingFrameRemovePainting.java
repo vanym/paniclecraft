@@ -52,7 +52,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
         if (pictureTag == null || pictureTag.hasNoTags()) {
             return painting;
         }
-        ItemPainting.setPictureTag(painting, (NBTTagCompound)pictureTag.copy());
+        ItemPainting.putPictureTag(painting, (NBTTagCompound)pictureTag.copy());
         return painting;
     }
     
@@ -77,8 +77,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
             return super.getRemainingItems(inv);
         }
         for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
-            if (ItemPaintingFrame.getPictureTag(frame, pside).isPresent()) {
-                ItemPaintingFrame.removePictureTag(frame, pside);
+            if (ItemPaintingFrame.removePictureTag(frame, pside).isPresent()) {
                 break;
             }
         }

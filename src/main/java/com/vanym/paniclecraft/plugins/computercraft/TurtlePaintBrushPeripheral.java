@@ -150,7 +150,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     @PeripheralMethod(32)
     protected boolean setBrushColor(int red, int green, int blue)
             throws LuaException, InterruptedException {
-        if (!InventoryUtils.inventoryToStream(this.turtle.getInventory())
+        if (!InventoryUtils.stream(this.turtle.getInventory())
                            .anyMatch(ItemPalette::canBePalette)) {
             throw new LuaException("cannot find palette");
         }

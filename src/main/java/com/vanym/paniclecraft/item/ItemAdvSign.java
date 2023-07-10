@@ -112,7 +112,7 @@ public class ItemAdvSign extends ItemMod3 {
                     tileAS.writeToNBT(signTag, true);
                 }
                 if (signTag != null) {
-                    setSign(stack, signTag);
+                    putSign(stack, signTag);
                     return EnumActionResult.SUCCESS;
                 }
             }
@@ -157,11 +157,11 @@ public class ItemAdvSign extends ItemMod3 {
         }
         NBTTagCompound signTag = new NBTTagCompound();
         tileAS.writeToNBT(signTag, true);
-        setSign(stack, signTag);
+        putSign(stack, signTag);
         return stack;
     }
     
-    protected static void setSign(ItemStack stack, NBTTagCompound tag) {
+    protected static void putSign(ItemStack stack, NBTTagCompound tag) {
         ItemUtils.getOrCreateTag(stack).setTag(TAG_SIGN, tag);
     }
     

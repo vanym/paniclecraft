@@ -162,7 +162,7 @@ public class ItemPainting extends ItemMod3 {
         return false;
     }
     
-    public static void setPictureTag(ItemStack stack, NBTTagCompound pictureTag) {
+    public static void putPictureTag(ItemStack stack, NBTTagCompound pictureTag) {
         ItemPaintingFrame.removePictureTagName(pictureTag).ifPresent(stack::setStackDisplayName);
         ItemUtils.getOrCreateBlockEntityTag(stack).setTag(TAG_PICTURE, pictureTag);
     }
@@ -178,7 +178,7 @@ public class ItemPainting extends ItemMod3 {
         if (picture == null) {
             return stack;
         }
-        setPictureTag(stack, picture.serializeNBT());
+        putPictureTag(stack, picture.serializeNBT());
         return stack;
     }
     
@@ -193,7 +193,7 @@ public class ItemPainting extends ItemMod3 {
         imageTag.setInteger(Picture.TAG_IMAGE_WIDTH, width);
         imageTag.setInteger(Picture.TAG_IMAGE_HEIGHT, height);
         pictureTag.setTag(Picture.TAG_IMAGE, imageTag);
-        setPictureTag(stack, pictureTag);
+        putPictureTag(stack, pictureTag);
         return stack;
     }
     

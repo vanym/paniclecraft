@@ -15,8 +15,8 @@ public class RecipeUtils {
                                                 .map(NBTTagCompound.class::cast)
                                                 .orElseGet(NBTTagCompound::new);
         if (painting.hasDisplayName()) {
-            ItemPaintingFrame.setPictureTagName(pictureTag, painting.getDisplayName());
+            ItemPaintingFrame.putPictureTagName(pictureTag, painting.getDisplayName());
         }
-        ItemPaintingFrame.setPictureTag(frame, pside, pictureTag);
+        ItemPaintingFrame.putPictureTag(frame, pside, pictureTag);
     }
 }
