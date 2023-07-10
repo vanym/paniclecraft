@@ -53,7 +53,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
         if (pictureTag == null || pictureTag.hasNoTags()) {
             return painting;
         }
-        ItemPainting.setPictureTag(painting, (NBTTagCompound)pictureTag.copy());
+        ItemPainting.putPictureTag(painting, (NBTTagCompound)pictureTag.copy());
         return painting;
     }
     
