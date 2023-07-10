@@ -209,7 +209,7 @@ public class BlockPainting extends BlockPaintingContainer {
     }
     
     public AxisAlignedBB getBlockBoundsBasedOnState(int meta) {
-        int side = EnumFacing.getFront(meta).getOpposite().ordinal();
+        int side = EnumFacing.getFront(meta).getOpposite().getIndex();
         return GeometryUtils.getBoundsBySide(side, this.getPaintingOutlineSize());
     }
     

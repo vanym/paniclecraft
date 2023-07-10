@@ -33,7 +33,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     @PeripheralMethod(31)
     protected Object getAvailableSides() {
         return Arrays.stream(EnumFacing.VALUES)
-                     .collect(Collectors.toMap(f->f.ordinal() + 1, f->f.getName2()));
+                     .collect(Collectors.toMap(f->f.getIndex() + 1, f->f.getName2()));
     }
     
     @PeripheralMethod(32)
@@ -72,7 +72,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
         if (this.pside == null) {
             return null;
         }
-        return this.sideProvider.getPicture(this.pside.ordinal());
+        return this.sideProvider.getPicture(this.pside.getIndex());
     }
     
 }

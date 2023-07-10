@@ -21,7 +21,7 @@ public enum PaintingSide {
     }
     
     public static PaintingSide getSide(@Nonnull EnumFacing side) {
-        return getSide(side.ordinal());
+        return getSide(side.getIndex());
     }
     
     public static PaintingSide getSide(int side) {

@@ -95,7 +95,7 @@ public class GeometryUtils {
     }
     
     protected static TileOnSide getZTileOnSide(EnumFacing zdir) {
-        EnumFacing xdir = EnumFacing.getFront((zdir.ordinal() + 2) % 6);
+        EnumFacing xdir = EnumFacing.getFront((zdir.getIndex() + 2) % 6);
         return new TileOnSide(xdir, zdir);
     }
 }

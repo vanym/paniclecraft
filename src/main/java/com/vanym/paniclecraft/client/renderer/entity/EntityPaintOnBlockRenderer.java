@@ -220,7 +220,7 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
                                      .collect(Collectors.toList());
         List<BakedQuad> quads = new ArrayList<>();
         EnumMap<EnumFacing, List<BakedQuad>> quadsMap = new EnumMap<>(EnumFacing.class);
-        for (EnumFacing side : EnumFacing.values()) {
+        for (EnumFacing side : EnumFacing.VALUES) {
             quadsMap.put(side, new ArrayList<>());
         }
         for (BlockPart part : parts) {
@@ -251,7 +251,7 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
         min.scale(16.0F);
         max.scale(16.0F);
         Map<EnumFacing, BlockPartFace> blockPartFaceMap =
-                Stream.of(EnumFacing.values())
+                Arrays.stream(EnumFacing.VALUES)
                       .collect(Collectors.toMap(Function.identity(),
                                                 side-> {
                                                     EnumFacing cullFace = null;
@@ -264,7 +264,7 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
                                                 }));
         BlockPart part = new BlockPart(min, max, blockPartFaceMap, null, true);
         // fixing vertical sides rotation
-        Arrays.stream(EnumFacing.values())
+        Arrays.stream(EnumFacing.VALUES)
               .filter(side->side.getAxis().isVertical())
               .map(part.mapFaces::get)
               .map(bpf->bpf.blockFaceUV.uvs)

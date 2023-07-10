@@ -160,7 +160,7 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
             ItemStack stack,
             EnumFacing pside,
             NBTTagCompound pictureTag) {
-        putPictureTag(stack, pside.ordinal(), pictureTag);
+        putPictureTag(stack, pside.getIndex(), pictureTag);
     }
     
     public static void putPictureTag(ItemStack stack, int side, NBTTagCompound pictureTag) {
@@ -169,7 +169,7 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
     }
     
     public static Optional<NBTTagCompound> getPictureTag(ItemStack stack, EnumFacing pside) {
-        return getPictureTag(stack, pside.ordinal());
+        return getPictureTag(stack, pside.getIndex());
     }
     
     public static Optional<NBTTagCompound> getPictureTag(ItemStack stack, int side) {
@@ -180,7 +180,7 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
     }
     
     public static Optional<NBTTagCompound> removePictureTag(ItemStack stack, EnumFacing pside) {
-        return removePictureTag(stack, pside.ordinal());
+        return removePictureTag(stack, pside.getIndex());
     }
     
     public static Optional<NBTTagCompound> removePictureTag(ItemStack stack, int side) {

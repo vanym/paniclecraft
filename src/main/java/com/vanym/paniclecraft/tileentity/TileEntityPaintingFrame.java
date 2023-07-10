@@ -91,24 +91,24 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     public void rotateY(int rotUp) {
         EnumFacing rotator = EnumFacing.UP;
         EnumFacing begin = EnumFacing.SOUTH;
-        Picture pictureUp = this.getPicture(rotator.ordinal());
+        Picture pictureUp = this.getPicture(rotator.getIndex());
         if (pictureUp != null) {
             pictureUp.rotate(rotUp);
         }
-        Picture pictureDown = this.getPicture(rotator.getOpposite().ordinal());
+        Picture pictureDown = this.getPicture(rotator.getOpposite().getIndex());
         if (pictureDown != null) {
             pictureDown.rotate((4 - rotUp) % 4);
         }
         for (int i = 0; i < rotUp; i++) {
-            PictureHolder holderBegin = this.holders[begin.ordinal()];
+            PictureHolder holderBegin = this.holders[begin.getIndex()];
             EnumFacing current = begin;
             while (true) {
                 EnumFacing next = GeometryUtils.rotateBy(current, rotator.getOpposite());
                 if (next == begin) {
                     break;
                 }
-                int c = current.ordinal();
-                int n = next.ordinal();
+                int c = current.getIndex();
+                int n = next.getIndex();
                 PictureHolder nextHolder = this.holders[n];
                 this.holders[n] = null;
                 if (nextHolder != null) {
@@ -117,7 +117,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
                 this.holders[c] = nextHolder;
                 current = next;
             }
-            int c = current.ordinal();
+            int c = current.getIndex();
             if (holderBegin != null) {
                 holderBegin.setSide(c);
             }

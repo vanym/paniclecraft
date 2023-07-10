@@ -168,7 +168,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
             for (EnumFacing pside : EnumFacing.VALUES) {
                 ItemPaintingFrame.getPictureTag(stack, pside).ifPresent(tag-> {
-                    Picture picture = tilePF.createPicture(pside.ordinal());
+                    Picture picture = tilePF.createPicture(pside.getIndex());
                     picture.deserializeNBT(tag);
                 });
             }
