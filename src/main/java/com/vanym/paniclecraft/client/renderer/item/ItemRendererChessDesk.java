@@ -66,7 +66,7 @@ public class ItemRendererChessDesk implements IItemRenderer {
             default:
             break;
         }
-        ItemChessDesk.getMoves(stack).ifPresent(list->tileChessDesk.readMovesFromNBT(list));
+        ItemChessDesk.getMoves(stack).ifPresent(list->tileChessDesk.readMoves(list));
         Core.instance.deskgame.tileChessDeskRenderer.renderTileEntityAt(tileChessDesk, 0, 0, 0, 0);
     }
 }

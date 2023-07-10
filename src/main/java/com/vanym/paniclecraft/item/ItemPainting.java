@@ -140,7 +140,7 @@ public class ItemPainting extends ItemMod3 {
     public static boolean fillPicture(Picture picture, ItemStack itemStack) {
         NBTTagCompound pictureTag = getPictureTag(itemStack).orElse(null);
         if (pictureTag != null && !pictureTag.hasNoTags()) {
-            picture.readFromNBT(pictureTag);
+            picture.deserializeNBT(pictureTag);
             if (itemStack.hasDisplayName()) {
                 picture.setName(itemStack.getDisplayName());
             }
@@ -165,9 +165,7 @@ public class ItemPainting extends ItemMod3 {
         if (picture == null) {
             return stack;
         }
-        NBTTagCompound pictureTag = new NBTTagCompound();
-        picture.writeToNBT(pictureTag);
-        setPictureTag(stack, pictureTag);
+        setPictureTag(stack, picture.serializeNBT());
         return stack;
     }
     

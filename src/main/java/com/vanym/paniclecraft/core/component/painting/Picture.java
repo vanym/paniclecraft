@@ -13,6 +13,7 @@ import java.util.Set;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
+import com.vanym.paniclecraft.utils.INBTSerializable;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -25,7 +26,7 @@ import net.minecraft.nbt.NBTBase.NBTPrimitive;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class Picture implements IPictureSize {
+public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     
     protected IPictureHolder holder;
     protected boolean hasAlpha = false;
@@ -464,19 +465,23 @@ public class Picture implements IPictureSize {
     public static final String TAG_IMAGE_RAWDATA = "Raw";
     public static final String TAG_IMAGE_PACKED = "Packed";
     
-    public void writeToNBT(NBTTagCompound nbtTag) {
+    @Override
+    public NBTTagCompound serializeNBT() {
+        NBTTagCompound nbtTag = new NBTTagCompound();
         nbtTag.setBoolean(TAG_EDITABLE, this.editable);
         if (this.name != null) {
             nbtTag.setString(TAG_NAME, this.name);
         }
         NBTTagCompound nbtImageTag = new NBTTagCompound();
-        this.writeImageToNBT(nbtImageTag);
+        this.writeImage(nbtImageTag);
         if (!nbtImageTag.hasNoTags()) {
             nbtTag.setTag(TAG_IMAGE, nbtImageTag);
         }
+        return nbtTag;
     }
     
-    public void readFromNBT(NBTTagCompound nbtTag) {
+    @Override
+    public void deserializeNBT(NBTTagCompound nbtTag) {
         if (nbtTag.hasKey(TAG_EDITABLE)) {
             this.editable = nbtTag.getBoolean(TAG_EDITABLE);
         }
@@ -487,11 +492,11 @@ public class Picture implements IPictureSize {
         }
         if (nbtTag.hasKey(TAG_IMAGE)) {
             NBTBase nbtImage = nbtTag.getTag(TAG_IMAGE);
-            this.readImageFromNBT(nbtImage);
+            this.readImage(nbtImage);
         }
     }
     
-    public void writeImageToNBT(NBTTagCompound nbtImageTag) {
+    protected void writeImage(NBTTagCompound nbtImageTag) {
         if (this.pack()) {
             nbtImageTag.setByteArray(TAG_IMAGE_PACKED, this.packed);
             nbtImageTag.setInteger(TAG_IMAGE_WIDTH, this.packedWidth);
@@ -503,7 +508,7 @@ public class Picture implements IPictureSize {
         }
     }
     
-    public void readImageFromNBT(NBTBase nbtImage) {
+    protected void readImage(NBTBase nbtImage) {
         int width = 0;
         int height = 0;
         byte[] packed = null;

@@ -124,10 +124,9 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
             return stack;
         }
         map.forEach((pside, picture)-> {
-            NBTTagCompound pictureTag = new NBTTagCompound();
-            if (picture != null) {
-                picture.writeToNBT(pictureTag);
-            }
+            NBTTagCompound pictureTag = Optional.ofNullable(picture)
+                                                .map(Picture::serializeNBT)
+                                                .orElseGet(NBTTagCompound::new);
             setPictureTag(stack, pside, pictureTag);
         });
         return stack;

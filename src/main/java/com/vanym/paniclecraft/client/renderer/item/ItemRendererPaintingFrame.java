@@ -72,7 +72,7 @@ public class ItemRendererPaintingFrame implements IItemRenderer {
                 picture.texture = obtainedTextures[i];
                 picture.imageChangeProcessed = true;
             } else if (pictureTag != null) {
-                picture.readFromNBT(pictureTag);
+                picture.deserializeNBT(pictureTag);
             }
         }
         switch (type) {

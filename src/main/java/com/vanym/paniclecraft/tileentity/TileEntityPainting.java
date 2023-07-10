@@ -24,16 +24,14 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     @Override
     public void writeToNBT(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
-        NBTTagCompound pictureTag = new NBTTagCompound();
-        this.getPicture().writeToNBT(pictureTag);
-        nbtTag.setTag(TAG_PICTURE, pictureTag);
+        nbtTag.setTag(TAG_PICTURE, this.getPicture().serializeNBT());
     }
     
     @Override
     public void readFromNBT(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         if (nbtTag.hasKey(TAG_PICTURE)) {
-            this.getPicture().readFromNBT(nbtTag.getCompoundTag(TAG_PICTURE));
+            this.getPicture().deserializeNBT(nbtTag.getCompoundTag(TAG_PICTURE));
         }
     }
     

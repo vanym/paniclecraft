@@ -167,7 +167,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             for (ForgeDirection pside : ForgeDirection.VALID_DIRECTIONS) {
                 ItemPaintingFrame.getPictureTag(stack, pside).ifPresent(tag-> {
                     Picture picture = tilePF.createPicture(pside.ordinal());
-                    picture.readFromNBT(tag);
+                    picture.deserializeNBT(tag);
                 });
             }
             int rot = getRotate(entity, ForgeDirection.UP, true);

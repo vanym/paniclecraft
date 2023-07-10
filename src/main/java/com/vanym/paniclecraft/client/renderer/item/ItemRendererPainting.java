@@ -63,7 +63,7 @@ public class ItemRendererPainting implements IItemRenderer {
             picture.texture = obtainedTexture;
             picture.imageChangeProcessed = true;
         } else if (nbtPictureTag != null) {
-            picture.readFromNBT(nbtPictureTag);
+            picture.deserializeNBT(nbtPictureTag);
         }
         switch (type) {
             case ENTITY:

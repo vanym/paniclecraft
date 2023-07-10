@@ -91,7 +91,7 @@ public class BlockChessDesk extends BlockContainerMod3 {
             ItemStack stack) {
         ItemChessDesk.getMoves(stack).ifPresent(list-> {
             WorldUtils.getTileEntity(world, x, y, z, TileEntityChessDesk.class)
-                      .ifPresent(tileCD->tileCD.readMovesFromNBT(list));
+                      .ifPresent(tileCD->tileCD.readMoves(list));
         });
     }
     

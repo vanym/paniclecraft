@@ -124,7 +124,7 @@ public class ItemChessDesk extends ItemBlockMod3 {
         }
         NBTTagCompound tag = ItemUtils.getOrCreateBlockEntityTag(stack);
         NBTTagList list = new NBTTagList();
-        tileCD.writeMovesToNBT(list);
+        tileCD.writeMoves(list);
         tag.setTag(TAG_MOVES, list);
         return stack;
     }
