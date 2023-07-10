@@ -506,10 +506,40 @@ processResources {
         from refMap
     }
 
+    from(sourceSets.main.resources.srcDirs) {
+        include 'assets/' + modId + '/lang/*.json'
+
+        eachFile { fileInfo ->
+            def matcher = fileInfo.name =~ /^([a-zA-Z0-9]+)_([a-zA-Z0-9]+).json$/
+            matcher.find()
+            def language = matcher.group(1)
+            def region = matcher.group(2)
+            def fileName = language + '_' + region.toUpperCase() + '.lang'
+            def filePath = fileInfo.relativePath.parent.append(true, fileName)
+            def langFile = new File(destinationDir, filePath.pathString)
+            def translation = new groovy.json.JsonSlurper().parse(file)
+            langFile.withWriter { wr ->
+                translation.each { e ->
+                    wr.println e.key + '=' + e.value
+                }
+            }
+            fileInfo.exclude()
+            def jsonFile = new File(destinationDir, fileInfo.path)
+            jsonFile.text = '{}\n'
+        }
+    }
+
     // copy everything else that's not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
+        exclude 'assets/' + modId + '/lang/*.json'
         exclude 'mcmod.info'
         exclude 'spotless.gradle'
+    }
+
+    doLast {
+        fileTree(dir: destinationDir, include: 'assets/' + modId + '/lang/*.json').each { file ->
+            file.delete()
+        }
     }
 }
 
