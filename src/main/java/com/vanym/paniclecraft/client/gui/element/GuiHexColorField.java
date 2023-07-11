@@ -34,7 +34,7 @@ public class GuiHexColorField extends GuiTextField {
     public GuiHexColorField(FontRenderer font, int x, int y, int width, int height) {
         super(font, x, y, width, height);
         this.setMaxStringLength(7);
-        this.setFocused(false);
+        this.fixate();
     }
     
     public void setSetter(Consumer<Integer> setter) {
@@ -44,9 +44,12 @@ public class GuiHexColorField extends GuiTextField {
     @Override
     public void setFocused(boolean focus) {
         super.setFocused(focus);
-        if (focus) {
-            return;
+        if (!focus) {
+            this.fixate();
         }
+    }
+    
+    protected void fixate() {
         int rgb;
         try {
             rgb = Integer.decode(this.getText());
