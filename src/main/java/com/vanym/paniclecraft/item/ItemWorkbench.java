@@ -7,23 +7,20 @@ import com.vanym.paniclecraft.container.ContainerPortableWorkbench;
 
 import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 
-public class ItemWorkbench extends Item {
+public class ItemWorkbench extends Item implements INamedContainerProvider {
     
     public final Supplier<Integer> durability;
-    
-    protected final INamedContainerProvider containerProvider =
-            new SimpleNamedContainerProvider(
-                    (id, inventory, player)->new ContainerPortableWorkbench(id, inventory),
-                    CraftingTableBlock.field_220271_a);
     
     public ItemWorkbench(Supplier<Integer> durability) {
         super(Props.create()
@@ -50,7 +47,7 @@ public class ItemWorkbench extends Item {
             Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
         if (!world.isRemote) {
-            player.openContainer(this.containerProvider);
+            player.openContainer(this);
         }
         return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }
@@ -62,5 +59,15 @@ public class ItemWorkbench extends Item {
     @Override
     public int getBurnTime(ItemStack fuel) {
         return 200;
+    }
+    
+    @Override
+    public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
+        return new ContainerPortableWorkbench(id, inventory);
+    }
+    
+    @Override
+    public ITextComponent getDisplayName() {
+        return CraftingTableBlock.field_220271_a;
     }
 }
