@@ -265,21 +265,21 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         return IconUtils.full(picture.getWidth(), picture.getHeight());
     }
     
-    protected static class BakedModelFrame extends BakedModelWrapper<IBakedModel> {
+    protected static class BakedModelFrame extends BakedModelQuadsWrapper {
         
         public BakedModelFrame(IBakedModel originalModel) {
             super(originalModel);
         }
         
         @Override
-        public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
-            return super.getQuads(state, side, rand).stream()
-                                                    .filter(q->!q.hasTintIndex())
-                                                    .collect(Collectors.toList());
+        protected List<BakedQuad> wrapQuads(List<BakedQuad> quads) {
+            return quads.stream()
+                        .filter(q->!q.hasTintIndex())
+                        .collect(Collectors.toList());
         }
     }
     
-    public static class BakedModelPicture extends BakedModelWrapper<IBakedModel> {
+    public static class BakedModelPicture extends BakedModelQuadsWrapper {
         
         protected final int index;
         protected final TextureAtlasSprite sprite;
@@ -291,8 +291,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         }
         
         @Override
-        public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
-            List<BakedQuad> quads = super.getQuads(state, side, rand);
+        protected List<BakedQuad> wrapQuads(List<BakedQuad> quads) {
             return quads.stream()
                         .filter(q->q.getTintIndex() == this.index)
                         .map(q->new BakedQuadRetexturedTintless(q, this.sprite))
@@ -315,5 +314,19 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                 return false;
             }
         }
+    }
+    
+    protected static abstract class BakedModelQuadsWrapper extends BakedModelWrapper<IBakedModel> {
+        
+        public BakedModelQuadsWrapper(IBakedModel originalModel) {
+            super(originalModel);
+        }
+        
+        @Override
+        public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
+            return this.wrapQuads(super.getQuads(state, side, rand));
+        }
+        
+        protected abstract List<BakedQuad> wrapQuads(List<BakedQuad> quads);
     }
 }
