@@ -39,12 +39,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class ItemPainting extends ItemMod3 {
+public class ItemPainting extends Item {
     
     protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public ItemPainting() {
-        super(new Item.Properties().setTEISR(()->ItemRendererPainting::create));
+        super(Props.create().setTEISR(()->ItemRendererPainting::create));
         this.setRegistryName("painting");
     }
     

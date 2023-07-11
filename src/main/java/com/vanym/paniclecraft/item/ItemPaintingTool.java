@@ -44,7 +44,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 
-public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool {
+public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
     public static final String TAG_RADIUS = "Radius";
     

@@ -15,10 +15,10 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-public class ItemPalette extends ItemMod3 implements INamedContainerProvider {
+public class ItemPalette extends Item implements INamedContainerProvider {
     
     public ItemPalette() {
-        super(new Item.Properties().maxStackSize(1));
+        super(Props.create().maxStackSize(1));
         this.setRegistryName("palette");
     }
     

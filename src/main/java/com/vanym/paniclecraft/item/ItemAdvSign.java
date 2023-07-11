@@ -41,12 +41,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 
-public class ItemAdvSign extends ItemMod3 {
+public class ItemAdvSign extends Item {
     
     public static final String TAG_SIGN = "Sign";
     
     public ItemAdvSign() {
-        super(new Item.Properties().maxStackSize(16).setTEISR(()->ItemRendererAdvSign::new));
+        super(Props.create().maxStackSize(16).setTEISR(()->ItemRendererAdvSign::new));
         this.setRegistryName("advanced_sign");
     }
     

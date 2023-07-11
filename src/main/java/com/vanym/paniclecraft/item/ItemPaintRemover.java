@@ -5,7 +5,6 @@ import java.awt.Color;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -26,7 +25,7 @@ public class ItemPaintRemover extends ItemPaintingTool {
     protected final Type type;
     
     public ItemPaintRemover(Type type) {
-        super(new Item.Properties().maxStackSize(1));
+        super(Props.create().maxStackSize(1));
         this.type = type;
         this.setRegistryName(type.id);
     }

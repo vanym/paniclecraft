@@ -21,7 +21,6 @@ import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
@@ -65,8 +64,7 @@ public class ItemPaintingFrame extends BlockItem {
     protected static final Map<Direction, String> SIDE_LETTERS;
     
     public ItemPaintingFrame(Block block) {
-        super(block, new Item.Properties().group(Core.instance.tab)
-                                          .setTEISR(()->ItemRendererPaintingFrame::create));
+        super(block, Props.create().setTEISR(()->ItemRendererPaintingFrame::create));
         this.setRegistryName(block.getRegistryName());
     }
     

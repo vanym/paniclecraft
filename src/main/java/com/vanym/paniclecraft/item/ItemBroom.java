@@ -16,13 +16,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
-public class ItemBroom extends ItemMod3 {
+public class ItemBroom extends Item {
     
     public final Supplier<Integer> durability;
     public final Supplier<Double> distance;
     
     public ItemBroom(Supplier<Integer> durability, Supplier<Double> distance) {
-        super(new Item.Properties().maxDamage(3072));
+        super(Props.create().maxDamage(3072));
         this.setRegistryName("broom");
         this.durability = durability;
         this.distance = distance;

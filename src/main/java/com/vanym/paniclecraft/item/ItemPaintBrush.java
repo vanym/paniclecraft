@@ -13,7 +13,6 @@ import com.vanym.paniclecraft.utils.ColorUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
@@ -43,7 +42,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     protected final Type type;
     
     public ItemPaintBrush(Type type) {
-        super(new Item.Properties().maxStackSize(1));
+        super(Props.create().maxStackSize(1));
         this.type = type;
         this.setRegistryName(type.id);
     }

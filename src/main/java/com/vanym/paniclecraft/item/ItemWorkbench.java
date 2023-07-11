@@ -16,7 +16,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-public class ItemWorkbench extends ItemMod3 {
+public class ItemWorkbench extends Item {
     
     public final Supplier<Integer> durability;
     
@@ -26,8 +26,9 @@ public class ItemWorkbench extends ItemMod3 {
                     CraftingTableBlock.field_220271_a);
     
     public ItemWorkbench(Supplier<Integer> durability) {
-        super(new Item.Properties().maxDamage(8192)
-                                   .setTEISR(()->ItemRendererPortableWorkbench::new));
+        super(Props.create()
+                   .maxDamage(8192)
+                   .setTEISR(()->ItemRendererPortableWorkbench::new));
         this.setRegistryName("portable_workbench");
         this.durability = durability;
     }

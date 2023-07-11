@@ -19,7 +19,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -34,8 +33,7 @@ public class ItemChessDesk extends BlockItem {
     protected static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
     
     public ItemChessDesk(Block block) {
-        super(block, new Item.Properties().group(Core.instance.tab)
-                                          .setTEISR(()->ItemRendererChessDesk::new));
+        super(block, Props.create().setTEISR(()->ItemRendererChessDesk::new));
         this.setRegistryName(block.getRegistryName());
     }
     
