@@ -141,15 +141,19 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             if (move < 0 || move > last) {
                 this.textHex.changeFocus(true);
             } else {
-                this.textColor[move].changeFocus(true);
-                this.textColor[move].setCursorPosition(sel);
+                GuiOneColorField textOneMove = this.textColor[move];
+                textOneMove.changeFocus(true);
+                textOneMove.setCursorPosition(sel);
+                this.setFocused(textOneMove);
             }
             return true;
         }
         if (this.textHex.isFocused()) {
             this.textHex.changeFocus(false);
+            GuiOneColorField textOneMove = this.textColor[up ? 0 : last];
+            textOneMove.setFocused(true);
             this.textColor[up ? 0 : last].changeFocus(true);
-            this.setFocused(this.textColor[up ? 0 : last]);
+            this.setFocused(textOneMove);
             return true;
         }
         return false;
@@ -231,10 +235,11 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             this.textHex.setFocused(false);
         }
         for (int i = 0; i < this.textColor.length; ++i) {
-            this.textColor[i].setEnabled(!empty);
-            if (empty || !this.textColor[i].isFocused()) {
-                this.textColor[i].setText(Integer.toString((rgb >> i * 8) & 0xFF));
-                this.textColor[i].setFocused(false);
+            GuiOneColorField textOne = this.textColor[i];
+            textOne.setEnabled(!empty);
+            if (empty || !textOne.isFocused()) {
+                textOne.setText(Integer.toString((rgb >> i * 8) & 0xFF));
+                textOne.setFocused(false);
             }
         }
         this.chart.enabled = !empty;

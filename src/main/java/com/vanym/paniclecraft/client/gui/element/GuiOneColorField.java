@@ -14,6 +14,7 @@ public class GuiOneColorField extends TextFieldWidget {
     public GuiOneColorField(FontRenderer font, int x, int y, int width, int height) {
         super(font, x, y, width, height, "");
         this.setMaxStringLength(3);
+        this.fixate();
     }
     
     public void setSetter(Consumer<Integer> setter) {
@@ -23,9 +24,12 @@ public class GuiOneColorField extends TextFieldWidget {
     @Override
     public void setFocused(boolean focus) {
         super.setFocused(focus);
-        if (focus) {
-            return;
+        if (!focus) {
+            this.fixate();
         }
+    }
+    
+    protected void fixate() {
         int num;
         try {
             num = Integer.decode(this.getText());
