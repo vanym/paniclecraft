@@ -41,6 +41,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.IModelData;
 
 @OnlyIn(Dist.CLIENT)
 public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPaintingContainer> {
@@ -325,6 +326,15 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         @Override
         public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
             return this.wrapQuads(super.getQuads(state, side, rand));
+        }
+        
+        @Override
+        public List<BakedQuad> getQuads(
+                BlockState state,
+                Direction side,
+                Random rand,
+                IModelData extraData) {
+            return this.wrapQuads(super.getQuads(state, side, rand, extraData));
         }
         
         protected abstract List<BakedQuad> wrapQuads(List<BakedQuad> quads);
