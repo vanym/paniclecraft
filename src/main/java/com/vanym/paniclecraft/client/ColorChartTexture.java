@@ -3,8 +3,11 @@ package com.vanym.paniclecraft.client;
 import java.awt.Color;
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.resources.data.TextureMetadataSection;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,10 +22,6 @@ public class ColorChartTexture extends SimpleTexture {
         super(textureLocation);
     }
     
-    public ResourceLocation getTextureLocation() {
-        return this.textureLocation;
-    }
-    
     @Override
     protected SimpleTexture.TextureData func_215246_b(IResourceManager resourceManager) {
         SimpleTexture.TextureData data = super.func_215246_b(resourceManager);
@@ -30,7 +29,7 @@ public class ColorChartTexture extends SimpleTexture {
             this.img = data.func_217800_b();
         } catch (IOException e) {
         }
-        return data;
+        return TextureDataUncloseable.wrap(data);
     }
     
     public Color getColor(int x, int y) {
@@ -41,6 +40,30 @@ public class ColorChartTexture extends SimpleTexture {
             return new Color(this.img.getPixelRGBA(x, y), true);
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;
+        }
+    }
+    
+    protected static class TextureDataUncloseable extends SimpleTexture.TextureData {
+        
+        protected TextureDataUncloseable(IOException e) {
+            super(e);
+        }
+        
+        protected TextureDataUncloseable(@Nullable TextureMetadataSection meta, NativeImage img) {
+            super(meta, img);
+        }
+        
+        @Override
+        public void close() {
+            // do nothing
+        }
+        
+        public static TextureDataUncloseable wrap(SimpleTexture.TextureData data) {
+            try {
+                return new TextureDataUncloseable(data.func_217798_a(), data.func_217800_b());
+            } catch (IOException e) {
+                return new TextureDataUncloseable(e);
+            }
         }
     }
 }

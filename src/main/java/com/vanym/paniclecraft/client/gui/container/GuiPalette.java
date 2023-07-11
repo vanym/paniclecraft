@@ -13,9 +13,10 @@ import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.network.message.MessagePaletteSetColor;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.IRenderable;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.RenderHelper;
@@ -56,7 +57,9 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         }
         this.chart =
                 new GuiColorChart(chartTexture, this.guiLeft, this.guiTop, this.xSize, this.ySize);
+        this.children.add(this.chart);
         this.picker = new GuiColorPicker(this.guiLeft + 8, this.guiTop + 38, 16, 16);
+        this.children.add(this.picker);
         this.minecraft.keyboardListener.enableRepeatEvents(true);
         for (int i = 0; i < this.textColor.length; ++i) {
             this.textColor[i] = new GuiOneColorField(
@@ -72,12 +75,14 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             this.textColor[i].setDisabledTextColour(disabled);
             this.textColor[i].setMaxStringLength(3);
             this.textColor[i].setEnableBackgroundDrawing(true);
+            this.addButton(this.textColor[i]);
         }
         this.textHex = new GuiHexColorField(
                 this.font,
                 this.guiLeft + 8,
                 this.guiTop + 58);
         this.textHex.setSetter(rgb->this.sendColor(new Color(rgb)));
+        this.addButton(this.textHex);
         this.container.removeListener(this);
         this.container.addListener(this);
     }
@@ -92,27 +97,20 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     @Override
     public void tick() {
         super.tick();
-        this.textHex.tick();
-        Arrays.stream(this.textColor).forEach(t->t.tick());
+        this.children()
+            .stream()
+            .filter(TextFieldWidget.class::isInstance)
+            .map(TextFieldWidget.class::cast)
+            .forEach(TextFieldWidget::tick);
     }
     
     @Override
-    public boolean charTyped(char character, int key) {
-        if (this.textHex.charTyped(character, key)) {
-            return true;
-        }
-        for (int i = 0; i < this.textColor.length; ++i) {
-            if (this.textColorKeyTyped(i, character, key)) {
-                return true;
-            }
-        }
-        if (this.switchTextTyped(character, key)) {
-            return true;
-        }
-        return super.charTyped(character, key);
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        return super.keyPressed(key, scanCode, modifiers)
+            || this.switchTextTyped(key, scanCode, modifiers);
     }
     
-    protected boolean switchTextTyped(char character, int key) {
+    protected boolean switchTextTyped(int key, int scanCode, int modifiers) {
         boolean up;
         switch (key) {
             case 200: // up
@@ -134,28 +132,29 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
                 continue;
             }
             int sel = textOne.getSelectionEnd();
-            textOne.setFocused(false);
+            textOne.changeFocus(false);
             int move = i + (up ? 1 : -1);
             if (move < 0 || move > last) {
-                this.textHex.setFocused(true);
+                this.textHex.changeFocus(true);
             } else {
-                this.textColor[move].setFocused(true);
+                this.textColor[move].changeFocus(true);
                 this.textColor[move].setCursorPosition(sel);
             }
             return true;
         }
         if (this.textHex.isFocused()) {
-            this.textHex.setFocused(false);
-            this.textColor[up ? 0 : last].setFocused(true);
+            this.textHex.changeFocus(false);
+            this.textColor[up ? 0 : last].changeFocus(true);
+            this.setFocused(this.textColor[up ? 0 : last]);
             return true;
         }
         return false;
     }
     
-    protected boolean textColorKeyTyped(int i, char character, int key) {
+    protected boolean textColorKeyTyped(int i, int key, int scanCode, int modifiers) {
         GuiOneColorField textOne = this.textColor[i];
         String previousText = textOne.getText();
-        if (!textOne.charTyped(character, key)) {
+        if (!textOne.keyPressedParent(key, scanCode, modifiers)) {
             return false;
         }
         String text = textOne.getText();
@@ -186,11 +185,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     
     @Override
     public boolean mouseClicked(double x, double y, int eventButton) {
-        return this.textHex.mouseClicked(x, y, eventButton)
-            || Arrays.stream(this.textColor).anyMatch(t->t.mouseClicked(x, y, eventButton))
-            || super.mouseClicked(x, y, eventButton)
-            || this.chart.mouseClicked((int)x, (int)y, eventButton)
-            || this.picker.mouseClicked((int)x, (int)y, eventButton);
+        return super.mouseClicked(x, y, eventButton);
     }
     
     @Override
@@ -231,7 +226,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(GUI_TEXTURE);
         this.blit(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-        this.chart.drawChart(this.minecraft);
+        this.chart.render(mouseX, mouseY, partialTicks);
         Color color = this.getColor();
         if (color == null) {
             color = new Color(0);
@@ -241,8 +236,6 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
              this.picker.yPosition + this.picker.height,
              color.getRGB());
         RenderHelper.disableStandardItemLighting();
-        this.textHex.render(mouseX, mouseY, partialTicks);
-        Arrays.stream(this.textColor).forEach(t->t.render(mouseX, mouseY, partialTicks));
     }
     
     protected void sendColor(Color color) {
@@ -291,7 +284,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     @Override
     public void sendWindowProperty(Container container, int id, int level) {}
     
-    protected class GuiColorPicker extends AbstractGui {
+    protected class GuiColorPicker extends AbstractGui implements IGuiEventListener {
         
         public int width;
         public int height;
@@ -308,7 +301,8 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             this.enabled = true;
         }
         
-        public boolean mouseClicked(int x, int y, int eventButton) {
+        @Override
+        public boolean mouseClicked(double x, double y, int eventButton) {
             if (!this.enabled || (eventButton != 0 /* left */ && eventButton != 1 /* right */)) {
                 return false;
             }
@@ -328,7 +322,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         }
     }
     
-    protected class GuiColorChart extends AbstractGui {
+    protected class GuiColorChart extends AbstractGui implements IRenderable, IGuiEventListener {
         
         public int width;
         public int height;
@@ -350,7 +344,8 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             this.visible = true;
         }
         
-        public boolean mouseClicked(int x, int y, int eventButton) {
+        @Override
+        public boolean mouseClicked(double x, double y, int eventButton) {
             if (!this.enabled || eventButton != 0 /* left */) {
                 return false;
             }
@@ -359,7 +354,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
                 return false;
             }
-            Color color = this.chart.getColor(x, y);
+            Color color = this.chart.getColor((int)x, (int)y);
             if (color == null || color.getAlpha() == 0) {
                 return false;
             }
@@ -367,16 +362,17 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             return true;
         }
         
-        public void drawChart(Minecraft mc) {
+        @Override
+        public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
             if (!this.visible) {
                 return;
             }
-            mc.getTextureManager().bindTexture(this.chart.getTextureLocation());
+            this.chart.bindTexture();
             this.blit(this.xPosition, this.yPosition, 0, 0, this.width, this.height);
         }
     }
     
-    protected static class GuiOneColorField extends TextFieldWidget {
+    protected class GuiOneColorField extends TextFieldWidget {
         
         protected static final String NUM_CHARS = "0123456789";
         
@@ -414,6 +410,18 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
                 sb.append(c);
             }
             super.writeText(sb.toString());
+        }
+        
+        @Override
+        public boolean keyPressed(int key, int scanCode, int modifiers) {
+            return GuiPalette.this.textColorKeyTyped(Arrays.asList(GuiPalette.this.textColor)
+                                                           .indexOf(this),
+                                                     key, scanCode,
+                                                     modifiers);
+        }
+        
+        public boolean keyPressedParent(int key, int scanCode, int modifiers) {
+            return super.keyPressed(key, scanCode, modifiers);
         }
         
         @Override
