@@ -1,6 +1,9 @@
 package com.vanym.paniclecraft.client.gui.container;
 
 import java.awt.Color;
+import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
@@ -110,20 +113,20 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        return super.keyPressed(key, scanCode, modifiers)
-            || this.switchTextTyped(key, scanCode, modifiers);
+        return this.switchKeyPressed(key, scanCode, modifiers)
+            || super.keyPressed(key, scanCode, modifiers);
     }
     
-    protected boolean switchTextTyped(int key, int scanCode, int modifiers) {
+    protected boolean switchKeyPressed(int key, int scanCode, int modifiers) {
         boolean up;
         switch (key) {
-            case 200: // up
+            case 265: // up
                 up = true;
             break;
-            case 15: // tab
-            case 28: // enter
-            case 156: // enter numpad
-            case 208: // down
+            case 258: // tab
+            case 257: // enter
+            case 335: // enter numpad
+            case 264: // down
                 up = false;
             break;
             default:
@@ -136,23 +139,23 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
                 continue;
             }
             int sel = textOne.getSelectionEnd();
-            textOne.changeFocus(false);
+            textOne.setFocused2(false);
             int move = i + (up ? 1 : -1);
             if (move < 0 || move > last) {
-                this.textHex.changeFocus(true);
+                this.textHex.setFocused2(true);
+                this.setFocused(this.textHex);
             } else {
                 GuiOneColorField textOneMove = this.textColor[move];
-                textOneMove.changeFocus(true);
+                textOneMove.setFocused2(true);
                 textOneMove.setCursorPosition(sel);
                 this.setFocused(textOneMove);
             }
             return true;
         }
         if (this.textHex.isFocused()) {
-            this.textHex.changeFocus(false);
+            this.textHex.setFocused2(false);
             GuiOneColorField textOneMove = this.textColor[up ? 0 : last];
-            textOneMove.setFocused(true);
-            this.textColor[up ? 0 : last].changeFocus(true);
+            textOneMove.setFocused2(true);
             this.setFocused(textOneMove);
             return true;
         }
@@ -162,6 +165,14 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     @Override
     public boolean mouseClicked(double x, double y, int eventButton) {
         return super.mouseClicked(x, y, eventButton);
+    }
+    
+    @Override
+    public void setFocused(@Nullable IGuiEventListener child) {
+        super.setFocused(child);
+        Stream.concat(Stream.of(this.textHex), Stream.of(this.textColor))
+              .filter(f->f != child)
+              .forEach(f->f.setFocused2(false));
     }
     
     @Override
@@ -232,15 +243,19 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         this.textHex.setEnabled(!empty);
         if (empty || !this.textHex.isFocused()) {
             this.textHex.setRGB(rgb);
-            this.textHex.setFocused(false);
+            this.textHex.setFocused2(false);
         }
         for (int i = 0; i < this.textColor.length; ++i) {
             GuiOneColorField textOne = this.textColor[i];
             textOne.setEnabled(!empty);
             if (empty || !textOne.isFocused()) {
                 textOne.setText(Integer.toString((rgb >> i * 8) & 0xFF));
-                textOne.setFocused(false);
+                textOne.setFocused2(false);
             }
+        }
+        if (empty && Stream.concat(Stream.of(this.textHex), Stream.of(this.textColor))
+                           .anyMatch(f->f == this.getFocused())) {
+            this.setFocused(null);
         }
         this.chart.enabled = !empty;
     }

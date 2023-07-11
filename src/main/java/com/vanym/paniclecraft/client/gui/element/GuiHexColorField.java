@@ -42,8 +42,8 @@ public class GuiHexColorField extends TextFieldWidget {
     }
     
     @Override
-    public void setFocused(boolean focus) {
-        super.setFocused(focus);
+    public void setFocused2(boolean focus) {
+        super.setFocused2(focus);
         if (!focus) {
             this.fixate();
         }
@@ -122,18 +122,33 @@ public class GuiHexColorField extends TextFieldWidget {
     }
     
     @Override
-    public boolean charTyped(char character, int key) {
+    public boolean charTyped(char character, int modifiers) {
         String previousText = this.getText();
-        if (!super.charTyped(character, key)) {
+        if (!super.charTyped(character, modifiers)) {
             return false;
         }
+        this.afterCheck(previousText);
+        return true;
+    }
+    
+    @Override
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        String previousText = this.getText();
+        if (!super.keyPressed(key, scanCode, modifiers)) {
+            return false;
+        }
+        this.afterCheck(previousText);
+        return true;
+    }
+    
+    protected void afterCheck(String previousText) {
         this.checkPrefix();
         if (this.setter == null) {
-            return true;
+            return;
         }
         String text = this.getText();
         if (previousText.equals(text)) {
-            return true;
+            return;
         }
         Integer previousColor;
         try {
@@ -148,10 +163,9 @@ public class GuiHexColorField extends TextFieldWidget {
             color = 0;
         }
         if (previousColor != null && color == previousColor.intValue()) {
-            return true;
+            return;
         }
         this.setter.accept(color);
-        return true;
     }
     
     protected boolean checkPrefix() {
