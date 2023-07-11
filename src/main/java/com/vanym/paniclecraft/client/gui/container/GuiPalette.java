@@ -19,7 +19,6 @@ import com.vanym.paniclecraft.utils.ColorUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -114,8 +113,8 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
         if (this.textHex.textboxKeyTyped(character, key)) {
             return;
         }
-        for (int i = 0; i < this.textColor.length; ++i) {
-            if (this.textColor[i].textboxKeyTyped(character, key)) {
+        for (GuiOneColorField textOne : this.textColor) {
+            if (textOne.textboxKeyTyped(character, key)) {
                 return;
             }
         }
@@ -142,7 +141,7 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
         }
         int last = this.textColor.length - 1;
         for (int i = 0; i <= last; ++i) {
-            GuiTextField textOne = this.textColor[i];
+            GuiOneColorField textOne = this.textColor[i];
             if (!textOne.isFocused()) {
                 continue;
             }
@@ -152,14 +151,16 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
             if (move < 0 || move > last) {
                 this.textHex.setFocused(true);
             } else {
-                this.textColor[move].setFocused(true);
-                this.textColor[move].setCursorPosition(sel);
+                GuiOneColorField textOneMove = this.textColor[move];
+                textOneMove.setFocused(true);
+                textOneMove.setCursorPosition(sel);
             }
             return true;
         }
         if (this.textHex.isFocused()) {
             this.textHex.setFocused(false);
-            this.textColor[up ? 0 : last].setFocused(true);
+            GuiOneColorField textOneMove = this.textColor[up ? 0 : last];
+            textOneMove.setFocused(true);
             return true;
         }
         return false;
@@ -191,10 +192,11 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     protected void drawRGBLabels() {
         final String letters = "BGR";
         for (int i = 0; i < this.textColor.length; ++i) {
-            int yoffset = this.textColor[i].getEnableBackgroundDrawing() ? 2 : 0;
+            GuiOneColorField textOne = this.textColor[i];
+            int yoffset = textOne.getEnableBackgroundDrawing() ? 2 : 0;
             this.fontRenderer.drawString(letters.charAt(i) + ": ",
-                                         -this.guiLeft + this.textColor[i].x - 11,
-                                         -this.guiTop + this.textColor[i].y + yoffset,
+                                         -this.guiLeft + textOne.x - 11,
+                                         -this.guiTop + textOne.y + yoffset,
                                          0x404040);
         }
     }
@@ -247,10 +249,11 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
             this.textHex.setFocused(false);
         }
         for (int i = 0; i < this.textColor.length; ++i) {
-            this.textColor[i].setEnabled(!empty);
-            if (empty || !this.textColor[i].isFocused()) {
-                this.textColor[i].setText(Integer.toString((rgb >> i * 8) & 0xFF));
-                this.textColor[i].setFocused(false);
+            GuiOneColorField textOne = this.textColor[i];
+            textOne.setEnabled(!empty);
+            if (empty || !textOne.isFocused()) {
+                textOne.setText(Integer.toString((rgb >> i * 8) & 0xFF));
+                textOne.setFocused(false);
             }
         }
         this.chart.enabled = !empty;
