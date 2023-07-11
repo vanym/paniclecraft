@@ -7,6 +7,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ContainerBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
@@ -26,11 +27,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class BlockCannon extends BlockContainerMod3 {
+public class BlockCannon extends ContainerBlock {
     
     public BlockCannon() {
         super(Block.Properties.create(Material.ANVIL)
-                              .sound(SoundType.ANVIL)
+                              .sound(SoundType.STONE)
                               .hardnessAndResistance(1.5F)
                               .doesNotBlockMovement());
         this.setRegistryName("cannon");
@@ -45,11 +46,9 @@ public class BlockCannon extends BlockContainerMod3 {
             Hand hand,
             BlockRayTraceResult hit) {
         if (!world.isRemote) {
-            TileEntity tile = world.getTileEntity(pos);
-            if (tile instanceof INamedContainerProvider && player instanceof ServerPlayerEntity) {
-                NetworkHooks.openGui((ServerPlayerEntity)player,
-                                     (INamedContainerProvider)tile,
-                                     tile.getPos());
+            INamedContainerProvider container = this.getContainer(state, world, pos);
+            if (container != null) {
+                NetworkHooks.openGui((ServerPlayerEntity)player, container, pos);
             }
         }
         return true;
