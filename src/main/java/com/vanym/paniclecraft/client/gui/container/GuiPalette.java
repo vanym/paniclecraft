@@ -11,6 +11,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.ColorChartTexture;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
+import com.vanym.paniclecraft.client.gui.element.GuiOneColorField;
 import com.vanym.paniclecraft.container.ContainerPalette;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
@@ -20,7 +21,6 @@ import com.vanym.paniclecraft.utils.ColorUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -62,19 +62,24 @@ public class GuiPalette extends GuiContainer implements ICrafting {
         this.picker = new GuiColorPicker(this.guiLeft + 8, this.guiTop + 38, 16, 16);
         Keyboard.enableRepeatEvents(true);
         for (int i = 0; i < this.textColor.length; ++i) {
-            this.textColor[i] = new GuiOneColorField(
+            GuiOneColorField textOne = this.textColor[i] = new GuiOneColorField(
                     this.fontRendererObj,
                     this.guiLeft + 40,
                     this.guiTop + 42 - i * 12,
                     26,
                     12);
+            int offset = i * 8;
+            textOne.setSetter(color-> {
+                int rgb = ColorUtils.getAlphaless(this.getColor());
+                rgb &= ~(0xff << offset);
+                rgb |= color << offset;
+                this.sendColor(new Color(rgb));
+            });
             int base = 0x555555;
             base |= 0xFF << (i * 8);
             int disabled = 0xAA << (i * 8);
-            this.textColor[i].setTextColor(base);
-            this.textColor[i].setDisabledTextColour(disabled);
-            this.textColor[i].setMaxStringLength(3);
-            this.textColor[i].setEnableBackgroundDrawing(true);
+            textOne.setTextColor(base);
+            textOne.setDisabledTextColour(disabled);
         }
         this.textHex = new GuiHexColorField(
                 this.fontRendererObj,
@@ -105,7 +110,7 @@ public class GuiPalette extends GuiContainer implements ICrafting {
             return;
         }
         for (int i = 0; i < this.textColor.length; ++i) {
-            if (this.textColorKeyTyped(i, character, key)) {
+            if (this.textColor[i].textboxKeyTyped(character, key)) {
                 return;
             }
         }
@@ -153,38 +158,6 @@ public class GuiPalette extends GuiContainer implements ICrafting {
             return true;
         }
         return false;
-    }
-    
-    protected boolean textColorKeyTyped(int i, char character, int key) {
-        GuiOneColorField textOne = this.textColor[i];
-        String previousText = textOne.getText();
-        if (!textOne.textboxKeyTyped(character, key)) {
-            return false;
-        }
-        String text = textOne.getText();
-        if (previousText.equals(text)) {
-            return true;
-        }
-        int previousColor;
-        int color;
-        try {
-            previousColor = Integer.decode(previousText);
-        } catch (NumberFormatException e) {
-            previousColor = 0;
-        }
-        try {
-            color = Integer.decode(text);
-        } catch (NumberFormatException e) {
-            color = 0;
-        }
-        if (color == previousColor) {
-            return true;
-        }
-        int rgb = ColorUtils.getAlphaless(this.getColor());
-        rgb &= ~(0xff << (i * 8));
-        rgb |= color << (i * 8);
-        this.sendColor(new Color(rgb));
-        return true;
     }
     
     @Override
@@ -373,78 +346,6 @@ public class GuiPalette extends GuiContainer implements ICrafting {
             mc.getTextureManager().bindTexture(this.chart.textureLocation);
             this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 0, this.width,
                                        this.height);
-        }
-    }
-    
-    protected static class GuiOneColorField extends GuiTextField {
-        
-        protected static final String NUM_CHARS = "0123456789";
-        
-        public GuiOneColorField(FontRenderer font, int x, int y, int width, int height) {
-            super(font, x, y, width, height);
-        }
-        
-        @Override
-        public void setFocused(boolean focus) {
-            super.setFocused(focus);
-            if (focus) {
-                return;
-            }
-            int num;
-            try {
-                num = Integer.decode(this.getText());
-            } catch (NumberFormatException e) {
-                num = 0;
-            }
-            this.setText(Integer.toString(num));
-        }
-        
-        @Override
-        public void writeText(String text) {
-            StringBuilder sb = new StringBuilder();
-            char[] chars = text.toCharArray();
-            for (char c : chars) {
-                if (NUM_CHARS.indexOf(c) == -1) {
-                    continue;
-                }
-                sb.append(c);
-            }
-            super.writeText(sb.toString());
-        }
-        
-        @Override
-        public boolean textboxKeyTyped(char character, int key) {
-            if (!super.textboxKeyTyped(character, key)) {
-                return false;
-            }
-            this.checkNum();
-            return true;
-        }
-        
-        protected boolean checkNum() {
-            String text = this.getText();
-            if (text.isEmpty()) {
-                return false;
-            }
-            int pos = this.getCursorPosition();
-            int sel = this.getSelectionEnd();
-            int num;
-            try {
-                num = Integer.decode(text);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            if (num > 0xff) {
-                this.setText(Integer.toString(0xff));
-                this.setCursorPosition(pos);
-                this.setSelectionPos(sel);
-                return true;
-            }
-            if (num < 0) {
-                this.setText(Integer.toString(0));
-                return true;
-            }
-            return false;
         }
     }
 }
