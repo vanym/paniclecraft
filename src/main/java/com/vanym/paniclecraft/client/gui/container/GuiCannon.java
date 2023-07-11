@@ -1,7 +1,5 @@
 package com.vanym.paniclecraft.client.gui.container;
 
-import java.util.stream.Stream;
-
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -145,13 +143,11 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     
     @Override
     public boolean mouseDragged(double x, double y, int button, double dragX, double dragY) {
-        if (super.mouseDragged(x, y, button, dragX, dragY)) {
+        if (this.getFocused() != null && this.isDragging()
+            && this.getFocused().mouseDragged(x, y, button, dragX, dragY)) {
             return true;
         }
-        Stream<GuiCircularSlider> sliders = this.buttons.stream()
-                                                        .filter(GuiCircularSlider.class::isInstance)
-                                                        .map(GuiCircularSlider.class::cast);
-        return sliders.anyMatch(s->s.mouseDragged(x, y, button, dragX, dragY));
+        return super.mouseDragged(x, y, button, dragX, dragY);
     }
     
     @Override

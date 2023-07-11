@@ -118,13 +118,15 @@ public class GuiCircularSlider extends Widget {
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.x + raduish, ycenter = this.y + raduisv;
         double dx = x - xcenter, dy = y - ycenter;
-        this.pressed = Math.pow(dx, 2) / Math.pow(raduish, 2) +
-                       Math.pow(dy, 2) / Math.pow(raduisv, 2) <= 1.0D
+        return Math.pow(dx, 2) / Math.pow(raduish, 2) +
+               Math.pow(dy, 2) / Math.pow(raduisv, 2) <= 1.0D
             && this.fromRadians(Math.atan2(dy, dx)) <= this.max;
-        if (this.pressed) {
-            this.onDrag(x, y, x, y);
-        }
-        return this.pressed;
+    }
+    
+    @Override
+    public void onClick(double x, double y) {
+        this.pressed = true;
+        this.onDrag(x, y, x, y);
     }
     
     @Override
