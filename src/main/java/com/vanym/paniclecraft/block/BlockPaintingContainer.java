@@ -4,13 +4,14 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.ContainerBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public abstract class BlockPaintingContainer extends BlockContainerMod3 {
+public abstract class BlockPaintingContainer extends ContainerBlock {
     
     protected final double paintingOutlineSize;
     

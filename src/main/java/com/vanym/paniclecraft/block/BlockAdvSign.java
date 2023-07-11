@@ -31,7 +31,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class BlockAdvSign extends BlockContainerMod3 {
+public class BlockAdvSign extends DirectionalBlock {
     
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
     
@@ -46,7 +46,12 @@ public class BlockAdvSign extends BlockContainerMod3 {
     }
     
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public boolean hasTileEntity(BlockState state) {
+        return true;
+    }
+    
+    @Override
+    public TileEntity createTileEntity(BlockState state, IBlockReader worldIn) {
         return new TileEntityAdvSign();
     }
     
