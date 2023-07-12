@@ -154,7 +154,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                 if (destroyStage >= 0) {
                     AtlasTexture tex = Minecraft.getInstance().getTextureMap();
                     TextureAtlasSprite sprite =
-                            tex.getAtlasSprite("minecraft:blocks/destroy_stage_" + destroyStage);
+                            tex.getAtlasSprite("minecraft:block/destroy_stage_" + destroyStage);
                     frameModel =
                             ForgeHooksClient.getDamageModel(model, sprite, state, world, pos, rand);
                     buf.noColor();
