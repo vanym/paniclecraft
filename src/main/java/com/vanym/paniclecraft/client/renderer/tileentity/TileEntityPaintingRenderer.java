@@ -48,14 +48,12 @@ public class TileEntityPaintingRenderer
         extends
             TileEntitySpecialRenderer<TileEntityPaintingContainer> {
     
-    protected static final ItemStack RENDER_STACK =
-            new ItemStack(Core.instance.painting.itemPainting);
-    
     public int renderFrameType = 1;
     public int renderPictureType = 2;
     
     protected BlockRendererDispatcher blockRenderer;
     protected RenderItem itemRenderer;
+    protected ItemStack renderStack;
     
     protected void initRenderers() {
         if (this.blockRenderer == null) {
@@ -63,6 +61,9 @@ public class TileEntityPaintingRenderer
         }
         if (this.itemRenderer == null) {
             this.itemRenderer = Minecraft.getMinecraft().getRenderItem();
+        }
+        if (this.renderStack == null) {
+            this.renderStack = new ItemStack(Core.instance.painting.itemPainting);
         }
     }
     
@@ -174,7 +175,7 @@ public class TileEntityPaintingRenderer
                 }
                 tessellator.draw();
             } else {
-                this.itemRenderer.renderItem(RENDER_STACK, frameModel);
+                this.itemRenderer.renderItem(this.renderStack, frameModel);
             }
             if (theProfiler != null) {
                 theProfiler.endSection(); // frame
@@ -206,7 +207,7 @@ public class TileEntityPaintingRenderer
                     }
                     tessellator.draw();
                 } else {
-                    this.itemRenderer.renderItem(RENDER_STACK, pictureModel);
+                    this.itemRenderer.renderItem(this.renderStack, pictureModel);
                 }
                 if (theProfiler != null) {
                     theProfiler.endSection(); // WxH
