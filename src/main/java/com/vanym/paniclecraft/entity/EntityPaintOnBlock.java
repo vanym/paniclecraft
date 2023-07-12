@@ -50,7 +50,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SSpawnObjectPacket;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.RailShape;
 import net.minecraft.util.ClassInheritanceMultiMap;
@@ -68,6 +67,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
@@ -281,7 +281,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
     @Override
     public IPacket<?> createSpawnPacket() {
-        return new SSpawnObjectPacket(this);
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
     
     protected class PictureHolder implements IPictureHolder {
