@@ -65,6 +65,8 @@ import net.minecraftforge.client.model.data.EmptyModelData;
 public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBlock> {
     
     protected static final TextureAtlasSprite FULL_SPRITE = IconUtils.full(16, 16);
+    protected static final TextureAtlasSprite SMALL_SPRITE =
+            IconUtils.sub(0, 0, 16, 16, 1024, 1024);
     
     protected final Supplier<Integer> renderPictureTypeSup =
             ()->Core.instance.painting.clientConfig.renderPaintOnBlockPartPictureType;
@@ -234,11 +236,12 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             for (Entry<Direction, BlockPartFace> e : part.mapFaces.entrySet()) {
                 Direction side = e.getKey();
                 BlockPartFace face = e.getValue();
+                // use small sprite here to decrease ratio of the shrink done in makeBakedQuad
                 BakedQuad quad = this.faceBakery.makeBakedQuad(part.positionFrom, part.positionTo,
-                                                               face, FULL_SPRITE, side,
+                                                               face, SMALL_SPRITE, side,
                                                                ModelRotation.X0_Y0,
                                                                part.partRotation,
-                                                               false);
+                                                               part.shade);
                 quadsMap.getOrDefault(face.cullFace, quads).add(quad);
             }
         }
