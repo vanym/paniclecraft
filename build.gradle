@@ -121,6 +121,12 @@ runServer {
     jvmArgs(jvmArguments)
 }
 
+jar {
+    manifest {
+        attributes 'FMLAT': mod_id + '_at.cfg'
+    }
+}
+
 jar.finalizedBy('reobfJar')
 
 task determinizeJar(type: Zip) {
