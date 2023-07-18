@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -38,13 +37,16 @@ public class ItemPainting extends ItemMod3 {
     
     protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
-    public ItemPainting() {
+    protected final Block block;
+    
+    public ItemPainting(Block block) {
         this.setRegistryName("painting");
+        this.block = block;
     }
     
     @Override
     public EnumActionResult onItemUse(
-            EntityPlayer entityPlayer,
+            EntityPlayer player,
             World world,
             BlockPos pos,
             EnumHand hand,
@@ -52,27 +54,26 @@ public class ItemPainting extends ItemMod3 {
             float hitX,
             float hitY,
             float hitZ) {
-        ItemStack itemStack = entityPlayer.getHeldItem(hand);
-        final BlockPainting painting = Core.instance.painting.blockPainting;
+        ItemStack stack = player.getHeldItem(hand);
         int i = 0;
-        if (!entityPlayer.isSneaking()) {
+        if (!player.isSneaking()) {
             TileEntity tile = world.getTileEntity(pos);
             if (tile != null && tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-                return this.onItemUseOnFrame(itemStack, entityPlayer, world, tilePF,
+                return this.onItemUseOnFrame(stack, player, world, tilePF,
                                              side.getIndex());
             }
             for (; i < Core.instance.painting.config.paintingPlaceStack; i++) {
                 IBlockState state = world.getBlockState(pos);
                 Block block = state.getBlock();
-                if (block != painting) {
+                if (block != this.block) {
                     break;
                 }
                 int meta = block.getMetaFromState(state);
                 if (meta != side.getIndex()) {
                     break;
                 }
-                EnumFacing stackdir = BlockPaintingContainer.getStackDirection(entityPlayer, side);
+                EnumFacing stackdir = BlockPaintingContainer.getStackDirection(player, side);
                 if (stackdir == null) {
                     break;
                 }
@@ -82,34 +83,34 @@ public class ItemPainting extends ItemMod3 {
         if (i == 0) {
             pos = pos.offset(side);
         }
-        if (!entityPlayer.canPlayerEdit(pos, side, itemStack)
-            || !painting.canPlaceBlockAt(world, pos)) {
+        if (!player.canPlayerEdit(pos, side, stack)
+            || !this.block.canPlaceBlockAt(world, pos)) {
             return EnumActionResult.FAIL;
         }
-        IBlockState state = painting.getStateForPlacement(world, pos, side,
-                                                          hitX, hitY, hitZ,
-                                                          0, entityPlayer, hand);
+        IBlockState state = this.block.getStateForPlacement(world, pos, side,
+                                                            hitX, hitY, hitZ,
+                                                            0, player, hand);
         if (!world.setBlockState(pos, state, 11)) {
             return EnumActionResult.FAIL;
         }
-        painting.onBlockPlacedBy(world, pos, state, entityPlayer, itemStack);
+        this.block.onBlockPlacedBy(world, pos, state, player, stack);
         state = world.getBlockState(pos);
-        SoundType soundtype = state.getBlock().getSoundType(state, world, pos, entityPlayer);
-        world.playSound(entityPlayer, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS,
+        SoundType soundtype = state.getBlock().getSoundType(state, world, pos, player);
+        world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS,
                         (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
         Picture picture = tileP.getPicture(side.getIndex());
-        fillPicture(picture, itemStack);
-        itemStack.shrink(1);
-        if (entityPlayer != null) {
-            BlockPaintingContainer.rotatePicture(entityPlayer, picture, side, true);
+        fillPicture(picture, stack);
+        stack.shrink(1);
+        if (player != null) {
+            BlockPaintingContainer.rotatePicture(player, picture, side, true);
         }
         return EnumActionResult.SUCCESS;
     }
     
     public EnumActionResult onItemUseOnFrame(
-            ItemStack itemStack,
-            EntityPlayer entityPlayer,
+            ItemStack stack,
+            EntityPlayer player,
             World world,
             TileEntityPaintingFrame tilePF,
             int side) {
@@ -117,11 +118,11 @@ public class ItemPainting extends ItemMod3 {
             return EnumActionResult.FAIL;
         }
         Picture picture = tilePF.createPicture(side);
-        fillPicture(picture, itemStack);
-        itemStack.shrink(1);
-        if (entityPlayer != null) {
+        fillPicture(picture, stack);
+        stack.shrink(1);
+        if (player != null) {
             EnumFacing dir = EnumFacing.getFront(side);
-            BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
+            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
         }
         tilePF.markForUpdate();
         return EnumActionResult.SUCCESS;
@@ -131,6 +132,16 @@ public class ItemPainting extends ItemMod3 {
     @Nullable
     public EntityEquipmentSlot getEquipmentSlot(ItemStack stack) {
         return EntityEquipmentSlot.HEAD;
+    }
+    
+    @Override
+    public String getUnlocalizedName() {
+        return this.block.getUnlocalizedName();
+    }
+    
+    @Override
+    public String getItemStackDisplayName(ItemStack stack) {
+        return this.block.getLocalizedName();
     }
     
     @Override

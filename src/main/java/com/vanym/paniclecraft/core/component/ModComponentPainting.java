@@ -129,12 +129,12 @@ public class ModComponentPainting extends ModComponent {
         this.enabled = true;
         MinecraftForge.EVENT_BUS.register(this);
         
-        this.itemPainting = new ItemPainting();
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPaintRemover = new ItemPaintRemover();
         this.itemPalette = new ItemPalette();
         
         this.blockPainting = new BlockPainting();
+        this.itemPainting = new ItemPainting(this.blockPainting);
         GameRegistry.registerTileEntity(TileEntityPainting.class, TileEntityPainting.ID);
         
         this.blockPaintingFrame = new BlockPaintingFrame();
