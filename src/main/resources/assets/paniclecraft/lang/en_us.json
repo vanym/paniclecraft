@@ -5,8 +5,8 @@
   "item.paniclecraft.advanced_sign": "Advanced Sign",
   "item.paniclecraft.advanced_sign.showtext": "Press <shift> to see text",
 
-  "item.paniclecraft.painting": "Canvas",
-  "item.paniclecraft.painting.uneditable": "Uneditable",
+  "block.paniclecraft.painting": "Canvas",
+  "block.paniclecraft.painting.uneditable": "Uneditable",
   "block.paniclecraft.paintingframe": "Canvas Frame",
   "item.paniclecraft.paintingtool_brush": "Paint Brush",
   "item.paniclecraft.paintingtool_brush_small": "Small Paint Brush",

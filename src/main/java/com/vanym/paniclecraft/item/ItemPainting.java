@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.vanym.paniclecraft.Core;
-import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -28,14 +27,17 @@ public class ItemPainting extends ItemMod3 {
     
     protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
-    public ItemPainting() {
+    protected final Block block;
+    
+    public ItemPainting(Block block) {
         this.setRegistryName("painting");
+        this.block = block;
     }
     
     @Override
     public boolean onItemUse(
-            ItemStack itemStack,
-            EntityPlayer entityPlayer,
+            ItemStack stack,
+            EntityPlayer player,
             World world,
             int x,
             int y,
@@ -44,18 +46,17 @@ public class ItemPainting extends ItemMod3 {
             float hitX,
             float hitY,
             float hitZ) {
-        final BlockPainting painting = Core.instance.painting.blockPainting;
         int i = 0;
         ForgeDirection dir = ForgeDirection.getOrientation(side);
-        if (!entityPlayer.isSneaking()) {
+        if (!player.isSneaking()) {
             TileEntity tile = world.getTileEntity(x, y, z);
             if (tile != null && tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-                return this.onItemUseOnFrame(itemStack, entityPlayer, world, tilePF, side);
+                return this.onItemUseOnFrame(stack, player, world, tilePF, side);
             }
             for (; i < Core.instance.painting.config.paintingPlaceStack; i++) {
                 Block block = world.getBlock(x, y, z);
-                if (block != painting) {
+                if (block != this.block) {
                     break;
                 }
                 int meta = world.getBlockMetadata(x, y, z);
@@ -63,7 +64,7 @@ public class ItemPainting extends ItemMod3 {
                     break;
                 }
                 ForgeDirection stackdir =
-                        BlockPaintingContainer.getStackDirection(entityPlayer, dir);
+                        BlockPaintingContainer.getStackDirection(player, dir);
                 if (stackdir == ForgeDirection.UNKNOWN) {
                     break;
                 }
@@ -77,30 +78,30 @@ public class ItemPainting extends ItemMod3 {
             y += dir.offsetY;
             z += dir.offsetZ;
         }
-        if (!entityPlayer.canPlayerEdit(x, y, z, side, itemStack)
-            || !painting.canPlaceBlockAt(world, x, y, z)
-            || !world.setBlock(x, y, z, painting, side, 3)) {
+        if (!player.canPlayerEdit(x, y, z, side, stack)
+            || !this.block.canPlaceBlockAt(world, x, y, z)
+            || !world.setBlock(x, y, z, this.block, side, 3)) {
             return false;
         }
-        painting.onBlockPlacedBy(world, x, y, z, entityPlayer, itemStack);
-        painting.onPostBlockPlaced(world, x, y, z, side);
+        this.block.onBlockPlacedBy(world, x, y, z, player, stack);
+        this.block.onPostBlockPlaced(world, x, y, z, side);
         world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D,
-                              painting.stepSound.func_150496_b(),
-                              (painting.stepSound.getVolume() + 1.0F) / 2.0F,
-                              painting.stepSound.getPitch() * 0.8F);
-        --itemStack.stackSize;
+                              this.block.stepSound.func_150496_b(),
+                              (this.block.stepSound.getVolume() + 1.0F) / 2.0F,
+                              this.block.stepSound.getPitch() * 0.8F);
+        --stack.stackSize;
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
         Picture picture = tileP.getPicture(side);
-        fillPicture(picture, itemStack);
-        if (entityPlayer != null) {
-            BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
+        fillPicture(picture, stack);
+        if (player != null) {
+            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
         }
         return true;
     }
     
     public boolean onItemUseOnFrame(
-            ItemStack itemStack,
-            EntityPlayer entityPlayer,
+            ItemStack stack,
+            EntityPlayer player,
             World world,
             TileEntityPaintingFrame tilePF,
             int side) {
@@ -108,15 +109,25 @@ public class ItemPainting extends ItemMod3 {
             return false;
         }
         Picture picture = tilePF.createPicture(side);
-        --itemStack.stackSize;
-        fillPicture(picture, itemStack);
-        if (entityPlayer != null) {
+        fillPicture(picture, stack);
+        --stack.stackSize;
+        if (player != null) {
             ForgeDirection dir = ForgeDirection.getOrientation(side);
-            BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
+            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
         }
         tilePF.markForUpdate();
         world.notifyBlockChange(tilePF.xCoord, tilePF.yCoord, tilePF.zCoord, tilePF.getBlockType());
         return true;
+    }
+    
+    @Override
+    public String getUnlocalizedName() {
+        return this.block.getUnlocalizedName();
+    }
+    
+    @Override
+    public String getItemStackDisplayName(ItemStack stack) {
+        return this.block.getLocalizedName();
     }
     
     @Override
