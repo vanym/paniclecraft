@@ -101,6 +101,16 @@ public class BlockPainting extends BlockPaintingContainer {
     }
     
     @Override
+    @SuppressWarnings("deprecation")
+    public boolean isReplaceable(BlockState state, BlockItemUseContext context) {
+        if (context.isPlacerSneaking()) {
+            return super.isReplaceable(state, context);
+        }
+        return context.getItem().getItem() == this.asItem()
+            && state.get(FACING) == context.getFace();
+    }
+    
+    @Override
     public Item asItem() {
         return Core.instance.painting.itemPainting;
     }

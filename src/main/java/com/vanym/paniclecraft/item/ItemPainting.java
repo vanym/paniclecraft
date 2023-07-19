@@ -17,12 +17,11 @@ import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
@@ -30,7 +29,6 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -39,67 +37,76 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class ItemPainting extends Item {
+public class ItemPainting extends BlockItem {
     
     protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
-    public ItemPainting() {
-        super(Props.create().setTEISR(()->ItemRendererPainting::create));
+    public ItemPainting(Block block) {
+        super(block, Props.create().setTEISR(()->ItemRendererPainting::create));
         this.setRegistryName("painting");
     }
     
     @Override
     public ActionResultType onItemUse(ItemUseContext context) {
-        ItemStack itemStack = context.getItem();
-        PlayerEntity entityPlayer = context.getPlayer();
-        World world = context.getWorld();
-        BlockPos pos = context.getPos();
-        Direction side = context.getFace();
-        final BlockPainting painting = Core.instance.painting.blockPainting;
-        int i = 0;
-        if (!entityPlayer.isSneaking()) {
+        PlayerEntity player = context.getPlayer();
+        if (player != null && !player.isSneaking()) {
+            World world = context.getWorld();
+            BlockPos pos = context.getPos();
             TileEntity tile = world.getTileEntity(pos);
-            if (tile != null && tile instanceof TileEntityPaintingFrame) {
+            if (tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-                return this.onItemUseOnFrame(itemStack, entityPlayer, world, tilePF,
+                ItemStack stack = context.getItem();
+                Direction side = context.getFace();
+                return this.onItemUseOnFrame(stack, player, world, tilePF,
                                              side.getIndex());
             }
-            for (; i < Core.instance.painting.config.paintingPlaceStack; i++) {
-                BlockState state = world.getBlockState(pos);
-                Block block = state.getBlock();
-                if ((block != painting) || (side != state.get(BlockPainting.FACING))) {
-                    break;
-                }
-                Direction stackdir = BlockPaintingContainer.getStackDirection(entityPlayer, side);
-                if (stackdir == null) {
-                    break;
-                }
-                pos = pos.offset(stackdir);
+        }
+        return super.onItemUse(context);
+    }
+    
+    @Override
+    @Nullable
+    public BlockItemUseContext getBlockItemUseContext(BlockItemUseContext context) {
+        PlayerEntity player = context.getPlayer();
+        if (player == null || player.isSneaking()) {
+            return context;
+        }
+        World world = context.getWorld();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(context.getPos());
+        Direction side = context.getFace();
+        Block self = this.getBlock();
+        for (int i = 0; i < Core.instance.painting.config.paintingPlaceStack; i++) {
+            BlockState state = world.getBlockState(pos);
+            if (state.getBlock() != self || side != state.get(BlockPainting.FACING)) {
+                break;
             }
+            Direction stackdir = BlockPaintingContainer.getStackDirection(player, side);
+            if (stackdir == null) {
+                break;
+            }
+            pos.move(stackdir);
         }
-        if (i == 0) {
-            pos = pos.offset(side);
-        }
-        if (!entityPlayer.canPlayerEdit(pos, side, itemStack)) {
-            return ActionResultType.FAIL;
-        }
-        BlockState state = painting.getStateForPlacement(new BlockItemUseContext(context));
-        if (!world.setBlockState(pos, state, 11)) {
-            return ActionResultType.FAIL;
-        }
-        painting.onBlockPlacedBy(world, pos, state, entityPlayer, itemStack);
-        state = world.getBlockState(pos);
-        SoundType soundtype = state.getBlock().getSoundType(state, world, pos, entityPlayer);
-        world.playSound(entityPlayer, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS,
-                        (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+        context = BlockItemUseContext.func_221536_a(context, pos, side);
+        return context.replacingClickedOnBlock()
+            && world.getBlockState(pos).getBlock() != self ? context : null;
+    }
+    
+    @Override
+    protected boolean onBlockPlaced(
+            BlockPos pos,
+            World world,
+            @Nullable PlayerEntity player,
+            ItemStack stack,
+            BlockState state) {
+        super.onBlockPlaced(pos, world, player, stack, state);
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
-        Picture picture = tileP.getPicture(side.getIndex());
-        fillPicture(picture, itemStack);
-        itemStack.shrink(1);
-        if (entityPlayer != null) {
-            BlockPaintingContainer.rotatePicture(entityPlayer, picture, side, true);
+        Picture picture = tileP.getPicture();
+        fillPicture(picture, stack);
+        if (player != null) {
+            Direction side = state.get(BlockPainting.FACING);
+            BlockPaintingContainer.rotatePicture(player, picture, side, true);
         }
-        return ActionResultType.SUCCESS;
+        return true;
     }
     
     public ActionResultType onItemUseOnFrame(

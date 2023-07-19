@@ -170,7 +170,7 @@ public class ModComponentPainting extends ModComponent {
         this.blockPainting = new BlockPainting();
         this.blockPaintingFrame = new BlockPaintingFrame();
         
-        this.itemPainting = new ItemPainting();
+        this.itemPainting = new ItemPainting(this.blockPainting);
         this.itemPaintingFrame = new ItemPaintingFrame(this.blockPaintingFrame);
         this.itemPaintBrush = new ItemPaintBrush(ItemPaintBrush.Type.BRUSH);
         this.itemPaintBrushSmall = new ItemPaintBrush(ItemPaintBrush.Type.SMALLBRUSH);
