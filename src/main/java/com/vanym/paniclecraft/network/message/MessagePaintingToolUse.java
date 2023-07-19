@@ -23,7 +23,7 @@ public class MessagePaintingToolUse {
     protected final boolean tile;
     
     public MessagePaintingToolUse(BlockPos pos, int px, int py, byte side, boolean tile) {
-        this.pos = pos;
+        this.pos = pos.toImmutable();
         this.px = px;
         this.py = py;
         this.side = side;

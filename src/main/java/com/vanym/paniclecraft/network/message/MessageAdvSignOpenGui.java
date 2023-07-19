@@ -15,7 +15,7 @@ public class MessageAdvSignOpenGui {
     public final BlockPos pos;
     
     public MessageAdvSignOpenGui(BlockPos pos) {
-        this.pos = pos;
+        this.pos = pos.toImmutable();
     }
     
     public static void encode(MessageAdvSignOpenGui message, PacketBuffer buf) {

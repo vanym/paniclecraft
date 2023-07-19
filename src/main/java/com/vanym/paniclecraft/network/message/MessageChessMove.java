@@ -16,7 +16,7 @@ public class MessageChessMove {
     protected final ChessGame.Move move;
     
     public MessageChessMove(BlockPos pos, ChessGame.Move move) {
-        this.pos = pos;
+        this.pos = pos.toImmutable();
         this.move = move;
     }
     
