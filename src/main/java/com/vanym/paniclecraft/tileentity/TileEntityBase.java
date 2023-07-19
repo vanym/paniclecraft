@@ -16,7 +16,7 @@ public abstract class TileEntityBase extends TileEntity {
     public void markForUpdate() {
         this.markDirty();
         if (this.world != null) {
-            BlockState state = this.world.getBlockState(this.pos);
+            BlockState state = this.getBlockState();
             this.world.notifyBlockUpdate(this.pos, state, state, 3);
         }
     }

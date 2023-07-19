@@ -2,11 +2,13 @@ package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -48,6 +50,24 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
                 picture.deserializeNBT(nbtTag.getCompound(TAG_PICTURE_I));
             } else {
                 this.clearPicture(i);
+            }
+        }
+    }
+    
+    @Override
+    public void markForUpdate() {
+        this.markDirty();
+        if (this.world != null) {
+            BlockState state = this.getBlockState();
+            BlockState actual = state;
+            if (state.getBlock() instanceof BlockPaintingFrame) {
+                BlockPaintingFrame blockPF = (BlockPaintingFrame)state.getBlock();
+                actual = blockPF.getActualState(state, this);
+            }
+            if (state != actual) {
+                this.world.setBlockState(this.pos, actual);
+            } else {
+                this.world.notifyBlockUpdate(this.pos, state, actual, 3);
             }
         }
     }

@@ -114,7 +114,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         world.addEntity(entityItem);
         tileP.clearPicture(side.getIndex());
         tileP.markForUpdate();
-        world.notifyNeighborsOfStateChange(pos, this);
         return true;
     }
     
@@ -170,6 +169,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             }
             int rot = getRotate(entity, Direction.UP, true);
             tilePF.rotateY(rot);
+            tilePF.markForUpdate();
         }
     }
     
