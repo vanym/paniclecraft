@@ -156,17 +156,10 @@ public class PaintingSpecialSelectionBox {
             }
         }
         Stream<AxisAlignedBB> pictureLines = pictureLinesBuilder.build();
-        double dx = player.lastTickPosX +
-                    (player.posX - player.lastTickPosX) * (double)event.getPartialTicks();
-        double dy = player.lastTickPosY +
-                    (player.posY - player.lastTickPosY) * (double)event.getPartialTicks();
-        double dz = player.lastTickPosZ +
-                    (player.posZ - player.lastTickPosZ) * (double)event.getPartialTicks();
+        Vec3d view = event.getInfo().getProjectedView();
         Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.axes.fromSideCoords(b)
-                                                                         .offset(pos.getX(),
-                                                                                 pos.getY(),
-                                                                                 pos.getZ())
-                                                                         .offset(-dx, -dy, -dz));
+                                                                         .offset(pos)
+                                                                         .offset(view.func_216371_e()));
         this.drawLines(frameLines);
     }
     
