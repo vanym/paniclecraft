@@ -110,8 +110,8 @@ public class ItemPainting extends BlockItem {
     }
     
     public ActionResultType onItemUseOnFrame(
-            ItemStack itemStack,
-            PlayerEntity entityPlayer,
+            ItemStack stack,
+            PlayerEntity player,
             World world,
             TileEntityPaintingFrame tilePF,
             int side) {
@@ -119,11 +119,11 @@ public class ItemPainting extends BlockItem {
             return ActionResultType.FAIL;
         }
         Picture picture = tilePF.createPicture(side);
-        fillPicture(picture, itemStack);
-        itemStack.shrink(1);
-        if (entityPlayer != null) {
+        fillPicture(picture, stack);
+        stack.shrink(1);
+        if (player != null) {
             Direction dir = Direction.byIndex(side);
-            BlockPaintingContainer.rotatePicture(entityPlayer, picture, dir, true);
+            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
         }
         tilePF.markForUpdate();
         return ActionResultType.SUCCESS;
