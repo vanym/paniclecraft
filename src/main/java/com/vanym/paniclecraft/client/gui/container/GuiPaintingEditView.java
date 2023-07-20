@@ -86,6 +86,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         this.addButton(this.buttonImport);
         this.addButton(this.buttonImportSave);
         this.addButton(this.buttonImportCancel);
+        this.addButton(this.textImport);
         this.minecraft.keyboardListener.enableRepeatEvents(true);
         this.updateButtons();
     }
@@ -139,7 +140,6 @@ public class GuiPaintingEditView extends GuiPaintingView {
     @Override
     public void render(int mouseX, int mouseY, float renderPartialTicks) {
         super.render(mouseX, mouseY, renderPartialTicks);
-        this.textImport.render(mouseX, mouseY, renderPartialTicks);
     }
     
     @Override
@@ -245,8 +245,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
     @Override
     public boolean mouseClicked(double x, double y, int eventButton) {
         return this.mouseClickedMovingImage(x, y, eventButton)
-            || super.mouseClicked(x, y, eventButton)
-            || this.textImport.mouseClicked(x, y, eventButton);
+            || super.mouseClicked(x, y, eventButton);
     }
     
     protected boolean mouseClickedMovingImage(double x, double y, int eventButton) {
@@ -368,7 +367,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     protected void switchImportImage(BufferedImage img) {
         if (this.importTexture != null) {
-            this.importTexture.deleteGlTexture();
+            this.importTexture.close();
             this.importTexture = null;
         }
         this.importImage = img;
@@ -408,24 +407,25 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    public boolean charTyped(char character, int key) {
-        if (character == 22 /* Ctrl+v */) {
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (Screen.isPaste(key)) {
             if (this.loadClipboardImage()) {
                 return true;
             }
             this.textImport.setFocused2(true);
+            this.setFocused(this.textImport);
         }
-        if (this.textImport.charTyped(character, key)) {
+        if (super.keyPressed(key, scanCode, modifiers)) {
             return true;
         }
         switch (key) {
-            case 28: // enter
-            case 156: // enter numpad
+            case 257: // enter
+            case 335: // enter numpad
                 if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
                     this.paintingImport();
                     return true;
                 }
-            case 205: { // right
+            case 262: { // right
                 int moveX;
                 if (Screen.hasControlDown()) {
                     moveX = this.view.getWidth() - this.importTextureWidth;
@@ -438,7 +438,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return true;
             }
-            case 203: { // left
+            case 263: { // left
                 int moveX;
                 if (Screen.hasControlDown()) {
                     moveX = 0;
@@ -451,7 +451,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return true;
             }
-            case 208: { // down
+            case 264: { // down
                 int moveY;
                 if (Screen.hasControlDown()) {
                     moveY = this.view.getHeight() - this.importTextureHeight;
@@ -464,7 +464,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return true;
             }
-            case 200: { // up
+            case 265: { // up
                 int moveY;
                 if (Screen.hasControlDown()) {
                     moveY = 0;
@@ -477,7 +477,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return true;
             }
-            case 57: // space
+            case 32: // space
                 if (Screen.hasControlDown()) {
                     this.fillFull();
                 } else {
@@ -485,7 +485,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 }
                 return true;
         }
-        return super.charTyped(character, key);
+        return false;
     }
     
     protected boolean loadClipboardImage() {

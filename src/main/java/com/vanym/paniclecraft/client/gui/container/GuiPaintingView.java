@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
@@ -172,13 +173,16 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     }
     
     @Override
-    public boolean charTyped(char character, int key) {
-        if (character == 3 /* Ctrl+c */) {
-            this.paintingCopy();
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (super.keyPressed(key, scanCode, modifiers)) {
             return true;
         }
-        if (key == 1 || key == this.minecraft.gameSettings.keyBindInventory.getKey().getKeyCode()) {
-            this.minecraft.player.closeScreen();
+        InputMappings.Input inputCode = InputMappings.getInputByCode(key, scanCode);
+        if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(inputCode)) {
+            this.onClose();
+        }
+        if (Screen.isCopy(key)) {
+            this.paintingCopy();
             return true;
         }
         return false;
