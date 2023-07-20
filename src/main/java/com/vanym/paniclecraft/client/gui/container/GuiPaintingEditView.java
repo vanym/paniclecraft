@@ -244,8 +244,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     @Override
     public boolean mouseClicked(double x, double y, int eventButton) {
-        return this.mouseClickedMovingImage(x, y, eventButton)
-            || super.mouseClicked(x, y, eventButton);
+        boolean moving = this.mouseClickedMovingImage(x, y, eventButton);
+        return super.mouseClicked(x, y, eventButton) || moving;
     }
     
     protected boolean mouseClickedMovingImage(double x, double y, int eventButton) {
@@ -529,7 +529,12 @@ public class GuiPaintingEditView extends GuiPaintingView {
         NativeImage image = new NativeImage(w, h, false);
         for (int py = 0; py < image.getHeight(); ++py) {
             for (int px = 0; px < image.getWidth(); ++px) {
-                image.setPixelRGBA(px, py, img.getRGB(px + x, py + y));
+                Color color = new Color(img.getRGB(px + x, py + y), true);
+                int value = color.getAlpha() << 24
+                            | color.getBlue() << 16
+                            | color.getGreen() << 8
+                            | color.getRed() << 0;
+                image.setPixelRGBA(px, py, value);
             }
         }
         return image;
