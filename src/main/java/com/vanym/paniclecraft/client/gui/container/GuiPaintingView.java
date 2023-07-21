@@ -189,6 +189,11 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     }
     
     @Override
+    public void onClose() {
+        this.minecraft.player.closeScreen();
+    }
+    
+    @Override
     public void removed() {
         if (this.minecraft.player != null) {
             this.view.onContainerClosed(this.minecraft.player);
