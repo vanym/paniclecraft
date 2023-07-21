@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -117,7 +118,8 @@ public class GuiPaintingView extends GuiScreen {
                 if (picture == null) {
                     continue;
                 }
-                TextureAtlasSprite icon = TileEntityPaintingRenderer.bindTexture(picture);
+                TextureAtlasSprite icon =
+                        IconUtils.shrink(TileEntityPaintingRenderer.bindTexture(picture));
                 this.drawTexturedModalRect(this.viewX + x * this.viewStep,
                                            this.viewY + y * this.viewStep,
                                            icon, this.viewStep, this.viewStep);

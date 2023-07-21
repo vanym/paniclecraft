@@ -199,11 +199,11 @@ public class GuiPaintingEditView extends GuiPaintingView {
                     iconWidth -= cut;
                 }
                 TextureAtlasSprite icon =
-                        IconUtils.sub(Math.max(paintingX - this.importTextureX, 0),
-                                      Math.max(paintingY - this.importTextureY, 0),
-                                      iconWidth, iconHeight,
-                                      this.importTextureWidth,
-                                      this.importTextureHeight);
+                        IconUtils.shrink(IconUtils.sub(Math.max(paintingX - this.importTextureX, 0),
+                                                       Math.max(paintingY - this.importTextureY, 0),
+                                                       iconWidth, iconHeight,
+                                                       this.importTextureWidth,
+                                                       this.importTextureHeight));
                 // based on drawTexturedModelRect
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buf = tessellator.getBuffer();
