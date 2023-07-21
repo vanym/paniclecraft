@@ -22,9 +22,15 @@ public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer 
     @Override
     protected IBlockState getActualState(TileEntityPaintingContainer tile) {
         BlockPaintingFrame block = Core.instance.painting.blockPaintingFrame;
-        IBlockState state = tile.hasWorld() ? tile.getWorld().getBlockState(tile.getPos())
-                                            : block.getDefaultState();
-        return block.getActualState(state, (TileEntityPaintingFrame)tile);
+        IBlockState state = null;
+        if (tile.hasWorld()) {
+            IBlockState stateWorld = tile.getWorld().getBlockState(tile.getPos());
+            if (block == stateWorld.getBlock()) {
+                state = stateWorld;
+            }
+        }
+        return block.getActualState(state != null ? state : block.getDefaultState(),
+                                    (TileEntityPaintingFrame)tile);
     }
     
     @Override
