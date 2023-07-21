@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
+import com.vanym.paniclecraft.utils.ColorUtils;
+
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.data.TextureMetadataSection;
@@ -37,7 +39,7 @@ public class ColorChartTexture extends SimpleTexture {
             return null;
         }
         try {
-            return new Color(this.img.getPixelRGBA(x, y), true);
+            return new Color(ColorUtils.swapRB(this.img.getPixelRGBA(x, y)), true);
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;
         }

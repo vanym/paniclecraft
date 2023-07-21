@@ -24,6 +24,7 @@ import com.vanym.paniclecraft.core.component.painting.Image;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
+import com.vanym.paniclecraft.utils.ColorUtils;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -529,12 +530,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         NativeImage image = new NativeImage(w, h, false);
         for (int py = 0; py < image.getHeight(); ++py) {
             for (int px = 0; px < image.getWidth(); ++px) {
-                Color color = new Color(img.getRGB(px + x, py + y), true);
-                int value = color.getAlpha() << 24
-                            | color.getBlue() << 16
-                            | color.getGreen() << 8
-                            | color.getRed() << 0;
-                image.setPixelRGBA(px, py, value);
+                image.setPixelRGBA(px, py, ColorUtils.swapRB(img.getRGB(px + x, py + y)));
             }
         }
         return image;

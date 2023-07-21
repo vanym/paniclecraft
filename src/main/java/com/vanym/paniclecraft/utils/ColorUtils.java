@@ -25,4 +25,12 @@ public class ColorUtils {
         }
         return color.getRGB() & 0xffffff;
     }
+    
+    public static int swapRB(int color) {
+        int a = color >> 24 & 0xFF;
+        int r = color >> 16 & 0xFF;
+        int g = color >> 8 & 0xFF;
+        int b = color >> 0 & 0xFF;
+        return a << 24 | b << 16 | g << 8 | r << 0;
+    }
 }
