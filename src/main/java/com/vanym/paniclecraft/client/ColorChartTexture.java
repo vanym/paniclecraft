@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.client;
 
 import java.awt.Color;
+import java.io.Closeable;
 import java.io.IOException;
 
 import javax.annotation.Nullable;
@@ -16,7 +17,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class ColorChartTexture extends SimpleTexture {
+public class ColorChartTexture extends SimpleTexture implements Closeable {
     
     protected NativeImage img;
     
@@ -42,6 +43,13 @@ public class ColorChartTexture extends SimpleTexture {
             return new Color(ColorUtils.swapRB(this.img.getPixelRGBA(x, y)), true);
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;
+        }
+    }
+    
+    @Override
+    public void close() throws IOException {
+        if (this.img != null) {
+            this.img.close();
         }
     }
     
