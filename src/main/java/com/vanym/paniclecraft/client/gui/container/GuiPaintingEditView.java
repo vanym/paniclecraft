@@ -104,6 +104,9 @@ public class GuiPaintingEditView extends GuiPaintingView {
         boolean importing = (this.importImage != null);
         this.buttonImport.visible = !importing;
         this.textImport.setVisible(!importing);
+        if (importing) {
+            this.textImport.setFocused(false);
+        }
         this.buttonImportSave.visible = importing;
         this.buttonImportCancel.visible = importing;
         this.buttonImportSave.enabled = false; // to prevent double click
