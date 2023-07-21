@@ -257,6 +257,9 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
                                      GL11.GL_NEAREST);
                 GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
+                GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
+                GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
+                GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
                 GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, format,
                                   width, height, 0, format,
                                   GL11.GL_UNSIGNED_BYTE,
