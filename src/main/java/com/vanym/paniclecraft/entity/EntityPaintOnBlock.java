@@ -125,7 +125,9 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 || EntityPaintOnBlock.isValidBlockSide(this.world, this.getBlockPos(), i)) {
                 continue;
             }
-            this.clearPicture(i);
+            if (this.clearPicture(i)) {
+                this.picturesDataManager.setPictureDirty(i);
+            }
         }
     }
     

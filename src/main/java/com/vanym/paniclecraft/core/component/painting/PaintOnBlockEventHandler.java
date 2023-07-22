@@ -33,16 +33,15 @@ public class PaintOnBlockEventHandler {
     
     @SubscribeEvent
     public void blockNeighborNotify(BlockEvent.NeighborNotifyEvent event) {
-        this.blockChange(event);
-    }
-    
-    @SubscribeEvent
-    public void blockBreak(BlockEvent.BreakEvent event) {
+        // NeighborNotifyEvent is only posted on the server side (1.14.4)
         this.blockChange(event);
     }
     
     protected void blockChange(BlockEvent event) {
         World world = event.getWorld().getWorld();
+        if (world.isRemote) {
+            return;
+        }
         EntityPaintOnBlock entityPOB = EntityPaintOnBlock.getEntity(world, event.getPos());
         if (entityPOB != null) {
             entityPOB.checkValidness();
