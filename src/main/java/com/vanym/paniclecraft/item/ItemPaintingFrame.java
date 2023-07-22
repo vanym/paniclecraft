@@ -1,12 +1,12 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -34,35 +34,6 @@ public class ItemPaintingFrame extends BlockItem {
     
     protected static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
-    public static final Direction FRONT;
-    public static final Direction LEFT;
-    public static final Direction BACK;
-    public static final Direction RIGHT;
-    public static final Direction BOTTOM;
-    public static final Direction TOP;
-    
-    static {
-        FRONT = Direction.NORTH;
-        LEFT = FRONT.rotateY();
-        BACK = LEFT.rotateY();
-        RIGHT = BACK.rotateY();
-        BOTTOM = Direction.DOWN;
-        TOP = Direction.UP;
-        
-        TreeMap<Direction, String> letters = new TreeMap<>();
-        letters.put(FRONT, "F");
-        letters.put(LEFT, "L");
-        letters.put(BACK, "K");
-        letters.put(RIGHT, "R");
-        letters.put(BOTTOM, "B");
-        letters.put(TOP, "T");
-        SIDE_LETTERS = Collections.unmodifiableMap(letters);
-    }
-    
-    public static final List<Direction> SIDE_ORDER =
-            Arrays.asList(FRONT, RIGHT, TOP, LEFT, BACK, BOTTOM);
-    protected static final Map<Direction, String> SIDE_LETTERS;
-    
     public ItemPaintingFrame(Block block) {
         super(block, Props.create().setTEISR(()->ItemRendererPaintingFrame::create));
         this.setRegistryName(block.getRegistryName());
@@ -88,19 +59,20 @@ public class ItemPaintingFrame extends BlockItem {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @OnlyIn(Dist.CLIENT)
     public void addInformation(
-            ItemStack itemStack,
+            ItemStack stack,
             @Nullable World world,
             List<ITextComponent> list,
             ITooltipFlag flag) {
-        if (itemStack.hasTag()) {
+        if (stack.hasTag()) {
             Map<String, String> mapLetters = new TreeMap<>();
             Map<String, Integer> mapCount = new TreeMap<>();
-            for (Direction side : SIDE_ORDER) {
+            for (SideName name : SideName.values()) {
                 Optional<String> info =
-                        getPictureTag(itemStack, side).map(ItemPainting::pictureSizeInformation);
+                        ItemPaintingFrame.getPictureTag(stack, name.getSide())
+                                         .map(ItemPainting::pictureSizeInformation);
                 info.ifPresent(i-> {
                     mapCount.put(i, mapCount.getOrDefault(i, 0) + 1);
-                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + SIDE_LETTERS.get(side));
+                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + name.getLetter());
                 });
             }
             Map mapInfo;
@@ -206,5 +178,45 @@ public class ItemPaintingFrame extends BlockItem {
         String name = pictureTag.getString(Picture.TAG_NAME);
         pictureTag.remove(Picture.TAG_NAME);
         return Optional.of(name);
+    }
+    
+    public static enum SideName {
+        FRONT(Direction.NORTH, "F"),
+        RIGHT(Direction.WEST, "R"),
+        TOP(Direction.UP, "T"),
+        LEFT(Direction.EAST, "L"),
+        BACK(Direction.SOUTH, "K"),
+        BOTTOM(Direction.DOWN, "B");
+        
+        protected final Direction side;
+        protected final String letter;
+        
+        SideName(Direction side, String letter) {
+            this.side = side;
+            this.letter = letter;
+        }
+        
+        public Direction getSide() {
+            return this.side;
+        }
+        
+        public String getLetter() {
+            return this.letter;
+        }
+        
+        public static Stream<SideName> stream() {
+            return Arrays.stream(values());
+        }
+        
+        public static SideName bySide(Direction side) {
+            return stream().filter(n->n.side == side).findAny().orElse(null);
+        }
+        
+        public static SideName byName(String name) {
+            return stream().filter(n->Stream.of(n.name(), n.side.name(), n.letter)
+                                            .anyMatch(name::equalsIgnoreCase))
+                           .findAny()
+                           .orElse(null);
+        }
     }
 }

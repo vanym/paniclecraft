@@ -26,7 +26,11 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     public RecipePaintingFrameRemovePainting(ResourceLocation id) {
         super(id, "", new ItemStack(Core.instance.painting.itemPainting),
               NonNullList.from(Ingredient.EMPTY,
-                               Ingredient.fromStacks(ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT))));
+                               Optional.of(ItemPaintingFrame.SideName.FRONT)
+                                       .map(ItemPaintingFrame.SideName::getSide)
+                                       .map(ItemPaintingFrame::getItemWithEmptyPictures)
+                                       .map(Ingredient::fromStacks)
+                                       .get()));
     }
     
     @Override
@@ -48,12 +52,13 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
             return painting;
         }
         CompoundNBT pictureTag =
-                ItemPaintingFrame.SIDE_ORDER.stream()
-                                            .map(side->ItemPaintingFrame.getPictureTag(frame, side))
-                                            .filter(Optional::isPresent)
-                                            .map(Optional::get)
-                                            .findFirst()
-                                            .orElse(null);
+                ItemPaintingFrame.SideName.stream()
+                                          .map(ItemPaintingFrame.SideName::getSide)
+                                          .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                                          .filter(Optional::isPresent)
+                                          .map(Optional::get)
+                                          .findFirst()
+                                          .orElse(null);
         if (pictureTag == null || pictureTag.isEmpty()) {
             return painting;
         }
@@ -81,8 +86,8 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
         if (!frame.hasTag()) {
             return super.getRemainingItems(inv);
         }
-        for (Direction pside : ItemPaintingFrame.SIDE_ORDER) {
-            if (ItemPaintingFrame.removePictureTag(frame, pside).isPresent()) {
+        for (ItemPaintingFrame.SideName name : ItemPaintingFrame.SideName.values()) {
+            if (ItemPaintingFrame.removePictureTag(frame, name.getSide()).isPresent()) {
                 break;
             }
         }

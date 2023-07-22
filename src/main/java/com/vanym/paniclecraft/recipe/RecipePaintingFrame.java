@@ -22,7 +22,7 @@ public class RecipePaintingFrame extends ShapedRecipe {
             int recipeHeight,
             NonNullList<Ingredient> recipeItems) {
         super(id, group, recipeWidth, recipeHeight, recipeItems,
-              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT));
+              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
     }
     
     protected RecipePaintingFrame(ShapedRecipe recipe) {
@@ -35,7 +35,7 @@ public class RecipePaintingFrame extends ShapedRecipe {
     public ItemStack getCraftingResult(CraftingInventory inv) {
         ItemStack frame = super.getCraftingResult(inv);
         ItemStack painting = InventoryUtils.findItem(inv, Core.instance.painting.itemPainting);
-        RecipeUtils.addPainting(frame, painting, ItemPaintingFrame.FRONT);
+        RecipeUtils.addPainting(frame, painting, ItemPaintingFrame.SideName.FRONT.getSide());
         return frame;
     }
     
