@@ -10,14 +10,15 @@ import net.minecraft.item.ItemStack;
 public class RecipePaintingFrame extends RecipeRegister.ShapedOreRecipe {
     
     public RecipePaintingFrame(Object... recipe) {
-        super(ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT), recipe);
+        super(ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()),
+              recipe);
     }
     
     @Override
     public ItemStack getCraftingResult(InventoryCrafting inv) {
         ItemStack frame = super.getCraftingResult(inv);
         ItemStack painting = InventoryUtils.findItem(inv, Core.instance.painting.itemPainting);
-        RecipeUtils.addPainting(frame, painting, ItemPaintingFrame.FRONT);
+        RecipeUtils.addPainting(frame, painting, ItemPaintingFrame.SideName.FRONT.getSide());
         return frame;
     }
     

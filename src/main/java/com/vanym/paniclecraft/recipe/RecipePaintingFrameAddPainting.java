@@ -83,12 +83,18 @@ public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreReci
     }
     
     public static List<IRecipe> createAllVariants() {
-        return Arrays.asList(create(ItemPaintingFrame.FRONT, -1, +1),
-                             create(ItemPaintingFrame.BACK, +1, -1),
-                             create(ItemPaintingFrame.LEFT, -1, -1),
-                             create(ItemPaintingFrame.RIGHT, +1, +1),
-                             create(ItemPaintingFrame.BOTTOM, +0, +1),
-                             create(ItemPaintingFrame.TOP, +0, -1));
+        EnumFacing FRONT = ItemPaintingFrame.SideName.FRONT.getSide();
+        EnumFacing BACK = ItemPaintingFrame.SideName.BACK.getSide();
+        EnumFacing LEFT = ItemPaintingFrame.SideName.LEFT.getSide();
+        EnumFacing RIGHT = ItemPaintingFrame.SideName.RIGHT.getSide();
+        EnumFacing BOTTOM = ItemPaintingFrame.SideName.BOTTOM.getSide();
+        EnumFacing TOP = ItemPaintingFrame.SideName.TOP.getSide();
+        return Arrays.asList(create(FRONT, -1, +1),
+                             create(BACK, +1, -1),
+                             create(LEFT, -1, -1),
+                             create(RIGHT, +1, +1),
+                             create(BOTTOM, +0, +1),
+                             create(TOP, +0, -1));
     }
     
     protected static IRecipe create(EnumFacing pside, int offsetX, int offsetY) {

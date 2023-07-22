@@ -21,7 +21,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
     
     public RecipePaintingFrameRemovePainting() {
         super(Core.instance.painting.itemPainting,
-              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT));
+              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
     }
     
     @Override
@@ -43,12 +43,13 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
             return painting;
         }
         NBTTagCompound pictureTag =
-                ItemPaintingFrame.SIDE_ORDER.stream()
-                                            .map(side->ItemPaintingFrame.getPictureTag(frame, side))
-                                            .filter(Optional::isPresent)
-                                            .map(Optional::get)
-                                            .findFirst()
-                                            .orElse(null);
+                ItemPaintingFrame.SideName.stream()
+                                          .map(ItemPaintingFrame.SideName::getSide)
+                                          .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                                          .filter(Optional::isPresent)
+                                          .map(Optional::get)
+                                          .findFirst()
+                                          .orElse(null);
         if (pictureTag == null || pictureTag.hasNoTags()) {
             return painting;
         }
@@ -76,8 +77,8 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
         if (!frame.hasTagCompound()) {
             return super.getRemainingItems(inv);
         }
-        for (EnumFacing pside : ItemPaintingFrame.SIDE_ORDER) {
-            if (ItemPaintingFrame.removePictureTag(frame, pside).isPresent()) {
+        for (ItemPaintingFrame.SideName name : ItemPaintingFrame.SideName.values()) {
+            if (ItemPaintingFrame.removePictureTag(frame, name.getSide()).isPresent()) {
                 break;
             }
         }

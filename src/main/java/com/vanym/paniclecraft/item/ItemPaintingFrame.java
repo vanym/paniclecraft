@@ -1,12 +1,12 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -29,35 +29,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ItemPaintingFrame extends ItemBlockMod3 {
     
     protected static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
-    
-    public static final EnumFacing FRONT;
-    public static final EnumFacing LEFT;
-    public static final EnumFacing BACK;
-    public static final EnumFacing RIGHT;
-    public static final EnumFacing BOTTOM;
-    public static final EnumFacing TOP;
-    
-    static {
-        FRONT = EnumFacing.NORTH;
-        LEFT = FRONT.rotateY();
-        BACK = LEFT.rotateY();
-        RIGHT = BACK.rotateY();
-        BOTTOM = EnumFacing.DOWN;
-        TOP = EnumFacing.UP;
-        
-        TreeMap<EnumFacing, String> letters = new TreeMap<>();
-        letters.put(FRONT, "F");
-        letters.put(LEFT, "L");
-        letters.put(BACK, "K");
-        letters.put(RIGHT, "R");
-        letters.put(BOTTOM, "B");
-        letters.put(TOP, "T");
-        SIDE_LETTERS = Collections.unmodifiableMap(letters);
-    }
-    
-    public static final List<EnumFacing> SIDE_ORDER =
-            Arrays.asList(FRONT, RIGHT, TOP, LEFT, BACK, BOTTOM);
-    protected static final Map<EnumFacing, String> SIDE_LETTERS;
     
     public ItemPaintingFrame(Block block) {
         super(block);
@@ -84,19 +55,20 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
-            ItemStack itemStack,
+            ItemStack stack,
             @Nullable World world,
             List<String> list,
             ITooltipFlag flag) {
-        if (itemStack.hasTagCompound()) {
+        if (stack.hasTagCompound()) {
             Map<String, String> mapLetters = new TreeMap<>();
             Map<String, Integer> mapCount = new TreeMap<>();
-            for (EnumFacing side : SIDE_ORDER) {
+            for (SideName name : SideName.values()) {
                 Optional<String> info =
-                        getPictureTag(itemStack, side).map(ItemPainting::pictureSizeInformation);
+                        ItemPaintingFrame.getPictureTag(stack, name.getSide())
+                                         .map(ItemPainting::pictureSizeInformation);
                 info.ifPresent(i-> {
                     mapCount.put(i, mapCount.getOrDefault(i, 0) + 1);
-                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + SIDE_LETTERS.get(side));
+                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + name.getLetter());
                 });
             }
             Map mapInfo;
@@ -202,5 +174,45 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
         String name = pictureTag.getString(Picture.TAG_NAME);
         pictureTag.removeTag(Picture.TAG_NAME);
         return Optional.of(name);
+    }
+    
+    public static enum SideName {
+        FRONT(EnumFacing.NORTH, "F"),
+        RIGHT(EnumFacing.WEST, "R"),
+        TOP(EnumFacing.UP, "T"),
+        LEFT(EnumFacing.EAST, "L"),
+        BACK(EnumFacing.SOUTH, "K"),
+        BOTTOM(EnumFacing.DOWN, "B");
+        
+        protected final EnumFacing side;
+        protected final String letter;
+        
+        SideName(EnumFacing side, String letter) {
+            this.side = side;
+            this.letter = letter;
+        }
+        
+        public EnumFacing getSide() {
+            return this.side;
+        }
+        
+        public String getLetter() {
+            return this.letter;
+        }
+        
+        public static Stream<SideName> stream() {
+            return Arrays.stream(values());
+        }
+        
+        public static SideName bySide(EnumFacing side) {
+            return stream().filter(n->n.side == side).findAny().orElse(null);
+        }
+        
+        public static SideName byName(String name) {
+            return stream().filter(n->Stream.of(n.name(), n.side.name(), n.letter)
+                                            .anyMatch(name::equalsIgnoreCase))
+                           .findAny()
+                           .orElse(null);
+        }
     }
 }
