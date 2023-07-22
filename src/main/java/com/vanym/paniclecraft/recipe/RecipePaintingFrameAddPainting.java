@@ -8,6 +8,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
+import com.vanym.paniclecraft.item.ItemPaintingFrame.SideName;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -83,24 +84,18 @@ public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreReci
     }
     
     public static List<IRecipe> createAllVariants() {
-        EnumFacing FRONT = ItemPaintingFrame.SideName.FRONT.getSide();
-        EnumFacing BACK = ItemPaintingFrame.SideName.BACK.getSide();
-        EnumFacing LEFT = ItemPaintingFrame.SideName.LEFT.getSide();
-        EnumFacing RIGHT = ItemPaintingFrame.SideName.RIGHT.getSide();
-        EnumFacing BOTTOM = ItemPaintingFrame.SideName.BOTTOM.getSide();
-        EnumFacing TOP = ItemPaintingFrame.SideName.TOP.getSide();
-        return Arrays.asList(create(FRONT, -1, +1),
-                             create(BACK, +1, -1),
-                             create(LEFT, -1, -1),
-                             create(RIGHT, +1, +1),
-                             create(BOTTOM, +0, +1),
-                             create(TOP, +0, -1));
+        return Arrays.asList(create(SideName.FRONT, -1, +1),
+                             create(SideName.BACK, +1, -1),
+                             create(SideName.LEFT, -1, -1),
+                             create(SideName.RIGHT, +1, +1),
+                             create(SideName.BOTTOM, +0, +1),
+                             create(SideName.TOP, +0, -1));
     }
     
-    protected static IRecipe create(EnumFacing pside, int offsetX, int offsetY) {
+    protected static IRecipe create(SideName name, int offsetX, int offsetY) {
         RecipePaintingFrameAddPainting recipe =
-                new RecipePaintingFrameAddPainting(pside, offsetX, offsetY);
-        RecipeRegister.flowRegistryName(recipe, "%s_add_painting_" + pside);
+                new RecipePaintingFrameAddPainting(name.getSide(), offsetX, offsetY);
+        RecipeRegister.flowRegistryName(recipe, "%s_add_painting_" + name.name().toLowerCase());
         return recipe;
     }
 }
