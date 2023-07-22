@@ -56,20 +56,19 @@ public class CommandPaintingView extends CommandBase {
     @Override
     public LiteralArgumentBuilder<CommandSource> register() {
         RequiredArgumentBuilder<CommandSource, Integer> maxRadius =
-                Commands.argument("maxRadius", IntegerArgumentType.integer(1, 4096));
+                Commands.argument("maxRadius", IntegerArgumentType.integer(0, 4096))
+                        .executes(this::execute);
         if (this.to) {
             return Commands.literal(this.getName())
                            .requires(this::checkPermission)
                            .then(Commands.argument("viewer", EntityArgument.player())
                                          .executes(this::execute)
-                                         .then(maxRadius)
-                                         .executes(this::execute));
+                                         .then(maxRadius));
         } else {
             return Commands.literal(this.getName())
                            .requires(this::checkPermission)
                            .executes(this::execute)
-                           .then(maxRadius)
-                           .executes(this::execute);
+                           .then(maxRadius);
         }
     }
     
