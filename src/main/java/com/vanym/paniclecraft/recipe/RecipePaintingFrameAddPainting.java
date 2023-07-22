@@ -8,6 +8,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
+import com.vanym.paniclecraft.item.ItemPaintingFrame.SideName;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -79,17 +80,15 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
     }
     
     public static List<IRecipe> createAllVariants() {
-        ForgeDirection FRONT = ItemPaintingFrame.SideName.FRONT.getSide();
-        ForgeDirection BACK = ItemPaintingFrame.SideName.BACK.getSide();
-        ForgeDirection LEFT = ItemPaintingFrame.SideName.LEFT.getSide();
-        ForgeDirection RIGHT = ItemPaintingFrame.SideName.RIGHT.getSide();
-        ForgeDirection BOTTOM = ItemPaintingFrame.SideName.BOTTOM.getSide();
-        ForgeDirection TOP = ItemPaintingFrame.SideName.TOP.getSide();
-        return Arrays.asList(new RecipePaintingFrameAddPainting(FRONT, -1, +1),
-                             new RecipePaintingFrameAddPainting(BACK, +1, -1),
-                             new RecipePaintingFrameAddPainting(LEFT, -1, -1),
-                             new RecipePaintingFrameAddPainting(RIGHT, +1, +1),
-                             new RecipePaintingFrameAddPainting(BOTTOM, +0, +1),
-                             new RecipePaintingFrameAddPainting(TOP, +0, -1));
+        return Arrays.asList(create(SideName.FRONT, -1, +1),
+                             create(SideName.BACK, +1, -1),
+                             create(SideName.LEFT, -1, -1),
+                             create(SideName.RIGHT, +1, +1),
+                             create(SideName.BOTTOM, +0, +1),
+                             create(SideName.TOP, +0, -1));
+    }
+    
+    protected static IRecipe create(SideName name, int offsetX, int offsetY) {
+        return new RecipePaintingFrameAddPainting(name.getSide(), offsetX, offsetY);
     }
 }
