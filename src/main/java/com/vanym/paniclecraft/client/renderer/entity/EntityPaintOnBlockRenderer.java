@@ -185,7 +185,8 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         if (this.isUsingCollisionBox(state, world, pos)) {
             return this.getModelByCollisionBox(state, world, pos);
         }
-        return this.getModel(state.getShape(world, pos).getBoundingBox());
+        VoxelShape shape = state.getShape(world, pos);
+        return this.getModel(shape.isEmpty() ? null : shape.getBoundingBox());
     }
     
     protected boolean isUsingCollisionBox(BlockState state, World world, BlockPos pos) {
