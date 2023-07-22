@@ -182,6 +182,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
         InputMappings.Input inputCode = InputMappings.getInputByCode(key, scanCode);
         if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(inputCode)) {
             this.onClose();
+            return true;
         }
         if (Screen.isCopy(key)) {
             this.paintingCopy();
