@@ -115,6 +115,12 @@ public class GuiPaintingEditView extends GuiPaintingView {
         boolean importing = (this.importImage != null);
         this.buttonImport.visible = !importing;
         this.textImport.setVisible(!importing);
+        if (importing) {
+            this.textImport.setFocused2(false);
+            if (this.getFocused() == this.textImport) {
+                this.setFocused(null);
+            }
+        }
         this.buttonImportSave.visible = importing;
         this.buttonImportCancel.visible = importing;
         this.buttonImportSave.active = false; // to prevent double click
@@ -209,11 +215,11 @@ public class GuiPaintingEditView extends GuiPaintingView {
                     iconWidth -= cut;
                 }
                 TextureAtlasSprite icon =
-                        IconUtils.sub(Math.max(paintingX - this.importTextureX, 0),
-                                      Math.max(paintingY - this.importTextureY, 0),
-                                      iconWidth, iconHeight,
-                                      this.importTextureWidth,
-                                      this.importTextureHeight);
+                        IconUtils.shrink(IconUtils.sub(Math.max(paintingX - this.importTextureX, 0),
+                                                       Math.max(paintingY - this.importTextureY, 0),
+                                                       iconWidth, iconHeight,
+                                                       this.importTextureWidth,
+                                                       this.importTextureHeight));
                 // based on drawTexturedModelRect
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buf = tessellator.getBuffer();

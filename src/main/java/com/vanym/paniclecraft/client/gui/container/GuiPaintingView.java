@@ -12,6 +12,7 @@ import java.util.Date;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
@@ -126,7 +127,8 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                 if (picture == null) {
                     continue;
                 }
-                TextureAtlasSprite icon = TileEntityPaintingRenderer.bindTexture(picture);
+                TextureAtlasSprite icon =
+                        IconUtils.shrink(TileEntityPaintingRenderer.bindTexture(picture));
                 blit(this.viewX + x * this.viewStep,
                      this.viewY + y * this.viewStep,
                      this.blitOffset,

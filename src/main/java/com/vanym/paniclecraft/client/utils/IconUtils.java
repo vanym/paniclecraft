@@ -20,4 +20,8 @@ public class IconUtils {
     public static TextureAtlasSprite full(int width, int height) {
         return sub(0, 0, width, height, width, height);
     }
+    
+    public static TextureAtlasSprite shrink(TextureAtlasSprite icon) {
+        return icon instanceof IconShrinked ? icon : new IconShrinked(icon);
+    }
 }
