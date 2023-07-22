@@ -93,7 +93,9 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                                                        this.getBlockZ(), i)) {
                 continue;
             }
-            this.clearPicture(i);
+            if (this.clearPicture(i)) {
+                this.picturesWatcher.setPictureWatched(i);
+            }
         }
     }
     

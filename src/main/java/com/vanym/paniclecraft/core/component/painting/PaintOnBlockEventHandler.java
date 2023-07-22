@@ -47,6 +47,9 @@ public class PaintOnBlockEventHandler {
         
         @Override
         public void markBlockForUpdate(int x, int y, int z) {
+            if (this.world.isRemote) {
+                return;
+            }
             EntityPaintOnBlock entityPOB = EntityPaintOnBlock.getEntity(this.world, x, y, z);
             if (entityPOB != null) {
                 entityPOB.checkValidness();
