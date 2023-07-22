@@ -1,12 +1,12 @@
 package com.vanym.paniclecraft.item;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
@@ -28,35 +28,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class ItemPaintingFrame extends ItemBlockMod3 {
     
     protected static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
-    
-    public static final ForgeDirection FRONT;
-    public static final ForgeDirection LEFT;
-    public static final ForgeDirection BACK;
-    public static final ForgeDirection RIGHT;
-    public static final ForgeDirection BOTTOM;
-    public static final ForgeDirection TOP;
-    
-    static {
-        FRONT = ForgeDirection.NORTH;
-        LEFT = FRONT.getRotation(ForgeDirection.UP);
-        BACK = LEFT.getRotation(ForgeDirection.UP);
-        RIGHT = BACK.getRotation(ForgeDirection.UP);
-        BOTTOM = ForgeDirection.DOWN;
-        TOP = ForgeDirection.UP;
-        
-        TreeMap<ForgeDirection, String> letters = new TreeMap<>();
-        letters.put(FRONT, "F");
-        letters.put(LEFT, "L");
-        letters.put(BACK, "K");
-        letters.put(RIGHT, "R");
-        letters.put(BOTTOM, "B");
-        letters.put(TOP, "T");
-        SIDE_LETTERS = Collections.unmodifiableMap(letters);
-    }
-    
-    public static final List<ForgeDirection> SIDE_ORDER =
-            Arrays.asList(FRONT, RIGHT, TOP, LEFT, BACK, BOTTOM);
-    protected static final Map<ForgeDirection, String> SIDE_LETTERS;
     
     public ItemPaintingFrame(Block block) {
         super(block);
@@ -87,19 +58,20 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SideOnly(Side.CLIENT)
     public void addInformation(
-            ItemStack itemStack,
-            EntityPlayer entityPlayer,
+            ItemStack stack,
+            EntityPlayer player,
             List list,
             boolean advancedItemTooltips) {
-        if (itemStack.hasTagCompound()) {
+        if (stack.hasTagCompound()) {
             Map<String, String> mapLetters = new TreeMap<>();
             Map<String, Integer> mapCount = new TreeMap<>();
-            for (ForgeDirection side : SIDE_ORDER) {
+            for (SideName name : SideName.values()) {
                 Optional<String> info =
-                        getPictureTag(itemStack, side).map(ItemPainting::pictureSizeInformation);
+                        ItemPaintingFrame.getPictureTag(stack, name.getSide())
+                                         .map(ItemPainting::pictureSizeInformation);
                 info.ifPresent(i-> {
                     mapCount.put(i, mapCount.getOrDefault(i, 0) + 1);
-                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + SIDE_LETTERS.get(side));
+                    mapLetters.put(i, mapLetters.getOrDefault(i, "") + name.getLetter());
                 });
             }
             Map mapInfo;
@@ -205,5 +177,45 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
         String name = pictureTag.getString(Picture.TAG_NAME);
         pictureTag.removeTag(Picture.TAG_NAME);
         return Optional.of(name);
+    }
+    
+    public static enum SideName {
+        FRONT(ForgeDirection.NORTH, "F"),
+        RIGHT(ForgeDirection.WEST, "R"),
+        TOP(ForgeDirection.UP, "T"),
+        LEFT(ForgeDirection.EAST, "L"),
+        BACK(ForgeDirection.SOUTH, "K"),
+        BOTTOM(ForgeDirection.DOWN, "B");
+        
+        protected final ForgeDirection side;
+        protected final String letter;
+        
+        SideName(ForgeDirection side, String letter) {
+            this.side = side;
+            this.letter = letter;
+        }
+        
+        public ForgeDirection getSide() {
+            return this.side;
+        }
+        
+        public String getLetter() {
+            return this.letter;
+        }
+        
+        public static Stream<SideName> stream() {
+            return Arrays.stream(values());
+        }
+        
+        public static SideName bySide(ForgeDirection side) {
+            return stream().filter(n->n.side == side).findAny().orElse(null);
+        }
+        
+        public static SideName byName(String name) {
+            return stream().filter(n->Stream.of(n.name(), n.side.name(), n.letter)
+                                            .anyMatch(name::equalsIgnoreCase))
+                           .findAny()
+                           .orElse(null);
+        }
     }
 }

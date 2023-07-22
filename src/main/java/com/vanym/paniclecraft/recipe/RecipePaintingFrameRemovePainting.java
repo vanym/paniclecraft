@@ -22,7 +22,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
     
     public RecipePaintingFrameRemovePainting() {
         super(Core.instance.painting.itemPainting,
-              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.FRONT));
+              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
     }
     
     @Override
@@ -44,12 +44,13 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
             return painting;
         }
         NBTTagCompound pictureTag =
-                ItemPaintingFrame.SIDE_ORDER.stream()
-                                            .map(side->ItemPaintingFrame.getPictureTag(frame, side))
-                                            .filter(Optional::isPresent)
-                                            .map(Optional::get)
-                                            .findFirst()
-                                            .orElse(null);
+                ItemPaintingFrame.SideName.stream()
+                                          .map(ItemPaintingFrame.SideName::getSide)
+                                          .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                                          .filter(Optional::isPresent)
+                                          .map(Optional::get)
+                                          .findFirst()
+                                          .orElse(null);
         if (pictureTag == null || pictureTag.hasNoTags()) {
             return painting;
         }
@@ -72,11 +73,12 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
             return;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        ItemPaintingFrame.SIDE_ORDER.stream()
-                                    .filter(side->ItemPaintingFrame.getPictureTag(frame, side)
-                                                                   .isPresent())
-                                    .findFirst()
-                                    .ifPresent(pside->removePainting(event.player, frame, pside));
+        ItemPaintingFrame.SideName.stream()
+                                  .map(ItemPaintingFrame.SideName::getSide)
+                                  .filter(side->ItemPaintingFrame.getPictureTag(frame, side)
+                                                                 .isPresent())
+                                  .findFirst()
+                                  .ifPresent(pside->removePainting(event.player, frame, pside));
     }
     
     protected static void removePainting(

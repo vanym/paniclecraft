@@ -79,11 +79,17 @@ public class RecipePaintingFrameAddPainting extends ShapedOreRecipe {
     }
     
     public static List<IRecipe> createAllVariants() {
-        return Arrays.asList(new RecipePaintingFrameAddPainting(ItemPaintingFrame.FRONT, -1, +1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.BACK, +1, -1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.LEFT, -1, -1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.RIGHT, +1, +1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.BOTTOM, +0, +1),
-                             new RecipePaintingFrameAddPainting(ItemPaintingFrame.TOP, +0, -1));
+        ForgeDirection FRONT = ItemPaintingFrame.SideName.FRONT.getSide();
+        ForgeDirection BACK = ItemPaintingFrame.SideName.BACK.getSide();
+        ForgeDirection LEFT = ItemPaintingFrame.SideName.LEFT.getSide();
+        ForgeDirection RIGHT = ItemPaintingFrame.SideName.RIGHT.getSide();
+        ForgeDirection BOTTOM = ItemPaintingFrame.SideName.BOTTOM.getSide();
+        ForgeDirection TOP = ItemPaintingFrame.SideName.TOP.getSide();
+        return Arrays.asList(new RecipePaintingFrameAddPainting(FRONT, -1, +1),
+                             new RecipePaintingFrameAddPainting(BACK, +1, -1),
+                             new RecipePaintingFrameAddPainting(LEFT, -1, -1),
+                             new RecipePaintingFrameAddPainting(RIGHT, +1, +1),
+                             new RecipePaintingFrameAddPainting(BOTTOM, +0, +1),
+                             new RecipePaintingFrameAddPainting(TOP, +0, -1));
     }
 }
