@@ -1,6 +1,6 @@
 {
   "type": "paniclecraft:paintingframe_add_painting",
-  "side": 1,
+  "side": "top",
   "offsetX": 0,
   "offsetY": -1
 }

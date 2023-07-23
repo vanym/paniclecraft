@@ -1,12 +1,15 @@
 package com.vanym.paniclecraft.recipe;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.MatrixUtils;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
+import com.vanym.paniclecraft.item.ItemPaintingFrame.SideName;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
@@ -115,7 +118,14 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
         
         @Override
         public RecipePaintingFrameAddPainting read(ResourceLocation recipeId, JsonObject json) {
-            Direction side = Direction.byIndex(JSONUtils.getInt(json, "side"));
+            Direction side;
+            try {
+                side = Direction.byIndex(JSONUtils.getInt(json, "side"));
+            } catch (JsonSyntaxException e) {
+                side = Optional.ofNullable(SideName.byName(JSONUtils.getString(json, "side")))
+                               .orElseThrow(IllegalArgumentException::new)
+                               .getSide();
+            }
             int offsetX = JSONUtils.getInt(json, "offsetX");
             int offsetY = JSONUtils.getInt(json, "offsetY");
             return new RecipePaintingFrameAddPainting(recipeId, side, offsetX, offsetY);
