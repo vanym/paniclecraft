@@ -42,9 +42,10 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     @SideOnly(Side.CLIENT)
     protected Set<MessagePaintingToolUse> brushUseMessages;
     
-    @SideOnly(Side.CLIENT)
-    public void initClient() {
-        this.brushUseMessages = new HashSet<>();
+    protected ItemPaintingTool() {
+        if (FMLCommonHandler.instance().getSide().isClient()) {
+            this.brushUseMessages = new HashSet<>();
+        }
     }
     
     @Override

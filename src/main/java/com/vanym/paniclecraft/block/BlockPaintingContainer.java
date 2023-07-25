@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.block;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
@@ -37,15 +38,13 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     public BlockPaintingContainer(Material material) {
         super(material);
         this.paintingOutlineSize = (1.0D / 16D);
+        if (FMLCommonHandler.instance().getSide().isClient()) {
+            this.setRendererPhase(SpecialRendererPhase.NONE);
+        }
     }
     
     public double getPaintingOutlineSize() {
         return this.paintingOutlineSize;
-    }
-    
-    @SideOnly(Side.CLIENT)
-    public void initClient() {
-        this.setRendererPhase(SpecialRendererPhase.NONE);
     }
     
     @SideOnly(Side.CLIENT)

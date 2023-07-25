@@ -393,10 +393,6 @@ public class ModComponentPainting extends ModComponent {
         }
         this.paintingSpecialSelectionBox = null;
         this.clientConfig = new ChangeableClientConfig();
-        this.blockPainting.initClient();
-        this.blockPaintingFrame.initClient();
-        this.itemPaintBrush.initClient();
-        this.itemPaintRemover.initClient();
     }
     
     @Override
