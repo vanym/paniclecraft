@@ -3,7 +3,11 @@ package com.vanym.paniclecraft.plugins.computercraft;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.IModComponent;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
@@ -12,8 +16,12 @@ import com.vanym.paniclecraft.utils.WorldUtils;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
+import dan200.computercraft.shared.TurtleUpgrades;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -43,6 +51,7 @@ public class ComputerCraftPlugin implements IModComponent {
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
         
         ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
         serverBuilder.push(this.getName());
@@ -66,20 +75,32 @@ public class ComputerCraftPlugin implements IModComponent {
     
     @SubscribeEvent
     protected void setup(FMLCommonSetupEvent event) {
-        if (this.peripheralCannon.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.cannonPeripheralProvider);
+        Stream.of(Pair.of(this.peripheralCannon, this.cannonPeripheralProvider),
+                  Pair.of(this.peripheralChessDesk, this.chessDeskPeripheralProvider),
+                  Pair.of(this.peripheralPainting, this.paintingPeripheralProvider),
+                  Pair.of(this.peripheralPaintingFrame, this.paintingFramePeripheralProvider))
+              .map(pair->makeConditionalProvider(pair.getLeft(), pair.getRight()))
+              .forEach(ComputerCraftAPI::registerPeripheralProvider);
+        ComputerCraftAPI.registerTurtleUpgrade(this.turtlePaintBrush);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(EventPriority.NORMAL, this::configChanged);
+        this.applyConfig();
+    }
+    
+    // Subscribes in setup
+    protected void configChanged(ModConfig.ConfigReloading event) {
+        if (event.getConfig().getType() != ModConfig.Type.SERVER
+            || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
+            return;
         }
-        if (this.peripheralChessDesk.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.chessDeskPeripheralProvider);
-        }
-        if (this.peripheralPainting.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.paintingPeripheralProvider);
-        }
-        if (this.peripheralPaintingFrame.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.paintingFramePeripheralProvider);
-        }
+        this.applyConfig();
+    }
+    
+    protected void applyConfig() {
         if (this.turtleUpgradePaintBrush.get()) {
-            ComputerCraftAPI.registerTurtleUpgrade(this.turtlePaintBrush);
+            TurtleUpgrades.enable(this.turtlePaintBrush);
+        } else {
+            TurtleUpgrades.disable(this.turtlePaintBrush);
         }
     }
     
@@ -101,5 +122,11 @@ public class ComputerCraftPlugin implements IModComponent {
         return (world, pos, side)->WorldUtils.getTileEntity(world, pos, tile)
                                              .map(creator)
                                              .orElse(null);
+    }
+    
+    protected static IPeripheralProvider makeConditionalProvider(
+            Supplier<Boolean> condition,
+            IPeripheralProvider provider) {
+        return (wrld, pos, side)->!condition.get() ? null : provider.getPeripheral(wrld, pos, side);
     }
 }
