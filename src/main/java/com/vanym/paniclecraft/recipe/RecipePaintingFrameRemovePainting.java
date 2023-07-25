@@ -20,9 +20,18 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
     
+    protected final ForgeDirection[] removeOrder;
+    
     public RecipePaintingFrameRemovePainting() {
+        this(ItemPaintingFrame.SideName.stream()
+                                       .map(ItemPaintingFrame.SideName::getSide)
+                                       .toArray(ForgeDirection[]::new));
+    }
+    
+    protected RecipePaintingFrameRemovePainting(ForgeDirection[] removeOrder) {
         super(Core.instance.painting.itemPainting,
               ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
+        this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);
     }
     
     @Override
@@ -31,7 +40,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
             return false;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        return Arrays.stream(ForgeDirection.VALID_DIRECTIONS)
+        return Arrays.stream(this.removeOrder)
                      .map(side->ItemPaintingFrame.getPictureTag(frame, side))
                      .anyMatch(Optional::isPresent);
     }
@@ -43,9 +52,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
         if (frame == null || !frame.hasTagCompound()) {
             return painting;
         }
-        NBTTagCompound pictureTag =
-                ItemPaintingFrame.SideName.stream()
-                                          .map(ItemPaintingFrame.SideName::getSide)
+        NBTTagCompound pictureTag = Arrays.stream(this.removeOrder)
                                           .map(side->ItemPaintingFrame.getPictureTag(frame, side))
                                           .filter(Optional::isPresent)
                                           .map(Optional::get)
@@ -73,12 +80,10 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
             return;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        ItemPaintingFrame.SideName.stream()
-                                  .map(ItemPaintingFrame.SideName::getSide)
-                                  .filter(side->ItemPaintingFrame.getPictureTag(frame, side)
-                                                                 .isPresent())
-                                  .findFirst()
-                                  .ifPresent(pside->removePainting(event.player, frame, pside));
+        Arrays.stream(this.removeOrder)
+              .filter(side->ItemPaintingFrame.getPictureTag(frame, side).isPresent())
+              .findFirst()
+              .ifPresent(pside->removePainting(event.player, frame, pside));
     }
     
     protected static void removePainting(
