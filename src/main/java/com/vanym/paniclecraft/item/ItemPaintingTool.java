@@ -72,19 +72,6 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
         }
     }
     
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    public void renderWorldLast(RenderWorldLastEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        ItemStack itemStack = mc.thePlayer.getItemInUse();
-        if (itemStack != null && itemStack.getItem() == this) {
-            MessagePaintingToolUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
-            if (mes != null) {
-                this.brushUseMessages.add(mes);
-            }
-        }
-    }
-    
     @SideOnly(Side.CLIENT)
     public void flashBrushUseMessages() {
         for (MessagePaintingToolUse mes : this.brushUseMessages) {
@@ -216,6 +203,23 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             return radiuses.get(key);
         } catch (NoSuchElementException e) {
             return 0.0D;
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public static class PerFrameEventHandler {
+        
+        @SubscribeEvent
+        public void renderWorldLast(RenderWorldLastEvent event) {
+            Minecraft mc = Minecraft.getMinecraft();
+            ItemStack stack = mc.thePlayer.getItemInUse();
+            if (stack != null && stack.getItem() instanceof ItemPaintingTool) {
+                ItemPaintingTool item = (ItemPaintingTool)stack.getItem();
+                MessagePaintingToolUse mes = makeBrushUseMessage(mc.theWorld, mc.objectMouseOver);
+                if (mes != null) {
+                    item.brushUseMessages.add(mes);
+                }
+            }
         }
     }
 }
