@@ -37,6 +37,7 @@ import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPaintRemover;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
+import com.vanym.paniclecraft.item.ItemPaintingTool;
 import com.vanym.paniclecraft.item.ItemPalette;
 import com.vanym.paniclecraft.network.message.MessageOpenPaintingView;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
@@ -101,6 +102,8 @@ public class ModComponentPainting extends ModComponent {
     
     public ChangeableServerConfig server = new ChangeableServerConfig();
     
+    @SideOnly(Side.CLIENT)
+    protected ItemPaintingTool.PerFrameEventHandler perFrameUse;
     @SideOnly(Side.CLIENT)
     protected TileEntityPaintingRenderer paintingTileRenderer;
     @SideOnly(Side.CLIENT)
@@ -387,8 +390,6 @@ public class ModComponentPainting extends ModComponent {
         }
         this.paintingSpecialSelectionBox = null;
         this.clientConfig = new ChangeableClientConfig();
-        this.itemPaintBrush.initClient();
-        this.itemPaintRemover.initClient();
     }
     
     @Override
@@ -398,6 +399,7 @@ public class ModComponentPainting extends ModComponent {
         if (!this.isEnabled()) {
             return;
         }
+        this.perFrameUse = new ItemPaintingTool.PerFrameEventHandler();
         this.textureCache = new PictureTextureCache();
         this.paintingTileRenderer = new TileEntityPaintingRenderer();
         this.paintingItemRenderer = new ItemRendererPainting(this.textureCache);
@@ -428,11 +430,9 @@ public class ModComponentPainting extends ModComponent {
     @SideOnly(Side.CLIENT)
     protected void applyConfigClient() {
         if (this.clientConfig.perFrameBrushUse) {
-            MinecraftForge.EVENT_BUS.register(this.itemPaintBrush);
-            MinecraftForge.EVENT_BUS.register(this.itemPaintRemover);
+            MinecraftForge.EVENT_BUS.register(this.perFrameUse);
         } else {
-            MinecraftForge.EVENT_BUS.unregister(this.itemPaintBrush);
-            MinecraftForge.EVENT_BUS.unregister(this.itemPaintRemover);
+            MinecraftForge.EVENT_BUS.unregister(this.perFrameUse);
         }
         
         this.paintingTileRenderer.renderFrameType =

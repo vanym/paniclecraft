@@ -50,9 +50,10 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     @SideOnly(Side.CLIENT)
     protected Set<MessagePaintingToolUse> brushUseMessages;
     
-    @SideOnly(Side.CLIENT)
-    public void initClient() {
-        this.brushUseMessages = new HashSet<>();
+    protected ItemPaintingTool() {
+        if (FMLCommonHandler.instance().getSide().isClient()) {
+            this.brushUseMessages = new HashSet<>();
+        }
     }
     
     @Override
@@ -80,19 +81,6 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             int count) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             this.flashBrushUseMessages();
-        }
-    }
-    
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    public void renderWorldLast(RenderWorldLastEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        ItemStack itemStack = mc.player.getActiveItemStack();
-        if (itemStack != null && itemStack.getItem() == this) {
-            MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
-            if (mes != null) {
-                this.brushUseMessages.add(mes);
-            }
         }
     }
     
@@ -234,6 +222,23 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             return radiuses.get(key);
         } catch (NoSuchElementException e) {
             return 0.0D;
+        }
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public static class PerFrameEventHandler {
+        
+        @SubscribeEvent
+        public void renderWorldLast(RenderWorldLastEvent event) {
+            Minecraft mc = Minecraft.getMinecraft();
+            ItemStack stack = mc.player.getActiveItemStack();
+            if (stack.getItem() instanceof ItemPaintingTool) {
+                ItemPaintingTool item = (ItemPaintingTool)stack.getItem();
+                MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
+                if (mes != null) {
+                    item.brushUseMessages.add(mes);
+                }
+            }
         }
     }
 }
