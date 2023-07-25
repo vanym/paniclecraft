@@ -19,9 +19,18 @@ import net.minecraftforge.common.ForgeHooks;
 
 public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessOreRecipe {
     
+    protected final EnumFacing[] removeOrder;
+    
     public RecipePaintingFrameRemovePainting() {
+        this(ItemPaintingFrame.SideName.stream()
+                                       .map(ItemPaintingFrame.SideName::getSide)
+                                       .toArray(EnumFacing[]::new));
+    }
+    
+    protected RecipePaintingFrameRemovePainting(EnumFacing[] removeOrder) {
         super(Core.instance.painting.itemPainting,
               ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
+        this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);
     }
     
     @Override
@@ -30,7 +39,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
             return false;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        return Arrays.stream(EnumFacing.VALUES)
+        return Arrays.stream(this.removeOrder)
                      .map(side->ItemPaintingFrame.getPictureTag(frame, side))
                      .anyMatch(Optional::isPresent);
     }
@@ -42,9 +51,7 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
         if (!frame.hasTagCompound()) {
             return painting;
         }
-        NBTTagCompound pictureTag =
-                ItemPaintingFrame.SideName.stream()
-                                          .map(ItemPaintingFrame.SideName::getSide)
+        NBTTagCompound pictureTag = Arrays.stream(this.removeOrder)
                                           .map(side->ItemPaintingFrame.getPictureTag(frame, side))
                                           .filter(Optional::isPresent)
                                           .map(Optional::get)
@@ -77,8 +84,8 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
         if (!frame.hasTagCompound()) {
             return super.getRemainingItems(inv);
         }
-        for (ItemPaintingFrame.SideName name : ItemPaintingFrame.SideName.values()) {
-            if (ItemPaintingFrame.removePictureTag(frame, name.getSide()).isPresent()) {
+        for (EnumFacing side : this.removeOrder) {
+            if (ItemPaintingFrame.removePictureTag(frame, side).isPresent()) {
                 break;
             }
         }

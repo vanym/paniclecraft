@@ -179,6 +179,7 @@ public class GuiChess extends GuiScreen {
             if (i % 2 == 0) {
                 int line = i / 2;
                 if (line != 0) {
+                    sb.append(' ');
                     sb.append(System.lineSeparator());
                 }
                 sb.append(line + 1);
