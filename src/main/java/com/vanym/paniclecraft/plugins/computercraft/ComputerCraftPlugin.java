@@ -1,11 +1,18 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.vanym.paniclecraft.core.component.IModComponent;
+import com.vanym.paniclecraft.tileentity.TileEntityCannon;
+import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.WorldUtils;
 
 import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.peripheral.IPeripheralProvider;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;
@@ -16,17 +23,21 @@ public class ComputerCraftPlugin implements IModComponent {
     
     protected static ComputerCraftPlugin instance;
     
-    public CannonPeripheralProvider tileEntityCannonPeripheralProvider;
+    protected final IPeripheralProvider cannonPeripheralProvider =
+            makeProvider(TileEntityCannon.class, CannonPeripheral::new);
     protected Supplier<Boolean> peripheralCannon;
     
-    public ChessDeskPeripheralProvider tileEntityChessDeskPeripheralProvider;
+    protected final IPeripheralProvider chessDeskPeripheralProvider =
+            makeProvider(TileEntityChessDesk.class, ChessDeskPeripheral::new);
     protected Supplier<Boolean> peripheralChessDesk;
     
-    public PaintingPeripheralProvider tileEntityPaintingPeripheralProvider;
+    protected final IPeripheralProvider paintingPeripheralProvider =
+            PaintingPeripheral::getPeripheral;
     protected Supplier<Boolean> peripheralPainting;
-    public PaintingFramePeripheralProvider tileEntityPaintingFramePeripheralProvider;
+    protected final IPeripheralProvider paintingFramePeripheralProvider =
+            PaintingFramePeripheral::getPeripheral;
     protected Supplier<Boolean> peripheralPaintingFrame;
-    public TurtlePaintBrush turtlePaintBrush;
+    protected final TurtlePaintBrush turtlePaintBrush = new TurtlePaintBrush();
     protected Supplier<Boolean> turtleUpgradePaintBrush;
     
     @Override
@@ -56,23 +67,18 @@ public class ComputerCraftPlugin implements IModComponent {
     @SubscribeEvent
     protected void setup(FMLCommonSetupEvent event) {
         if (this.peripheralCannon.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityCannonPeripheralProvider =
-                    new CannonPeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.cannonPeripheralProvider);
         }
         if (this.peripheralChessDesk.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityChessDeskPeripheralProvider =
-                    new ChessDeskPeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.chessDeskPeripheralProvider);
         }
         if (this.peripheralPainting.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingPeripheralProvider =
-                    new PaintingPeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.paintingPeripheralProvider);
         }
         if (this.peripheralPaintingFrame.get()) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingFramePeripheralProvider =
-                    new PaintingFramePeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.paintingFramePeripheralProvider);
         }
         if (this.turtleUpgradePaintBrush.get()) {
-            this.turtlePaintBrush = new TurtlePaintBrush();
             ComputerCraftAPI.registerTurtleUpgrade(this.turtlePaintBrush);
         }
     }
@@ -87,5 +93,13 @@ public class ComputerCraftPlugin implements IModComponent {
             instance = new ComputerCraftPlugin();
         }
         return instance;
+    }
+    
+    protected static <T extends TileEntity> IPeripheralProvider makeProvider(
+            Class<T> tile,
+            Function<T, IPeripheral> creator) {
+        return (world, pos, side)->WorldUtils.getTileEntity(world, pos, tile)
+                                             .map(creator)
+                                             .orElse(null);
     }
 }

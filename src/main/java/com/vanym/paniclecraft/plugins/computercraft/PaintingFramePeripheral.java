@@ -6,10 +6,14 @@ import java.util.stream.Collectors;
 
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.WorldUtils;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class PaintingFramePeripheral extends PicturePeripheral {
     
@@ -53,7 +57,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
         }
     }
     
-    @PeripheralMethod(14)
+    @PeripheralMethod(value = 14, mainThread = true)
     protected boolean hasPicture() {
         return this.getPicture() != null;
     }
@@ -75,4 +79,10 @@ public class PaintingFramePeripheral extends PicturePeripheral {
         return this.sideProvider.getPicture(this.pside.getIndex());
     }
     
+    public static IPeripheral getPeripheral(World world, BlockPos pos, Direction side) {
+        Direction pside = side.getOpposite();
+        return WorldUtils.getTileEntity(world, pos, TileEntityPaintingFrame.class)
+                         .map(tile->new PaintingFramePeripheral(tile, pside))
+                         .orElse(null);
+    }
 }
