@@ -59,7 +59,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
         }
     }
     
-    @PeripheralMethod(14)
+    @PeripheralMethod(value = 14, mainThread = true)
     protected boolean hasPicture() {
         return this.getPicture() != null;
     }
