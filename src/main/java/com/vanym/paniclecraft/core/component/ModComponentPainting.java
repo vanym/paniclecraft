@@ -139,6 +139,8 @@ public class ModComponentPainting extends ModComponent {
     public PictureTextureCache textureCache;
     
     @OnlyIn(Dist.CLIENT)
+    protected ItemPaintingTool.PerFrameEventHandler perFrameUse;
+    @OnlyIn(Dist.CLIENT)
     protected TileEntityPaintingRenderer paintingTileRenderer;
     @OnlyIn(Dist.CLIENT)
     protected TileEntityPaintingFrameRenderer paintingFrameTileRenderer;
@@ -158,6 +160,7 @@ public class ModComponentPainting extends ModComponent {
         this.server = new ServerConfig(serverBuilder);
         
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
+            this.perFrameUse = new ItemPaintingTool.PerFrameEventHandler();
             this.textureCache = new PictureTextureCache();
             this.paintingSpecialSelectionBox = null;
             ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
@@ -292,15 +295,9 @@ public class ModComponentPainting extends ModComponent {
     @OnlyIn(Dist.CLIENT)
     protected void applyConfigClient() {
         if (this.clientConfig.perFrameBrushUse) {
-            this.getItems()
-                .stream()
-                .filter(ItemPaintingTool.class::isInstance)
-                .forEach(MinecraftForge.EVENT_BUS::register);
+            MinecraftForge.EVENT_BUS.register(this.perFrameUse);
         } else {
-            this.getItems()
-                .stream()
-                .filter(ItemPaintingTool.class::isInstance)
-                .forEach(MinecraftForge.EVENT_BUS::unregister);
+            MinecraftForge.EVENT_BUS.unregister(this.perFrameUse);
         }
         
         this.paintingTileRenderer.renderFrameType =
