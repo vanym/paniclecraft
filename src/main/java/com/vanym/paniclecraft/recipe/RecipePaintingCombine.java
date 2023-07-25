@@ -101,7 +101,7 @@ public class RecipePaintingCombine extends RecipeRegister.ShapedOreRecipe {
     
     @Override
     public boolean isDynamic() {
-        return true;
+        return false; // we want to show this recipe
     }
     
     protected static Picture[][] getAsPictures(ItemStack[][] stacks) {

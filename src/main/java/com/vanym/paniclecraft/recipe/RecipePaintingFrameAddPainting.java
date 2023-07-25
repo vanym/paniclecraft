@@ -51,7 +51,7 @@ public class RecipePaintingFrameAddPainting extends RecipeRegister.ShapedOreReci
     
     @Override
     public boolean isDynamic() {
-        return true;
+        return false; // we want to show this recipe
     }
     
     protected static Object[] getRecipe(int offsetX, int offsetY) {

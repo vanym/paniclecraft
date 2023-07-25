@@ -24,6 +24,6 @@ public class RecipePaintingFrame extends RecipeRegister.ShapedOreRecipe {
     
     @Override
     public boolean isDynamic() {
-        return true;
+        return false; // we want to show this recipe
     }
 }
