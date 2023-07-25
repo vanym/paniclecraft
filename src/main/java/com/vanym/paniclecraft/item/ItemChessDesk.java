@@ -23,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -66,7 +67,7 @@ public class ItemChessDesk extends BlockItem {
             ListNBT movesTag = movesTagOpt.get();
             list.add(new TranslationTextComponent(
                     this.getTranslationKey() + ".moves",
-                    movesTag.size()));
+                    movesTag.size()).applyTextStyle(TextFormatting.GRAY));
             if (Screen.hasShiftDown()) {
                 Map<CompoundNBT, Integer> white = new HashMap<>(), black = new HashMap<>();
                 for (int i = 0; i < movesTag.size(); ++i) {
@@ -95,6 +96,7 @@ public class ItemChessDesk extends BlockItem {
                                    many ? new Object[]{name, e.getValue()}
                                         : new Object[]{name});
                        })
+                       .peek(line->line.applyTextStyle(TextFormatting.GRAY))
                        .forEach(list::add);
                 });
             }

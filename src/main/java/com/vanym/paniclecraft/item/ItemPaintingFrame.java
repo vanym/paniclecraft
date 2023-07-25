@@ -26,6 +26,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -86,7 +87,8 @@ public class ItemPaintingFrame extends BlockItem {
                 sb.append(info);
                 sb.append("×");
                 sb.append(count);
-                list.add(new StringTextComponent(sb.toString()));
+                list.add(new StringTextComponent(
+                        sb.toString()).applyTextStyle(TextFormatting.GRAY));
             });
         }
     }

@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.item;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -32,6 +33,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -143,12 +145,16 @@ public class ItemPainting extends BlockItem {
             List<ITextComponent> list,
             ITooltipFlag flag) {
         getPictureTag(itemStack).ifPresent(pictureTag-> {
+            Stream.Builder<ITextComponent> lines = Stream.builder();
             if (pictureTag.contains(Picture.TAG_EDITABLE) &&
                 !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                list.add(new TranslationTextComponent(
+                lines.add(new TranslationTextComponent(
                         this.getTranslationKey() + ".uneditable"));
             }
-            list.add(new StringTextComponent(pictureSizeInformation(pictureTag)));
+            lines.add(new StringTextComponent(pictureSizeInformation(pictureTag)));
+            lines.build()
+                 .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                 .forEachOrdered(list::add);
         });
     }
     

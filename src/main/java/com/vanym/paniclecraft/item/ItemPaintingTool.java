@@ -35,6 +35,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -197,7 +198,8 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 list.add(new TranslationTextComponent(
                         "item." + DEF.MOD_ID + ".paintingtool.radius").appendText(": ")
-                                                                      .appendText(NUMBER_FORMATTER.format(radius)));
+                                                                      .appendText(NUMBER_FORMATTER.format(radius))
+                                                                      .applyTextStyle(TextFormatting.GRAY));
             }
         }
     }

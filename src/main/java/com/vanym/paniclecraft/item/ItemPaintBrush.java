@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -57,12 +58,16 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
         super.addInformation(itemStack, world, list, flag);
         if (Screen.hasShiftDown()) {
             Color color = new Color(this.getColor(itemStack));
-            list.add(new StringTextComponent("R: ").appendSibling(new StringTextComponent(
+            Stream.Builder<ITextComponent> lines = Stream.builder();
+            lines.add(new StringTextComponent("R: ").appendSibling(new StringTextComponent(
                     Integer.toString(color.getRed())).applyTextStyle(TextFormatting.RED)));
-            list.add(new StringTextComponent("G: ").appendSibling(new StringTextComponent(
+            lines.add(new StringTextComponent("G: ").appendSibling(new StringTextComponent(
                     Integer.toString(color.getGreen())).applyTextStyle(TextFormatting.GREEN)));
-            list.add(new StringTextComponent("B: ").appendSibling(new StringTextComponent(
+            lines.add(new StringTextComponent("B: ").appendSibling(new StringTextComponent(
                     Integer.toString(color.getBlue())).applyTextStyle(TextFormatting.BLUE)));
+            lines.build()
+                 .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                 .forEachOrdered(list::add);
         }
     }
     
