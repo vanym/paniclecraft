@@ -20,17 +20,17 @@ public class CannonPeripheral extends PeripheralBase {
         return "cannon";
     }
     
-    @PeripheralMethod(0)
+    @PeripheralMethod(value = 0, mainThread = true)
     public double getDirection() {
         return this.cannon.getDirection();
     }
     
-    @PeripheralMethod(1)
+    @PeripheralMethod(value = 1, mainThread = true)
     public double getHeight() {
         return this.cannon.getHeight();
     }
     
-    @PeripheralMethod(2)
+    @PeripheralMethod(value = 2, mainThread = true)
     public double getStrength() {
         return this.cannon.getStrength();
     }
@@ -40,13 +40,13 @@ public class CannonPeripheral extends PeripheralBase {
         return Core.instance.cannon.config.maxStrength;
     }
     
-    @PeripheralMethod(10)
+    @PeripheralMethod(value = 10, mainThread = true)
     public void setDirection(double direction) {
         this.cannon.setDirection(direction);
         this.cannon.markForUpdate();
     }
     
-    @PeripheralMethod(11)
+    @PeripheralMethod(value = 11, mainThread = true)
     public void setHeight(double height) throws LuaException {
         if (!this.cannon.setHeight(height)) {
             throw new LuaException(
@@ -57,7 +57,7 @@ public class CannonPeripheral extends PeripheralBase {
         this.cannon.markForUpdate();
     }
     
-    @PeripheralMethod(12)
+    @PeripheralMethod(value = 12, mainThread = true)
     public void setStrength(double strength) throws LuaException {
         if (!this.cannon.setStrength(strength)) {
             throw new LuaException("strength must be from 0 to maxStrength");
@@ -79,5 +79,4 @@ public class CannonPeripheral extends PeripheralBase {
             return false;
         }
     }
-    
 }

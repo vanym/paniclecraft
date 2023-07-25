@@ -55,12 +55,12 @@ public abstract class PeripheralBase implements IPeripheral {
         try {
             Method method = this.methods[methodIndex];
             PeripheralMethod annotation = method.getAnnotation(PeripheralMethod.class);
-            Object ret;
+            List<Object> methodArgs = new ArrayList<>();
             if (annotation.rawArgs()) {
-                ret = method.invoke(this, computer, context, arguments);
+                Stream.of(computer, context, arguments)
+                      .forEachOrdered(methodArgs::add);
             } else {
                 Parameter[] params = method.getParameters();
-                List<Object> methodArgs = new ArrayList<>();
                 int paramIndex = 0;
                 if (params.length > paramIndex
                     && params[paramIndex].getType().isAssignableFrom(IComputerAccess.class)) {
@@ -121,8 +121,41 @@ public abstract class PeripheralBase implements IPeripheral {
                         methodArgs.add(arg);
                     }
                 }
-                ret = method.invoke(this, methodArgs.toArray());
             }
+            if (annotation.mainThread()) {
+                Object[] rets = context.executeMainThreadTask(()-> {
+                    try {
+                        return this.execute(method, methodArgs.toArray());
+                    } catch (InterruptedException e) {
+                        return new Object[]{e};
+                    }
+                });
+                if (rets != null && rets.length == 1 && rets[0] instanceof InterruptedException) {
+                    throw (InterruptedException)rets[0];
+                }
+                return rets;
+            } else {
+                return this.execute(method, methodArgs.toArray());
+            }
+        } catch (IllegalArgumentException | ClassCastException e) {
+            throw new LuaException(e.getMessage());
+        }
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    protected @interface PeripheralMethod {
+        int value();
+        
+        boolean rawArgs() default false;
+        
+        boolean mainThread() default false;
+    }
+    
+    private Object[] execute(Method method, Object[] args)
+            throws LuaException, InterruptedException {
+        try {
+            Object ret = method.invoke(this, args);
             if (method.getReturnType() == Void.TYPE) {
                 return null;
             }
@@ -145,14 +178,6 @@ public abstract class PeripheralBase implements IPeripheral {
                 throw new LuaException(e.getMessage());
             }
         }
-    }
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    protected @interface PeripheralMethod {
-        int value();
-        
-        boolean rawArgs() default false;
     }
     
     public static <V> Map<Integer, V> toLuaArray(Iterable<V> iterable) {

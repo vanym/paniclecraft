@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixed
+ - Thread safeness of peripherals
+
 ## 2.12.0.0 - 2023-06-05
 ### Added
  - Allow to wear painting as mask

@@ -1,42 +1,49 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
+import java.util.function.Function;
+
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.IModComponent;
+import com.vanym.paniclecraft.tileentity.TileEntityCannon;
+import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.WorldUtils;
 
 import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.peripheral.IPeripheralProvider;
+import net.minecraft.tileentity.TileEntity;
 
 public class ComputerCraftPlugin implements IModComponent {
     
     protected static ComputerCraftPlugin instance;
     
-    public CannonPeripheralProvider tileEntityCannonPeripheralProvider;
+    protected final IPeripheralProvider cannonPeripheralProvider =
+            makeProvider(TileEntityCannon.class, CannonPeripheral::new);
     
-    public ChessDeskPeripheralProvider tileEntityChessDeskPeripheralProvider;
+    protected final IPeripheralProvider chessDeskPeripheralProvider =
+            makeProvider(TileEntityChessDesk.class, ChessDeskPeripheral::new);
     
-    public PaintingPeripheralProvider tileEntityPaintingPeripheralProvider;
-    public PaintingFramePeripheralProvider tileEntityPaintingFramePeripheralProvider;
-    public TurtlePaintBrush turtlePaintBrush;
+    protected final IPeripheralProvider paintingPeripheralProvider =
+            PaintingPeripheral::getPeripheral;
+    protected final IPeripheralProvider paintingFramePeripheralProvider =
+            PaintingFramePeripheral::getPeripheral;
+    protected final TurtlePaintBrush turtlePaintBrush = new TurtlePaintBrush();
     
     @Override
     public void preInit(ModConfig config) {
         if (config.getBoolean("peripheralCannon", this.getName(), true, "")) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityCannonPeripheralProvider =
-                    new CannonPeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.cannonPeripheralProvider);
         }
         if (config.getBoolean("peripheralChessDesk", this.getName(), true, "")) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityChessDeskPeripheralProvider =
-                    new ChessDeskPeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.chessDeskPeripheralProvider);
         }
         if (config.getBoolean("peripheralPainting", this.getName(), false, "")) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingPeripheralProvider =
-                    new PaintingPeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.paintingPeripheralProvider);
         }
         if (config.getBoolean("peripheralPaintingFrame", this.getName(), false, "")) {
-            ComputerCraftAPI.registerPeripheralProvider(this.tileEntityPaintingFramePeripheralProvider =
-                    new PaintingFramePeripheralProvider());
+            ComputerCraftAPI.registerPeripheralProvider(this.paintingFramePeripheralProvider);
         }
         if (config.getBoolean("turtleUpgradePaintBrush", this.getName(), true, "")) {
-            this.turtlePaintBrush = new TurtlePaintBrush();
             ComputerCraftAPI.registerTurtleUpgrade(this.turtlePaintBrush);
         }
     }
@@ -56,5 +63,13 @@ public class ComputerCraftPlugin implements IModComponent {
             instance = new ComputerCraftPlugin();
         }
         return instance;
+    }
+    
+    protected static <T extends TileEntity> IPeripheralProvider makeProvider(
+            Class<T> tile,
+            Function<T, IPeripheral> creator) {
+        return (world, pos, side)->WorldUtils.getTileEntity(world, pos, tile)
+                                             .map(creator)
+                                             .orElse(null);
     }
 }

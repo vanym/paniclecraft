@@ -38,17 +38,17 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return this.searchPicture(dir) != null;
     }
     
-    @PeripheralMethod(0)
+    @PeripheralMethod(value = 0, mainThread = true)
     protected boolean detectPicture() throws LuaException, InterruptedException {
         return this.detectPicture(null);
     }
     
-    @PeripheralMethod(1)
+    @PeripheralMethod(value = 1, mainThread = true)
     protected boolean detectPictureUp() throws LuaException, InterruptedException {
         return this.detectPicture(EnumFacing.UP);
     }
     
-    @PeripheralMethod(2)
+    @PeripheralMethod(value = 2, mainThread = true)
     protected boolean detectPictureDown() throws LuaException, InterruptedException {
         return this.detectPicture(EnumFacing.DOWN);
     }
@@ -57,17 +57,17 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return this.findPicture(dir).getWidth();
     }
     
-    @PeripheralMethod(3)
+    @PeripheralMethod(value = 3, mainThread = true)
     protected int getWidth() throws LuaException, InterruptedException {
         return this.getWidth(null);
     }
     
-    @PeripheralMethod(4)
+    @PeripheralMethod(value = 4, mainThread = true)
     protected int getWidthUp() throws LuaException, InterruptedException {
         return this.getWidth(EnumFacing.UP);
     }
     
-    @PeripheralMethod(5)
+    @PeripheralMethod(value = 5, mainThread = true)
     protected int getWidthDown() throws LuaException, InterruptedException {
         return this.getWidth(EnumFacing.DOWN);
     }
@@ -76,17 +76,17 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return this.findPicture(dir).getHeight();
     }
     
-    @PeripheralMethod(6)
+    @PeripheralMethod(value = 6, mainThread = true)
     protected int getHeight() throws LuaException, InterruptedException {
         return this.getHeight(null);
     }
     
-    @PeripheralMethod(7)
+    @PeripheralMethod(value = 7, mainThread = true)
     protected int getHeightUp() throws LuaException, InterruptedException {
         return this.getHeight(EnumFacing.UP);
     }
     
-    @PeripheralMethod(8)
+    @PeripheralMethod(value = 8, mainThread = true)
     protected int getHeightDown() throws LuaException, InterruptedException {
         return this.getHeight(EnumFacing.DOWN);
     }
@@ -95,17 +95,17 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return this.findPicture(dir).isEditable();
     }
     
-    @PeripheralMethod(9)
+    @PeripheralMethod(value = 9, mainThread = true)
     protected boolean isEditable() throws LuaException, InterruptedException {
         return this.isEditable(null);
     }
     
-    @PeripheralMethod(10)
+    @PeripheralMethod(value = 10, mainThread = true)
     protected boolean isEditableUp() throws LuaException, InterruptedException {
         return this.isEditable(EnumFacing.UP);
     }
     
-    @PeripheralMethod(11)
+    @PeripheralMethod(value = 11, mainThread = true)
     protected boolean isEditableDown() throws LuaException, InterruptedException {
         return this.isEditable(EnumFacing.DOWN);
     }
@@ -121,22 +121,22 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return picture.usePaintingTool(stack, px, py);
     }
     
-    @PeripheralMethod(20)
+    @PeripheralMethod(value = 20, mainThread = true)
     protected boolean useBrush(int px, int py) throws LuaException, InterruptedException {
         return this.useBrush(null, px, py);
     }
     
-    @PeripheralMethod(21)
+    @PeripheralMethod(value = 21, mainThread = true)
     protected boolean useBrushUp(int px, int py) throws LuaException, InterruptedException {
         return this.useBrush(EnumFacing.UP, px, py);
     }
     
-    @PeripheralMethod(22)
+    @PeripheralMethod(value = 22, mainThread = true)
     protected boolean useBrushDown(int px, int py) throws LuaException, InterruptedException {
         return this.useBrush(EnumFacing.DOWN, px, py);
     }
     
-    @PeripheralMethod(31)
+    @PeripheralMethod(value = 31, mainThread = true)
     protected Object[] getBrushColor() throws LuaException, InterruptedException {
         ItemStack stack = this.getSelectedStack();
         IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
@@ -147,7 +147,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
     }
     
-    @PeripheralMethod(32)
+    @PeripheralMethod(value = 32, mainThread = true)
     protected boolean setBrushColor(int red, int green, int blue)
             throws LuaException, InterruptedException {
         if (!InventoryUtils.stream(this.turtle.getInventory())

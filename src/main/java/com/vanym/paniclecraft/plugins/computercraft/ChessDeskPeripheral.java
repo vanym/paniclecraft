@@ -21,12 +21,12 @@ public class ChessDeskPeripheral extends PeripheralBase {
         return "chess";
     }
     
-    @PeripheralMethod(1)
+    @PeripheralMethod(value = 1, mainThread = true)
     protected Map<Integer, String> getMoves() {
         return toLuaArray(this.desk.moves.stream().map(m->m.move.toString())::iterator);
     }
     
-    @PeripheralMethod(11)
+    @PeripheralMethod(value = 11, mainThread = true)
     protected boolean move(String move) {
         try {
             ChessGame.Move gameMove = new ChessGame.Move(move, this.desk.getGame().isWhiteTurn());

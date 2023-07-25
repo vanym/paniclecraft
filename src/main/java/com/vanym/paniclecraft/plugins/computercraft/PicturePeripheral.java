@@ -11,27 +11,27 @@ public abstract class PicturePeripheral extends PeripheralBase {
     
     public PicturePeripheral() {}
     
-    @PeripheralMethod(0)
+    @PeripheralMethod(value = 0, mainThread = true)
     protected String getName() throws LuaException, InterruptedException {
         return this.findPicture().getName();
     }
     
-    @PeripheralMethod(1)
+    @PeripheralMethod(value = 1, mainThread = true)
     protected boolean isEditable() throws LuaException, InterruptedException {
         return this.findPicture().isEditable();
     }
     
-    @PeripheralMethod(2)
+    @PeripheralMethod(value = 2, mainThread = true)
     protected int getWidth() throws LuaException, InterruptedException {
         return this.findPicture().getWidth();
     }
     
-    @PeripheralMethod(3)
+    @PeripheralMethod(value = 3, mainThread = true)
     protected int getHeight() throws LuaException, InterruptedException {
         return this.findPicture().getHeight();
     }
     
-    @PeripheralMethod(11)
+    @PeripheralMethod(value = 11, mainThread = true)
     protected Object[] getPixelColor(int px, int py) throws LuaException, InterruptedException {
         Picture picture = this.findPicture();
         checkPicturePixelCoords(picture, px, py);
@@ -39,7 +39,7 @@ public abstract class PicturePeripheral extends PeripheralBase {
         return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
     }
     
-    @PeripheralMethod(12)
+    @PeripheralMethod(value = 12, mainThread = true)
     protected boolean setPixelColor(int px, int py, int red, int green, int blue)
             throws LuaException, InterruptedException {
         Picture picture = this.findPicture();
@@ -50,7 +50,7 @@ public abstract class PicturePeripheral extends PeripheralBase {
         return true;
     }
     
-    @PeripheralMethod(13)
+    @PeripheralMethod(value = 13, mainThread = true)
     protected boolean fill(int red, int green, int blue) throws LuaException, InterruptedException {
         Picture picture = this.findPicture();
         checkPictureEditable(picture);
