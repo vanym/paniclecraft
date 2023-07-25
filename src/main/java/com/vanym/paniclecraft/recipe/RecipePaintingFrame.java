@@ -41,7 +41,7 @@ public class RecipePaintingFrame extends ShapedRecipe {
     
     @Override
     public boolean isDynamic() {
-        return true;
+        return false; // we want to show this recipe
     }
     
     @Override

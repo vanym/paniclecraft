@@ -23,7 +23,15 @@ import net.minecraftforge.common.ForgeHooks;
 
 public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     
+    protected final Direction[] removeOrder;
+    
     public RecipePaintingFrameRemovePainting(ResourceLocation id) {
+        this(id, ItemPaintingFrame.SideName.stream()
+                                           .map(ItemPaintingFrame.SideName::getSide)
+                                           .toArray(Direction[]::new));
+    }
+    
+    protected RecipePaintingFrameRemovePainting(ResourceLocation id, Direction[] removeOrder) {
         super(id, "", new ItemStack(Core.instance.painting.itemPainting),
               NonNullList.from(Ingredient.EMPTY,
                                Optional.of(ItemPaintingFrame.SideName.FRONT)
@@ -31,6 +39,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
                                        .map(ItemPaintingFrame::getItemWithEmptyPictures)
                                        .map(Ingredient::fromStacks)
                                        .get()));
+        this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);
     }
     
     @Override
@@ -39,7 +48,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
             return false;
         }
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
-        return Arrays.stream(Direction.values())
+        return Arrays.stream(this.removeOrder)
                      .map(side->ItemPaintingFrame.getPictureTag(frame, side))
                      .anyMatch(Optional::isPresent);
     }
@@ -51,14 +60,12 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
         if (!frame.hasTag()) {
             return painting;
         }
-        CompoundNBT pictureTag =
-                ItemPaintingFrame.SideName.stream()
-                                          .map(ItemPaintingFrame.SideName::getSide)
-                                          .map(side->ItemPaintingFrame.getPictureTag(frame, side))
-                                          .filter(Optional::isPresent)
-                                          .map(Optional::get)
-                                          .findFirst()
-                                          .orElse(null);
+        CompoundNBT pictureTag = Arrays.stream(this.removeOrder)
+                                       .map(side->ItemPaintingFrame.getPictureTag(frame, side))
+                                       .filter(Optional::isPresent)
+                                       .map(Optional::get)
+                                       .findFirst()
+                                       .orElse(null);
         if (pictureTag == null || pictureTag.isEmpty()) {
             return painting;
         }
@@ -86,8 +93,8 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
         if (!frame.hasTag()) {
             return super.getRemainingItems(inv);
         }
-        for (ItemPaintingFrame.SideName name : ItemPaintingFrame.SideName.values()) {
-            if (ItemPaintingFrame.removePictureTag(frame, name.getSide()).isPresent()) {
+        for (Direction side : this.removeOrder) {
+            if (ItemPaintingFrame.removePictureTag(frame, side).isPresent()) {
                 break;
             }
         }
@@ -96,7 +103,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     
     @Override
     public boolean isDynamic() {
-        return true;
+        return false; // we want to show this recipe
     }
     
     @Override
