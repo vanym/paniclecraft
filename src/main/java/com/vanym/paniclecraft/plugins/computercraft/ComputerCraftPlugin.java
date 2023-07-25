@@ -55,21 +55,11 @@ public class ComputerCraftPlugin implements IModComponent {
         
         ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
         serverBuilder.push(this.getName());
-        ForgeConfigSpec.BooleanValue peripheralCannon =
-                serverBuilder.define("peripheralCannon", true);
-        this.peripheralCannon = ()->peripheralCannon.get();
-        ForgeConfigSpec.BooleanValue peripheralChessDesk =
-                serverBuilder.define("peripheralChessDesk", true);
-        this.peripheralChessDesk = ()->peripheralChessDesk.get();
-        ForgeConfigSpec.BooleanValue peripheralPainting =
-                serverBuilder.define("peripheralPainting", false);
-        this.peripheralPainting = ()->peripheralPainting.get();
-        ForgeConfigSpec.BooleanValue peripheralPaintingFrame =
-                serverBuilder.define("peripheralPaintingFrame", false);
-        this.peripheralPaintingFrame = ()->peripheralPaintingFrame.get();
-        ForgeConfigSpec.BooleanValue turtleUpgradePaintBrush =
-                serverBuilder.define("turtleUpgradePaintBrush", true);
-        this.turtleUpgradePaintBrush = ()->turtleUpgradePaintBrush.get();
+        this.peripheralCannon = serverBuilder.define("peripheralCannon", true)::get;
+        this.peripheralChessDesk = serverBuilder.define("peripheralChessDesk", true)::get;
+        this.peripheralPainting = serverBuilder.define("peripheralPainting", false)::get;
+        this.peripheralPaintingFrame = serverBuilder.define("peripheralPaintingFrame", false)::get;
+        this.turtleUpgradePaintBrush = serverBuilder.define("turtleUpgradePaintBrush", true)::get;
         serverBuilder.pop();
     }
     

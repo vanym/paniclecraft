@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.core.component;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockChessDesk;
@@ -38,7 +39,7 @@ public class ModComponentDeskGame extends ModComponent {
     public TileEntityChessDeskRenderer tileChessDeskRenderer;
     
     @OnlyIn(Dist.CLIENT)
-    protected ForgeConfigSpec.BooleanValue renderTileChessDesk;
+    protected Supplier<Boolean> renderTileChessDesk;
     
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
@@ -55,8 +56,7 @@ public class ModComponentDeskGame extends ModComponent {
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
             ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
             clientBuilder.push(CLIENT_RENDER);
-            this.renderTileChessDesk =
-                    clientBuilder.define("chessDeskTile", true);
+            this.renderTileChessDesk = clientBuilder.define("chessDeskTile", true)::get;
             clientBuilder.pop();
         });
     }

@@ -24,7 +24,7 @@ public class ModComponentBroom extends ModComponent {
                              .defineInRange("durability", 3072, 0, Short.MAX_VALUE);
         ForgeConfigSpec.DoubleValue radius =
                 serverBuilder.defineInRange("radius", 6.0D, 1.0D, 64.0D);
-        this.itemBroom = new ItemBroom(()->durability.get(), ()->radius.get());
+        this.itemBroom = new ItemBroom(durability::get, radius::get);
         serverBuilder.pop();
     }
     

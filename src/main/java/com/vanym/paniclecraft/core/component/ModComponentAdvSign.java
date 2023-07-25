@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.core.component;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockAdvSign;
@@ -40,7 +41,7 @@ public class ModComponentAdvSign extends ModComponent {
     public TileEntityAdvSignRenderer tileAdvSignRenderer;
     
     @OnlyIn(Dist.CLIENT)
-    protected ForgeConfigSpec.BooleanValue renderTileAdvSign;
+    protected Supplier<Boolean> renderTileAdvSign;
     
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
@@ -60,7 +61,7 @@ public class ModComponentAdvSign extends ModComponent {
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
             ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
             clientBuilder.push(CLIENT_RENDER);
-            this.renderTileAdvSign = clientBuilder.define("advSignTile", true);
+            this.renderTileAdvSign = clientBuilder.define("advSignTile", true)::get;
             clientBuilder.pop();
         });
     }

@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.vanym.paniclecraft.client.ClientProxy;
@@ -70,7 +71,7 @@ public class Core {
                           this.deskgame, this.cannon,
                           this.portableworkbench));
     
-    protected final ForgeConfigSpec.BooleanValue versionCheck;
+    protected final Supplier<Boolean> versionCheck;
     
     public Core() {
         instance = this;
@@ -90,7 +91,7 @@ public class Core {
                                     .collect(Collectors.toMap(Function.identity(),
                                                               e->new ForgeConfigSpec.Builder())));
         ForgeConfigSpec.Builder commonBuilder = configBuilders.get(ModConfig.Type.COMMON);
-        this.versionCheck = commonBuilder.define("versionCheck", true);
+        this.versionCheck = commonBuilder.define("versionCheck", true)::get;
         Map<ModConfig.Type, ForgeConfigSpec.Builder> initConfigBuilders =
                 Collections.unmodifiableMap(configBuilders);
         Core.instance.getComponents().forEach(comp->comp.init(initConfigBuilders));

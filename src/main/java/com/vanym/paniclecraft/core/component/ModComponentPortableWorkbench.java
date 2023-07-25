@@ -33,9 +33,8 @@ public class ModComponentPortableWorkbench extends ModComponent {
         ForgeConfigSpec.IntValue durability =
                 serverBuilder.comment("\'0\' is infinite")
                              .defineInRange("durability", 3072, 0, Short.MAX_VALUE);
-        this.itemWorkbench = new ItemWorkbench(()->durability.get());
-        this.containerPortableWorkbench =
-                new ContainerType<>(ContainerPortableWorkbench::new);
+        this.itemWorkbench = new ItemWorkbench(durability::get);
+        this.containerPortableWorkbench = new ContainerType<>(ContainerPortableWorkbench::new);
         this.containerPortableWorkbench.setRegistryName(this.itemWorkbench.getRegistryName());
         serverBuilder.pop();
     }

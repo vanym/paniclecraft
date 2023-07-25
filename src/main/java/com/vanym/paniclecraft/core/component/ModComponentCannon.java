@@ -53,7 +53,7 @@ public class ModComponentCannon extends ModComponent {
     public TileEntityCannonRenderer tileCannonRenderer;
     
     @OnlyIn(Dist.CLIENT)
-    protected ForgeConfigSpec.BooleanValue renderTileCannon;
+    protected Supplier<Boolean> renderTileCannon;
     
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
@@ -75,23 +75,17 @@ public class ModComponentCannon extends ModComponent {
         
         ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
         serverBuilder.push(this.getName());
-        ForgeConfigSpec.DoubleValue maxStrength =
-                serverBuilder.defineInRange("maxStrength", 5.0D, 0.0D, 16.0D);
-        this.maxStrength = ()->maxStrength.get();
-        ForgeConfigSpec.IntValue pickupDelay =
-                serverBuilder.comment("shooted items pickup delay in game ticks")
-                             .defineInRange("pickupDelay", 25, 0, Short.MAX_VALUE);
-        this.pickupDelay = ()->pickupDelay.get();
-        ForgeConfigSpec.IntValue shootTimeout =
-                serverBuilder.comment("shoot timeout in game ticks")
-                             .defineInRange("shootTimeout", 2, 0, Short.MAX_VALUE);
-        this.shootTimeout = ()->shootTimeout.get();
+        this.maxStrength = serverBuilder.defineInRange("maxStrength", 5.0D, 0.0D, 16.0D)::get;
+        this.pickupDelay = serverBuilder.comment("shooted items pickup delay in game ticks")
+                                        .defineInRange("pickupDelay", 25, 0, Short.MAX_VALUE)::get;
+        this.shootTimeout = serverBuilder.comment("shoot timeout in game ticks")
+                                         .defineInRange("shootTimeout", 2, 0, Short.MAX_VALUE)::get;
         serverBuilder.pop();
         
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
             ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
             clientBuilder.push(CLIENT_RENDER);
-            this.renderTileCannon = clientBuilder.define("cannonTile", true);
+            this.renderTileCannon = clientBuilder.define("cannonTile", true)::get;
             clientBuilder.pop();
         });
     }
