@@ -6,9 +6,12 @@ import java.util.stream.Collectors;
 
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.WorldUtils;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class PaintingFramePeripheral extends PicturePeripheral {
@@ -78,4 +81,10 @@ public class PaintingFramePeripheral extends PicturePeripheral {
         return this.sideProvider.getPicture(this.pside.ordinal());
     }
     
+    public static IPeripheral getPeripheral(World world, int x, int y, int z, int side) {
+        ForgeDirection pside = ForgeDirection.getOrientation(side).getOpposite();
+        return WorldUtils.getTileEntity(world, x, y, z, TileEntityPaintingFrame.class)
+                         .map(tile->new PaintingFramePeripheral(tile, pside))
+                         .orElse(null);
+    }
 }

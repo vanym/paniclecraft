@@ -79,5 +79,4 @@ public class CannonPeripheral extends PeripheralBase {
             return false;
         }
     }
-    
 }

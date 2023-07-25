@@ -1,8 +1,13 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
+import java.util.Optional;
+
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 
 import dan200.computercraft.api.peripheral.IPeripheral;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class PaintingPeripheral extends PicturePeripheral {
     
@@ -31,4 +36,10 @@ public class PaintingPeripheral extends PicturePeripheral {
         return this.picture;
     }
     
+    public static IPeripheral getPeripheral(World world, int x, int y, int z, int side) {
+        int pside = ForgeDirection.OPPOSITES[side];
+        return Optional.ofNullable(WorldPictureProvider.PAINTING.getPicture(world, x, y, z, pside))
+                       .map(PaintingPeripheral::new)
+                       .orElse(null);
+    }
 }
