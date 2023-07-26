@@ -37,7 +37,10 @@ public class MessageChessMove {
         if (message.move != null && tile instanceof TileEntityChessDesk
             && player.getDistanceSq(new Vec3d(tile.getPos()).add(0.5D, 0.5D, 0.5D)) <= 64.0D) {
             TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
-            tileCD.move(message.move, player);
+            synchronized (tileCD) {
+                tileCD.move(message.move, player);
+            }
+            tileCD.markForUpdate();
         }
     }
 }

@@ -8,18 +8,13 @@ import com.vanym.paniclecraft.tileentity.TileEntityBase;
 
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
 public class SyncTileEntityUpdater {
     
     protected Set<TileEntityBase> tiles = ConcurrentHashMap.newKeySet(1);
-    
-    @SubscribeEvent
-    protected void serverStarted(FMLServerStartedEvent event) {
-        this.tiles.clear();
-    }
     
     @SubscribeEvent
     protected void tick(TickEvent.WorldTickEvent event) {
@@ -29,7 +24,22 @@ public class SyncTileEntityUpdater {
         for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
             TileEntityBase tile = it.next();
             if (event.world == tile.getWorld()) {
-                tile.markForUpdate();
+                if (!tile.isRemoved()) {
+                    tile.markForUpdate();
+                }
+                it.remove();
+            }
+        }
+    }
+    
+    @SubscribeEvent
+    public void worldUnload(WorldEvent.Unload event) {
+        if (event.getWorld().isRemote()) {
+            return;
+        }
+        for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
+            TileEntityBase tile = it.next();
+            if (event.getWorld() == tile.getWorld()) {
                 it.remove();
             }
         }

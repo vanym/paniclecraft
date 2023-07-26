@@ -105,12 +105,15 @@ public class ItemChessDesk extends BlockItem {
     
     public static ItemStack getSavedDesk(TileEntityChessDesk tileCD) {
         ItemStack stack = new ItemStack(Core.instance.deskgame.itemChessDesk);
-        if (tileCD == null || tileCD.moves.isEmpty()) {
+        if (tileCD == null) {
+            return stack;
+        }
+        ListNBT list = new ListNBT();
+        tileCD.writeMoves(list);
+        if (list.isEmpty()) {
             return stack;
         }
         CompoundNBT tag = ItemUtils.getOrCreateBlockEntityTag(stack);
-        ListNBT list = new ListNBT();
-        tileCD.writeMoves(list);
         tag.put(TAG_MOVES, list);
         return stack;
     }
