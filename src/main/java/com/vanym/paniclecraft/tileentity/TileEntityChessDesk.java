@@ -12,6 +12,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiChess;
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.utils.INBTSerializable;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -61,12 +62,22 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     public void writeMoves(NBTTagList listTag) {
+        SideUtils.runSync(this.worldObj != null && !this.worldObj.isRemote,
+                          this, ()->this.writeMovesAsync(listTag));
+    }
+    
+    protected void writeMovesAsync(NBTTagList listTag) {
         this.imoves.stream()
                    .map(Move::serializeNBT)
                    .forEachOrdered(listTag::appendTag);
     }
     
     public void readMoves(NBTTagList listTag) {
+        SideUtils.runSync(this.worldObj != null && !this.worldObj.isRemote,
+                          this, ()->this.readMovesAsync(listTag));
+    }
+    
+    protected void readMovesAsync(NBTTagList listTag) {
         this.game = new ChessGame();
         this.imoves.clear();
         for (int i = 0; i < listTag.tagCount(); i++) {
@@ -101,7 +112,6 @@ public class TileEntityChessDesk extends TileEntityBase {
     public void resetGame() {
         this.game = new ChessGame();
         this.imoves.clear();
-        this.markForUpdate();
         this.sendEvent("chess_reset");
     }
     
@@ -118,7 +128,6 @@ public class TileEntityChessDesk extends TileEntityBase {
             return false;
         }
         this.imoves.add(new Move(move, playerUUID, playerName));
-        this.markForUpdate();
         this.sendEvent("chess_move", move.toString(), this.imoves.size());
         return true;
     }
