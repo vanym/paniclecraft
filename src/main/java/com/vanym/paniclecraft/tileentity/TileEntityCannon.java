@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -51,11 +52,16 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
-        return this.writeToNBT(nbtTag, false);
+        return this.write(nbtTag, false);
     }
     
-    protected NBTTagCompound writeToNBT(NBTTagCompound nbtTag, boolean forClient) {
-        nbtTag = super.writeToNBT(nbtTag);
+    protected NBTTagCompound write(NBTTagCompound nbtTag, boolean forClient) {
+        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+                                  this, ()->this.writeAsync(nbtTag, forClient));
+    }
+    
+    protected NBTTagCompound writeAsync(NBTTagCompound nbtTag, boolean forClient) {
+        super.writeToNBT(nbtTag);
         nbtTag.setDouble(TAG_DIRECTION, this.direction);
         nbtTag.setDouble(TAG_HEIGHT, this.height);
         nbtTag.setDouble(TAG_STRENGTH, this.strength);
@@ -75,6 +81,11 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     
     @Override
     public void readFromNBT(NBTTagCompound nbtTag) {
+        SideUtils.runSync(this.world != null && !this.world.isRemote,
+                          this, ()->this.readAsync(nbtTag));
+    }
+    
+    protected void readAsync(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.height = nbtTag.getDouble(TAG_HEIGHT);
@@ -106,7 +117,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound(), true);
+        return this.write(new NBTTagCompound(), true);
     }
     
     public void setDirection(double direction) {
@@ -151,7 +162,9 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
         return this.strength;
     }
     
-    protected Vec3d getVector() {
+    protected synchronized Vec3d getVector() {
+        // expected to be called only on server side,
+        // so do synchronized unconditionally
         if (this.vector == null) {
             double heightRadians = Math.toRadians(this.height);
             double hSin = Math.sin(heightRadians);

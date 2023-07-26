@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
+import com.vanym.paniclecraft.Core;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -20,6 +22,10 @@ public abstract class TileEntityBase extends TileEntity {
             IBlockState state = this.world.getBlockState(this.pos);
             this.world.notifyBlockUpdate(this.pos, state, state, 3);
         }
+    }
+    
+    public void safeMarkForUpdate() {
+        Core.instance.syncTileEntityUpdater.safeMarkForUpdate(this);
     }
     
     @Override
@@ -44,7 +50,7 @@ public abstract class TileEntityBase extends TileEntity {
     @Override
     public void onDataPacket(NetworkManager manager, SPacketUpdateTileEntity packet) {
         NBTTagCompound nbt = packet.getNbtCompound();
-        this.readFromNBT(nbt);
+        this.handleUpdateTag(nbt);
     }
     
     @Override

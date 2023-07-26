@@ -11,6 +11,7 @@ import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.core.SyncTileEntityUpdater;
 import com.vanym.paniclecraft.core.Version;
 import com.vanym.paniclecraft.core.component.IModComponent;
 import com.vanym.paniclecraft.core.component.IModComponent.IServerSideConfig;
@@ -40,6 +41,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
@@ -82,6 +84,8 @@ public class Core implements IGuiHandler {
     
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
+    
+    public final SyncTileEntityUpdater syncTileEntityUpdater = new SyncTileEntityUpdater();
     
     protected final List<IModComponent> components = new ArrayList<>(
             Arrays.asList(this.broom, this.advSign, this.painting,
@@ -133,6 +137,7 @@ public class Core implements IGuiHandler {
     protected void preInitCommon() {
         Core.instance.network.registerMessage(MessageComponentConfig.Handler.class,
                                               MessageComponentConfig.class, 5, Side.CLIENT);
+        MinecraftForge.EVENT_BUS.register(this.syncTileEntityUpdater);
     }
     
     @EventHandler
@@ -155,6 +160,11 @@ public class Core implements IGuiHandler {
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(this.command);
+    }
+    
+    @EventHandler
+    public void serverStarted(FMLServerStartedEvent event) {
+        this.syncTileEntityUpdater.serverStarted(event);
     }
     
     @SubscribeEvent
