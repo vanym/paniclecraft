@@ -13,6 +13,7 @@ import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -75,19 +76,20 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             int x,
             int y,
             int z,
-            EntityPlayer entityPlayer,
+            EntityPlayer player,
             int side,
             float hitX,
             float hitY,
             float hitZ) {
-        if (!entityPlayer.isSneaking()) {
+        if (!player.isSneaking()) {
             return false;
         }
-        TileEntityPaintingFrame tileP = (TileEntityPaintingFrame)world.getTileEntity(x, y, z);
-        if (tileP == null) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (!TileEntityPaintingFrame.class.isInstance(tile)) {
             return false;
         }
-        Picture picture = tileP.getPicture(side);
+        TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
+        Picture picture = tilePF.getPicture(side);
         if (picture == null) {
             return false;
         }
@@ -95,18 +97,20 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             return true;
         }
         ForgeDirection dir = ForgeDirection.getOrientation(side);
-        if (entityPlayer != null) {
-            rotatePicture(entityPlayer, picture, dir, false);
-        }
+        ItemStack stack = SideUtils.callSync(!world.isRemote, tilePF, ()-> {
+            if (player != null) {
+                rotatePicture(player, picture, dir, false);
+            }
+            tilePF.clearPicture(side);
+            return ItemPainting.getPictureAsItem(picture);
+        });
         double ex = x + 0.5D + (dir.offsetX * 0.6);
         double ey = y + 0.5D + (dir.offsetY * 0.6);
         double ez = z + 0.5D + (dir.offsetZ * 0.6);
-        ItemStack itemStack = ItemPainting.getPictureAsItem(picture);
-        EntityItem entityItem = new EntityItem(world, ex, ey, ez, itemStack);
+        EntityItem entityItem = new EntityItem(world, ex, ey, ez, stack);
         entityItem.delayBeforeCanPickup = 3;
         world.spawnEntityInWorld(entityItem);
-        tileP.clearPicture(side);
-        tileP.markForUpdate();
+        tilePF.markForUpdate();
         world.notifyBlockChange(x, y, z, this);
         return true;
     }
@@ -126,10 +130,10 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             boolean willHarvest) {
         if (player != null) {
             TileEntity tile = world.getTileEntity(x, y, z);
-            if (tile != null && tile instanceof TileEntityPaintingFrame) {
+            if (tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
                 int rot = getRotate(player, ForgeDirection.UP, false);
-                tilePF.rotateY(rot);
+                SideUtils.runSync(!world.isRemote, tilePF, ()->tilePF.rotateY(rot));
             }
         }
         return super.removedByPlayer(world, player, x, y, z, willHarvest);
@@ -138,10 +142,11 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     @Override
     public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
         TileEntity tile = world.getTileEntity(x, y, z);
-        if (tile != null && tile instanceof TileEntityPaintingFrame) {
+        if (tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame timePF = (TileEntityPaintingFrame)tile;
-            ItemStack itemStack = ItemPaintingFrame.getFrameAsItem(timePF);
-            this.dropBlockAsItem(world, x, y, z, itemStack);
+            ItemStack stack = SideUtils.callSync(!world.isRemote, timePF,
+                                                 ()->ItemPaintingFrame.getFrameAsItem(timePF));
+            this.dropBlockAsItem(world, x, y, z, stack);
         }
         super.breakBlock(world, x, y, z, block, meta);
     }
@@ -161,14 +166,14 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         TileEntity tile = world.getTileEntity(x, y, z);
         if (tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-            for (ForgeDirection pside : ForgeDirection.VALID_DIRECTIONS) {
-                ItemPaintingFrame.getPictureTag(stack, pside).ifPresent(tag-> {
-                    Picture picture = tilePF.createPicture(pside.ordinal());
-                    picture.deserializeNBT(tag);
-                });
-            }
             int rot = getRotate(entity, ForgeDirection.UP, true);
-            tilePF.rotateY(rot);
+            SideUtils.runSync(!world.isRemote, tilePF, ()-> {
+                for (ForgeDirection pside : ForgeDirection.VALID_DIRECTIONS) {
+                    ItemPaintingFrame.getPictureTag(stack, pside)
+                                     .ifPresent(tag->tilePF.createPicture(pside.ordinal(), tag));
+                }
+                tilePF.rotateY(rot);
+            });
         }
     }
     

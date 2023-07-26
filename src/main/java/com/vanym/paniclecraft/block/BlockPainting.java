@@ -7,6 +7,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -138,12 +139,13 @@ public class BlockPainting extends BlockPaintingContainer {
             boolean willHarvest) {
         if (player != null) {
             TileEntity tile = world.getTileEntity(x, y, z);
-            if (tile != null && tile instanceof TileEntityPainting) {
+            if (tile instanceof TileEntityPainting) {
                 TileEntityPainting tileP = (TileEntityPainting)tile;
                 Picture picture = tileP.getPicture();
                 int meta = tileP.getBlockMetadata();
                 ForgeDirection dir = ForgeDirection.getOrientation(meta);
-                rotatePicture(player, picture, dir, false);
+                SideUtils.runSync(!world.isRemote, tileP,
+                                  ()->rotatePicture(player, picture, dir, false));
             }
         }
         return super.removedByPlayer(world, player, x, y, z, willHarvest);
@@ -152,11 +154,12 @@ public class BlockPainting extends BlockPaintingContainer {
     @Override
     public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
         TileEntity tile = world.getTileEntity(x, y, z);
-        if (tile != null && tile instanceof TileEntityPainting) {
+        if (tile instanceof TileEntityPainting) {
             TileEntityPainting tileP = (TileEntityPainting)tile;
             Picture picture = tileP.getPicture();
-            ItemStack itemStack = ItemPainting.getPictureAsItem(picture);
-            this.dropBlockAsItem(world, x, y, z, itemStack);
+            ItemStack stack = SideUtils.callSync(!world.isRemote, tileP,
+                                                 ()->ItemPainting.getPictureAsItem(picture));
+            this.dropBlockAsItem(world, x, y, z, stack);
         }
         super.breakBlock(world, x, y, z, block, meta);
     }

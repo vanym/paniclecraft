@@ -17,7 +17,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class PaintingFramePeripheral extends PicturePeripheral {
     
     protected final ISidePictureProvider sideProvider;
-    protected ForgeDirection pside;
+    protected final ThreadLocal<ForgeDirection> pside;
     
     public PaintingFramePeripheral(ISidePictureProvider sideProvider) {
         this(sideProvider, null);
@@ -28,7 +28,8 @@ public class PaintingFramePeripheral extends PicturePeripheral {
         if (pside == null) {
             pside = ForgeDirection.UNKNOWN;
         }
-        this.pside = pside;
+        ForgeDirection defpside = pside;
+        this.pside = ThreadLocal.withInitial(()->defpside);
     }
     
     @Override
@@ -44,24 +45,26 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     
     @PeripheralMethod(32)
     protected String getCurrentSide() {
-        return this.pside.toString().toLowerCase();
+        return this.pside.get().toString().toLowerCase();
     }
     
     @PeripheralMethod(33)
     protected void setSide(String name) throws LuaException, InterruptedException {
         try {
-            this.pside = Arrays.stream(ForgeDirection.VALID_DIRECTIONS)
-                               .filter(f->f.toString().equalsIgnoreCase(name))
-                               .findAny()
-                               .get();
+            this.pside.set(Arrays.stream(ForgeDirection.VALID_DIRECTIONS)
+                                 .filter(f->f.toString().equalsIgnoreCase(name))
+                                 .findAny()
+                                 .get());
         } catch (NoSuchElementException e) {
             throw new LuaException("invalid side");
         }
     }
     
-    @PeripheralMethod(value = 14, mainThread = true)
+    @PeripheralMethod(14)
     protected boolean hasPicture() {
-        return this.getPicture() != null;
+        synchronized (this.syncObject()) {
+            return this.getPicture() != null;
+        }
     }
     
     @Override
@@ -75,10 +78,16 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     
     @Override
     protected Picture getPicture() {
-        if (this.pside == ForgeDirection.UNKNOWN) {
+        ForgeDirection pside = this.pside.get();
+        if (pside == ForgeDirection.UNKNOWN) {
             return null;
         }
-        return this.sideProvider.getPicture(this.pside.ordinal());
+        return this.sideProvider.getPicture(pside.ordinal());
+    }
+    
+    @Override
+    protected Object syncObject() {
+        return this.sideProvider;
     }
     
     public static IPeripheral getPeripheral(World world, int x, int y, int z, int side) {

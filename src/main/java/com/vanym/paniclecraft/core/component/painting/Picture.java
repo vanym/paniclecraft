@@ -28,8 +28,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     
-    protected IPictureHolder holder;
-    protected boolean hasAlpha = false;
+    protected final IPictureHolder holder;
+    protected final boolean hasAlpha;
     
     protected boolean editable = true;
     protected String name;
@@ -254,6 +254,10 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
         this.imageChanged();
         this.update();
         return true;
+    }
+    
+    public IPictureHolder getHolder() {
+        return this.holder;
     }
     
     public Picture getNeighborPicture(int offsetX, int offsetY) {

@@ -10,6 +10,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.ItemUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -89,13 +90,15 @@ public class ItemPainting extends ItemMod3 {
                               this.block.stepSound.func_150496_b(),
                               (this.block.stepSound.getVolume() + 1.0F) / 2.0F,
                               this.block.stepSound.getPitch() * 0.8F);
-        --stack.stackSize;
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
-        Picture picture = tileP.getPicture(side);
-        fillPicture(picture, stack);
-        if (player != null) {
-            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
-        }
+        SideUtils.runSync(!world.isRemote, tileP, ()-> {
+            Picture picture = tileP.getPicture();
+            fillPicture(picture, stack);
+            if (player != null) {
+                BlockPaintingContainer.rotatePicture(player, picture, dir, true);
+            }
+        });
+        --stack.stackSize;
         return true;
     }
     
@@ -108,13 +111,14 @@ public class ItemPainting extends ItemMod3 {
         if (tilePF.getPicture(side) != null) {
             return false;
         }
-        Picture picture = tilePF.createPicture(side);
-        fillPicture(picture, stack);
+        SideUtils.runSync(!world.isRemote, tilePF, ()-> {
+            Picture picture = tilePF.createPicture(side, stack);
+            if (player != null) {
+                ForgeDirection dir = ForgeDirection.getOrientation(side);
+                BlockPaintingContainer.rotatePicture(player, picture, dir, true);
+            }
+        });
         --stack.stackSize;
-        if (player != null) {
-            ForgeDirection dir = ForgeDirection.getOrientation(side);
-            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
-        }
         tilePF.markForUpdate();
         world.notifyBlockChange(tilePF.xCoord, tilePF.yCoord, tilePF.zCoord, tilePF.getBlockType());
         return true;

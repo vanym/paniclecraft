@@ -288,6 +288,16 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
         }
         
         @Override
+        public ISidePictureProvider getProvider() {
+            return EntityPaintOnBlock.this;
+        }
+        
+        @Override
+        public boolean isProviderSyncRequired() {
+            return false;
+        }
+        
+        @Override
         public void update() {
             EntityPaintOnBlock.this.picturesWatcher.setPictureWatched(this.side);
             if (this.picture.isEmpty()) {

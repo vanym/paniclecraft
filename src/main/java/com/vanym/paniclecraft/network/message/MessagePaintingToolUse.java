@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.PictureUtils;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
 
@@ -89,7 +90,7 @@ public class MessagePaintingToolUse implements IMessage {
                 return null;
             }
             World world = playerEntity.worldObj;
-            Picture picture = null;
+            Picture picture;
             WorldPictureProvider provider = null;
             if (message.tile) {
                 provider = WorldPictureProvider.ANYTILE;
@@ -99,12 +100,16 @@ public class MessagePaintingToolUse implements IMessage {
             if (provider != null) {
                 picture = provider.getOrCreatePicture(world, message.x, message.y, message.z,
                                                       message.side);
+            } else {
+                picture = null;
             }
             if (picture == null || !playerEntity.canPlayerEdit(message.x, message.y, message.z,
                                                                message.side, heldItem)) {
                 return null;
             }
-            picture.usePaintingTool(heldItem, message.px, message.py);
+            int px = message.px;
+            int py = message.py;
+            PictureUtils.runSync(picture, ()->picture.usePaintingTool(heldItem, px, py));
             return null;
         }
     }
