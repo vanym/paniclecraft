@@ -21,16 +21,25 @@ public class ChessDeskPeripheral extends PeripheralBase {
         return "chess";
     }
     
-    @PeripheralMethod(value = 1, mainThread = true)
+    @PeripheralMethod(1)
     protected Map<Integer, String> getMoves() {
-        return toLuaArray(this.desk.moves.stream().map(m->m.move.toString())::iterator);
+        synchronized (this.desk) {
+            return toLuaArray(this.desk.moves.stream().map(m->m.move.toString())::iterator);
+        }
     }
     
-    @PeripheralMethod(value = 11, mainThread = true)
+    @PeripheralMethod(11)
     protected boolean move(String move) {
         try {
             ChessGame.Move gameMove = new ChessGame.Move(move, this.desk.getGame().isWhiteTurn());
-            return this.desk.move(gameMove, "ComputerCraft", null);
+            boolean moved;
+            synchronized (this.desk) {
+                moved = this.desk.move(gameMove, "ComputerCraft", null);
+            }
+            if (moved) {
+                this.desk.safeMarkForUpdate();
+            }
+            return moved;
         } catch (IllegalArgumentException e) {
             return false;
         }

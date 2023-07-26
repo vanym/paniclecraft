@@ -97,12 +97,15 @@ public class ItemChessDesk extends ItemBlockMod3 {
     
     public static ItemStack getSavedDesk(TileEntityChessDesk tileCD) {
         ItemStack stack = new ItemStack(Core.instance.deskgame.itemChessDesk);
-        if (tileCD == null || tileCD.moves.isEmpty()) {
+        if (tileCD == null) {
+            return stack;
+        }
+        NBTTagList list = new NBTTagList();
+        tileCD.writeMoves(list);
+        if (list.tagCount() == 0) {
             return stack;
         }
         NBTTagCompound tag = ItemUtils.getOrCreateBlockEntityTag(stack);
-        NBTTagList list = new NBTTagList();
-        tileCD.writeMoves(list);
         tag.setTag(TAG_MOVES, list);
         return stack;
     }

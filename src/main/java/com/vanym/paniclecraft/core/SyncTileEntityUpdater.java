@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.vanym.paniclecraft.tileentity.TileEntityBase;
 
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -21,7 +22,6 @@ public class SyncTileEntityUpdater {
     // called from Core
     public void serverStarted(FMLServerStartedEvent event) {
         this.serverThread = Thread.currentThread();
-        this.tiles.clear();
     }
     
     @SubscribeEvent
@@ -32,7 +32,22 @@ public class SyncTileEntityUpdater {
         for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
             TileEntityBase tile = it.next();
             if (event.world == tile.getWorld()) {
-                tile.markForUpdate();
+                if (!tile.isInvalid()) {
+                    tile.markForUpdate();
+                }
+                it.remove();
+            }
+        }
+    }
+    
+    @SubscribeEvent
+    public void worldUnload(WorldEvent.Unload event) {
+        if (this.serverThread != Thread.currentThread()) {
+            return;
+        }
+        for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
+            TileEntityBase tile = it.next();
+            if (event.getWorld() == tile.getWorld()) {
                 it.remove();
             }
         }
