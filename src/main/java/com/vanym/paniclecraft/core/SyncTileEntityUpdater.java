@@ -11,6 +11,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.event.world.WorldEvent;
 
 public class SyncTileEntityUpdater {
     
@@ -21,7 +22,6 @@ public class SyncTileEntityUpdater {
     // called from Core
     public void serverStarted(FMLServerStartedEvent event) {
         this.serverThread = Thread.currentThread();
-        this.tiles.clear();
     }
     
     @SubscribeEvent
@@ -32,7 +32,22 @@ public class SyncTileEntityUpdater {
         for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
             TileEntityBase tile = it.next();
             if (event.world == tile.getWorldObj()) {
-                tile.markForUpdate();
+                if (!tile.isInvalid()) {
+                    tile.markForUpdate();
+                }
+                it.remove();
+            }
+        }
+    }
+    
+    @SubscribeEvent
+    public void worldUnload(WorldEvent.Unload event) {
+        if (this.serverThread != Thread.currentThread()) {
+            return;
+        }
+        for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
+            TileEntityBase tile = it.next();
+            if (event.world == tile.getWorldObj()) {
                 it.remove();
             }
         }
