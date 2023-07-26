@@ -12,6 +12,7 @@ import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.core.SyncTileEntityUpdater;
 import com.vanym.paniclecraft.core.Version;
 import com.vanym.paniclecraft.core.component.IModComponent;
 import com.vanym.paniclecraft.core.component.IModComponent.IServerSideConfig;
@@ -36,6 +37,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLEmbeddedChannel;
@@ -89,6 +91,8 @@ public class Core implements IGuiHandler {
     
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
+    
+    public final SyncTileEntityUpdater syncTileEntityUpdater = new SyncTileEntityUpdater();
     
     protected final List<IModComponent> components = new ArrayList<>(
             Arrays.asList(this.broom, this.advSign, this.painting,
@@ -146,6 +150,7 @@ public class Core implements IGuiHandler {
                               "after:forge:shapedore after:forge:shapelessore");
         Core.instance.network.registerMessage(MessageComponentConfig.Handler.class,
                                               MessageComponentConfig.class, 5, Side.CLIENT);
+        FMLCommonHandler.instance().bus().register(this.syncTileEntityUpdater);
     }
     
     @EventHandler
@@ -168,6 +173,11 @@ public class Core implements IGuiHandler {
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(this.command);
+    }
+    
+    @EventHandler
+    public void serverStarted(FMLServerStartedEvent event) {
+        this.syncTileEntityUpdater.serverStarted(event);
     }
     
     @SubscribeEvent

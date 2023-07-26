@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.tileentity;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -44,10 +45,15 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     
     @Override
     public void writeToNBT(NBTTagCompound nbtTag) {
-        this.writeToNBT(nbtTag, false);
+        this.write(nbtTag, false);
     }
     
-    protected void writeToNBT(NBTTagCompound nbtTag, boolean forClient) {
+    protected void write(NBTTagCompound nbtTag, boolean forClient) {
+        SideUtils.runSync(this.worldObj != null && !this.worldObj.isRemote,
+                          this, ()->this.writeAsync(nbtTag, forClient));
+    }
+    
+    protected void writeAsync(NBTTagCompound nbtTag, boolean forClient) {
         super.writeToNBT(nbtTag);
         nbtTag.setDouble(TAG_DIRECTION, this.direction);
         nbtTag.setDouble(TAG_HEIGHT, this.height);
@@ -69,6 +75,11 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     
     @Override
     public void readFromNBT(NBTTagCompound nbtTag) {
+        SideUtils.runSync(this.worldObj != null && !this.worldObj.isRemote,
+                          this, ()->this.readAsync(nbtTag));
+    }
+    
+    protected void readAsync(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.height = nbtTag.getDouble(TAG_HEIGHT);
@@ -106,7 +117,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
     @Override
     public Packet getDescriptionPacket() {
         NBTTagCompound dataTag = new NBTTagCompound();
-        this.writeToNBT(dataTag, true);
+        this.write(dataTag, true);
         dataTag.removeTag(TAG_STACK);
         return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, dataTag);
     }
@@ -153,7 +164,9 @@ public class TileEntityCannon extends TileEntityBase implements IInventory {
         return this.strength;
     }
     
-    protected Vec3 getVector() {
+    protected synchronized Vec3 getVector() {
+        // expected to be called only on server side,
+        // so do synchronized unconditionally
         if (this.vector == null) {
             double heightRadians = Math.toRadians(this.height);
             double hSin = Math.sin(heightRadians);

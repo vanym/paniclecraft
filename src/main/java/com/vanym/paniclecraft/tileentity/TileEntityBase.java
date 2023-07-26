@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
+import com.vanym.paniclecraft.Core;
+
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -15,6 +17,10 @@ public abstract class TileEntityBase extends TileEntity {
         if (this.worldObj != null) {
             this.worldObj.markBlockForUpdate(this.xCoord, this.yCoord, this.zCoord);
         }
+    }
+    
+    public void safeMarkForUpdate() {
+        Core.instance.syncTileEntityUpdater.safeMarkForUpdate(this);
     }
     
     @Override

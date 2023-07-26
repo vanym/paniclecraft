@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -89,12 +90,14 @@ public class BlockCannon extends BlockContainerMod3 {
             ItemStack stack) {
         super.onBlockPlacedBy(world, x, y, z, entity, stack);
         TileEntity tile = world.getTileEntity(x, y, z);
-        if (tile != null && tile instanceof TileEntityCannon) {
+        if (tile instanceof TileEntityCannon) {
             TileEntityCannon tileCannon = (TileEntityCannon)tile;
             double direction = Math.round(180.0D + entity.rotationYaw);
-            tileCannon.setDirection(direction);
             double height = Math.round(entity.rotationPitch);
-            tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
+            SideUtils.runSync(!world.isRemote, tileCannon, ()-> {
+                tileCannon.setDirection(direction);
+                tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
+            });
         }
     }
     
