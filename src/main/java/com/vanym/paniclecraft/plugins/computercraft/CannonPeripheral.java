@@ -20,19 +20,25 @@ public class CannonPeripheral extends PeripheralBase {
         return "cannon";
     }
     
-    @PeripheralMethod(value = 0, mainThread = true)
+    @PeripheralMethod(0)
     public double getDirection() {
-        return this.cannon.getDirection();
+        synchronized (this.cannon) {
+            return this.cannon.getDirection();
+        }
     }
     
-    @PeripheralMethod(value = 1, mainThread = true)
+    @PeripheralMethod(1)
     public double getHeight() {
-        return this.cannon.getHeight();
+        synchronized (this.cannon) {
+            return this.cannon.getHeight();
+        }
     }
     
-    @PeripheralMethod(value = 2, mainThread = true)
+    @PeripheralMethod(2)
     public double getStrength() {
-        return this.cannon.getStrength();
+        synchronized (this.cannon) {
+            return this.cannon.getStrength();
+        }
     }
     
     @PeripheralMethod(3)
@@ -40,29 +46,35 @@ public class CannonPeripheral extends PeripheralBase {
         return Core.instance.cannon.maxStrength.get();
     }
     
-    @PeripheralMethod(value = 10, mainThread = true)
+    @PeripheralMethod(10)
     public void setDirection(double direction) {
-        this.cannon.setDirection(direction);
-        this.cannon.markForUpdate();
+        synchronized (this.cannon) {
+            this.cannon.setDirection(direction);
+        }
+        this.cannon.safeMarkForUpdate();
     }
     
-    @PeripheralMethod(value = 11, mainThread = true)
+    @PeripheralMethod(11)
     public void setHeight(double height) throws LuaException {
-        if (!this.cannon.setHeight(height)) {
-            throw new LuaException(
-                    String.format("height must be from %s to %s",
-                                  TileEntityCannon.MIN_HEIGHT,
-                                  TileEntityCannon.MAX_HEIGHT));
+        synchronized (this.cannon) {
+            if (!this.cannon.setHeight(height)) {
+                throw new LuaException(
+                        String.format("height must be from %s to %s",
+                                      TileEntityCannon.MIN_HEIGHT,
+                                      TileEntityCannon.MAX_HEIGHT));
+            }
         }
-        this.cannon.markForUpdate();
+        this.cannon.safeMarkForUpdate();
     }
     
-    @PeripheralMethod(value = 12, mainThread = true)
+    @PeripheralMethod(12)
     public void setStrength(double strength) throws LuaException {
-        if (!this.cannon.setStrength(strength)) {
-            throw new LuaException("strength must be from 0 to maxStrength");
+        synchronized (this.cannon) {
+            if (!this.cannon.setStrength(strength)) {
+                throw new LuaException("strength must be from 0 to maxStrength");
+            }
         }
-        this.cannon.markForUpdate();
+        this.cannon.safeMarkForUpdate();
     }
     
     @Override

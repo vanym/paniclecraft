@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.block;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -85,12 +86,14 @@ public class BlockCannon extends ContainerBlock {
             ItemStack stack) {
         super.onBlockPlacedBy(world, pos, state, entity, stack);
         TileEntity tile = world.getTileEntity(pos);
-        if (entity != null && tile != null && tile instanceof TileEntityCannon) {
+        if (entity != null && tile instanceof TileEntityCannon) {
             TileEntityCannon tileCannon = (TileEntityCannon)tile;
             double direction = Math.round(180.0D + entity.rotationYaw);
-            tileCannon.setDirection(direction);
             double height = Math.round(entity.rotationPitch);
-            tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
+            SideUtils.runSync(!world.isRemote, tileCannon, ()-> {
+                tileCannon.setDirection(direction);
+                tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
+            });
         }
     }
     

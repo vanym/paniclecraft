@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.tileentity;
 
+import com.vanym.paniclecraft.Core;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
@@ -21,6 +23,10 @@ public abstract class TileEntityBase extends TileEntity {
         }
     }
     
+    public void safeMarkForUpdate() {
+        Core.instance.syncTileEntityUpdater.safeMarkForUpdate(this);
+    }
+    
     @Override
     public CompoundNBT getUpdateTag() {
         return this.serializeNBT();
@@ -34,6 +40,6 @@ public abstract class TileEntityBase extends TileEntity {
     @Override
     public void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
         CompoundNBT nbt = packet.getNbtCompound();
-        this.read(nbt);
+        this.handleUpdateTag(nbt);
     }
 }

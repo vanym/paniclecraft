@@ -71,7 +71,9 @@ public class MessageCannonSet {
             ContainerCannon containerCannon = (ContainerCannon)playerEntity.openContainer;
             TileEntityCannon tileCannon = containerCannon.cannon;
             if (message.field != null) {
-                message.field.set(tileCannon, message.value);
+                synchronized (tileCannon) {
+                    message.field.set(tileCannon, message.value);
+                }
                 tileCannon.markForUpdate();
             }
         }

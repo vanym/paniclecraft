@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.container.ContainerCannon;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -70,6 +71,11 @@ public class TileEntityCannon extends TileEntityBase
     }
     
     protected CompoundNBT write(CompoundNBT nbtTag, boolean forClient) {
+        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+                                  this, ()->this.writeAsync(nbtTag, forClient));
+    }
+    
+    protected CompoundNBT writeAsync(CompoundNBT nbtTag, boolean forClient) {
         nbtTag = super.write(nbtTag);
         nbtTag.putDouble(TAG_DIRECTION, this.direction);
         nbtTag.putDouble(TAG_HEIGHT, this.height);
@@ -90,6 +96,11 @@ public class TileEntityCannon extends TileEntityBase
     
     @Override
     public void read(CompoundNBT nbtTag) {
+        SideUtils.runSync(this.world != null && !this.world.isRemote,
+                          this, ()->this.readAsync(nbtTag));
+    }
+    
+    public void readAsync(CompoundNBT nbtTag) {
         super.read(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.height = nbtTag.getDouble(TAG_HEIGHT);
@@ -166,7 +177,9 @@ public class TileEntityCannon extends TileEntityBase
         return this.strength;
     }
     
-    protected Vec3d getVector() {
+    protected synchronized Vec3d getVector() {
+        // expected to be called only on server side,
+        // so do synchronized unconditionally
         if (this.vector == null) {
             double heightRadians = Math.toRadians(this.height);
             double hSin = Math.sin(heightRadians);
