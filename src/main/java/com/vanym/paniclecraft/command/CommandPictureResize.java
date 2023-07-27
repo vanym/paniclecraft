@@ -5,8 +5,8 @@ import java.util.Arrays;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.core.component.painting.PictureUtils;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -52,7 +52,7 @@ public class CommandPictureResize extends CommandBase {
                 picture.getHeight(),
                 width,
                 height);
-        if (PictureUtils.callSync(picture, ()->picture.resize(width, height))) {
+        if (SideUtils.callSync(picture.syncObject(), ()->picture.resize(width, height))) {
             sender.addChatMessage(success);
         } else {
             sender.addChatMessage(new ChatComponentTranslation(

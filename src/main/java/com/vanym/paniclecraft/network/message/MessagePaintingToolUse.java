@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.core.component.painting.PictureUtils;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPaintingTool;
 
@@ -107,9 +106,7 @@ public class MessagePaintingToolUse implements IMessage {
                                                                message.side, heldItem)) {
                 return null;
             }
-            int px = message.px;
-            int py = message.py;
-            PictureUtils.runSync(picture, ()->picture.usePaintingTool(heldItem, px, py));
+            picture.usePaintingTool(heldItem, message.px, message.py);
             return null;
         }
     }

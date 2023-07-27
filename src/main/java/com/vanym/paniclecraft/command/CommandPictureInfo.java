@@ -3,8 +3,8 @@ package com.vanym.paniclecraft.command;
 import java.util.Arrays;
 
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.core.component.painting.PictureUtils;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -37,6 +37,6 @@ public class CommandPictureInfo extends CommandBase {
         EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
         sender.addChatMessage(new ChatComponentText(
-                PictureUtils.callSync(picture, picture::toString)));
+                SideUtils.callSync(picture.syncObject(), picture::toString)));
     }
 }

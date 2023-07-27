@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.plugins.computercraft;
 import java.awt.Color;
 
 import com.vanym.paniclecraft.core.component.painting.Picture;
-import com.vanym.paniclecraft.core.component.painting.PictureUtils;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -83,7 +82,7 @@ public abstract class PicturePeripheral extends PeripheralBase {
     protected abstract Picture getPicture();
     
     protected Object syncObject() {
-        return PictureUtils.syncObject(this.getPicture());
+        return this.getPicture().syncObject();
     }
     
     protected Picture findPicture() throws LuaException {
