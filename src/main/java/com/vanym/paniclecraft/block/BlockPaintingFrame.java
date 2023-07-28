@@ -117,7 +117,6 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         EntityItem entityItem = new EntityItem(world, ePos.x, ePos.y, ePos.z, stack);
         entityItem.setPickupDelay(3);
         world.spawnEntity(entityItem);
-        tilePF.clearPicture(side.getIndex());
         tilePF.markForUpdate();
         world.notifyNeighborsOfStateChange(pos, this, true);
         return true;
