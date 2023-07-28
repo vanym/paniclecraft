@@ -224,7 +224,7 @@ public class BlockPainting extends BlockPaintingContainer {
             World world,
             BlockPos pos,
             EntityPlayer player) {
-        TileEntityPainting tile = (TileEntityPainting)world.getTileEntity(pos);
-        return ItemPainting.getPictureAsItem(tile.getPicture(tile.getBlockMetadata()));
+        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
+        return ItemPainting.getPictureAsItem(tileP.getPicture());
     }
 }
