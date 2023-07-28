@@ -5,6 +5,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -23,6 +24,11 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
+        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+                                  this, ()->this.writeAsync(nbtTag));
+    }
+    
+    protected NBTTagCompound writeAsync(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
         nbtTag.setTag(TAG_PICTURE, this.getPicture().serializeNBT());
         return nbtTag;
@@ -30,6 +36,11 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     @Override
     public void readFromNBT(NBTTagCompound nbtTag) {
+        SideUtils.runSync(this.world != null && !this.world.isRemote,
+                          this, ()->this.readAsync(nbtTag));
+    }
+    
+    protected void readAsync(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         if (nbtTag.hasKey(TAG_PICTURE)) {
             this.getPicture().deserializeNBT(nbtTag.getCompoundTag(TAG_PICTURE));
@@ -84,20 +95,25 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         return Core.instance.painting.clientConfig.renderPaintingTileMaxRenderDistanceSquared;
     }
     
+    protected void unloadPicture() {
+        SideUtils.runSync(this.world != null && !this.world.isRemote,
+                          this, this.picture::unload);
+    }
+    
     @Override
     public void invalidate() {
         super.invalidate();
-        this.picture.unload();
+        this.unloadPicture();
     }
     
     @Override
     public void onChunkUnload() {
         super.onChunkUnload();
-        this.picture.unload();
+        this.unloadPicture();
     }
     
     @Override
     public void onWorldUnload() {
-        this.picture.unload();
+        this.unloadPicture();
     }
 }

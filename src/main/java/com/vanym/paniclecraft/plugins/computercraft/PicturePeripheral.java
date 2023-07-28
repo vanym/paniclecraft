@@ -11,51 +11,65 @@ public abstract class PicturePeripheral extends PeripheralBase {
     
     public PicturePeripheral() {}
     
-    @PeripheralMethod(value = 0, mainThread = true)
+    @PeripheralMethod(0)
     protected String getName() throws LuaException, InterruptedException {
-        return this.findPicture().getName();
+        synchronized (this.syncObject()) {
+            return this.findPicture().getName();
+        }
     }
     
-    @PeripheralMethod(value = 1, mainThread = true)
+    @PeripheralMethod(1)
     protected boolean isEditable() throws LuaException, InterruptedException {
-        return this.findPicture().isEditable();
+        synchronized (this.syncObject()) {
+            return this.findPicture().isEditable();
+        }
     }
     
-    @PeripheralMethod(value = 2, mainThread = true)
+    @PeripheralMethod(2)
     protected int getWidth() throws LuaException, InterruptedException {
-        return this.findPicture().getWidth();
+        synchronized (this.syncObject()) {
+            return this.findPicture().getWidth();
+        }
     }
     
-    @PeripheralMethod(value = 3, mainThread = true)
+    @PeripheralMethod(3)
     protected int getHeight() throws LuaException, InterruptedException {
-        return this.findPicture().getHeight();
+        synchronized (this.syncObject()) {
+            return this.findPicture().getHeight();
+        }
     }
     
-    @PeripheralMethod(value = 11, mainThread = true)
+    @PeripheralMethod(11)
     protected Object[] getPixelColor(int px, int py) throws LuaException, InterruptedException {
-        Picture picture = this.findPicture();
-        checkPicturePixelCoords(picture, px, py);
-        Color color = picture.getPixelColor(px, py);
-        return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
+        synchronized (this.syncObject()) {
+            Picture picture = this.findPicture();
+            checkPicturePixelCoords(picture, px, py);
+            Color color = picture.getPixelColor(px, py);
+            return new Object[]{color.getRed(), color.getGreen(), color.getBlue()};
+        }
     }
     
-    @PeripheralMethod(value = 12, mainThread = true)
+    @PeripheralMethod(12)
     protected boolean setPixelColor(int px, int py, int red, int green, int blue)
             throws LuaException, InterruptedException {
-        Picture picture = this.findPicture();
-        checkPictureEditable(picture);
-        checkPicturePixelCoords(picture, px, py);
-        Color color = getColor(red, green, blue);
-        picture.setPixelColor(px, py, color);
+        synchronized (this.syncObject()) {
+            Picture picture = this.findPicture();
+            checkPictureEditable(picture);
+            checkPicturePixelCoords(picture, px, py);
+            Color color = getColor(red, green, blue);
+            picture.setPixelColor(px, py, color);
+        }
         return true;
     }
     
-    @PeripheralMethod(value = 13, mainThread = true)
+    @PeripheralMethod(13)
     protected boolean fill(int red, int green, int blue) throws LuaException, InterruptedException {
-        Picture picture = this.findPicture();
-        checkPictureEditable(picture);
-        Color color = getColor(red, green, blue);
-        picture.fill(color);
+        synchronized (this.syncObject()) {
+            Picture picture = this.findPicture();
+            checkPictureEditable(picture);
+            Color color = getColor(red, green, blue);
+            picture.fill(color);
+        }
         return true;
     }
     
@@ -66,6 +80,10 @@ public abstract class PicturePeripheral extends PeripheralBase {
     public void detach(IComputerAccess computer) {}
     
     protected abstract Picture getPicture();
+    
+    protected Object syncObject() {
+        return this.getPicture().syncObject();
+    }
     
     protected Picture findPicture() throws LuaException {
         Picture picture = this.getPicture();

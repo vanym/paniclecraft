@@ -136,10 +136,12 @@ public class ImageUtils {
         }
     }
     
+    @SideOnly(Side.CLIENT)
     public static void savePainting(OutputStream output, Picture picture) throws IOException {
         savePainting(output, picture, 1, 1, (x, y)->picture);
     }
     
+    @SideOnly(Side.CLIENT)
     public static void savePainting(
             OutputStream output,
             IPictureSize elementSize,
@@ -159,6 +161,7 @@ public class ImageUtils {
         return makePaintingImage(elementSize, sizeX, sizeY, getter);
     }
     
+    @SideOnly(Side.CLIENT)
     protected static BufferedImage makePaintingImage(
             IPictureSize elementSize,
             int sizeX,

@@ -9,6 +9,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
@@ -185,12 +186,13 @@ public class BlockPainting extends BlockPaintingContainer {
             boolean willHarvest) {
         if (player != null) {
             TileEntity tile = world.getTileEntity(pos);
-            if (tile != null && tile instanceof TileEntityPainting) {
+            if (tile instanceof TileEntityPainting) {
                 TileEntityPainting tileP = (TileEntityPainting)tile;
                 Picture picture = tileP.getPicture();
                 int meta = tileP.getBlockMetadata();
                 EnumFacing dir = EnumFacing.getFront(meta);
-                rotatePicture(player, picture, dir, false);
+                SideUtils.runSync(!world.isRemote, tileP,
+                                  ()->rotatePicture(player, picture, dir, false));
             }
         }
         return super.removedByPlayer(state, world, pos, player, willHarvest);
@@ -199,11 +201,12 @@ public class BlockPainting extends BlockPaintingContainer {
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
         TileEntity tile = world.getTileEntity(pos);
-        if (tile != null && tile instanceof TileEntityPainting) {
+        if (tile instanceof TileEntityPainting) {
             TileEntityPainting tileP = (TileEntityPainting)tile;
             Picture picture = tileP.getPicture();
-            ItemStack itemStack = ItemPainting.getPictureAsItem(picture);
-            spawnAsEntity(world, pos, itemStack);
+            ItemStack stack = SideUtils.callSync(!world.isRemote, tileP,
+                                                 ()->ItemPainting.getPictureAsItem(picture));
+            spawnAsEntity(world, pos, stack);
         }
         super.breakBlock(world, pos, state);
     }

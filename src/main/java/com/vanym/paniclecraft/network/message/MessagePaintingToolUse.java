@@ -96,7 +96,7 @@ public class MessagePaintingToolUse implements IMessage {
                 return;
             }
             World world = player.world;
-            Picture picture = null;
+            Picture picture;
             WorldPictureProvider provider = null;
             if (message.tile) {
                 provider = WorldPictureProvider.ANYTILE;
@@ -105,6 +105,8 @@ public class MessagePaintingToolUse implements IMessage {
             }
             if (provider != null) {
                 picture = provider.getOrCreatePicture(world, message.getPos(), message.side);
+            } else {
+                picture = null;
             }
             if (picture == null
                 || !player.canPlayerEdit(new BlockPos(message.x, message.y, message.z),

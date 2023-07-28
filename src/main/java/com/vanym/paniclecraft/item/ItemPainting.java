@@ -12,6 +12,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.ItemUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -99,12 +100,14 @@ public class ItemPainting extends ItemMod3 {
         world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS,
                         (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
-        Picture picture = tileP.getPicture(side.getIndex());
-        fillPicture(picture, stack);
+        SideUtils.runSync(!world.isRemote, tileP, ()-> {
+            Picture picture = tileP.getPicture();
+            fillPicture(picture, stack);
+            if (player != null) {
+                BlockPaintingContainer.rotatePicture(player, picture, side, true);
+            }
+        });
         stack.shrink(1);
-        if (player != null) {
-            BlockPaintingContainer.rotatePicture(player, picture, side, true);
-        }
         return EnumActionResult.SUCCESS;
     }
     
@@ -117,13 +120,14 @@ public class ItemPainting extends ItemMod3 {
         if (tilePF.getPicture(side) != null) {
             return EnumActionResult.FAIL;
         }
-        Picture picture = tilePF.createPicture(side);
-        fillPicture(picture, stack);
+        SideUtils.runSync(!world.isRemote, tilePF, ()-> {
+            Picture picture = tilePF.createPicture(side, stack);
+            if (player != null) {
+                EnumFacing dir = EnumFacing.getFront(side);
+                BlockPaintingContainer.rotatePicture(player, picture, dir, true);
+            }
+        });
         stack.shrink(1);
-        if (player != null) {
-            EnumFacing dir = EnumFacing.getFront(side);
-            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
-        }
         tilePF.markForUpdate();
         return EnumActionResult.SUCCESS;
     }

@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -54,7 +55,7 @@ public class CommandPictureResize extends CommandBase {
                 picture.getHeight(),
                 width,
                 height);
-        if (picture.resize(width, height)) {
+        if (SideUtils.callSync(picture.syncObject(), ()->picture.resize(width, height))) {
             sender.sendMessage(success);
         } else {
             sender.sendMessage(new TextComponentTranslation(

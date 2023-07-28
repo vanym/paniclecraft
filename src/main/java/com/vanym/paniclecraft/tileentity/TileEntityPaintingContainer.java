@@ -19,8 +19,18 @@ public abstract class TileEntityPaintingContainer extends TileEntityBase
         }
         
         @Override
+        public ISidePictureProvider getProvider() {
+            return TileEntityPaintingContainer.this;
+        }
+        
+        @Override
+        public boolean isProviderSyncRequired() {
+            return true;
+        }
+        
+        @Override
         public void update() {
-            TileEntityPaintingContainer.this.markForUpdate();
+            TileEntityPaintingContainer.this.safeMarkForUpdate();
         }
     }
 }

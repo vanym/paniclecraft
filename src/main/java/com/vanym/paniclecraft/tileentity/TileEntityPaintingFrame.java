@@ -1,12 +1,18 @@
 package com.vanym.paniclecraft.tileentity;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -24,6 +30,11 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
+        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+                                  this, ()->this.writeAsync(nbtTag));
+    }
+    
+    protected NBTTagCompound writeAsync(NBTTagCompound nbtTag) {
         super.writeToNBT(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
@@ -36,16 +47,33 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     @Override
     public void readFromNBT(NBTTagCompound nbtTag) {
+        SideUtils.runSync(this.world != null && !this.world.isRemote,
+                          this, ()->this.readAsync(nbtTag));
+    }
+    
+    protected void readAsync(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (nbtTag.hasKey(TAG_PICTURE_I)) {
-                Picture picture = this.createPicture(i);
-                picture.deserializeNBT(nbtTag.getCompoundTag(TAG_PICTURE_I));
+                NBTTagCompound pictureTag = nbtTag.getCompoundTag(TAG_PICTURE_I);
+                this.createPicture(i, pictureTag);
             } else {
                 this.clearPicture(i);
             }
         }
+    }
+    
+    public Picture createPicture(int side, NBTTagCompound pictureTag) {
+        Picture picture = this.createPicture(side);
+        picture.deserializeNBT(pictureTag);
+        return picture;
+    }
+    
+    public Picture createPicture(int side, ItemStack stack) {
+        Picture picture = this.createPicture(side);
+        ItemPainting.fillPicture(picture, stack);
+        return picture;
     }
     
     public Picture createPicture(int side) {
@@ -70,6 +98,8 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     @Override
     public Picture getPicture(int side) {
+        // don't need to synchronize when getting from main thread,
+        // since holders changes done only from main thread
         if (this.isValidSide(side) && this.holders[side] != null) {
             return this.holders[side].picture;
         }
@@ -161,11 +191,11 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     protected void unloadPictures() {
-        for (PictureHolder holder : this.holders) {
-            if (holder != null) {
-                holder.picture.unload();
-            }
-        }
+        SideUtils.runSync(this.world != null && !this.world.isRemote, this,
+                          ()->Arrays.stream(this.holders)
+                                    .filter(Objects::nonNull)
+                                    .map(h->h.picture)
+                                    .forEach(Picture::unload));
     }
     
     @Override
