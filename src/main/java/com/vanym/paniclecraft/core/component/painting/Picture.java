@@ -82,16 +82,16 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     }
     
     // synchronized inside
-    public boolean usePaintingTool(ItemStack itemStack, int x, int y) {
-        if (itemStack == null) {
+    public boolean usePaintingTool(ItemStack stack, int x, int y) {
+        if (stack == null) {
             return false;
         }
-        Item item = itemStack.getItem();
+        Item item = stack.getItem();
         if (!(item instanceof IPaintingTool)) {
             return false;
         }
         IPaintingTool tool = (IPaintingTool)item;
-        PaintingToolType toolType = tool.getPaintingToolType(itemStack);
+        PaintingToolType toolType = tool.getPaintingToolType(stack);
         if (toolType == PaintingToolType.NONE) {
             return false;
         }
@@ -105,13 +105,13 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
                     color = Core.instance.painting.DEFAULT_COLOR;
                 }
             } else {
-                color = tool.getPaintingToolColor(itemStack);
+                color = tool.getPaintingToolColor(stack);
             }
             IPictureSize size = new FixedPictureSize(this);
-            double radius = tool.getPaintingToolRadius(itemStack, size);
+            double radius = tool.getPaintingToolRadius(stack, size);
             return this.setNeighborsPixelsColor(x, y, radius, color, size);
         } else if (toolType == PaintingToolType.FILLER && this.holder != null) {
-            Color color = tool.getPaintingToolColor(itemStack);
+            Color color = tool.getPaintingToolColor(stack);
             if (SideUtils.callSync(this.syncObject(), ()->this.fill(color))) {
                 return true;
             }
@@ -124,7 +124,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
             if (color.getAlpha() == 0) {
                 return false;
             }
-            colorizeable.setColor(itemStack, ColorUtils.getAlphaless(color));
+            colorizeable.setColor(stack, ColorUtils.getAlphaless(color));
             return true;
         }
         return false;
@@ -242,7 +242,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     }
     
     public boolean fill(Color color) {
-        if (this.isEditableBy(this)
+        if (this.isEditable()
             && this.unpack()
             && this.image.fill(color)) {
             // packed become outdated, removing it
@@ -313,10 +313,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     }
     
     public boolean isEditableBy(IPictureSize picture) {
-        if (!this.isEditable() || !this.isSameSize(picture)) {
-            return false;
-        }
-        return true;
+        return this.isEditable() && this.isSameSize(picture);
     }
     
     public boolean canEdit(Picture picture) {
@@ -324,7 +321,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     }
     
     public boolean isSameSize(IPictureSize picture) {
-        return (this.getWidth() == picture.getWidth()) && (this.getHeight() == picture.getHeight());
+        return IPictureSize.equals(this, picture);
     }
     
     public boolean isEmpty() {
@@ -370,7 +367,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
         }
     }
     
-    protected int getSize() {
+    protected int getDataSize() {
         return this.getWidth() * this.getHeight() * Image.getPixelSize(this.hasAlpha);
     }
     
@@ -391,7 +388,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
         ByteArrayInputStream in = new ByteArrayInputStream(this.packed);
         try {
             ByteBuffer buffer = ImageUtils.readImageToDirectByteBuffer(in, this.hasAlpha);
-            if (buffer.capacity() != this.getSize()) {
+            if (buffer.capacity() != this.getDataSize()) {
                 return null;
             }
             return buffer;
