@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -160,7 +161,16 @@ public abstract class PeripheralBase implements IPeripheral {
                 return null;
             }
             if (ret != null && ret.getClass().isArray()) {
-                return (Object[])ret;
+                if (ret.getClass().getComponentType().isPrimitive()) {
+                    int len = Array.getLength(ret);
+                    Object[] arr = new Object[len];
+                    for (int i = 0; i < len; ++i) {
+                        arr[i] = Array.get(ret, i);
+                    }
+                    return arr;
+                } else {
+                    return (Object[])ret;
+                }
             } else {
                 return new Object[]{ret};
             }
