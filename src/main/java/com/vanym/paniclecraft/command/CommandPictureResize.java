@@ -8,8 +8,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.core.component.painting.FixedPictureSize;
+import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -51,12 +54,13 @@ public class CommandPictureResize extends CommandBase {
     }
     
     public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        int width, height;
+        IPictureSize size;
         try {
-            width = height = IntegerArgumentType.getInteger(context, "size");
+            size = new FixedPictureSize(IntegerArgumentType.getInteger(context, "size"));
         } catch (IllegalArgumentException e) {
-            width = IntegerArgumentType.getInteger(context, "width");
-            height = IntegerArgumentType.getInteger(context, "height");
+            size = new FixedPictureSize(
+                    IntegerArgumentType.getInteger(context, "width"),
+                    IntegerArgumentType.getInteger(context, "height"));
         }
         CommandSource source = context.getSource();
         ServerPlayerEntity player = source.asPlayer();
@@ -65,9 +69,10 @@ public class CommandPictureResize extends CommandBase {
                 String.format("commands.%s.%s.success", DEF.MOD_ID, "pictureresize"),
                 picture.getWidth(),
                 picture.getHeight(),
-                width,
-                height);
-        if (picture.resize(width, height)) {
+                size.getWidth(),
+                size.getHeight());
+        int width = size.getWidth(), height = size.getHeight();
+        if (SideUtils.callSync(picture.syncObject(), ()->picture.resize(width, height))) {
             source.sendFeedback(success, false);
             return 1;
         } else {

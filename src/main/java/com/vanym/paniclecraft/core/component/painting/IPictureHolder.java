@@ -6,5 +6,9 @@ public interface IPictureHolder {
     
     public Picture getNeighborPicture(int offsetX, int offsetY);
     
+    public ISidePictureProvider getProvider();
+    
+    public boolean isProviderSyncRequired();
+    
     public void update();
 }

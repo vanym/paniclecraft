@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -27,6 +28,11 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     @Override
     public CompoundNBT write(CompoundNBT nbtTag) {
+        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+                                  this, ()->this.writeAsync(nbtTag));
+    }
+    
+    protected CompoundNBT writeAsync(CompoundNBT nbtTag) {
         super.write(nbtTag);
         nbtTag.put(TAG_PICTURE, this.getPicture().serializeNBT());
         return nbtTag;
@@ -34,6 +40,11 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     @Override
     public void read(CompoundNBT nbtTag) {
+        SideUtils.runSync(this.world != null && !this.world.isRemote,
+                          this, ()->this.readAsync(nbtTag));
+    }
+    
+    protected void readAsync(CompoundNBT nbtTag) {
         super.read(nbtTag);
         if (nbtTag.contains(TAG_PICTURE)) {
             this.getPicture().deserializeNBT(nbtTag.getCompound(TAG_PICTURE));
@@ -88,19 +99,24 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
         return Core.instance.painting.clientConfig.renderPaintingTileMaxRenderDistanceSquared;
     }
     
+    protected void unloadPicture() {
+        SideUtils.runSync(this.world != null && !this.world.isRemote,
+                          this, this.picture::unload);
+    }
+    
     @Override
     public void remove() {
         super.remove();
-        this.picture.unload();
+        this.unloadPicture();
     }
     
     @Override
     public void onChunkUnloaded() {
-        this.picture.unload();
+        this.unloadPicture();
     }
     
     @Override
     public void onWorldUnload() {
-        this.picture.unload();
+        this.unloadPicture();
     }
 }

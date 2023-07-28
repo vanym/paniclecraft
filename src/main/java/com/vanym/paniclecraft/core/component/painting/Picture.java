@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Optional;
 
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -28,8 +28,8 @@ import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     
-    protected IPictureHolder holder;
-    protected boolean hasAlpha = false;
+    protected final IPictureHolder holder;
+    protected final boolean hasAlpha;
     
     protected boolean editable = true;
     protected String name;
@@ -81,16 +81,17 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         this.image = image;
     }
     
-    public boolean usePaintingTool(ItemStack itemStack, int x, int y) {
-        if (itemStack == null) {
+    // synchronized inside
+    public boolean usePaintingTool(ItemStack stack, int x, int y) {
+        if (stack == null) {
             return false;
         }
-        Item item = itemStack.getItem();
+        Item item = stack.getItem();
         if (!(item instanceof IPaintingTool)) {
             return false;
         }
         IPaintingTool tool = (IPaintingTool)item;
-        PaintingToolType toolType = tool.getPaintingToolType(itemStack);
+        PaintingToolType toolType = tool.getPaintingToolType(stack);
         if (toolType == PaintingToolType.NONE) {
             return false;
         }
@@ -104,19 +105,14 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
                     color = Core.instance.painting.DEFAULT_COLOR;
                 }
             } else {
-                color = tool.getPaintingToolColor(itemStack);
+                color = tool.getPaintingToolColor(stack);
             }
-            double radius = tool.getPaintingToolRadius(itemStack, this);
-            Set<Picture> changedSet = new HashSet<>();
-            boolean changed = this.setNeighborsPixelsColor(x, y, radius, color, changedSet);
-            for (Picture picture : changedSet) {
-                picture.imageChanged();
-                picture.update();
-            }
-            return changed;
+            IPictureSize size = new FixedPictureSize(this);
+            double radius = tool.getPaintingToolRadius(stack, size);
+            return this.setNeighborsPixelsColor(x, y, radius, color, size);
         } else if (toolType == PaintingToolType.FILLER && this.holder != null) {
-            Color color = tool.getPaintingToolColor(itemStack);
-            if (this.fill(color)) {
+            Color color = tool.getPaintingToolColor(stack);
+            if (SideUtils.callSync(this.syncObject(), ()->this.fill(color))) {
                 return true;
             }
         } else if (toolType == PaintingToolType.COLORPICKER) {
@@ -128,36 +124,41 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
             if (color.getAlpha() == 0) {
                 return false;
             }
-            colorizeable.setColor(itemStack, ColorUtils.getAlphaless(color));
+            colorizeable.setColor(stack, ColorUtils.getAlphaless(color));
             return true;
         }
         return false;
     }
     
     protected boolean setNeighborsPixelsColor(
-            int x,
-            int y,
+            int px,
+            int py,
             double radius,
             Color color,
-            Set<Picture> changedSet) {
+            IPictureSize size) {
         if (radius == 0.0D) {
             return false;
         }
-        int max = (int)Math.ceil(radius);
+        int width = size.getWidth();
+        int height = size.getHeight();
+        int rad = (int)Math.ceil(radius);
+        int maxNX = rad / width + 1;
+        int maxNY = rad / height + 1;
         boolean changed = false;
-        for (int ix = 0; ix <= max; ix++) {
-            for (int iy = 0; iy <= max; iy++) {
-                if (ix * ix + iy * iy >= radius * radius) {
-                    continue;
+        for (int nx = 0; nx <= maxNX; nx++) {
+            for (int ny = 0; ny <= maxNY; ny++) {
+                changed |= this.setNeighborPixelsColor(nx, ny, px, py,
+                                                       radius, color, size);
+                if (ny > 0) {
+                    changed |= this.setNeighborPixelsColor(nx, -ny, px, py,
+                                                           radius, color, size);
                 }
-                changed |= this.setNeighborsPixelColor(x + ix, y + iy, color, changedSet);
-                if (iy > 0) {
-                    changed |= this.setNeighborsPixelColor(x + ix, y - iy, color, changedSet);
-                }
-                if (ix > 0) {
-                    changed |= this.setNeighborsPixelColor(x - ix, y + iy, color, changedSet);
-                    if (iy > 0) {
-                        changed |= this.setNeighborsPixelColor(x - ix, y - iy, color, changedSet);
+                if (nx > 0) {
+                    changed |= this.setNeighborPixelsColor(-nx, ny, px, py,
+                                                           radius, color, size);
+                    if (ny > 0) {
+                        changed |= this.setNeighborPixelsColor(-nx, -ny, px, py,
+                                                               radius, color, size);
                     }
                 }
             }
@@ -165,30 +166,58 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         return changed;
     }
     
-    protected boolean setNeighborsPixelColor(int x, int y, Color color, Set<Picture> changedSet) {
-        int width = this.getWidth();
-        int height = this.getHeight();
-        int nx = x / width;
-        int ny = y / height;
-        int sx = x % width;
-        int sy = y % height;
-        if (sx < 0) {
-            sx = width + sx;
-            --nx;
-        }
-        if (sy < 0) {
-            sy = height + sy;
-            --ny;
-        }
-        Picture picture = this.getNeighborPicture(nx, ny);
-        if (!this.canEdit(picture)) {
+    protected boolean setNeighborPixelsColor(
+            int nx,
+            int ny,
+            int px,
+            int py,
+            double radius,
+            Color color,
+            IPictureSize size) {
+        int width = size.getWidth();
+        int height = size.getHeight();
+        int mx = px + nx * -width;
+        int my = py + ny * -height;
+        // check if no overlap exist
+        int dx = Math.max(0, Math.min(mx, width - 1)) - mx;
+        int dy = Math.max(0, Math.min(my, height - 1)) - my;
+        if (dx * dx + dy * dy >= radius * radius) {
             return false;
         }
-        if (picture.setMyPixelColor(sx, sy, color)) {
-            changedSet.add(picture);
-            return true;
+        Picture picture = this.getNeighborPicture(nx, ny);
+        if (picture == null) {
+            return false;
         }
-        return false;
+        return SideUtils.callSync(picture.syncObject(), ()->picture.isEditableBy(size)
+            && picture.setMyPixelsColor(mx, my, radius, color));
+    }
+    
+    protected boolean setMyPixelsColor(
+            int px,
+            int py,
+            double radius,
+            Color color) {
+        int width = this.getWidth();
+        int height = this.getHeight();
+        int rad = (int)Math.ceil(radius);
+        int minX = Math.max(px - rad, 0);
+        int maxX = Math.min(px + rad, width - 1);
+        int minY = Math.max(py - rad, 0);
+        int maxY = Math.min(py + rad, height - 1);
+        boolean changed = false;
+        for (int ix = minX, offsetX = ix - px; ix <= maxX; ix++, offsetX++) {
+            for (int iy = minY, offsetY = iy - py; iy <= maxY; iy++, offsetY++) {
+                if (offsetX * offsetX + offsetY * offsetY >= radius * radius) {
+                    continue;
+                }
+                changed |= this.setMyPixelColor(ix, iy, color);
+            }
+        }
+        if (changed) {
+            this.imageChanged();
+            this.update();
+        }
+        return changed;
     }
     
     protected boolean setMyPixelColor(int x, int y, Color color) {
@@ -204,7 +233,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     }
     
     public boolean setPixelColor(int x, int y, Color color) {
-        if (this.isEditableBy(this) && this.setMyPixelColor(x, y, color)) {
+        if (this.isEditable() && this.setMyPixelColor(x, y, color)) {
             this.imageChanged();
             this.update();
             return true;
@@ -213,7 +242,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     }
     
     public boolean fill(Color color) {
-        if (this.isEditableBy(this)
+        if (this.isEditable()
             && this.unpack()
             && this.image.fill(color)) {
             // packed become outdated, removing it
@@ -256,6 +285,18 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         return true;
     }
     
+    public IPictureHolder getHolder() {
+        return this.holder;
+    }
+    
+    public Object syncObject() {
+        return Optional.of(this)
+                       .map(Picture::getHolder)
+                       .filter(IPictureHolder::isProviderSyncRequired)
+                       .map(IPictureHolder::getProvider)
+                       .orElse(null);
+    }
+    
     public Picture getNeighborPicture(int offsetX, int offsetY) {
         if (offsetX == 0 && offsetY == 0) {
             return this;
@@ -271,19 +312,16 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         return this.editable && this.name == null;
     }
     
-    public boolean isEditableBy(Picture picture) {
-        if (!this.isEditable() || !this.isSameSize(picture)) {
-            return false;
-        }
-        return true;
+    public boolean isEditableBy(IPictureSize picture) {
+        return this.isEditable() && this.isSameSize(picture);
     }
     
     public boolean canEdit(Picture picture) {
         return picture != null && picture.isEditableBy(this);
     }
     
-    public boolean isSameSize(Picture picture) {
-        return (this.getWidth() == picture.getWidth()) && (this.getHeight() == picture.getHeight());
+    public boolean isSameSize(IPictureSize picture) {
+        return IPictureSize.equals(this, picture);
     }
     
     public boolean isEmpty() {
@@ -329,7 +367,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         }
     }
     
-    protected int getSize() {
+    protected int getDataSize() {
         return this.getWidth() * this.getHeight() * Image.getPixelSize(this.hasAlpha);
     }
     
@@ -350,7 +388,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         ByteArrayInputStream in = new ByteArrayInputStream(this.packed);
         try {
             ByteBuffer buffer = ImageUtils.readImageToDirectByteBuffer(in, this.hasAlpha);
-            if (buffer.capacity() != this.getSize()) {
+            if (buffer.capacity() != this.getDataSize()) {
                 return null;
             }
             return buffer;
@@ -496,7 +534,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         }
     }
     
-    public void writeImage(CompoundNBT nbtImageTag) {
+    protected void writeImage(CompoundNBT nbtImageTag) {
         if (this.pack()) {
             nbtImageTag.putByteArray(TAG_IMAGE_PACKED, this.packed);
             nbtImageTag.putInt(TAG_IMAGE_WIDTH, this.packedWidth);

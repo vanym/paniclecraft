@@ -5,6 +5,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -182,11 +183,12 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             IFluidState fluid) {
         if (player != null) {
             TileEntity tile = world.getTileEntity(pos);
-            if (tile != null && tile instanceof TileEntityPainting) {
+            if (tile instanceof TileEntityPainting) {
                 TileEntityPainting tileP = (TileEntityPainting)tile;
                 Picture picture = tileP.getPicture();
                 Direction dir = tileP.getBlockState().get(FACING);
-                rotatePicture(player, picture, dir, false);
+                SideUtils.runSync(!world.isRemote, tileP,
+                                  ()->rotatePicture(player, picture, dir, false));
             }
         }
         return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
@@ -195,11 +197,12 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     @Override
     public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         TileEntity tile = world.getTileEntity(pos);
-        if (tile != null && tile instanceof TileEntityPainting) {
+        if (tile instanceof TileEntityPainting) {
             TileEntityPainting tileP = (TileEntityPainting)tile;
             Picture picture = tileP.getPicture();
-            ItemStack itemStack = ItemPainting.getPictureAsItem(picture);
-            spawnAsEntity(world, pos, itemStack);
+            ItemStack stack = SideUtils.callSync(!world.isRemote, tileP,
+                                                 ()->ItemPainting.getPictureAsItem(picture));
+            spawnAsEntity(world, pos, stack);
         }
         super.onBlockHarvested(world, pos, state, player);
     }
@@ -216,9 +219,8 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             IBlockReader world,
             BlockPos pos,
             PlayerEntity player) {
-        TileEntityPainting tile = (TileEntityPainting)world.getTileEntity(pos);
-        return ItemPainting.getPictureAsItem(tile.getPicture(tile.getBlockState()
-                                                                 .get(FACING)
-                                                                 .getIndex()));
+        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
+        return SideUtils.callSync(tileP.hasWorld() && !tileP.getWorld().isRemote(), tileP,
+                                  ()->ItemPainting.getPictureAsItem(tileP.getPicture()));
     }
 }

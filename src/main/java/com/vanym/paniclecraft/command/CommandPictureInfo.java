@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -41,7 +42,8 @@ public class CommandPictureInfo extends CommandBase {
         CommandSource source = context.getSource();
         ServerPlayerEntity player = source.asPlayer();
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
-        source.sendFeedback(new StringTextComponent(picture.toString()), false);
+        source.sendFeedback(new StringTextComponent(
+                SideUtils.callSync(picture.syncObject(), picture::toString)), false);
         return 1;
     }
 }

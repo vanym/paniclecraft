@@ -8,6 +8,7 @@ import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ImageUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
@@ -86,6 +87,7 @@ public abstract class ContainerPaintingViewBase extends Container {
         return this.sizeY * this.pictureSize.getHeight();
     }
     
+    @OnlyIn(Dist.CLIENT)
     public void savePainting(OutputStream output) throws IOException {
         ImageUtils.savePainting(output, this.pictureSize, this.sizeX, this.sizeY,
                                 (x, y)->this.getPicture(x, y));
@@ -115,7 +117,10 @@ public abstract class ContainerPaintingViewBase extends Container {
                     continue;
                 }
                 int paintingX = x * pictureWidth;
-                changed |= picture.addPicture(inputX - paintingX, inputY - paintingY, input);
+                changed |= SideUtils.callSync(picture.syncObject(),
+                                              ()->picture.addPicture(inputX - paintingX,
+                                                                     inputY - paintingY,
+                                                                     input));
             }
         }
         if (changed) {
@@ -132,7 +137,8 @@ public abstract class ContainerPaintingViewBase extends Container {
             if (!IPictureSize.equals(picture, ContainerPaintingViewBase.this.pictureSize)) {
                 return ItemStack.EMPTY;
             }
-            return ItemPainting.getPictureAsItem(picture);
+            return SideUtils.callSync(picture.syncObject(),
+                                      ()->ItemPainting.getPictureAsItem(picture));
         }
         
         @Override
@@ -143,7 +149,8 @@ public abstract class ContainerPaintingViewBase extends Container {
             }
             Picture picture = ContainerPaintingViewBase.this.getOrCreatePicture(slot);
             if (IPictureSize.equals(picture, ContainerPaintingViewBase.this.pictureSize)) {
-                ItemPainting.fillPicture(picture, stack);
+                SideUtils.runSync(picture.syncObject(),
+                                  ()->ItemPainting.fillPicture(picture, stack));
             }
         }
         

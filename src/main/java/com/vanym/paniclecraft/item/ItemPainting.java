@@ -15,6 +15,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.ItemUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -102,12 +103,14 @@ public class ItemPainting extends BlockItem {
             BlockState state) {
         super.onBlockPlaced(pos, world, player, stack, state);
         TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
-        Picture picture = tileP.getPicture();
-        fillPicture(picture, stack);
-        if (player != null) {
-            Direction side = state.get(BlockPainting.FACING);
-            BlockPaintingContainer.rotatePicture(player, picture, side, true);
-        }
+        SideUtils.runSync(!world.isRemote, tileP, ()-> {
+            Picture picture = tileP.getPicture();
+            fillPicture(picture, stack);
+            if (player != null) {
+                Direction side = state.get(BlockPainting.FACING);
+                BlockPaintingContainer.rotatePicture(player, picture, side, true);
+            }
+        });
         return true;
     }
     
@@ -120,13 +123,14 @@ public class ItemPainting extends BlockItem {
         if (tilePF.getPicture(side) != null) {
             return ActionResultType.FAIL;
         }
-        Picture picture = tilePF.createPicture(side);
-        fillPicture(picture, stack);
+        SideUtils.runSync(!world.isRemote, tilePF, ()-> {
+            Picture picture = tilePF.createPicture(side, stack);
+            if (player != null) {
+                Direction dir = Direction.byIndex(side);
+                BlockPaintingContainer.rotatePicture(player, picture, dir, true);
+            }
+        });
         stack.shrink(1);
-        if (player != null) {
-            Direction dir = Direction.byIndex(side);
-            BlockPaintingContainer.rotatePicture(player, picture, dir, true);
-        }
         tilePF.markForUpdate();
         return ActionResultType.SUCCESS;
     }

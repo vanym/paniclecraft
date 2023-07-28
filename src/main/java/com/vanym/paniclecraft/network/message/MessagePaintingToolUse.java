@@ -74,7 +74,7 @@ public class MessagePaintingToolUse {
             return;
         }
         World world = player.world;
-        Picture picture = null;
+        Picture picture;
         WorldPictureProvider provider = null;
         if (message.tile) {
             provider = WorldPictureProvider.ANYTILE;
@@ -83,6 +83,8 @@ public class MessagePaintingToolUse {
         }
         if (provider != null) {
             picture = provider.getOrCreatePicture(world, message.pos, message.side);
+        } else {
+            picture = null;
         }
         if (picture == null
             || !player.canPlayerEdit(message.pos, Direction.byIndex(message.side), heldItem)) {
