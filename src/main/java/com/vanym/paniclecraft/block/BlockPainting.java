@@ -180,7 +180,7 @@ public class BlockPainting extends BlockPaintingContainer {
     @Override
     @SideOnly(Side.CLIENT)
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-        TileEntityPainting tile = (TileEntityPainting)world.getTileEntity(x, y, z);
-        return ItemPainting.getPictureAsItem(tile.getPicture(tile.getBlockMetadata()));
+        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(x, y, z);
+        return ItemPainting.getPictureAsItem(tileP.getPicture());
     }
 }
