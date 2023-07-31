@@ -68,7 +68,7 @@ public class ItemRendererAdvSign implements IItemRenderer {
         }
         ItemAdvSign.getSign(item).ifPresent(signTag->tileAS.readFromNBT(signTag, true));
         Core.instance.advSign.tileAdvSignRenderer.renderTileEntityAt(tileAS, 0.0D, 0.0D, 0.0D,
-                                                                     0.0F, false, false, -1);
+                                                                     0.0F, false, false, null);
     }
     
 }

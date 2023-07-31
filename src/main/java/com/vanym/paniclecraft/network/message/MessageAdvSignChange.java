@@ -1,15 +1,17 @@
 package com.vanym.paniclecraft.network.message;
 
 import java.io.IOException;
+import java.util.stream.Stream;
 
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 
@@ -19,8 +21,8 @@ public class MessageAdvSignChange implements IMessage {
     
     public MessageAdvSignChange() {}
     
-    public MessageAdvSignChange(TileEntityAdvSign tileAS) {
-        tileAS.writeToNBT(this.tag = new NBTTagCompound());
+    public MessageAdvSignChange(TileEntityAdvSign sign) {
+        sign.writeToNBT(this.tag = new NBTTagCompound());
     }
     
     @Override
@@ -53,21 +55,18 @@ public class MessageAdvSignChange implements IMessage {
             int x = message.tag.getInteger("x");
             int y = message.tag.getInteger("y");
             int z = message.tag.getInteger("z");
-            NBTTagList linesTag = message.tag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
-            int size = linesTag.tagCount();
-            if (size > TileEntityAdvSign.MAX_LINES || size < TileEntityAdvSign.MIN_LINES) {
+            if (!Stream.of(TileEntityAdvSign.TAG_FRONTTEXT,
+                           TileEntityAdvSign.TAG_BACKTEXT)
+                       .map(message.tag::getCompoundTag)
+                       .map(AdvSignText::new)
+                       .allMatch(AdvSignText::isValid)) {
                 return null;
             }
-            for (int i = 0; i < size; ++i) {
-                String line = linesTag.getStringTagAt(i);
-                if (line.length() > 64 * size) {
-                    return null;
-                }
-            }
-            TileEntity tile = ctx.getServerHandler().playerEntity.worldObj.getTileEntity(x, y, z);
-            if (tile != null && tile instanceof TileEntityAdvSign) {
+            EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+            TileEntity tile = player.worldObj.getTileEntity(x, y, z);
+            if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                if (tileAS.isEditor(ctx.getServerHandler().playerEntity)) {
+                if (tileAS.isEditor(player)) {
                     tileAS.resetEditor();
                 } else {
                     return null;

@@ -1,19 +1,27 @@
 package com.vanym.paniclecraft.client.renderer.tileentity;
 
 import java.awt.Color;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
+import com.vanym.paniclecraft.client.utils.AdvTextInput;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.model.ModelSign;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 
 @SideOnly(Side.CLIENT)
@@ -32,9 +40,8 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
             float f,
             boolean statik,
             boolean inWorld,
-            int selectLine) {
+            GuiEditAdvSign gui) {
         GL11.glPushMatrix();
-        float scale = 0.6666667F;
         GL11.glTranslatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
         this.modelSign.signStick.showModel = tileAS.onStick();
         if (!statik) {
@@ -67,6 +74,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
         if (inWorld) {
             GL11.glDisable(GL12.GL_RESCALE_NORMAL);
         }
+        float scale = 0.6666667F;
         GL11.glPushMatrix();
         GL11.glScalef(scale, -scale, -scale);
         GL11.glEnable(GL11.GL_BLEND);
@@ -77,31 +85,61 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
         GL11.glColor4f(colorf[0], colorf[1], colorf[2], colorf[3]);
         this.modelSign.renderSign();
         GL11.glPopMatrix();
-        FontRenderer fontRenderer = this.func_147498_b();
-        int size = tileAS.lines.size();
-        float textScale = 0.016666668F * scale * 4.0F / Math.max(1, size);
+        Stream.of(true, false).forEach(side->this.renderSignText(tileAS.getSide(side), side, gui));
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glPopMatrix();
+    }
+    
+    protected void renderSignText(AdvSignText text, boolean front, GuiEditAdvSign gui) {
+        float scale = 0.6666667F;
+        FontRenderer font = this.func_147498_b();
+        if (font == null) {
+            return;
+        }
+        List<IChatComponent> lines = text.getLines();
+        int size = lines.size();
+        float textScale = scale * 0.016666668F * 4.0F / Math.max(1, size);
+        GL11.glPushMatrix();
+        GL11.glRotatef(front ? 0.0F : 180.0F, 0.0F, 1.0F, 0.0F);
         GL11.glTranslatef(0.0F, 0.5F * scale, 0.07F * scale);
         GL11.glScalef(textScale, -textScale, textScale);
         GL11.glNormal3f(0.0F, 0.0F, -1.0F * textScale);
         GL11.glDepthMask(false);
-        Color textColor = tileAS.getTextColor();
+        Color textColor = text.getTextColor();
         for (int i = 0; i < size; ++i) {
-            String line = tileAS.lines.get(i);
-            if (selectLine == i) {
-                line = String.format("> %s <", line);
+            AdvTextInput input = gui != null ? gui.getInput(front, i) : null;
+            IChatComponent line = input != null ? input.getComponent() : lines.get(i);
+            String basic = line.getUnformattedText();
+            String colored = line.getFormattedText();
+            int width = font.getStringWidth(basic);
+            int x = -width / 2;
+            int y = i * 10 - size * 5;
+            font.drawString(colored, x, y, textColor.getRGB());
+            if (input == null) {
+                continue;
             }
-            if (fontRenderer != null) {
-                fontRenderer.drawString(line, -fontRenderer.getStringWidth(line) / 2,
-                                        i * 10 - size * 5, textColor.getRGB());
+            int cursorOffset = font.getStringWidth(basic.substring(0, input.getCursorPos()));
+            int cursorX = x + cursorOffset;
+            if (gui.isBlink()) {
+                if (input.getCursorPos() < basic.length()) {
+                    Gui.drawRect(cursorX, y - 1, cursorX + 1, y + font.FONT_HEIGHT,
+                                 0xff000000 | textColor.getRGB());
+                } else {
+                    font.drawString("_", cursorX, y, textColor.getRGB());
+                }
+            }
+            if (input.isSelected()) {
+                int selOffset = font.getStringWidth(basic.substring(0, input.getSelectionPos()));
+                int selectionX = x + selOffset;
+                GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.FONT_HEIGHT);
             }
         }
         GL11.glDepthMask(true);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glPopMatrix();
     }
     
     @Override
     public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float f) {
-        this.renderTileEntityAt((TileEntityAdvSign)tile, x, y, z, f, false, true, -1);
+        this.renderTileEntityAt((TileEntityAdvSign)tile, x, y, z, f, false, true, null);
     }
 }

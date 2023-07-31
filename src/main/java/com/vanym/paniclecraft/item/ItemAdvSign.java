@@ -3,10 +3,10 @@ package com.vanym.paniclecraft.item;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ItemUtils;
 
@@ -16,10 +16,10 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -42,11 +42,9 @@ public class ItemAdvSign extends ItemMod3 {
             EntityPlayer player,
             List list,
             boolean advancedItemTooltips) {
-        getLines(stack).ifPresent(lines-> {
+        getSide(stack, !GuiScreen.isCtrlKeyDown()).map(AdvSignText::getLines).ifPresent(lines-> {
             if (GuiScreen.isShiftKeyDown()) {
-                IntStream.range(0, lines.tagCount())
-                         .mapToObj(lines::getStringTagAt)
-                         .forEachOrdered(list::add);
+                lines.stream().map(IChatComponent::getUnformattedText).forEachOrdered(list::add);
             } else {
                 list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
                     ".showtext"));
@@ -81,11 +79,12 @@ public class ItemAdvSign extends ItemMod3 {
                 if (tile instanceof TileEntitySign) {
                     TileEntitySign tileS = (TileEntitySign)tile;
                     signTag = new NBTTagCompound();
-                    NBTTagList linesTag = new NBTTagList();
+                    AdvSignText text = new AdvSignText();
+                    List<IChatComponent> lines = text.getLines();
                     Arrays.stream(tileS.signText)
-                          .map(NBTTagString::new)
-                          .forEachOrdered(linesTag::appendTag);
-                    signTag.setTag(TileEntityAdvSign.TAG_LINES, linesTag);
+                          .map(ChatComponentText::new)
+                          .forEachOrdered(lines::add);
+                    signTag.setTag(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
                 } else if (tile instanceof TileEntityAdvSign) {
                     TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
                     signTag = new NBTTagCompound();
@@ -131,7 +130,7 @@ public class ItemAdvSign extends ItemMod3 {
     
     public static ItemStack getSavedSign(TileEntityAdvSign tileAS) {
         ItemStack stack = new ItemStack(Core.instance.advSign.itemAdvSign);
-        if (tileAS == null || tileAS.lines.stream().allMatch(String::isEmpty)) {
+        if (tileAS == null || (tileAS.getFront().isEmpty() && tileAS.getBack().isEmpty())) {
             return stack;
         }
         NBTTagCompound signTag = new NBTTagCompound();
@@ -156,8 +155,10 @@ public class ItemAdvSign extends ItemMod3 {
                         .map(tag->tag.getCompoundTag(TAG_SIGN));
     }
     
-    protected static Optional<NBTTagList> getLines(ItemStack stack) {
-        return getSign(stack).filter(tag->tag.hasKey(TileEntityAdvSign.TAG_LINES, 9))
-                             .map(tag->tag.getTagList(TileEntityAdvSign.TAG_LINES, 8));
+    protected static Optional<AdvSignText> getSide(ItemStack stack, boolean front) {
+        String TAG_TEXT = front ? TileEntityAdvSign.TAG_FRONTTEXT : TileEntityAdvSign.TAG_BACKTEXT;
+        return getSign(stack).filter(tag->tag.hasKey(TAG_TEXT, 10))
+                             .map(tag->tag.getCompoundTag(TAG_TEXT))
+                             .map(AdvSignText::new);
     }
 }

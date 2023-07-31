@@ -10,6 +10,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 
@@ -36,6 +37,10 @@ public class GuiUtils {
         tessellator.draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
+    }
+    
+    public static void drawHighlight(int x1, int y1, int x2, int y2) {
+        new GuiTextField(null, 0, 0, Integer.MAX_VALUE, 0).drawCursorVertical(x1, y1, x2, y2);
     }
     
     public static Point2D.Double getMousePoint() {

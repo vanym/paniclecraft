@@ -1,12 +1,13 @@
 package com.vanym.paniclecraft.tileentity;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
+import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -14,8 +15,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
@@ -24,24 +25,19 @@ public class TileEntityAdvSign extends TileEntityBase {
     public static final String IN_MOD_ID = "advanced_sign";
     public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
-    public static final int MAX_LINES = 32;
-    public static final int MIN_LINES = 1;
-    
-    public static final List<String> DEFAULT_LINES = Collections.nCopies(5, "");
-    
-    public final List<String> lines = new ArrayList<>(DEFAULT_LINES);
+    protected final AdvSignText frontText = new AdvSignText();
+    protected final AdvSignText backText = new AdvSignText();
     
     protected Color standColor = Color.WHITE;
-    protected Color textColor = Color.BLACK;
     
     protected double direction = 0.0D;
     protected boolean onStick = false;
     
     protected EntityPlayer editor = null;
     
-    public static final String TAG_LINES = "Lines";
+    public static final String TAG_FRONTTEXT = "FrontText";
+    public static final String TAG_BACKTEXT = "BackText";
     public static final String TAG_STANDCOLOR = "StandColor";
-    public static final String TAG_TEXTCOLOR = "TextColor";
     
     protected static final String TAG_DIRECTION = "Direction";
     protected static final String TAG_ONSTICK = "OnStick";
@@ -52,11 +48,9 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void writeToNBT(NBTTagCompound nbtTag, boolean toStack) {
-        NBTTagList linesTag = new NBTTagList();
-        this.lines.stream().map(NBTTagString::new).forEachOrdered(linesTag::appendTag);
-        nbtTag.setTag(TAG_LINES, linesTag);
+        nbtTag.setTag(TAG_FRONTTEXT, this.frontText.serializeNBT());
+        nbtTag.setTag(TAG_BACKTEXT, this.backText.serializeNBT());
         nbtTag.setInteger(TAG_STANDCOLOR, this.standColor.getRGB());
-        nbtTag.setInteger(TAG_TEXTCOLOR, this.textColor.getRGB());
         if (toStack) {
             return;
         }
@@ -71,12 +65,25 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void readFromNBT(NBTTagCompound nbtTag, boolean fromStack) {
+        if (nbtTag.hasKey(TAG_FRONTTEXT, 10)) {
+            this.frontText.deserializeNBT(nbtTag.getCompoundTag(TAG_FRONTTEXT));
+        }
+        if (nbtTag.hasKey(TAG_BACKTEXT, 10)) {
+            this.backText.deserializeNBT(nbtTag.getCompoundTag(TAG_BACKTEXT));
+        }
         this.standColor = new Color(nbtTag.getInteger(TAG_STANDCOLOR), true);
-        this.textColor = new Color(nbtTag.getInteger(TAG_TEXTCOLOR), true);
-        this.lines.clear();
-        NBTTagList linesTag = nbtTag.getTagList(TAG_LINES, 8);
-        for (int i = 0; i < linesTag.tagCount(); ++i) {
-            this.lines.add(linesTag.getStringTagAt(i));
+        // backwards compatibility with 2.7.0.0
+        if (!nbtTag.hasKey(TAG_FRONTTEXT)
+            && nbtTag.hasKey("Lines", 9)
+            && nbtTag.hasKey("TextColor", 3)) {
+            List<IChatComponent> lines = this.frontText.getLines();
+            lines.clear();
+            NBTTagList linesTag = nbtTag.getTagList("Lines", 8);
+            IntStream.range(0, linesTag.tagCount())
+                     .mapToObj(linesTag::getStringTagAt)
+                     .map(FormattingUtils::parseLine)
+                     .forEachOrdered(lines::add);
+            this.frontText.setTextColor(new Color(nbtTag.getInteger("TextColor"), true));
         }
         if (fromStack) {
             return;
@@ -86,6 +93,18 @@ public class TileEntityAdvSign extends TileEntityBase {
         this.onStick = nbtTag.getBoolean(TAG_ONSTICK);
     }
     
+    public AdvSignText getFront() {
+        return this.frontText;
+    }
+    
+    public AdvSignText getBack() {
+        return this.backText;
+    }
+    
+    public AdvSignText getSide(boolean front) {
+        return front ? this.getFront() : this.getBack();
+    }
+    
     public void setStandColor(Color color) {
         Objects.requireNonNull(color);
         this.standColor = color;
@@ -93,15 +112,6 @@ public class TileEntityAdvSign extends TileEntityBase {
     
     public Color getStandColor() {
         return this.standColor;
-    }
-    
-    public void setTextColor(Color color) {
-        Objects.requireNonNull(color);
-        this.textColor = color;
-    }
-    
-    public Color getTextColor() {
-        return this.textColor;
     }
     
     public void setStick(boolean stick) {
