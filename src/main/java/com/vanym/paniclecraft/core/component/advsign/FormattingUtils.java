@@ -59,7 +59,7 @@ public class FormattingUtils {
                      .orElse(null);
     }
     
-    public static void applyToStyle(ChatStyle style, EnumChatFormatting formatting) {
+    public static ChatStyle applyToStyle(ChatStyle style, EnumChatFormatting formatting) {
         switch (formatting) {
             case RESET:
                 style.setBold(null)
@@ -88,6 +88,11 @@ public class FormattingUtils {
                 style.setColor(formatting);
             break;
         }
+        return style;
+    }
+    
+    public static ChatStyle toStyle(EnumChatFormatting formatting) {
+        return applyToStyle(new ChatStyle(), formatting);
     }
     
     public static String trimReset(String str) {
@@ -99,5 +104,52 @@ public class FormattingUtils {
             str = str.substring(0, str.length() - r.length());
         }
         return str;
+    }
+    
+    public static ChatStyle invertBy(ChatStyle style, ChatStyle patch) {
+        ChatStyle copy1 = style.createShallowCopy().setParentStyle(null);
+        ChatStyle copy2 = style.createShallowCopy()
+                               .setParentStyle(new ChatStyle().setColor(EnumChatFormatting.BLACK)
+                                                              .setObfuscated(true)
+                                                              .setBold(true)
+                                                              .setStrikethrough(true)
+                                                              .setUnderlined(true)
+                                                              .setItalic(true));
+        EnumChatFormatting patchColor = patch.getColor();
+        if (copy1.getColor() == copy2.getColor()
+            && patchColor != null
+            && patchColor != EnumChatFormatting.RESET) {
+            EnumChatFormatting color = style.getColor();
+            if (color == patchColor) {
+                style.setColor(EnumChatFormatting.RESET);
+            } else if (color == null || color == EnumChatFormatting.RESET) {
+                style.setColor(patchColor);
+            }
+        }
+        if (copy1.getObfuscated() == copy2.getObfuscated() && patch.getObfuscated()) {
+            style.setObfuscated(!style.getObfuscated());
+        }
+        if (copy1.getBold() == copy2.getBold() && patch.getBold()) {
+            style.setBold(!style.getBold());
+        }
+        if (copy1.getStrikethrough() == copy2.getStrikethrough() && patch.getStrikethrough()) {
+            style.setStrikethrough(!style.getStrikethrough());
+        }
+        if (copy1.getUnderlined() == copy2.getUnderlined() && patch.getUnderlined()) {
+            style.setUnderlined(!style.getUnderlined());
+        }
+        if (copy1.getItalic() == copy2.getItalic() && patch.getItalic()) {
+            style.setItalic(!style.getItalic());
+        }
+        return style;
+    }
+    
+    public static ChatStyle invert(ChatStyle style) {
+        return invertBy(style, new ChatStyle().setColor(EnumChatFormatting.RED)
+                                              .setObfuscated(true)
+                                              .setBold(true)
+                                              .setStrikethrough(true)
+                                              .setUnderlined(true)
+                                              .setItalic(true));
     }
 }

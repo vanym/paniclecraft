@@ -10,8 +10,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.gui.element.AbstractButton;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
+import com.vanym.paniclecraft.client.gui.element.GuiStyleEditor;
 import com.vanym.paniclecraft.client.utils.AdvTextInput;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
@@ -106,6 +108,14 @@ public class GuiEditAdvSign extends GuiScreen {
         this.textColorHex =
                 new GuiHexColorField(this.fontRendererObj, xCenter + 48, this.height / 4 + 90);
         this.textColorHex.setSetter(rgb->this.getState().getText().setTextColor(new Color(rgb)));
+        List<GuiStyleEditor> stylingMenu =
+                GuiStyleEditor.createMenu(33, xCenter + 61, this.height / 4 + 25,
+                                          ()->this.getState().getInput().getStyle(),
+                                          (style)-> {
+                                              SideEditState state = this.getState();
+                                              state.getInput().applyStyle(style);
+                                              state.updateLine();
+                                          });
         this.updateElements();
         this.buttonList.clear();
         Keyboard.enableRepeatEvents(true);
@@ -117,6 +127,7 @@ public class GuiEditAdvSign extends GuiScreen {
         this.buttonList.add(this.buttonToggleStick);
         this.buttonList.add(this.buttonFlip);
         this.buttonList.add(this.sliderDir);
+        this.buttonList.addAll(stylingMenu);
     }
     
     @Override
@@ -135,7 +146,7 @@ public class GuiEditAdvSign extends GuiScreen {
     
     @Override
     protected void actionPerformed(GuiButton button) {
-        if (!button.enabled) {
+        if (AbstractButton.hook(button)) {
             return;
         }
         if (button.id == this.buttonDone.id) {

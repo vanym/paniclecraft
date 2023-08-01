@@ -84,7 +84,7 @@ public class AdvTextInput {
     
     protected void insertChar(char c, ChatStyle style) {
         if (ChatAllowedCharacters.isAllowedCharacter(c)) {
-            this.text.add(this.cursorPos, new Element(c, style.createDeepCopy()));
+            this.text.add(this.cursorPos, new Element(c, style));
             this.selectionPos = ++this.cursorPos;
         }
     }
@@ -189,6 +189,18 @@ public class AdvTextInput {
         return true;
     }
     
+    public void applyStyle(ChatStyle style) {
+        this.style = style.createShallowCopy().setParentStyle(this.style).createDeepCopy();
+        if (this.isSelected()) {
+            int min = Math.min(this.cursorPos, this.selectionPos);
+            int max = Math.max(this.cursorPos, this.selectionPos);
+            this.text.subList(min, max)
+                     .stream()
+                     .forEach(e->e.setStyle(style.createShallowCopy()
+                                                 .setParentStyle(e.copyStyle())));
+        }
+    }
+    
     public boolean isSelected() {
         return this.selectionPos != this.cursorPos;
     }
@@ -261,11 +273,15 @@ public class AdvTextInput {
     protected static class Element {
         
         public final char symbol;
-        protected final ChatStyle style;
+        protected ChatStyle style;
         
         public Element(char symbol, ChatStyle style) {
             this.symbol = symbol;
-            this.style = style;
+            this.setStyle(style);
+        }
+        
+        public void setStyle(ChatStyle style) {
+            this.style = style.createDeepCopy();
         }
         
         public ChatStyle copyStyle() {
