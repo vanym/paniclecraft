@@ -24,6 +24,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
@@ -121,6 +122,7 @@ public class GuiEditAdvSign extends GuiScreen {
     @Override
     public void onGuiClosed() {
         Keyboard.enableRepeatEvents(false);
+        this.getState().updateLine();
         Core.instance.network.sendToServer(new MessageAdvSignChange(this.sign));
     }
     
@@ -187,7 +189,8 @@ public class GuiEditAdvSign extends GuiScreen {
             this.getState().switchLine(+1);
         } else {
             AdvTextInput input = this.getState().getInput();
-            if (!input.keyTyped(character, key)) {
+            if (!input.keyTyped(character, key)
+                && ChatAllowedCharacters.isAllowedCharacter(character)) {
                 input.insertText(Character.toString(character));
             }
             this.getState().updateLine();
