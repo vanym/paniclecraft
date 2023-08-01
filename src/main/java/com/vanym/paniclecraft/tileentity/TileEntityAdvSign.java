@@ -4,11 +4,13 @@ import java.awt.Color;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.NumberUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -123,6 +125,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void setDirection(double direction) {
+        direction = NumberUtils.finite(direction);
         direction = MathHelper.wrapAngleTo180_double(direction);
         if (direction < 0) {
             direction += 360.0D;
@@ -157,5 +160,13 @@ public class TileEntityAdvSign extends TileEntityBase {
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
         return 16384.0D;
+    }
+    
+    public static boolean isValidTag(NBTTagCompound signTag) {
+        return new Color(signTag.getInteger(TAG_STANDCOLOR), true).getAlpha() == 0xff
+            && Stream.of(TAG_FRONTTEXT, TAG_BACKTEXT)
+                     .map(signTag::getCompoundTag)
+                     .map(AdvSignText::new)
+                     .allMatch(AdvSignText::isValid);
     }
 }

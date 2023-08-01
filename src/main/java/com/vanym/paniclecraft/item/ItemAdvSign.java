@@ -91,7 +91,9 @@ public class ItemAdvSign extends ItemMod3 {
                     tileAS.writeToNBT(signTag, true);
                 }
                 if (signTag != null) {
-                    putSign(stack, signTag);
+                    if (TileEntityAdvSign.isValidTag(signTag)) {
+                        putSign(stack, signTag);
+                    }
                     return true;
                 }
             }
@@ -112,7 +114,8 @@ public class ItemAdvSign extends ItemMod3 {
         TileEntity tile = world.getTileEntity(x, y, z);
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            getSign(stack).ifPresent(signTag->tileAS.readFromNBT(signTag, true));
+            getSign(stack).filter(TileEntityAdvSign::isValidTag)
+                          .ifPresent(signTag->tileAS.readFromNBT(signTag, true));
             if (pside == ForgeDirection.UP) {
                 tileAS.setStick(true);
                 double direction = Math.round(180.0D + player.rotationYaw);

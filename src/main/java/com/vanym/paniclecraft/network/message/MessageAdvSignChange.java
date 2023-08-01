@@ -1,9 +1,7 @@
 package com.vanym.paniclecraft.network.message;
 
 import java.io.IOException;
-import java.util.stream.Stream;
 
-import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -55,11 +53,7 @@ public class MessageAdvSignChange implements IMessage {
             int x = message.tag.getInteger("x");
             int y = message.tag.getInteger("y");
             int z = message.tag.getInteger("z");
-            if (!Stream.of(TileEntityAdvSign.TAG_FRONTTEXT,
-                           TileEntityAdvSign.TAG_BACKTEXT)
-                       .map(message.tag::getCompoundTag)
-                       .map(AdvSignText::new)
-                       .allMatch(AdvSignText::isValid)) {
+            if (!TileEntityAdvSign.isValidTag(message.tag)) {
                 return null;
             }
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;

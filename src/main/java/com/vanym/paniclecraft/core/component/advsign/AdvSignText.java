@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.core.component.advsign;
 import java.awt.Color;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -80,12 +81,21 @@ public class AdvSignText implements INBTSerializable<NBTTagCompound> {
     public boolean isValid() {
         int size = this.lines.size();
         return MIN_LINES <= size && size <= MAX_LINES
+            && this.textColor.getAlpha() == 0xff
+            && this.lines.stream()
+                         .flatMap(FormattingUtils::stream)
+                         .allMatch(AdvSignText::isValid)
             && this.lines.stream()
                          .map(IChatComponent::getUnformattedText)
                          .allMatch(line->line.length() <= 64 * size
                              && IntStream.range(0, line.length())
                                          .mapToObj(line::charAt)
-                                         .allMatch(ChatAllowedCharacters::isAllowedCharacter));
+                                         .allMatch(ChatAllowedCharacters::isAllowedCharacter))
+            && this.lines.stream()
+                         .allMatch(root->FormattingUtils.stream(root)
+                                                        .allMatch(comp->comp == root
+                                                            || !comp.getUnformattedTextForChat()
+                                                                    .isEmpty()));
     }
     
     public static final String TAG_LINES = "Lines";
@@ -113,5 +123,15 @@ public class AdvSignText implements INBTSerializable<NBTTagCompound> {
                  .mapToObj(linesTag::getStringTagAt)
                  .map(IChatComponent.Serializer::func_150699_a)
                  .forEachOrdered(this.lines::add);
+    }
+    
+    protected static boolean isValid(IChatComponent component) {
+        return Optional.ofNullable(component)
+                       .filter(ChatComponentText.class::isInstance)
+                       .map(IChatComponent::getChatStyle)
+                       .filter(style->style.getChatHoverEvent() == null)
+                       .filter(style->style.getChatClickEvent() == null)
+                       .filter(style->style.getColor() == null || style.getColor().isColor())
+                       .isPresent();
     }
 }
