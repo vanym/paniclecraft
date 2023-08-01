@@ -3,7 +3,12 @@ package com.vanym.paniclecraft.core.component.advsign;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
@@ -151,5 +156,27 @@ public class FormattingUtils {
                                               .setStrikethrough(true)
                                               .setUnderlined(true)
                                               .setItalic(true));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static Stream<IChatComponent> stream(IChatComponent component) {
+        return StreamSupport.stream((Spliterator<IChatComponent>)component.spliterator(), false);
+    }
+    
+    public static Stream<IChatComponent> fragmentate(IChatComponent component) {
+        return stream(component).flatMap(sub-> {
+            ChatStyle style = sub.getChatStyle();
+            String str = sub.getUnformattedTextForChat();
+            return IntStream.range(0, str.length())
+                            .mapToObj(str::charAt)
+                            .map(String::valueOf)
+                            .map(ChatComponentText::new)
+                            .peek(comp->comp.setChatStyle(style.createDeepCopy()));
+        });
+    }
+    
+    public static IChatComponent substring(IChatComponent line, int beginIndex, int endIndex) {
+        List<IChatComponent> list = fragmentate(line).collect(Collectors.toList());
+        return toComponent(list.subList(beginIndex, endIndex));
     }
 }

@@ -335,7 +335,7 @@ public class GuiEditAdvSign extends GuiScreen {
         }
         
         protected void trim() {
-            while (!this.lineFits(this.input.getComponent().getUnformattedText())
+            while (!this.lineFits(this.input.getComponent().getFormattedText())
                 && (this.input.removeBack() || this.input.removeLast())) {
             }
         }

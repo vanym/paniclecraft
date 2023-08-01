@@ -11,6 +11,7 @@ import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.utils.AdvTextInput;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
+import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import cpw.mods.fml.relauncher.Side;
@@ -109,30 +110,34 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer {
         for (int i = 0; i < size; ++i) {
             AdvTextInput input = gui != null ? gui.getInput(front, i) : null;
             IChatComponent line = input != null ? input.getComponent() : lines.get(i);
-            String basic = line.getUnformattedText();
             String colored = line.getFormattedText();
-            int width = font.getStringWidth(basic);
+            int width = font.getStringWidth(colored);
             int x = -width / 2;
             int y = i * 10 - size * 5;
             font.drawString(colored, x, y, textColor.getRGB());
             if (input == null) {
                 continue;
             }
-            int cursorOffset = font.getStringWidth(basic.substring(0, input.getCursorPos()));
+            int cursorOffset =
+                    font.getStringWidth(FormattingUtils.substring(line, 0, input.getCursorPos())
+                                                       .getFormattedText());
             int cursorX = x + cursorOffset;
             if (gui.isBlink()) {
-                if (input.getCursorPos() < basic.length()) {
+                if (input.getCursorPos() < line.getUnformattedText().length()) {
                     Gui.drawRect(cursorX, y - 1, cursorX + 1, y + font.FONT_HEIGHT,
                                  0xff000000 | textColor.getRGB());
                 } else {
                     font.drawString("_", cursorX, y, textColor.getRGB());
                 }
             }
-            if (input.isSelected()) {
-                int selOffset = font.getStringWidth(basic.substring(0, input.getSelectionPos()));
-                int selectionX = x + selOffset;
-                GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.FONT_HEIGHT);
+            if (!input.isSelected()) {
+                continue;
             }
+            int selOffset =
+                    font.getStringWidth(FormattingUtils.substring(line, 0, input.getSelectionPos())
+                                                       .getFormattedText());
+            int selectionX = x + selOffset;
+            GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.FONT_HEIGHT);
         }
         GL11.glDepthMask(true);
         GL11.glPopMatrix();
