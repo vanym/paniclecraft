@@ -159,6 +159,7 @@ public class GuiEditAdvSign extends GuiScreen {
                                              .getLines()
                                              .stream()
                                              .map(IChatComponent::getFormattedText)
+                                             .map(FormattingUtils::trimReset)
                                              .collect(Collectors.joining(System.lineSeparator())));
         } else if (button.id == this.buttonPaste.id) {
             this.getState().pasteFull(GuiScreen.getClipboardString());

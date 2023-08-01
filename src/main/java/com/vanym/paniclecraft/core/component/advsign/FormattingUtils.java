@@ -89,4 +89,15 @@ public class FormattingUtils {
             break;
         }
     }
+    
+    public static String trimReset(String str) {
+        String r = EnumChatFormatting.RESET.toString();
+        if (str.startsWith(r)) {
+            str = str.substring(r.length());
+        }
+        if (str.endsWith(r)) {
+            str = str.substring(0, str.length() - r.length());
+        }
+        return str;
+    }
 }
