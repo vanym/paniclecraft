@@ -62,6 +62,50 @@ public class ItemAdvSign extends ItemMod3 {
     }
     
     @Override
+    public boolean onItemUseFirst(
+            ItemStack stack,
+            EntityPlayer player,
+            World world,
+            int x,
+            int y,
+            int z,
+            int side,
+            float hitX,
+            float hitY,
+            float hitZ) {
+        if (player.isSneaking()) {
+            return false;
+        }
+        TileEntity tile = world.getTileEntity(x, y, z);
+        NBTTagCompound signTag = null;
+        if (tile instanceof TileEntitySign) {
+            TileEntitySign tileS = (TileEntitySign)tile;
+            signTag = new NBTTagCompound();
+            AdvSignText text = new AdvSignText();
+            List<IChatComponent> lines = text.getLines();
+            lines.clear();
+            Arrays.stream(tileS.signText)
+                  .map(ChatComponentText::new)
+                  .forEachOrdered(lines::add);
+            signTag.setTag(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
+            signTag.setTag(TileEntityAdvSign.TAG_BACKTEXT,
+                           new AdvSignText(4).serializeNBT());
+            signTag.setInteger(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());
+        } else if (tile instanceof TileEntityAdvSign) {
+            TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+            signTag = new NBTTagCompound();
+            tileAS.writeToNBT(signTag, true);
+        }
+        if (signTag != null) {
+            if (TileEntityAdvSign.isValidTag(signTag)) {
+                putSign(stack, signTag);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
     public boolean onItemUse(
             ItemStack stack,
             EntityPlayer player,
@@ -73,36 +117,6 @@ public class ItemAdvSign extends ItemMod3 {
             float hitX,
             float hitY,
             float hitZ) {
-        if (!player.isSneaking()) {
-            TileEntity tile = world.getTileEntity(x, y, z);
-            if (tile != null) {
-                NBTTagCompound signTag = null;
-                if (tile instanceof TileEntitySign) {
-                    TileEntitySign tileS = (TileEntitySign)tile;
-                    signTag = new NBTTagCompound();
-                    AdvSignText text = new AdvSignText();
-                    List<IChatComponent> lines = text.getLines();
-                    lines.clear();
-                    Arrays.stream(tileS.signText)
-                          .map(ChatComponentText::new)
-                          .forEachOrdered(lines::add);
-                    signTag.setTag(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
-                    signTag.setTag(TileEntityAdvSign.TAG_BACKTEXT,
-                                   new AdvSignText(4).serializeNBT());
-                    signTag.setInteger(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());
-                } else if (tile instanceof TileEntityAdvSign) {
-                    TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                    signTag = new NBTTagCompound();
-                    tileAS.writeToNBT(signTag, true);
-                }
-                if (signTag != null) {
-                    if (TileEntityAdvSign.isValidTag(signTag)) {
-                        putSign(stack, signTag);
-                    }
-                    return true;
-                }
-            }
-        }
         if (!world.getBlock(x, y, z).getMaterial().isSolid()) {
             return false;
         }
