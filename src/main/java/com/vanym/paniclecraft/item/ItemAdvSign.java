@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.item;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -81,10 +82,14 @@ public class ItemAdvSign extends ItemMod3 {
                     signTag = new NBTTagCompound();
                     AdvSignText text = new AdvSignText();
                     List<IChatComponent> lines = text.getLines();
+                    lines.clear();
                     Arrays.stream(tileS.signText)
                           .map(ChatComponentText::new)
                           .forEachOrdered(lines::add);
                     signTag.setTag(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
+                    signTag.setTag(TileEntityAdvSign.TAG_BACKTEXT,
+                                   new AdvSignText(4).serializeNBT());
+                    signTag.setInteger(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());
                 } else if (tile instanceof TileEntityAdvSign) {
                     TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
                     signTag = new NBTTagCompound();

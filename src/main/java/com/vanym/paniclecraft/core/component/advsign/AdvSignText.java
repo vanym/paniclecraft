@@ -22,15 +22,23 @@ public class AdvSignText implements INBTSerializable<NBTTagCompound> {
     public static final int MAX_LINES = 32;
     public static final int MIN_LINES = 1;
     
-    protected final List<IChatComponent> lines = Stream.generate(()->new ChatComponentText(""))
-                                                       .limit(5)
-                                                       .collect(Collectors.toList());
+    protected final List<IChatComponent> lines;
     
     protected Color textColor = Color.BLACK;
     
-    public AdvSignText() {}
+    public AdvSignText() {
+        this(5);
+    }
+    
+    public AdvSignText(int size) {
+        size = Math.max(MIN_LINES, Math.min(MAX_LINES, size));
+        this.lines = Stream.generate(()->new ChatComponentText(""))
+                           .limit(size)
+                           .collect(Collectors.toList());
+    }
     
     public AdvSignText(NBTTagCompound nbtTag) {
+        this(0);
         this.deserializeNBT(nbtTag);
     }
     
