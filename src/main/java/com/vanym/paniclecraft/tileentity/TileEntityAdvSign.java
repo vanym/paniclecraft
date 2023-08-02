@@ -153,6 +153,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
         return GeometryUtils.getFullBlockBox()
+                            .expand(0.25D, 0.25D, 0.25D)
                             .getOffsetBoundingBox(this.xCoord, this.yCoord, this.zCoord);
     }
     
