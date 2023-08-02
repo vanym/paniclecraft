@@ -166,8 +166,7 @@ public class ItemAdvSign extends ItemMod3 {
     }
     
     protected static void removeSign(ItemStack stack) {
-        NBTTagCompound tag = stack.getTagCompound();
-        tag.removeTag(TAG_SIGN);
+        ItemUtils.getTag(stack).ifPresent(tag->tag.removeTag(TAG_SIGN));
         ItemUtils.cleanTag(stack);
     }
     
