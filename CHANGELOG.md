@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+### Added
+ - Advanced sign on back writing
+ - Advanced sign styling menu
+
 ### Fixed
  - Thread safeness of peripherals
 

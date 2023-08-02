@@ -1,21 +1,24 @@
 package com.vanym.paniclecraft.tileentity;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
+import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
+import com.vanym.paniclecraft.utils.NumberUtils;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -24,24 +27,19 @@ public class TileEntityAdvSign extends TileEntityBase {
     public static final String IN_MOD_ID = "advanced_sign";
     public static final ResourceLocation ID = new ResourceLocation(DEF.MOD_ID, IN_MOD_ID);
     
-    public static final int MAX_LINES = 32;
-    public static final int MIN_LINES = 1;
-    
-    public static final List<String> DEFAULT_LINES = Collections.nCopies(5, "");
-    
-    public final List<String> lines = new ArrayList<>(DEFAULT_LINES);
+    protected final AdvSignText frontText = new AdvSignText();
+    protected final AdvSignText backText = new AdvSignText();
     
     protected Color standColor = Color.WHITE;
-    protected Color textColor = Color.BLACK;
     
     protected double direction = 0.0D;
     protected boolean onStick = false;
     
     protected PlayerEntity editor = null;
     
-    public static final String TAG_LINES = "Lines";
+    public static final String TAG_FRONTTEXT = "FrontText";
+    public static final String TAG_BACKTEXT = "BackText";
     public static final String TAG_STANDCOLOR = "StandColor";
-    public static final String TAG_TEXTCOLOR = "TextColor";
     
     protected static final String TAG_DIRECTION = "Direction";
     protected static final String TAG_ONSTICK = "OnStick";
@@ -56,11 +54,9 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public CompoundNBT write(CompoundNBT nbtTag, boolean toStack) {
-        ListNBT linesTag = new ListNBT();
-        this.lines.stream().map(StringNBT::new).forEachOrdered(linesTag::add);
-        nbtTag.put(TAG_LINES, linesTag);
+        nbtTag.put(TAG_FRONTTEXT, this.frontText.serializeNBT());
+        nbtTag.put(TAG_BACKTEXT, this.backText.serializeNBT());
         nbtTag.putInt(TAG_STANDCOLOR, this.standColor.getRGB());
-        nbtTag.putInt(TAG_TEXTCOLOR, this.textColor.getRGB());
         if (toStack) {
             return nbtTag;
         }
@@ -76,12 +72,25 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void read(CompoundNBT nbtTag, boolean fromStack) {
+        if (nbtTag.contains(TAG_FRONTTEXT, 10)) {
+            this.frontText.deserializeNBT(nbtTag.getCompound(TAG_FRONTTEXT));
+        }
+        if (nbtTag.contains(TAG_BACKTEXT, 10)) {
+            this.backText.deserializeNBT(nbtTag.getCompound(TAG_BACKTEXT));
+        }
         this.standColor = new Color(nbtTag.getInt(TAG_STANDCOLOR), true);
-        this.textColor = new Color(nbtTag.getInt(TAG_TEXTCOLOR), true);
-        this.lines.clear();
-        ListNBT linesTag = nbtTag.getList(TAG_LINES, 8);
-        for (int i = 0; i < linesTag.size(); ++i) {
-            this.lines.add(linesTag.getString(i));
+        // backwards compatibility with 2.12.0.0
+        if (!nbtTag.contains(TAG_FRONTTEXT)
+            && nbtTag.contains("Lines", 9)
+            && nbtTag.contains("TextColor", 3)) {
+            List<ITextComponent> lines = this.frontText.getLines();
+            lines.clear();
+            ListNBT linesTag = nbtTag.getList("Lines", 8);
+            IntStream.range(0, linesTag.size())
+                     .mapToObj(linesTag::getString)
+                     .map(FormattingUtils::parseLine)
+                     .forEachOrdered(lines::add);
+            this.frontText.setTextColor(new Color(nbtTag.getInt("TextColor"), true));
         }
         if (fromStack) {
             return;
@@ -89,6 +98,18 @@ public class TileEntityAdvSign extends TileEntityBase {
         super.read(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.onStick = nbtTag.getBoolean(TAG_ONSTICK);
+    }
+    
+    public AdvSignText getFront() {
+        return this.frontText;
+    }
+    
+    public AdvSignText getBack() {
+        return this.backText;
+    }
+    
+    public AdvSignText getSide(boolean front) {
+        return front ? this.getFront() : this.getBack();
     }
     
     public void setStandColor(Color color) {
@@ -100,15 +121,6 @@ public class TileEntityAdvSign extends TileEntityBase {
         return this.standColor;
     }
     
-    public void setTextColor(Color color) {
-        Objects.requireNonNull(color);
-        this.textColor = color;
-    }
-    
-    public Color getTextColor() {
-        return this.textColor;
-    }
-    
     public void setStick(boolean stick) {
         this.onStick = stick;
     }
@@ -118,6 +130,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void setDirection(double direction) {
+        direction = NumberUtils.finite(direction);
         direction = MathHelper.wrapDegrees(direction);
         if (direction < 0) {
             direction += 360.0D;
@@ -151,5 +164,13 @@ public class TileEntityAdvSign extends TileEntityBase {
     @OnlyIn(Dist.CLIENT)
     public double getMaxRenderDistanceSquared() {
         return 16384.0D;
+    }
+    
+    public static boolean isValidTag(CompoundNBT signTag) {
+        return new Color(signTag.getInt(TAG_STANDCOLOR), true).getAlpha() == 0xff
+            && Stream.of(TAG_FRONTTEXT, TAG_BACKTEXT)
+                     .map(signTag::getCompound)
+                     .map(AdvSignText::new)
+                     .allMatch(AdvSignText::isValid);
     }
 }

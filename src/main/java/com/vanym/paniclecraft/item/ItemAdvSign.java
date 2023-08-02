@@ -1,15 +1,17 @@
 package com.vanym.paniclecraft.item;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererAdvSign;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
+import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ItemUtils;
 
@@ -24,8 +26,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResult;
@@ -35,7 +35,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -58,13 +57,12 @@ public class ItemAdvSign extends Item {
             @Nullable World world,
             List<ITextComponent> list,
             ITooltipFlag flag) {
-        getLines(stack).ifPresent(lines-> {
+        getSide(stack, !Screen.hasControlDown()).map(AdvSignText::getLines).ifPresent(lines-> {
             if (Screen.hasShiftDown()) {
-                IntStream.range(0, lines.size())
-                         .mapToObj(lines::getString)
-                         .map(StringTextComponent::new)
-                         .peek(line->line.applyTextStyle(TextFormatting.GRAY))
-                         .forEachOrdered(list::add);
+                lines.stream()
+                     .map(ITextComponent::getString)
+                     .map(StringTextComponent::new)
+                     .forEachOrdered(list::add);
             } else {
                 list.add(new TranslationTextComponent(this.getTranslationKey() + ".showtext"));
             }
@@ -92,38 +90,50 @@ public class ItemAdvSign extends Item {
     }
     
     @Override
+    public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
+        if (context.isPlacerSneaking()) {
+            return ActionResultType.PASS;
+        }
+        World world = context.getWorld();
+        BlockPos pos = context.getPos();
+        TileEntity tile = world.getTileEntity(pos);
+        CompoundNBT signTag = null;
+        if (tile instanceof SignTileEntity) {
+            SignTileEntity tileS = (SignTileEntity)tile;
+            signTag = new CompoundNBT();
+            AdvSignText text = new AdvSignText();
+            List<ITextComponent> lines = text.getLines();
+            lines.clear();
+            Arrays.stream(tileS.signText)
+                  .map(ITextComponent::getFormattedText)
+                  .map(FormattingUtils::parseLine)
+                  .forEachOrdered(lines::add);
+            signTag.put(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
+            signTag.put(TileEntityAdvSign.TAG_BACKTEXT, new AdvSignText(4).serializeNBT());
+            signTag.putInt(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());
+        } else if (tile instanceof TileEntityAdvSign) {
+            TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+            signTag = new CompoundNBT();
+            tileAS.write(signTag, true);
+        }
+        if (signTag != null) {
+            if (TileEntityAdvSign.isValidTag(signTag)) {
+                putSign(stack, signTag);
+            }
+            return ActionResultType.SUCCESS;
+        }
+        return ActionResultType.PASS;
+    }
+    
+    @Override
     public ActionResultType onItemUse(ItemUseContext context) {
-        ItemStack stack = context.getItem();
         World world = context.getWorld();
         BlockPos pos = context.getPos();
         Direction facing = context.getFace();
-        if (!context.isPlacerSneaking()) {
-            TileEntity tile = world.getTileEntity(pos);
-            if (tile != null) {
-                CompoundNBT signTag = null;
-                if (tile instanceof SignTileEntity) {
-                    SignTileEntity tileS = (SignTileEntity)tile;
-                    signTag = new CompoundNBT();
-                    ListNBT linesTag = new ListNBT();
-                    Arrays.stream(tileS.signText)
-                          .map(ITextComponent::getFormattedText)
-                          .map(StringNBT::new)
-                          .forEachOrdered(linesTag::add);
-                    signTag.put(TileEntityAdvSign.TAG_LINES, linesTag);
-                } else if (tile instanceof TileEntityAdvSign) {
-                    TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                    signTag = new CompoundNBT();
-                    tileAS.write(signTag, true);
-                }
-                if (signTag != null) {
-                    putSign(stack, signTag);
-                    return ActionResultType.SUCCESS;
-                }
-            }
-        }
         if (!world.getBlockState(pos).getMaterial().isSolid()) {
             return ActionResultType.FAIL;
         }
+        ItemStack stack = context.getItem();
         pos = pos.offset(facing);
         Block block = Core.instance.advSign.blockAdvSign;
         PlayerEntity player = context.getPlayer();
@@ -136,7 +146,8 @@ public class ItemAdvSign extends Item {
         TileEntity tile = world.getTileEntity(pos);
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            getSign(stack).ifPresent(signTag->tileAS.read(signTag, true));
+            getSign(stack).filter(TileEntityAdvSign::isValidTag)
+                          .ifPresent(signTag->tileAS.read(signTag, true));
             if (facing == Direction.UP) {
                 tileAS.setStick(true);
                 double direction = Math.round(180.0D + player.rotationYaw);
@@ -157,7 +168,7 @@ public class ItemAdvSign extends Item {
     
     public static ItemStack getSavedSign(TileEntityAdvSign tileAS) {
         ItemStack stack = new ItemStack(Core.instance.advSign.itemAdvSign);
-        if (tileAS == null || tileAS.lines.stream().allMatch(String::isEmpty)) {
+        if (tileAS == null || (tileAS.getFront().isEmpty() && tileAS.getBack().isEmpty())) {
             return stack;
         }
         CompoundNBT signTag = new CompoundNBT();
@@ -171,8 +182,7 @@ public class ItemAdvSign extends Item {
     }
     
     protected static void removeSign(ItemStack stack) {
-        CompoundNBT tag = stack.getTag();
-        tag.remove(TAG_SIGN);
+        ItemUtils.getTag(stack).ifPresent(tag->tag.remove(TAG_SIGN));
         ItemUtils.cleanTag(stack);
     }
     
@@ -182,8 +192,10 @@ public class ItemAdvSign extends Item {
                         .map(tag->tag.getCompound(TAG_SIGN));
     }
     
-    protected static Optional<ListNBT> getLines(ItemStack stack) {
-        return getSign(stack).filter(tag->tag.contains(TileEntityAdvSign.TAG_LINES, 9))
-                             .map(tag->tag.getList(TileEntityAdvSign.TAG_LINES, 8));
+    protected static Optional<AdvSignText> getSide(ItemStack stack, boolean front) {
+        String TAG_TEXT = front ? TileEntityAdvSign.TAG_FRONTTEXT : TileEntityAdvSign.TAG_BACKTEXT;
+        return getSign(stack).filter(tag->tag.contains(TAG_TEXT, 10))
+                             .map(tag->tag.getCompound(TAG_TEXT))
+                             .map(AdvSignText::new);
     }
 }

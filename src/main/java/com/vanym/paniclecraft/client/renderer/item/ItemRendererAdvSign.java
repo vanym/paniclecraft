@@ -18,6 +18,6 @@ public class ItemRendererAdvSign extends ItemStackTileEntityRenderer {
         tileAS.setStick(true);
         ItemAdvSign.getSign(item).ifPresent(signTag->tileAS.read(signTag, true));
         Core.instance.advSign.tileAdvSignRenderer.render(tileAS, 0.0D, 0.0D, 0.0D,
-                                                         1.0F, -1, true, false, -1);
+                                                         1.0F, -1, true, false, null);
     }
 }
