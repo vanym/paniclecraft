@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -20,8 +21,8 @@ import net.minecraft.util.IChatComponent;
 
 @SideOnly(Side.CLIENT)
 public class AdvTextInput {
-    protected final Consumer<String> setClip = GuiScreen::setClipboardString;
-    protected final Supplier<String> getClip = GuiScreen::getClipboardString;
+    protected final Consumer<String> setClip = GuiUtils::setClipboardString;
+    protected final Supplier<String> getClip = GuiUtils::getClipboardString;
     
     protected final List<Element> text = new ArrayList<>();
     protected ChatStyle style = new ChatStyle();
