@@ -166,7 +166,7 @@ public class GuiChess extends GuiScreen {
     protected void movesCopy() {
         String moves = this.getMovesString();
         if (!moves.isEmpty()) {
-            GuiScreen.setClipboardString(moves);
+            GuiUtils.setClipboardString(moves);
             ITextComponent message = new TextComponentTranslation("chess.export.copy.success");
             this.mc.ingameGUI.getChatGUI().printChatMessage(message);
         }

@@ -166,15 +166,15 @@ public class GuiEditAdvSign extends GuiScreen {
                                        text.getLines().size() - 1));
             this.updateElements();
         } else if (button.id == this.buttonCopy.id) {
-            GuiScreen.setClipboardString(this.getState()
-                                             .getText()
-                                             .getLines()
-                                             .stream()
-                                             .map(ITextComponent::getFormattedText)
-                                             .map(FormattingUtils::trimReset)
-                                             .collect(Collectors.joining(System.lineSeparator())));
+            GuiUtils.setClipboardString(this.getState()
+                                            .getText()
+                                            .getLines()
+                                            .stream()
+                                            .map(ITextComponent::getFormattedText)
+                                            .map(FormattingUtils::trimReset)
+                                            .collect(Collectors.joining(System.lineSeparator())));
         } else if (button.id == this.buttonPaste.id) {
-            this.getState().pasteFull(GuiScreen.getClipboardString());
+            this.getState().pasteFull(GuiUtils.getClipboardString());
             this.updateElements();
         } else if (button.id == this.buttonToggleStick.id) {
             this.sign.setStick(!this.sign.onStick());

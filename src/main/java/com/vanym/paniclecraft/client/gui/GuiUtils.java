@@ -67,4 +67,12 @@ public class GuiUtils {
             return new Point2D.Double(x, y);
         }
     }
+    
+    public static void setClipboardString(String string) {
+        GuiScreen.setClipboardString(string);
+    }
+    
+    public static String getClipboardString() {
+        return GuiScreen.getClipboardString();
+    }
 }
