@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -41,6 +42,10 @@ public class GuiUtils {
         tessellator.draw();
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+    }
+    
+    public static void drawHighlight(int x1, int y1, int x2, int y2) {
+        new GuiTextField(0, null, 0, 0, Integer.MAX_VALUE, 0).drawSelectionBox(x1, y1, x2, y2);
     }
     
     public static Point2D.Double getMousePoint() {

@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.utils.NumberUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.entity.item.EntityItem;
@@ -88,8 +89,8 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     protected void readAsync(NBTTagCompound nbtTag) {
         super.readFromNBT(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
-        this.height = nbtTag.getDouble(TAG_HEIGHT);
-        this.strength = nbtTag.getDouble(TAG_STRENGTH);
+        this.height = NumberUtils.finite(nbtTag.getDouble(TAG_HEIGHT));
+        this.strength = NumberUtils.finite(nbtTag.getDouble(TAG_STRENGTH));
         this.vector = null;
         this.timeout = nbtTag.getInteger(TAG_TIMEOUT);
         if (nbtTag.hasKey(TAG_STACK, 10)) {
@@ -121,6 +122,7 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     }
     
     public void setDirection(double direction) {
+        direction = NumberUtils.finite(direction);
         direction = MathHelper.wrapDegrees(direction);
         if (direction < 0) {
             direction += 360.0D;

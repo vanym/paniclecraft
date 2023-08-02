@@ -1,16 +1,25 @@
 package com.vanym.paniclecraft.client.renderer.tileentity;
 
 import java.awt.Color;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
+import com.vanym.paniclecraft.client.utils.AdvTextInput;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
+import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.model.ModelSign;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -31,9 +40,8 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             int destroyStage,
             boolean statik,
             boolean inWorld,
-            int selectLine) {
+            GuiEditAdvSign gui) {
         GlStateManager.pushMatrix();
-        float scale = 0.6666667F;
         GlStateManager.translate((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
         this.modelSign.signStick.showModel = tileAS.onStick();
         if (!statik) {
@@ -80,6 +88,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
         if (inWorld) {
             GlStateManager.enableRescaleNormal();
         }
+        float scale = 0.6666667F;
         GlStateManager.pushMatrix();
         GlStateManager.scale(scale, -scale, -scale);
         if (destroyStage < 0) {
@@ -90,25 +99,8 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
         this.modelSign.renderSign();
         GlStateManager.popMatrix();
         if (destroyStage < 0) {
-            FontRenderer fontRenderer = this.getFontRenderer();
-            int size = tileAS.lines.size();
-            float textScale = 0.016666668F * scale * 4.0F / Math.max(1, size);
-            GlStateManager.translate(0.0F, 0.5F * scale, 0.07F * scale);
-            GlStateManager.scale(textScale, -textScale, textScale);
-            GlStateManager.glNormal3f(0.0F, 0.0F, -1.0F * textScale);
-            GlStateManager.depthMask(false);
-            Color textColor = tileAS.getTextColor();
-            for (int i = 0; i < size; ++i) {
-                String line = tileAS.lines.get(i);
-                if (selectLine == i) {
-                    line = String.format("> %s <", line);
-                }
-                if (fontRenderer != null) {
-                    fontRenderer.drawString(line, -fontRenderer.getStringWidth(line) / 2,
-                                            i * 10 - size * 5, textColor.getRGB());
-                }
-            }
-            GlStateManager.depthMask(true);
+            Stream.of(true, false)
+                  .forEach(side->this.renderSignText(tileAS.getSide(side), side, gui));
         }
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.popMatrix();
@@ -117,6 +109,58 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             GlStateManager.popMatrix();
             GlStateManager.matrixMode(GL11.GL_MODELVIEW);
         }
+    }
+    
+    protected void renderSignText(AdvSignText text, boolean front, GuiEditAdvSign gui) {
+        float scale = 0.6666667F;
+        FontRenderer font = this.getFontRenderer();
+        if (font == null) {
+            return;
+        }
+        List<ITextComponent> lines = text.getLines();
+        int size = lines.size();
+        float textScale = scale * 0.016666668F * 4.0F / Math.max(1, size);
+        GlStateManager.pushMatrix();
+        GlStateManager.rotate(front ? 0.0F : 180.0F, 0.0F, 1.0F, 0.0F);
+        GlStateManager.translate(0.0F, 0.5F * scale, 0.07F * scale);
+        GlStateManager.scale(textScale, -textScale, textScale);
+        GlStateManager.glNormal3f(0.0F, 0.0F, -1.0F * textScale);
+        GlStateManager.depthMask(false);
+        Color textColor = text.getTextColor();
+        for (int i = 0; i < size; ++i) {
+            AdvTextInput input = gui != null ? gui.getInput(front, i) : null;
+            ITextComponent line = input != null ? input.getComponent() : lines.get(i);
+            String colored = line.getFormattedText();
+            int width = font.getStringWidth(colored);
+            int x = -width / 2;
+            int y = i * 10 - size * 5;
+            font.drawString(colored, x, y, textColor.getRGB());
+            if (input == null) {
+                continue;
+            }
+            int cursorOffset =
+                    font.getStringWidth(FormattingUtils.substring(line, 0, input.getCursorPos())
+                                                       .getFormattedText());
+            int cursorX = x + cursorOffset;
+            if (gui.isBlink()) {
+                if (input.getCursorPos() < line.getUnformattedText().length()) {
+                    Gui.drawRect(cursorX, y - 1, cursorX + 1, y + font.FONT_HEIGHT,
+                                 0xff000000 | textColor.getRGB());
+                } else {
+                    font.drawString("_", cursorX, y, textColor.getRGB());
+                }
+            }
+            if (!input.isSelected()) {
+                continue;
+            }
+            int selOffset =
+                    font.getStringWidth(FormattingUtils.substring(line, 0, input.getSelectionPos())
+                                                       .getFormattedText());
+            int selectionX = x + selOffset;
+            GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.FONT_HEIGHT);
+        }
+        GlStateManager.depthMask(true);
+        GlStateManager.popMatrix();
     }
     
     @Override
@@ -128,6 +172,6 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             float partialTicks,
             int destroyStage,
             float alpha) {
-        this.render(tileAS, x, y, z, partialTicks, destroyStage, false, true, -1);
+        this.render(tileAS, x, y, z, partialTicks, destroyStage, false, true, null);
     }
 }

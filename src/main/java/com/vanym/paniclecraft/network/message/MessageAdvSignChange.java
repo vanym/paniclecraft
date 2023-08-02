@@ -7,8 +7,8 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.EncoderException;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -21,8 +21,8 @@ public class MessageAdvSignChange implements IMessage {
     
     public MessageAdvSignChange() {}
     
-    public MessageAdvSignChange(TileEntityAdvSign tileAS) {
-        tileAS.writeToNBT(this.tag = new NBTTagCompound());
+    public MessageAdvSignChange(TileEntityAdvSign sign) {
+        sign.writeToNBT(this.tag = new NBTTagCompound());
     }
     
     @Override
@@ -55,22 +55,14 @@ public class MessageAdvSignChange implements IMessage {
             int x = message.tag.getInteger("x");
             int y = message.tag.getInteger("y");
             int z = message.tag.getInteger("z");
-            NBTTagList linesTag = message.tag.getTagList(TileEntityAdvSign.TAG_LINES, 8);
-            int size = linesTag.tagCount();
-            if (size > TileEntityAdvSign.MAX_LINES || size < TileEntityAdvSign.MIN_LINES) {
+            if (!TileEntityAdvSign.isValidTag(message.tag)) {
                 return;
             }
-            for (int i = 0; i < size; ++i) {
-                String line = linesTag.getStringTagAt(i);
-                if (line.length() > 64 * size) {
-                    return;
-                }
-            }
-            TileEntity tile =
-                    ctx.getServerHandler().player.world.getTileEntity(new BlockPos(x, y, z));
-            if (tile != null && tile instanceof TileEntityAdvSign) {
+            EntityPlayerMP player = ctx.getServerHandler().player;
+            TileEntity tile = player.world.getTileEntity(new BlockPos(x, y, z));
+            if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                if (tileAS.isEditor(ctx.getServerHandler().player)) {
+                if (tileAS.isEditor(player)) {
                     tileAS.resetEditor();
                 } else {
                     return;

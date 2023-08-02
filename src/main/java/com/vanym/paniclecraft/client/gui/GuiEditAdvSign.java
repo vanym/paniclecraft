@@ -3,14 +3,20 @@ package com.vanym.paniclecraft.client.gui;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.stream.IntStream;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.lwjgl.input.Keyboard;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.gui.element.AbstractButton;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
+import com.vanym.paniclecraft.client.gui.element.GuiStyleEditor;
+import com.vanym.paniclecraft.client.utils.AdvTextInput;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
+import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ColorUtils;
@@ -20,32 +26,45 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiEditAdvSign extends GuiScreen {
     
-    protected final TileEntityAdvSign tileAS;
+    protected final TileEntityAdvSign sign;
     
-    protected int editLine = 0;
+    protected final SideEditState frontState;
+    protected final SideEditState backState;
+    
+    protected boolean front;
+    
     protected int updateCounter;
     
     protected GuiButton buttonDone;
     protected GuiButton buttonCopy;
     protected GuiButton buttonPaste;
-    protected GuiButton buttonAddSect;
     protected GuiButton buttonAddLine;
     protected GuiButton buttonRemoveLine;
     protected GuiButton buttonToggleStick;
+    protected GuiButton buttonFlip;
     
     protected GuiCircularSlider sliderDir;
     
     protected GuiHexColorField standColorHex;
     protected GuiHexColorField textColorHex;
     
-    public GuiEditAdvSign(TileEntityAdvSign tileAS) {
-        this.tileAS = tileAS;
+    public GuiEditAdvSign(TileEntityAdvSign sign) {
+        this(sign, true);
+    }
+    
+    public GuiEditAdvSign(TileEntityAdvSign sign, boolean front) {
+        this.sign = sign;
+        this.front = front;
+        this.frontState = new SideEditState(sign.getFront());
+        this.backState = new SideEditState(sign.getBack());
     }
     
     @Override
@@ -61,17 +80,15 @@ public class GuiEditAdvSign extends GuiScreen {
                 20,
                 20,
                 "-");
-        this.buttonAddSect =
-                new GuiButton(3, xCenter - 100, this.height / 4 + 99, 20, 20, "+\u00a7");
         this.buttonCopy =
-                new GuiButton(4, xCenter - 79, this.height / 4 + 99, 30, 20, "Copy");
+                new GuiButton(4, xCenter - 100, this.height / 4 + 99, 40, 20, "Copy");
         this.buttonPaste =
-                new GuiButton(5, xCenter - 48, this.height / 4 + 99, 30, 20, "Paste");
+                new GuiButton(5, xCenter - 59, this.height / 4 + 99, 40, 20, "Paste");
         this.buttonToggleStick =
-                new GuiButton(14, xCenter - 100, this.height / 4 + 78, 70, 20, "Toggle Stick");
-        this.lineButtonsUpdate();
-        this.sliderDir = new GuiCircularSlider(15, xCenter - 100, this.height / 4 + 36, 40, 40);
-        this.sliderDir.setGetter(()->this.tileAS.getDirection() / 360.0D);
+                new GuiButton(14, xCenter - 100, this.height / 4 + 57, 55, 20, "Stick: ");
+        this.buttonFlip = new GuiButton(20, xCenter - 100, this.height / 4 + 78, 60, 20, "Side: ");
+        this.sliderDir = new GuiCircularSlider(15, xCenter - 100, this.height / 4 + 15, 40, 40);
+        this.sliderDir.setGetter(()->this.sign.getDirection() / 360.0D);
         this.sliderDir.setSetter(v-> {
             v *= 16.0D;
             if (GuiScreen.isShiftKeyDown()) {
@@ -79,7 +96,7 @@ public class GuiEditAdvSign extends GuiScreen {
             }
             v *= 22.5D;
             v = (double)Math.round(v);
-            this.tileAS.setDirection(v);
+            this.sign.setDirection(v);
         });
         this.sliderDir.setOffset(-0.25D);
         this.standColorHex =
@@ -88,28 +105,37 @@ public class GuiEditAdvSign extends GuiScreen {
                         this.fontRenderer,
                         xCenter + 48,
                         this.height / 4 + 106);
-        this.standColorHex.setRGB(ColorUtils.getAlphaless(this.tileAS.getStandColor()));
-        this.standColorHex.setSetter(rgb->this.tileAS.setStandColor(new Color(rgb)));
+        this.standColorHex.setSetter(rgb->this.sign.setStandColor(new Color(rgb)));
         this.textColorHex =
                 new GuiHexColorField(2, this.fontRenderer, xCenter + 48, this.height / 4 + 90);
-        this.textColorHex.setRGB(ColorUtils.getAlphaless(this.tileAS.getTextColor()));
-        this.textColorHex.setSetter(rgb->this.tileAS.setTextColor(new Color(rgb)));
+        this.textColorHex.setSetter(rgb->this.getState().getText().setTextColor(new Color(rgb)));
+        List<GuiStyleEditor> stylingMenu =
+                GuiStyleEditor.createMenu(33, xCenter + 61, this.height / 4 + 25,
+                                          ()->this.getState().getInput().getStyle(),
+                                          (style)-> {
+                                              SideEditState state = this.getState();
+                                              state.getInput().applyStyle(style);
+                                              state.updateLine();
+                                          });
+        this.updateElements();
         this.buttonList.clear();
         Keyboard.enableRepeatEvents(true);
         this.buttonList.add(this.buttonDone);
         this.buttonList.add(this.buttonRemoveLine);
         this.buttonList.add(this.buttonAddLine);
-        this.buttonList.add(this.buttonAddSect);
         this.buttonList.add(this.buttonCopy);
         this.buttonList.add(this.buttonPaste);
         this.buttonList.add(this.buttonToggleStick);
+        this.buttonList.add(this.buttonFlip);
         this.buttonList.add(this.sliderDir);
+        this.buttonList.addAll(stylingMenu);
     }
     
     @Override
     public void onGuiClosed() {
         Keyboard.enableRepeatEvents(false);
-        Core.instance.network.sendToServer(new MessageAdvSignChange(this.tileAS));
+        this.getState().updateLine();
+        Core.instance.network.sendToServer(new MessageAdvSignChange(this.sign));
     }
     
     @Override
@@ -121,35 +147,41 @@ public class GuiEditAdvSign extends GuiScreen {
     
     @Override
     protected void actionPerformed(GuiButton button) {
-        if (!button.enabled) {
+        if (AbstractButton.hook(button)) {
             return;
         }
         if (button.id == this.buttonDone.id) {
             this.mc.displayGuiScreen(null);
         } else if (button.id == this.buttonAddLine.id) {
-            if (this.tileAS.lines.size() >= TileEntityAdvSign.MAX_LINES) {
-                return;
-            }
-            this.tileAS.lines.add("");
-            this.lineButtonsUpdate();
+            AdvSignText text = this.getState().getText();
+            text.getLines().add(new TextComponentString(""));
+            text.fixSize();
+            this.updateElements();
         } else if (button.id == this.buttonRemoveLine.id) {
-            if (this.tileAS.lines.size() <= TileEntityAdvSign.MIN_LINES) {
-                return;
-            }
-            int last = this.tileAS.lines.size() - 1;
-            this.tileAS.lines.remove(last);
-            this.editLine = Math.min(this.editLine, last - 1);
-            IntStream.range(0, this.tileAS.lines.size()).forEach(this::refitText);
-            this.lineButtonsUpdate();
-        } else if (button.id == this.buttonAddSect.id) {
-            this.addText("\u00a7");
+            AdvSignText text = this.getState().getText();
+            text.removeLast();
+            text.fixSize();
+            this.getState()
+                .switchToLine(Math.min(this.getState().getLine(),
+                                       text.getLines().size() - 1));
+            this.updateElements();
         } else if (button.id == this.buttonCopy.id) {
-            GuiScreen.setClipboardString(String.join(System.lineSeparator(), this.tileAS.lines));
+            GuiScreen.setClipboardString(this.getState()
+                                             .getText()
+                                             .getLines()
+                                             .stream()
+                                             .map(ITextComponent::getFormattedText)
+                                             .map(FormattingUtils::trimReset)
+                                             .collect(Collectors.joining(System.lineSeparator())));
         } else if (button.id == this.buttonPaste.id) {
-            this.pasteFull(GuiScreen.getClipboardString());
-            this.lineButtonsUpdate();
+            this.getState().pasteFull(GuiScreen.getClipboardString());
+            this.updateElements();
         } else if (button.id == this.buttonToggleStick.id) {
-            this.tileAS.setStick(!this.tileAS.onStick());
+            this.sign.setStick(!this.sign.onStick());
+            this.updateElements();
+        } else if (button.id == this.buttonFlip.id) {
+            this.front = !this.front;
+            this.updateElements();
         }
     }
     
@@ -163,61 +195,18 @@ public class GuiEditAdvSign extends GuiScreen {
             this.actionPerformed(this.buttonDone);
             return;
         }
-        switch (character) {
-            case 3: // Ctrl+c
-                GuiScreen.setClipboardString(this.getCurrentLine());
-            break;
-            case 22: // Ctrl+v
-                this.addText(GuiScreen.getClipboardString());
-            break;
-            case 24: // Ctrl+x
-                GuiScreen.setClipboardString(this.getCurrentLine());
-                this.setCurrentLine("");
-            break;
-            default:
-                switch (key) {
-                    case 14: { // backspace
-                        String line = this.getCurrentLine();
-                        if (line.length() > 0) {
-                            if (GuiScreen.isCtrlKeyDown()) {
-                                this.setCurrentLine("");
-                            } else {
-                                this.setCurrentLine(line.substring(0, line.length() - 1));
-                            }
-                        }
-                    }
-                    break;
-                    case 200: // up
-                        --this.editLine;
-                        if (this.editLine < 0) {
-                            this.editLine = this.tileAS.lines.size() - 1;
-                        }
-                    break;
-                    case 15: // tab
-                    case 28: // enter
-                    case 156: // enter numpad
-                    case 208: // down
-                        ++this.editLine;
-                        if (this.editLine >= this.tileAS.lines.size()) {
-                            this.editLine = 0;
-                        }
-                    break;
-                    case 211: { // delete
-                        String line = this.getCurrentLine();
-                        if (line.length() > 0) {
-                            if (GuiScreen.isCtrlKeyDown()) {
-                                this.setCurrentLine("");
-                            } else {
-                                this.setCurrentLine(line.substring(1));
-                            }
-                        }
-                    }
-                    break;
-                    default:
-                        this.addText(Character.toString(character));
-                    break;
-                }
-            break;
+        if (key == 200 /* up */ || key == 201 /* page up */) {
+            this.getState().switchLine(-1);
+        } else if (Stream.of(208, 209, 15, 28, 156 /* down, page down, tab, enter, enter numpad */)
+                         .anyMatch(code->code == key)) {
+            this.getState().switchLine(+1);
+        } else {
+            AdvTextInput input = this.getState().getInput();
+            if (!input.keyTyped(character, key)
+                && ChatAllowedCharacters.isAllowedCharacter(character)) {
+                input.insertText(Character.toString(character));
+            }
+            this.getState().updateLine();
         }
     }
     
@@ -249,7 +238,7 @@ public class GuiEditAdvSign extends GuiScreen {
             return;
         }
         this.drawSign();
-        String linesText = String.format("Lines:%2d", this.tileAS.lines.size());
+        String linesText = String.format("Lines:%2d", this.getState().getText().getLines().size());
         int linesTextWidth = this.fontRenderer.getStringWidth(linesText);
         this.drawString(this.fontRenderer, linesText,
                         this.buttonAddLine.x - 2 - linesTextWidth,
@@ -274,75 +263,116 @@ public class GuiEditAdvSign extends GuiScreen {
         GlStateManager.translate(this.width / 2, 0.0F, 50.0F);
         float scale = 93.75F;
         GlStateManager.scale(-scale, -scale, -scale);
-        GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(this.front ? 180.0F : 0.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.translate(0.0F, -1.0625F, 0.0F);
-        
-        int selectLine = -1;
-        if (this.updateCounter / 6 % 2 == 0) {
-            selectLine = this.editLine;
-        }
-        
-        Core.instance.advSign.tileAdvSignRenderer.render(this.tileAS, -0.5D, -0.75D,
+        Core.instance.advSign.tileAdvSignRenderer.render(this.sign, -0.5D, -0.75D,
                                                          -0.5D, 0.0F, -1, true, false,
-                                                         selectLine);
+                                                         this);
         GlStateManager.popMatrix();
     }
     
-    protected void lineButtonsUpdate() {
-        this.buttonAddLine.enabled = (this.tileAS.lines.size() < TileEntityAdvSign.MAX_LINES);
-        this.buttonRemoveLine.enabled = (this.tileAS.lines.size() > TileEntityAdvSign.MIN_LINES);
+    public boolean isBlink() {
+        return this.updateCounter / 6 % 2 == 0;
     }
     
-    protected void pasteFull(String text) {
-        this.tileAS.lines.clear();
-        Arrays.stream(text.split("\\R", TileEntityAdvSign.MAX_LINES))
-              .limit(TileEntityAdvSign.MAX_LINES)
-              .forEachOrdered(this.tileAS.lines::add);
-        IntStream.range(0, this.tileAS.lines.size()).forEach(this::refitText);
+    public AdvTextInput getInput(boolean front, int line) {
+        return this.getState(front).getInput(line);
     }
     
-    protected void setCurrentLine(String line) {
-        this.tileAS.lines.set(this.editLine, line);
+    protected SideEditState getState() {
+        return this.getState(this.front);
     }
     
-    protected String getCurrentLine() {
-        return this.tileAS.lines.get(this.editLine);
+    protected SideEditState getState(boolean front) {
+        return front ? this.frontState : this.backState;
     }
     
-    protected void addText(String text) {
-        this.addText(text, this.editLine);
+    protected void updateElements() {
+        this.buttonAddLine.enabled = !this.getState().getText().isMax();
+        this.buttonRemoveLine.enabled = !this.getState().getText().isMin();
+        this.standColorHex.setRGB(ColorUtils.getAlphaless(this.sign.getStandColor()));
+        this.textColorHex.setRGB(ColorUtils.getAlphaless(this.getState().getText().getTextColor()));
+        this.buttonToggleStick.displayString = "Stick: " + (this.sign.onStick() ? "ON" : "OFF");
+        this.buttonFlip.displayString = "Side: " + (this.front ? "Front" : "Back");
     }
     
-    protected void addText(String text, int lineIndex) {
-        String line = this.tileAS.lines.get(lineIndex);
-        StringBuilder sb = new StringBuilder(line);
-        char[] chars = text.toCharArray();
-        for (int i = 0; i < chars.length; ++i) {
-            char c = chars[i];
-            if (c != '\u00a7' && !ChatAllowedCharacters.isAllowedCharacter(c)) {
-                continue;
-            }
-            sb.append(c);
-            if (!this.lineFits(sb)) {
-                sb.deleteCharAt(sb.length() - 1);
-                break;
+    protected class SideEditState {
+        
+        public final AdvTextInput input = new AdvTextInput();
+        protected final AdvSignText text;
+        
+        protected int editLine = 0;
+        
+        public SideEditState(AdvSignText text) {
+            this.text = text;
+            this.switchLine(0);
+        }
+        
+        public void switchLine(int offset) {
+            this.switchToLine(this.editLine + offset);
+        }
+        
+        public void switchToLine(int line) {
+            int size = this.text.getLines().size();
+            if (size > 0) {
+                this.editLine = (size + line % size) % size;
+                this.input.read(this.text.getLines().get(this.editLine));
             }
         }
-        this.tileAS.lines.set(lineIndex, sb.toString());
-    }
-    
-    protected void refitText(int lineIndex) {
-        String line = this.tileAS.lines.get(lineIndex);
-        this.tileAS.lines.set(lineIndex, "");
-        this.addText(line, lineIndex);
-    }
-    
-    protected int getMaxLineFontWidth() {
-        int lines = this.tileAS.lines.size();
-        return 23 * lines;
-    }
-    
-    protected boolean lineFits(CharSequence line) {
-        return this.fontRenderer.getStringWidth(line.toString()) <= this.getMaxLineFontWidth();
+        
+        public void pasteFull(String text) {
+            List<ITextComponent> lines = this.text.getLines();
+            lines.clear();
+            Arrays.stream(text.split("\\R", AdvSignText.MAX_LINES))
+                  .limit(AdvSignText.MAX_LINES)
+                  .map(FormattingUtils::parseLine)
+                  .forEachOrdered(lines::add);
+            for (int i = 0; i < lines.size(); i++) {
+                this.switchToLine(i);
+                this.trim();
+                this.updateLine();
+            }
+        }
+        
+        protected void trim() {
+            while (!this.lineFits(this.input.getComponent().getFormattedText())
+                && (this.input.removeBack() || this.input.removeLast())) {
+            }
+        }
+        
+        protected boolean lineFits(CharSequence line) {
+            int max = this.getMaxLineFontWidth();
+            return GuiEditAdvSign.this.fontRenderer.getStringWidth(line.toString()) <= max;
+        }
+        
+        public void updateLine() {
+            this.trim();
+            try {
+                this.text.getLines().set(this.editLine, this.input.getComponent());
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        public int getLine() {
+            return this.editLine;
+        }
+        
+        public AdvTextInput getInput() {
+            return this.input;
+        }
+        
+        public AdvSignText getText() {
+            return this.text;
+        }
+        
+        public AdvTextInput getInput(int line) {
+            return this.editLine == line ? this.input : null;
+        }
+        
+        protected int getMaxLineFontWidth() {
+            int size = this.text.getLines().size();
+            return 23 * size;
+        }
     }
 }
