@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -18,6 +20,7 @@ import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
@@ -151,15 +154,16 @@ public class GuiEditAdvSign extends Screen {
         this.addButton(this.buttonToggleStick);
         this.addButton(this.buttonFlip);
         this.addButton(this.sliderDir);
+        this.addButton(this.standColorHex);
+        this.addButton(this.textColorHex);
         stylingMenu.forEach(this::addButton);
     }
     
     @Override
-    public void onClose() {
+    public void removed() {
         this.minecraft.keyboardListener.enableRepeatEvents(false);
         this.getState().updateLine();
         Core.instance.network.sendToServer(new MessageAdvSignChange(this.sign));
-        super.onClose();
     }
     
     @Override
@@ -206,56 +210,76 @@ public class GuiEditAdvSign extends Screen {
     }
     
     @Override
-    public boolean charTyped(char character, int key) {
-        if (this.standColorHex.charTyped(character, key)
-            || this.textColorHex.charTyped(character, key)) {
-            return true;
-        }
-        if (key == 1) {
-            this.actionPerformed(this.buttonDone);
-            return true;
-        }
-        if (key == 200 /* up */ || key == 201 /* page up */) {
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (key == 265 /* up */ || key == 266 /* page up */) {
             this.getState().switchLine(-1);
-        } else if (Stream.of(208, 209, 15, 28, 156 /* down, page down, tab, enter, enter numpad */)
+            return true;
+        } else if (Stream.of(264, 267, 258, 257, 335
+        /* down, page down, tab, enter, enter numpad */)
                          .anyMatch(code->code == key)) {
             this.getState().switchLine(+1);
+            return true;
+        } else if (super.keyPressed(key, scanCode, modifiers)) {
+            return true;
         } else {
             AdvTextInput input = this.getState().getInput();
-            if (!input.keyTyped(character, key)
-                && SharedConstants.isAllowedCharacter(character)) {
-                input.insertText(Character.toString(character));
+            if (input.keyPressed(key, scanCode, modifiers)) {
+                this.getState().updateLine();
+                return true;
             }
-            this.getState().updateLine();
         }
-        return true;
+        return false;
+    }
+    
+    @Override
+    public boolean charTyped(char character, int key) {
+        if (super.charTyped(character, key)) {
+            return true;
+        }
+        if (SharedConstants.isAllowedCharacter(character)) {
+            AdvTextInput input = this.getState().getInput();
+            input.insertText(Character.toString(character));
+            this.getState().updateLine();
+            return true;
+        }
+        return false;
     }
     
     @Override
     public boolean mouseClicked(double x, double y, int eventButton) {
-        return this.standColorHex.mouseClicked(x, y, eventButton)
-            || this.textColorHex.mouseClicked(x, y, eventButton)
-            || super.mouseClicked(x, y, eventButton);
+        return super.mouseClicked(x, y, eventButton);
     }
     
     @Override
     public boolean mouseDragged(double x, double y, int button, double dragX, double dragY) {
-        if (super.mouseDragged(x, y, button, dragX, dragY)) {
+        if (this.getFocused() != null && this.isDragging()
+            && this.getFocused().mouseDragged(x, y, button, dragX, dragY)) {
             return true;
         }
-        Stream<GuiCircularSlider> sliders = this.buttons.stream()
-                                                        .filter(GuiCircularSlider.class::isInstance)
-                                                        .map(GuiCircularSlider.class::cast);
-        return sliders.anyMatch(s->s.mouseDragged(x, y, button, dragX, dragY));
+        return super.mouseDragged(x, y, button, dragX, dragY);
+    }
+    
+    @Override
+    public void setFocused(@Nullable IGuiEventListener child) {
+        super.setFocused(child);
+        Stream.of(this.standColorHex, this.textColorHex)
+              .filter(f->f != child)
+              .forEach(f->f.setFocused2(false));
+    }
+    
+    protected boolean isRotating() {
+        return this.getFocused() == this.sliderDir
+            && this.sliderDir.isPressed()
+            && this.isDragging();
     }
     
     @Override
     public void render(int mouseX, int mouseY, float renderPartialTicks) {
-        if (!this.sliderDir.isPressed()) {
+        if (!this.isRotating()) {
             this.renderBackground();
         }
         this.drawCenteredString(this.font, I18n.format("sign.edit"), this.width / 2, 40, 0xffffff);
-        if (this.sliderDir.isPressed()) {
+        if (this.isRotating()) {
             this.sliderDir.render(mouseX, mouseY, renderPartialTicks);
             return;
         }
@@ -270,13 +294,11 @@ public class GuiEditAdvSign extends Screen {
         this.drawString(this.font, standText,
                         this.standColorHex.x - 2 - standTextWidth,
                         this.standColorHex.y + 3, 0xffffff);
-        this.standColorHex.render(mouseX, mouseY, renderPartialTicks);
         String textText = "Text:";
         int textTextWidth = this.font.getStringWidth(textText);
         this.drawString(this.font, textText,
                         this.textColorHex.x - 2 - textTextWidth,
                         this.textColorHex.y + 3, 0xffffff);
-        this.textColorHex.render(mouseX, mouseY, renderPartialTicks);
         super.render(mouseX, mouseY, renderPartialTicks);
     }
     

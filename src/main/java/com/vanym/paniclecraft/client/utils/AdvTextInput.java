@@ -29,42 +29,42 @@ public class AdvTextInput {
     protected int cursorPos;
     protected int selectionPos;
     
-    public boolean keyTyped(char character, int key) {
-        if (character == 1 /* ctrl+a */) {
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (Screen.isSelectAll(key) /* ctrl+a */) {
             this.selectAll();
             return true;
-        } else if (character == 3 /* ctrl+c */) {
+        } else if (Screen.isCopy(key) /* ctrl+c */) {
             this.copy();
             return true;
-        } else if (character == 22 /* ctrl+v */) {
+        } else if (Screen.isPaste(key) /* ctrl+v */) {
             this.paste();
             return true;
-        } else if (character == 24 /* ctrl+x */) {
+        } else if (Screen.isCut(key) /* ctrl+x */) {
             this.cut();
             return true;
         } else {
             boolean words = Screen.hasControlDown();
-            if (key == 14 /* backspace */) {
+            if (key == 259 /* backspace */) {
                 this.backspace(words);
                 return true;
-            } else if (key == 211 /* delete */) {
+            } else if (key == 261 /* delete */) {
                 this.delete(words);
                 return true;
             } else {
                 boolean select = Screen.hasShiftDown();
-                if (key == 205 /* right */) {
+                if (key == 262 /* right */) {
                     this.right(select, words);
                     return true;
-                } else if (key == 203 /* left */) {
+                } else if (key == 263 /* left */) {
                     this.left(select, words);
                     return true;
-                } else if (key == 199 /* home */ || key == 71 /* shift + home numpad */) {
+                } else if (key == 268 /* home */) {
                     this.home(select);
                     return true;
-                } else if (key == 207 /* end */ || key == 79 /* shift + end numpad */) {
+                } else if (key == 269 /* end */) {
                     this.end(select);
                     return true;
-                } else if (key == 210 /* insert */) {
+                } else if (key == 260 /* insert */) {
                     // nope
                 }
             }
@@ -234,10 +234,10 @@ public class AdvTextInput {
     public void read(ITextComponent line) {
         line = FormattingUtils.parseLine(line.getFormattedText());
         this.clear();
-        for (ITextComponent sub : line) {
+        line.stream().forEachOrdered(sub-> {
             this.style = sub.getStyle();
             this.insertText(sub.getUnformattedComponentText());
-        }
+        });
     }
     
     public Style getStyle() {

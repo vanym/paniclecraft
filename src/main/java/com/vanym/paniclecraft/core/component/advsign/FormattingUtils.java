@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -158,7 +157,7 @@ public class FormattingUtils {
     }
     
     public static Stream<ITextComponent> stream(ITextComponent component) {
-        return StreamSupport.stream(component.spliterator(), false);
+        return component.stream();
     }
     
     public static Stream<ITextComponent> fragmentate(ITextComponent component) {
