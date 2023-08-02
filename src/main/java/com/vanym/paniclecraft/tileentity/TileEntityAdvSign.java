@@ -74,7 +74,7 @@ public class TileEntityAdvSign extends TileEntityBase {
             this.backText.deserializeNBT(nbtTag.getCompoundTag(TAG_BACKTEXT));
         }
         this.standColor = new Color(nbtTag.getInteger(TAG_STANDCOLOR), true);
-        // backwards compatibility with 2.7.0.0
+        // backwards compatibility with 2.12.0.0
         if (!nbtTag.hasKey(TAG_FRONTTEXT)
             && nbtTag.hasKey("Lines", 9)
             && nbtTag.hasKey("TextColor", 3)) {
