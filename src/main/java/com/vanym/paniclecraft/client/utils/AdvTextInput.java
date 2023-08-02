@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.text.ITextComponent;
@@ -21,10 +21,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class AdvTextInput {
-    protected final Consumer<String> setClip =
-            Minecraft.getInstance().keyboardListener::setClipboardString;
-    protected final Supplier<String> getClip =
-            Minecraft.getInstance().keyboardListener::getClipboardString;
+    protected final Consumer<String> setClip = GuiUtils::setClipboardString;
+    protected final Supplier<String> getClip = GuiUtils::getClipboardString;
     
     protected final List<Element> text = new ArrayList<>();
     protected Style style = new Style();

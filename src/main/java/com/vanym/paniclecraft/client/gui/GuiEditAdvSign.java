@@ -186,15 +186,15 @@ public class GuiEditAdvSign extends Screen {
                                        text.getLines().size() - 1));
             this.updateElements();
         } else if (button == this.buttonCopy) {
-            this.minecraft.keyboardListener.setClipboardString(this.getState()
-                                                                   .getText()
-                                                                   .getLines()
-                                                                   .stream()
-                                                                   .map(ITextComponent::getFormattedText)
-                                                                   .map(FormattingUtils::trimReset)
-                                                                   .collect(Collectors.joining(System.lineSeparator())));
+            GuiUtils.setClipboardString(this.getState()
+                                            .getText()
+                                            .getLines()
+                                            .stream()
+                                            .map(ITextComponent::getFormattedText)
+                                            .map(FormattingUtils::trimReset)
+                                            .collect(Collectors.joining(System.lineSeparator())));
         } else if (button == this.buttonPaste) {
-            this.getState().pasteFull(this.minecraft.keyboardListener.getClipboardString());
+            this.getState().pasteFull(GuiUtils.getClipboardString());
             this.updateElements();
         } else if (button == this.buttonToggleStick) {
             this.sign.setStick(!this.sign.onStick());

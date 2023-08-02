@@ -169,7 +169,7 @@ public class GuiChess extends Screen {
     protected void movesCopy() {
         String moves = this.getMovesString();
         if (!moves.isEmpty()) {
-            this.minecraft.keyboardListener.setClipboardString(moves);
+            GuiUtils.setClipboardString(moves);
             ITextComponent message = new TranslationTextComponent("chess.export.copy.success");
             this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
         }

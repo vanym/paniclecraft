@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -43,5 +44,15 @@ public class GuiUtils {
     
     public static void drawHighlight(int x1, int y1, int x2, int y2) {
         new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, "").drawSelectionBox(x1, y1, x2, y2);
+    }
+    
+    public static void setClipboardString(String string) {
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.keyboardListener.setClipboardString(string);
+    }
+    
+    public static String getClipboardString() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return minecraft.keyboardListener.getClipboardString();
     }
 }
