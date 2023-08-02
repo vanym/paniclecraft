@@ -81,6 +81,50 @@ public class ItemAdvSign extends ItemMod3 {
     }
     
     @Override
+    public EnumActionResult onItemUseFirst(
+            EntityPlayer player,
+            World world,
+            BlockPos pos,
+            EnumFacing side,
+            float hitX,
+            float hitY,
+            float hitZ,
+            EnumHand hand) {
+        if (player.isSneaking()) {
+            return EnumActionResult.PASS;
+        }
+        TileEntity tile = world.getTileEntity(pos);
+        NBTTagCompound signTag = null;
+        if (tile instanceof TileEntitySign) {
+            TileEntitySign tileS = (TileEntitySign)tile;
+            signTag = new NBTTagCompound();
+            AdvSignText text = new AdvSignText();
+            List<ITextComponent> lines = text.getLines();
+            lines.clear();
+            Arrays.stream(tileS.signText)
+                  .map(ITextComponent::getFormattedText)
+                  .map(FormattingUtils::parseLine)
+                  .forEachOrdered(lines::add);
+            signTag.setTag(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
+            signTag.setTag(TileEntityAdvSign.TAG_BACKTEXT,
+                           new AdvSignText(4).serializeNBT());
+            signTag.setInteger(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());
+        } else if (tile instanceof TileEntityAdvSign) {
+            TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+            signTag = new NBTTagCompound();
+            tileAS.writeToNBT(signTag, true);
+        }
+        if (signTag != null) {
+            if (TileEntityAdvSign.isValidTag(signTag)) {
+                ItemStack stack = player.getHeldItem(hand);
+                putSign(stack, signTag);
+            }
+            return EnumActionResult.SUCCESS;
+        }
+        return EnumActionResult.PASS;
+    }
+    
+    @Override
     public EnumActionResult onItemUse(
             EntityPlayer player,
             World world,
@@ -90,41 +134,10 @@ public class ItemAdvSign extends ItemMod3 {
             float hitX,
             float hitY,
             float hitZ) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (!player.isSneaking()) {
-            TileEntity tile = world.getTileEntity(pos);
-            if (tile != null) {
-                NBTTagCompound signTag = null;
-                if (tile instanceof TileEntitySign) {
-                    TileEntitySign tileS = (TileEntitySign)tile;
-                    signTag = new NBTTagCompound();
-                    AdvSignText text = new AdvSignText();
-                    List<ITextComponent> lines = text.getLines();
-                    lines.clear();
-                    Arrays.stream(tileS.signText)
-                          .map(ITextComponent::getFormattedText)
-                          .map(FormattingUtils::parseLine)
-                          .forEachOrdered(lines::add);
-                    signTag.setTag(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
-                    signTag.setTag(TileEntityAdvSign.TAG_BACKTEXT,
-                                   new AdvSignText(4).serializeNBT());
-                    signTag.setInteger(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());
-                } else if (tile instanceof TileEntityAdvSign) {
-                    TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                    signTag = new NBTTagCompound();
-                    tileAS.writeToNBT(signTag, true);
-                }
-                if (signTag != null) {
-                    if (TileEntityAdvSign.isValidTag(signTag)) {
-                        putSign(stack, signTag);
-                    }
-                    return EnumActionResult.SUCCESS;
-                }
-            }
-        }
         if (!world.getBlockState(pos).getMaterial().isSolid()) {
             return EnumActionResult.FAIL;
         }
+        ItemStack stack = player.getHeldItem(hand);
         pos = pos.offset(facing);
         Block block = Core.instance.advSign.blockAdvSign;
         if (!player.canPlayerEdit(pos, facing, stack)
@@ -172,8 +185,7 @@ public class ItemAdvSign extends ItemMod3 {
     }
     
     protected static void removeSign(ItemStack stack) {
-        NBTTagCompound tag = stack.getTagCompound();
-        tag.removeTag(TAG_SIGN);
+        ItemUtils.getTag(stack).ifPresent(tag->tag.removeTag(TAG_SIGN));
         ItemUtils.cleanTag(stack);
     }
     
