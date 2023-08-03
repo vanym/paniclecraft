@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.GUIs;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ItemUtils;
@@ -136,7 +137,7 @@ public class ItemAdvSign extends ItemMod3 {
             getSign(stack).filter(TileEntityAdvSign::isValidTag)
                           .ifPresent(signTag->tileAS.readFromNBT(signTag, true));
             if (pside == ForgeDirection.UP) {
-                tileAS.setStick(true);
+                tileAS.setForm(AdvSignForm.STICK_DOWN);
                 double direction = Math.round(180.0D + player.rotationYaw);
                 tileAS.setDirection(direction);
             }

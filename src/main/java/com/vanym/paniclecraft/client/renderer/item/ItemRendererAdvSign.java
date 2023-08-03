@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.client.renderer.item;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
@@ -35,7 +36,7 @@ public class ItemRendererAdvSign implements IItemRenderer {
         TileEntityAdvSign tileAS = new TileEntityAdvSign();
         tileAS.blockType = Core.instance.advSign.blockAdvSign;
         tileAS.blockMetadata = 1;
-        tileAS.setStick(true);
+        tileAS.setForm(AdvSignForm.STICK_DOWN);
         switch (type) {
             case ENTITY: {
                 GL11.glTranslatef(-0.25F, -0.2F, -0.25F);

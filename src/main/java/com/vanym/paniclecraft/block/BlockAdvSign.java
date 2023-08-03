@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.block;
 import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignSide;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
@@ -68,13 +69,13 @@ public class BlockAdvSign extends BlockContainerMod3 {
         TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
         AdvSignSide pside = AdvSignSide.getSide(tileAS.getBlockMetadata());
         AxisAlignedBB box;
-        if (tileAS.onStick()) {
-            box = AxisAlignedBB.getBoundingBox(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
-        } else {
+        if (tileAS.getForm() == AdvSignForm.WALL) {
             double direction = MathHelper.wrapAngleTo180_double(tileAS.getDirection());
             direction *= pside.zAxis;
             box = AxisAlignedBB.getBoundingBox(0.0D, 0.21875D, 0.0D, 1.0D, 0.71875D, 0.125D);
             box = GeometryUtils.rotateXYInnerEdge(box, Math.toRadians(direction));
+        } else {
+            box = AxisAlignedBB.getBoundingBox(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
         }
         box = pside.axes.fromSideCoords(box);
         this.setBlockBounds((float)box.minX, (float)box.minY, (float)box.minZ,
