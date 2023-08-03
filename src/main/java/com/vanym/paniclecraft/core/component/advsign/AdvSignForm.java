@@ -2,9 +2,12 @@ package com.vanym.paniclecraft.core.component.advsign;
 
 import java.util.Arrays;
 
-public enum AdvSignForm {
+import net.minecraft.util.IStringSerializable;
+
+public enum AdvSignForm implements IStringSerializable {
     WALL, STICK_DOWN;
     
+    @Override
     public String getName() {
         return this.name().toLowerCase();
     }

@@ -10,10 +10,12 @@ import com.vanym.paniclecraft.core.component.advsign.AdvSignSide;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.WorldUtils;
 
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -40,10 +42,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomStateMapper {
     
     public static final PropertyDirection FACING = BlockDirectional.FACING;
+    public static final PropertyEnum<AdvSignForm> FORM =
+            PropertyEnum.create("form", AdvSignForm.class);
     
     public BlockAdvSign() {
         super(Material.WOOD);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.UP));
+        this.setDefaultState(this.blockState.getBaseState()
+                                            .withProperty(FACING, EnumFacing.UP)
+                                            .withProperty(FORM, AdvSignForm.WALL));
         this.setRegistryName("advanced_sign");
         this.setHardness(1.0F);
     }
@@ -88,7 +94,14 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
     
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, FACING);
+        return new BlockStateContainer(this, FACING, FORM);
+    }
+    
+    @Override
+    public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return WorldUtils.getTileEntity(world, pos, TileEntityAdvSign.class)
+                         .map(sign->state.withProperty(FORM, sign.getForm()))
+                         .orElse(state);
     }
     
     @Override
@@ -186,7 +199,7 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
     @Override
     @SideOnly(Side.CLIENT)
     public IStateMapper getStateMapper() {
-        return new StateMap.Builder().ignore(FACING).build();
+        return new StateMap.Builder().ignore(FACING, FORM).build();
     }
     
     @Override
