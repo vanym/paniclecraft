@@ -1,19 +1,24 @@
 package com.vanym.paniclecraft.block;
 
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignSide;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
-import com.vanym.paniclecraft.utils.TileOnSide;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
 import net.minecraft.block.SoundType;
+import net.minecraft.block.StandingSignBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
@@ -35,6 +40,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class BlockAdvSign extends DirectionalBlock {
     
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
+    public static final EnumProperty<AdvSignForm> FORM =
+            EnumProperty.create("form", AdvSignForm.class);
+    public static final IntegerProperty ROTATION = StandingSignBlock.ROTATION;
     
     public BlockAdvSign() {
         super(Block.Properties.create(Material.WOOD)
@@ -43,7 +51,10 @@ public class BlockAdvSign extends DirectionalBlock {
                               .doesNotBlockMovement()
                               .noDrops());
         this.setRegistryName("advanced_sign");
-        this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.UP));
+        this.setDefaultState(this.stateContainer.getBaseState()
+                                                .with(FACING, Direction.UP)
+                                                .with(FORM, AdvSignForm.WALL)
+                                                .with(ROTATION, 0));
     }
     
     @Override
@@ -73,7 +84,7 @@ public class BlockAdvSign extends DirectionalBlock {
     
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, FORM, ROTATION);
     }
     
     @Override
@@ -87,50 +98,15 @@ public class BlockAdvSign extends DirectionalBlock {
             return VoxelShapes.fullCube();
         }
         TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-        SignSide pside = SignSide.getSide(state.get(FACING).getIndex());
+        AdvSignSide pside = AdvSignSide.getSide(state.get(FACING).getIndex());
         AxisAlignedBB box;
-        if (tileAS.onStick()) {
-            box = new AxisAlignedBB(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
-        } else {
+        if (tileAS.getForm() == AdvSignForm.WALL) {
             double direction = MathHelper.wrapDegrees(tileAS.getDirection());
-            if (pside == SignSide.DOWN) {
-                direction *= -1.0D;
-            }
-            double radians = Math.toRadians(direction);
-            double sin = Math.sin(radians);
-            double cos = Math.cos(radians);
-            
-            double xl = -0.5D, xr = 0.5D;
-            double yt = -0.28125D, yb = 0.5D - 0.28125D;
-            
-            double nxlt = xl * cos - yt * sin;
-            double nylt = yt * cos + xl * sin;
-            
-            double nxrt = xr * cos - yt * sin;
-            double nyrt = yt * cos + xr * sin;
-            
-            double nxlb = xl * cos - yb * sin;
-            double nylb = yb * cos + xl * sin;
-            
-            double nxrb = xr * cos - yb * sin;
-            double nyrb = yb * cos + xr * sin;
-            
-            double mul2 = ((180.0D + direction) % 90.0D) / 90.0D;
-            double mul1 = 1.0D - mul2;
-            
-            double nx1 = nxlt * mul1 + nxlb * mul2;
-            double ny1 = nylt * mul1 + nylb * mul2;
-            
-            double nx2 = nxrb * mul1 + nxrt * mul2;
-            double ny2 = nyrb * mul1 + nyrt * mul2;
-            
-            box = new AxisAlignedBB(
-                    0.5D + nx1,
-                    0.5D + ny1,
-                    0.0D,
-                    0.5D + nx2,
-                    0.5D + ny2,
-                    0.125D);
+            direction *= pside.zAxis;
+            box = new AxisAlignedBB(0.0D, 0.21875D, 0.0D, 1.0D, 0.71875D, 0.125D);
+            box = GeometryUtils.rotateXYInnerEdge(box, Math.toRadians(direction));
+        } else {
+            box = new AxisAlignedBB(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
         }
         box = pside.axes.fromSideCoords(box);
         return VoxelShapes.create(box);
@@ -174,24 +150,5 @@ public class BlockAdvSign extends DirectionalBlock {
         TileEntity tile = world.getTileEntity(pos);
         return ItemAdvSign.getSavedSign(tile instanceof TileEntityAdvSign ? (TileEntityAdvSign)tile
                                                                           : null);
-    }
-    
-    protected static enum SignSide {
-        DOWN(Direction.WEST), // -Y
-        UP(Direction.EAST), // +Y
-        NORTH(Direction.WEST), // -Z
-        SOUTH(Direction.EAST), // +Z
-        WEST(Direction.SOUTH), // -X
-        EAST(Direction.NORTH); // +X
-        
-        public final TileOnSide axes;
-        
-        SignSide(Direction xDir) {
-            this.axes = new TileOnSide(xDir, Direction.byIndex(this.ordinal()));
-        }
-        
-        public static SignSide getSide(int side) {
-            return values()[Math.abs(side) % values().length];
-        }
     }
 }

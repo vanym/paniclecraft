@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererAdvSign;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
@@ -149,7 +150,7 @@ public class ItemAdvSign extends Item {
             getSign(stack).filter(TileEntityAdvSign::isValidTag)
                           .ifPresent(signTag->tileAS.read(signTag, true));
             if (facing == Direction.UP) {
-                tileAS.setStick(true);
+                tileAS.setForm(AdvSignForm.STICK_DOWN);
                 double direction = Math.round(180.0D + player.rotationYaw);
                 tileAS.setDirection(direction);
             }

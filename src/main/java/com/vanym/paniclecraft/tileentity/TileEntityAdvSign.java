@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.utils.NumberUtils;
@@ -33,7 +34,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     protected Color standColor = Color.WHITE;
     
     protected double direction = 0.0D;
-    protected boolean onStick = false;
+    protected AdvSignForm form = AdvSignForm.WALL;
     
     protected PlayerEntity editor = null;
     
@@ -42,7 +43,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     public static final String TAG_STANDCOLOR = "StandColor";
     
     protected static final String TAG_DIRECTION = "Direction";
-    protected static final String TAG_ONSTICK = "OnStick";
+    protected static final String TAG_FORM = "Form";
     
     public TileEntityAdvSign() {
         super(Core.instance.advSign.tileEntityAdvSign);
@@ -62,7 +63,7 @@ public class TileEntityAdvSign extends TileEntityBase {
         }
         super.write(nbtTag);
         nbtTag.putDouble(TAG_DIRECTION, this.direction);
-        nbtTag.putBoolean(TAG_ONSTICK, this.onStick);
+        nbtTag.putInt(TAG_FORM, this.form.getIndex());
         return nbtTag;
     }
     
@@ -97,7 +98,11 @@ public class TileEntityAdvSign extends TileEntityBase {
         }
         super.read(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
-        this.onStick = nbtTag.getBoolean(TAG_ONSTICK);
+        this.setForm(AdvSignForm.byIndex(nbtTag.getInt(TAG_FORM)));
+        // backwards compatibility with 2.12.0.0
+        if (!nbtTag.contains(TAG_FORM) && nbtTag.contains("OnStick")) {
+            this.setForm(nbtTag.getBoolean("OnStick") ? AdvSignForm.STICK_DOWN : AdvSignForm.WALL);
+        }
     }
     
     public AdvSignText getFront() {
@@ -121,12 +126,12 @@ public class TileEntityAdvSign extends TileEntityBase {
         return this.standColor;
     }
     
-    public void setStick(boolean stick) {
-        this.onStick = stick;
+    public void setForm(AdvSignForm form) {
+        this.form = Objects.requireNonNull(form);
     }
     
-    public boolean onStick() {
-        return this.onStick;
+    public AdvSignForm getForm() {
+        return this.form;
     }
     
     public void setDirection(double direction) {

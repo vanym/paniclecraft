@@ -14,6 +14,7 @@ import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
 import com.vanym.paniclecraft.client.gui.element.GuiStyleEditor;
 import com.vanym.paniclecraft.client.utils.AdvTextInput;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
@@ -201,7 +202,7 @@ public class GuiEditAdvSign extends Screen {
             this.getState().pasteFull(GuiUtils.getClipboardString());
             this.updateElements();
         } else if (button == this.buttonToggleStick) {
-            this.sign.setStick(!this.sign.onStick());
+            this.sign.setForm(AdvSignForm.byIndex(this.sign.getForm().getIndex() + 1));
             this.updateElements();
         } else if (button == this.buttonFlip) {
             this.front = !this.front;
@@ -336,7 +337,8 @@ public class GuiEditAdvSign extends Screen {
         this.buttonRemoveLine.active = !this.getState().getText().isMin();
         this.standColorHex.setRGB(ColorUtils.getAlphaless(this.sign.getStandColor()));
         this.textColorHex.setRGB(ColorUtils.getAlphaless(this.getState().getText().getTextColor()));
-        this.buttonToggleStick.setMessage("Stick: " + (this.sign.onStick() ? "ON" : "OFF"));
+        this.buttonToggleStick.setMessage("Stick: " +
+            (this.sign.getForm() == AdvSignForm.STICK_DOWN ? "ON" : "OFF"));
         this.buttonFlip.setMessage("Side: " + (this.front ? "Front" : "Back"));
     }
     
