@@ -8,11 +8,13 @@ import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.utils.NumberUtils;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -102,6 +104,25 @@ public class TileEntityAdvSign extends TileEntityBase {
         // backwards compatibility with 2.12.0.0
         if (!nbtTag.contains(TAG_FORM) && nbtTag.contains("OnStick")) {
             this.setForm(nbtTag.getBoolean("OnStick") ? AdvSignForm.STICK_DOWN : AdvSignForm.WALL);
+        }
+    }
+    
+    @Override
+    public void markForUpdate() {
+        this.markDirty();
+        if (this.world != null) {
+            BlockState state = this.getBlockState();
+            BlockState actual = state;
+            if (state.getBlock() instanceof BlockAdvSign) {
+                actual = state.with(BlockAdvSign.FORM, this.form)
+                              .with(BlockAdvSign.ROTATION,
+                                    Math.abs((int)Math.round(this.getDirection() / 22.5D)) % 16);
+            }
+            if (state != actual) {
+                this.world.setBlockState(this.pos, actual);
+            } else {
+                this.world.notifyBlockUpdate(this.pos, state, actual, 3);
+            }
         }
     }
     

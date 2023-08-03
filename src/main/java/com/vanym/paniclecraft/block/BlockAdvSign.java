@@ -1,10 +1,13 @@
 package com.vanym.paniclecraft.block;
 
+import java.util.Optional;
+
 import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignSide;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.WorldUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -93,15 +96,15 @@ public class BlockAdvSign extends DirectionalBlock {
             IBlockReader world,
             BlockPos pos,
             ISelectionContext context) {
-        TileEntity tile = world.getTileEntity(pos);
-        if (!TileEntityAdvSign.class.isInstance(tile)) {
-            return VoxelShapes.fullCube();
-        }
-        TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+        Optional<TileEntityAdvSign> oSign =
+                WorldUtils.getTileEntity(world, pos, TileEntityAdvSign.class);
         AdvSignSide pside = AdvSignSide.getSide(state.get(FACING).getIndex());
+        AdvSignForm form = oSign.map(TileEntityAdvSign::getForm).orElseGet(()->state.get(FORM));
         AxisAlignedBB box;
-        if (tileAS.getForm() == AdvSignForm.WALL) {
-            double direction = MathHelper.wrapDegrees(tileAS.getDirection());
+        if (form == AdvSignForm.WALL) {
+            double direction = oSign.map(TileEntityAdvSign::getDirection)
+                                    .orElseGet(()->state.get(ROTATION) * 22.5D);
+            direction = MathHelper.wrapDegrees(direction);
             direction *= pside.zAxis;
             box = new AxisAlignedBB(0.0D, 0.21875D, 0.0D, 1.0D, 0.71875D, 0.125D);
             box = GeometryUtils.rotateXYInnerEdge(box, Math.toRadians(direction));
