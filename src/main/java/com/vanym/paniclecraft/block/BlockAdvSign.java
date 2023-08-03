@@ -3,10 +3,10 @@ package com.vanym.paniclecraft.block;
 import java.util.Random;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignSide;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.GeometryUtils;
-import com.vanym.paniclecraft.utils.TileOnSide;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -25,7 +25,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 public class BlockAdvSign extends BlockContainerMod3 {
     
@@ -67,15 +66,13 @@ public class BlockAdvSign extends BlockContainerMod3 {
             return;
         }
         TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-        SignSide pside = SignSide.getSide(tileAS.getBlockMetadata());
+        AdvSignSide pside = AdvSignSide.getSide(tileAS.getBlockMetadata());
         AxisAlignedBB box;
         if (tileAS.onStick()) {
             box = AxisAlignedBB.getBoundingBox(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
         } else {
             double direction = MathHelper.wrapAngleTo180_double(tileAS.getDirection());
-            if (pside == SignSide.DOWN) {
-                direction *= -1.0D;
-            }
+            direction *= pside.zAxis;
             box = AxisAlignedBB.getBoundingBox(0.0D, 0.21875D, 0.0D, 1.0D, 0.71875D, 0.125D);
             box = GeometryUtils.rotateXYInnerEdge(box, Math.toRadians(direction));
         }
@@ -140,25 +137,5 @@ public class BlockAdvSign extends BlockContainerMod3 {
         TileEntity tile = world.getTileEntity(x, y, z);
         return ItemAdvSign.getSavedSign(tile instanceof TileEntityAdvSign ? (TileEntityAdvSign)tile
                                                                           : null);
-    }
-    
-    protected static enum SignSide {
-        DOWN(ForgeDirection.WEST), // -Y
-        UP(ForgeDirection.EAST), // +Y
-        NORTH(ForgeDirection.WEST), // -Z
-        SOUTH(ForgeDirection.EAST), // +Z
-        WEST(ForgeDirection.SOUTH), // -X
-        EAST(ForgeDirection.NORTH), // +X
-        UNKNOWN(ForgeDirection.UNKNOWN);
-        
-        public final TileOnSide axes;
-        
-        SignSide(ForgeDirection xDir) {
-            this.axes = new TileOnSide(xDir, ForgeDirection.getOrientation(this.ordinal()));
-        }
-        
-        public static SignSide getSide(int side) {
-            return values()[Math.abs(side) % values().length];
-        }
     }
 }
