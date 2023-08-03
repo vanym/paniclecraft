@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.utils.AdvTextInput;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
@@ -43,7 +44,8 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
             GuiEditAdvSign gui) {
         GlStateManager.pushMatrix();
         GlStateManager.translate((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
-        this.modelSign.signStick.showModel = tileAS.onStick();
+        boolean onStick = tileAS.getForm() == AdvSignForm.STICK_DOWN;
+        this.modelSign.signStick.showModel = onStick;
         if (!statik) {
             float rotation = 0.0F;
             float yaxis = 1.0F;
@@ -65,7 +67,7 @@ public class TileEntityAdvSignRenderer extends TileEntitySpecialRenderer<TileEnt
                 break;
             }
             GlStateManager.rotate(-(float)tileAS.getDirection(), 0.0F, yaxis, 0.0F);
-            if (!tileAS.onStick()) {
+            if (!onStick) {
                 GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
                 GlStateManager.translate(0.0F, -0.3125F, -0.4375F);
             }

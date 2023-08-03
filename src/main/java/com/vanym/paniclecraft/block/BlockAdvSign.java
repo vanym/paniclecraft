@@ -5,9 +5,11 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
+import com.vanym.paniclecraft.core.component.advsign.AdvSignSide;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
-import com.vanym.paniclecraft.utils.TileOnSide;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
@@ -115,50 +117,15 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
             return FULL_BLOCK_AABB;
         }
         TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-        SignSide pside = SignSide.getSide(state.getValue(FACING).getIndex());
+        AdvSignSide pside = AdvSignSide.getSide(tileAS.getBlockMetadata());
         AxisAlignedBB box;
-        if (tileAS.onStick()) {
-            box = new AxisAlignedBB(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
-        } else {
+        if (tileAS.getForm() == AdvSignForm.WALL) {
             double direction = MathHelper.wrapDegrees(tileAS.getDirection());
-            if (pside == SignSide.DOWN) {
-                direction *= -1.0D;
-            }
-            double radians = Math.toRadians(direction);
-            double sin = Math.sin(radians);
-            double cos = Math.cos(radians);
-            
-            double xl = -0.5D, xr = 0.5D;
-            double yt = -0.28125D, yb = 0.5D - 0.28125D;
-            
-            double nxlt = xl * cos - yt * sin;
-            double nylt = yt * cos + xl * sin;
-            
-            double nxrt = xr * cos - yt * sin;
-            double nyrt = yt * cos + xr * sin;
-            
-            double nxlb = xl * cos - yb * sin;
-            double nylb = yb * cos + xl * sin;
-            
-            double nxrb = xr * cos - yb * sin;
-            double nyrb = yb * cos + xr * sin;
-            
-            double mul2 = ((180.0D + direction) % 90.0D) / 90.0D;
-            double mul1 = 1.0D - mul2;
-            
-            double nx1 = nxlt * mul1 + nxlb * mul2;
-            double ny1 = nylt * mul1 + nylb * mul2;
-            
-            double nx2 = nxrb * mul1 + nxrt * mul2;
-            double ny2 = nyrb * mul1 + nyrt * mul2;
-            
-            box = new AxisAlignedBB(
-                    0.5D + nx1,
-                    0.5D + ny1,
-                    0.0D,
-                    0.5D + nx2,
-                    0.5D + ny2,
-                    0.125D);
+            direction *= pside.zAxis;
+            box = new AxisAlignedBB(0.0D, 0.21875D, 0.0D, 1.0D, 0.71875D, 0.125D);
+            box = GeometryUtils.rotateXYInnerEdge(box, Math.toRadians(direction));
+        } else {
+            box = new AxisAlignedBB(0.25D, 0.25D, 0.0D, 0.75D, 0.75D, 1.0D);
         }
         box = pside.axes.fromSideCoords(box);
         return box;
@@ -233,24 +200,5 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
         TileEntity tile = world.getTileEntity(pos);
         return ItemAdvSign.getSavedSign(tile instanceof TileEntityAdvSign ? (TileEntityAdvSign)tile
                                                                           : null);
-    }
-    
-    protected static enum SignSide {
-        DOWN(EnumFacing.WEST), // -Y
-        UP(EnumFacing.EAST), // +Y
-        NORTH(EnumFacing.WEST), // -Z
-        SOUTH(EnumFacing.EAST), // +Z
-        WEST(EnumFacing.SOUTH), // -X
-        EAST(EnumFacing.NORTH); // +X
-        
-        public final TileOnSide axes;
-        
-        SignSide(EnumFacing xDir) {
-            this.axes = new TileOnSide(xDir, EnumFacing.getFront(this.ordinal()));
-        }
-        
-        public static SignSide getSide(int side) {
-            return values()[Math.abs(side) % values().length];
-        }
     }
 }
