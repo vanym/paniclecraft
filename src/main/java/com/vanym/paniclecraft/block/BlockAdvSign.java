@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.block;
 
 import java.util.Random;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -13,9 +14,11 @@ import com.vanym.paniclecraft.utils.GeometryUtils;
 import com.vanym.paniclecraft.utils.WorldUtils;
 
 import net.minecraft.block.BlockDirectional;
+import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -44,12 +47,14 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
     public static final PropertyDirection FACING = BlockDirectional.FACING;
     public static final PropertyEnum<AdvSignForm> FORM =
             PropertyEnum.create("form", AdvSignForm.class);
+    public static final PropertyInteger ROTATION = BlockStandingSign.ROTATION;
     
     public BlockAdvSign() {
         super(Material.WOOD);
         this.setDefaultState(this.blockState.getBaseState()
                                             .withProperty(FACING, EnumFacing.UP)
-                                            .withProperty(FORM, AdvSignForm.WALL));
+                                            .withProperty(FORM, AdvSignForm.WALL)
+                                            .withProperty(ROTATION, 0));
         this.setRegistryName("advanced_sign");
         this.setHardness(1.0F);
     }
@@ -94,13 +99,16 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
     
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, FACING, FORM);
+        return new BlockStateContainer(this, FACING, FORM, ROTATION);
     }
     
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+        Function<TileEntityAdvSign, Integer> rotation =
+                (sign)->Math.abs((int)Math.round(sign.getDirection() / 22.5D)) % 16;
         return WorldUtils.getTileEntity(world, pos, TileEntityAdvSign.class)
-                         .map(sign->state.withProperty(FORM, sign.getForm()))
+                         .map(sign->state.withProperty(FORM, sign.getForm())
+                                         .withProperty(ROTATION, rotation.apply(sign)))
                          .orElse(state);
     }
     
@@ -199,7 +207,7 @@ public class BlockAdvSign extends BlockContainerMod3 implements IWithCustomState
     @Override
     @SideOnly(Side.CLIENT)
     public IStateMapper getStateMapper() {
-        return new StateMap.Builder().ignore(FACING, FORM).build();
+        return new StateMap.Builder().ignore(FACING, FORM, ROTATION).build();
     }
     
     @Override
