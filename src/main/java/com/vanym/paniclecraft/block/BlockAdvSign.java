@@ -13,16 +13,21 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
+import net.minecraft.block.IWaterLoggable;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.StandingSignBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
@@ -36,16 +41,18 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class BlockAdvSign extends DirectionalBlock {
+public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
     
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
     public static final EnumProperty<AdvSignForm> FORM =
             EnumProperty.create("form", AdvSignForm.class);
     public static final IntegerProperty ROTATION = StandingSignBlock.ROTATION;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     
     public BlockAdvSign() {
         super(Block.Properties.create(Material.WOOD)
@@ -57,7 +64,8 @@ public class BlockAdvSign extends DirectionalBlock {
         this.setDefaultState(this.stateContainer.getBaseState()
                                                 .with(FACING, Direction.UP)
                                                 .with(FORM, AdvSignForm.WALL)
-                                                .with(ROTATION, 0));
+                                                .with(ROTATION, 0)
+                                                .with(WATERLOGGED, false));
     }
     
     @Override
@@ -72,7 +80,10 @@ public class BlockAdvSign extends DirectionalBlock {
     
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return this.getDefaultState().with(FACING, context.getFace());
+        IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
+        return this.getDefaultState()
+                   .with(FACING, context.getFace())
+                   .with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
     }
     
     @Override
@@ -87,7 +98,31 @@ public class BlockAdvSign extends DirectionalBlock {
     
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(FACING, FORM, ROTATION);
+        builder.add(FACING, FORM, ROTATION, WATERLOGGED);
+    }
+    
+    @Override
+    @SuppressWarnings("deprecation")
+    public IFluidState getFluidState(BlockState state) {
+        return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false)
+                                      : super.getFluidState(state);
+    }
+    
+    @Override
+    @SuppressWarnings("deprecation")
+    public BlockState updatePostPlacement(
+            BlockState state,
+            Direction facing,
+            BlockState facingState,
+            IWorld world,
+            BlockPos currentPos,
+            BlockPos facingPos) {
+        if (state.get(WATERLOGGED)) {
+            world.getPendingFluidTicks()
+                 .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        }
+        return super.updatePostPlacement(state, facing, facingState, world, currentPos,
+                                         facingPos);
     }
     
     @Override
