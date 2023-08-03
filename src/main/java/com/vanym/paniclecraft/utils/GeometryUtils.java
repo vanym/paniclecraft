@@ -38,6 +38,46 @@ public class GeometryUtils {
         return sideBox.minZ <= 0.0D;
     }
     
+    public static AxisAlignedBB rotateXYInnerEdge(AxisAlignedBB box, double radians) {
+        return rotateXYInnerEdge(box, radians, 0.5D, 0.5D);
+    }
+    
+    public static AxisAlignedBB rotateXYInnerEdge(
+            AxisAlignedBB box,
+            double radians,
+            double centerX,
+            double centerY) {
+        double sin = Math.sin(radians);
+        double cos = Math.cos(radians);
+        
+        double xl = box.minX - centerX, xr = box.maxX - centerX;
+        double yt = box.minY - centerY, yb = box.maxY - centerY;
+        
+        double nxlt = xl * cos - yt * sin;
+        double nylt = yt * cos + xl * sin;
+        
+        double nxrt = xr * cos - yt * sin;
+        double nyrt = yt * cos + xr * sin;
+        
+        double nxlb = xl * cos - yb * sin;
+        double nylb = yb * cos + xl * sin;
+        
+        double nxrb = xr * cos - yb * sin;
+        double nyrb = yb * cos + xr * sin;
+        
+        double mul2 = (2.0D + Math.atan2(sin, cos) * 2.0D / Math.PI) % 1.0D;
+        double mul1 = 1.0D - mul2;
+        
+        double nx1 = nxlt * mul1 + nxlb * mul2;
+        double ny1 = nylt * mul1 + nylb * mul2;
+        
+        double nx2 = nxrb * mul1 + nxrt * mul2;
+        double ny2 = nyrb * mul1 + nyrt * mul2;
+        
+        return AxisAlignedBB.getBoundingBox(centerX + nx1, centerY + ny1, box.minZ,
+                                            centerX + nx2, centerY + ny2, box.maxZ);
+    }
+    
     public static Vec3 getInBlockVec(MovingObjectPosition target) {
         return Vec3.createVectorHelper(target.blockX, target.blockY, target.blockZ)
                    .subtract(target.hitVec);
