@@ -78,6 +78,11 @@ public class BlockCannon extends ContainerBlock {
     }
     
     @Override
+    public boolean propagatesSkylightDown(BlockState state, IBlockReader reader, BlockPos pos) {
+        return state.getFluidState().isEmpty();
+    }
+    
+    @Override
     public void onBlockPlacedBy(
             World world,
             BlockPos pos,
