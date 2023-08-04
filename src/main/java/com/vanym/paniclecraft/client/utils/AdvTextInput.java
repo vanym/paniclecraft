@@ -152,13 +152,12 @@ public class AdvTextInput {
         } else {
             pos = this.cursorPos + i;
         }
-        if (this.setCursorPos(pos)) {
-            if (!select) {
-                this.selectionPos = this.cursorPos;
-            }
+        boolean moved = this.setCursorPos(pos);
+        if (!select && this.selectionPos != this.cursorPos) {
+            this.selectionPos = this.cursorPos;
             return true;
         }
-        return false;
+        return moved;
     }
     
     public boolean remove(int i) {
