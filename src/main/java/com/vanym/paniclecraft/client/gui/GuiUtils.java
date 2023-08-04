@@ -70,4 +70,11 @@ public class GuiUtils {
     public static String getClipboardString() {
         return GuiScreen.getClipboardString();
     }
+    
+    public static int getWordPosition(String str, int n, int cursor, boolean skipSpaces) {
+        GuiTextField field = new GuiTextField(null, 0, 0, Integer.MAX_VALUE, 0);
+        field.setMaxStringLength(Integer.MAX_VALUE);
+        field.setText(str);
+        return field.func_146197_a(n, cursor, skipSpaces);
+    }
 }
