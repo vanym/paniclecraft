@@ -157,7 +157,7 @@ public class ItemAdvSign extends Item {
             if (facing == Direction.DOWN) {
                 tileAS.setDirection(player.getHorizontalFacing().getHorizontalAngle());
             }
-            tileAS.setEditor(player);
+            tileAS.setEditor(player.getUniqueID());
         }
         stack.shrink(1);
         if (EffectiveSide.get().isClient()) {

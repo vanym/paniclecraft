@@ -55,4 +55,11 @@ public class GuiUtils {
         Minecraft minecraft = Minecraft.getInstance();
         return minecraft.keyboardListener.getClipboardString();
     }
+    
+    public static int getWordPosition(String str, int n, int cursor, boolean skipSpaces) {
+        TextFieldWidget field = new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, "");
+        field.setMaxStringLength(Integer.MAX_VALUE);
+        field.setText(str);
+        return field.getNthWordFromPosWS(n, cursor, skipSpaces);
+    }
 }

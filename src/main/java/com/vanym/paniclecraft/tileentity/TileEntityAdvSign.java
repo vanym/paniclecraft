@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.tileentity;
 import java.awt.Color;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -15,7 +16,6 @@ import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.utils.NumberUtils;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
@@ -38,7 +38,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     protected double direction = 0.0D;
     protected AdvSignForm form = AdvSignForm.WALL;
     
-    protected PlayerEntity editor = null;
+    protected UUID editor = null;
     
     public static final String TAG_FRONTTEXT = "FrontText";
     public static final String TAG_BACKTEXT = "BackText";
@@ -168,16 +168,20 @@ public class TileEntityAdvSign extends TileEntityBase {
         return this.direction;
     }
     
-    public void setEditor(PlayerEntity editor) {
+    public void setEditor(UUID editor) {
         this.editor = editor;
     }
     
     public void resetEditor() {
-        this.setEditor(null);
+        this.editor = null;
     }
     
-    public boolean isEditor(PlayerEntity player) {
-        return this.editor != null && this.editor == player;
+    public boolean hasEditor() {
+        return this.editor == null;
+    }
+    
+    public boolean isEditor(UUID player) {
+        return this.editor != null && this.editor.equals(player);
     }
     
     @Override

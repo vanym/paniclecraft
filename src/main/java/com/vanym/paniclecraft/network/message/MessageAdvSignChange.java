@@ -42,7 +42,7 @@ public class MessageAdvSignChange {
         TileEntity tile = ctx.getSender().world.getTileEntity(new BlockPos(x, y, z));
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            if (tileAS.isEditor(ctx.getSender())) {
+            if (tileAS.isEditor(ctx.getSender().getUniqueID())) {
                 tileAS.resetEditor();
             } else {
                 return;
