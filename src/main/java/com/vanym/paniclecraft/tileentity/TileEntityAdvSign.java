@@ -1,10 +1,8 @@
 package com.vanym.paniclecraft.tileentity;
 
 import java.awt.Color;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vanym.paniclecraft.Core;
@@ -12,16 +10,15 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
-import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
+import com.vanym.paniclecraft.datafix.fixes.AdvSignSidesFix;
+import com.vanym.paniclecraft.utils.JUtils;
 import com.vanym.paniclecraft.utils.NumberUtils;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -75,6 +72,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void read(CompoundNBT nbtTag, boolean fromStack) {
+        AdvSignSidesFix.processSignTag(nbtTag); // backwards compatibility with 2.12.0.0
         if (nbtTag.contains(TAG_FRONTTEXT, 10)) {
             this.frontText.deserializeNBT(nbtTag.getCompound(TAG_FRONTTEXT));
         }
@@ -82,29 +80,12 @@ public class TileEntityAdvSign extends TileEntityBase {
             this.backText.deserializeNBT(nbtTag.getCompound(TAG_BACKTEXT));
         }
         this.standColor = new Color(nbtTag.getInt(TAG_STANDCOLOR), true);
-        // backwards compatibility with 2.12.0.0
-        if (!nbtTag.contains(TAG_FRONTTEXT)
-            && nbtTag.contains("Lines", 9)
-            && nbtTag.contains("TextColor", 3)) {
-            List<ITextComponent> lines = this.frontText.getLines();
-            lines.clear();
-            ListNBT linesTag = nbtTag.getList("Lines", 8);
-            IntStream.range(0, linesTag.size())
-                     .mapToObj(linesTag::getString)
-                     .map(FormattingUtils::parseLine)
-                     .forEachOrdered(lines::add);
-            this.frontText.setTextColor(new Color(nbtTag.getInt("TextColor"), true));
-        }
         if (fromStack) {
             return;
         }
         super.read(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.setForm(AdvSignForm.byIndex(nbtTag.getInt(TAG_FORM)));
-        // backwards compatibility with 2.12.0.0
-        if (!nbtTag.contains(TAG_FORM) && nbtTag.contains("OnStick")) {
-            this.setForm(nbtTag.getBoolean("OnStick") ? AdvSignForm.STICK_DOWN : AdvSignForm.WALL);
-        }
     }
     
     @Override
@@ -202,6 +183,8 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public static boolean isValidTag(CompoundNBT signTag) {
+        // backwards compatibility with 2.12.0.0
+        signTag = JUtils.peek(AdvSignSidesFix::processSignTag, (CompoundNBT)signTag.copy());
         return new Color(signTag.getInt(TAG_STANDCOLOR), true).getAlpha() == 0xff
             && Stream.of(TAG_FRONTTEXT, TAG_BACKTEXT)
                      .map(signTag::getCompound)
