@@ -20,6 +20,10 @@ public class MessageChessMove implements IMessage {
     
     public MessageChessMove() {}
     
+    public MessageChessMove(TileEntityChessDesk chessdesk, ChessGame.Move move) {
+        this(chessdesk.xCoord, chessdesk.yCoord, chessdesk.zCoord, move);
+    }
+    
     public MessageChessMove(int x, int y, int z, ChessGame.Move move) {
         this.x = x;
         this.y = y;

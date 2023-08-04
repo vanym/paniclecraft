@@ -96,16 +96,16 @@ public class TileEntityChessDesk extends TileEntityBase {
     public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
         super.onDataPacket(manager, packet);
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.updateGui();
+            this.updateScreen();
         }
     }
     
     @SideOnly(Side.CLIENT)
-    protected void updateGui() {
+    protected void updateScreen() {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.currentScreen instanceof GuiChess) {
-            GuiChess guiChess = (GuiChess)mc.currentScreen;
-            guiChess.updateGui(this);
+            GuiChess screen = (GuiChess)mc.currentScreen;
+            screen.update(this);
         }
     }
     
