@@ -206,6 +206,11 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
+    public boolean propagatesSkylightDown(BlockState state, IBlockReader reader, BlockPos pos) {
+        return state.getFluidState().isEmpty();
+    }
+    
+    @Override
     public VoxelShape getCollisionShape(
             BlockState state,
             IBlockReader worldIn,
