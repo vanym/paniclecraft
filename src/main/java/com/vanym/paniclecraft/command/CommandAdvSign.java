@@ -42,7 +42,7 @@ public class CommandAdvSign extends TreeCommandBase {
                                     .getTileEntity(target.blockX, target.blockY, target.blockZ);
             if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                tileAS.setEditor(player);
+                tileAS.setEditor(player.getPersistentID());
                 Core.instance.network.sendTo(new MessageAdvSignOpenGui(
                         tileAS.xCoord,
                         tileAS.yCoord,

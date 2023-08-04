@@ -145,7 +145,7 @@ public class ItemAdvSign extends ItemMod3 {
                 int rot = MathHelper.floor_double((player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
                 tileAS.setDirection(rot * 90.0D);
             }
-            tileAS.setEditor(player);
+            tileAS.setEditor(player.getPersistentID());
             player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(), world, x, y, z);
         }
         return true;

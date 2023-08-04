@@ -60,7 +60,7 @@ public class MessageAdvSignChange implements IMessage {
             TileEntity tile = player.worldObj.getTileEntity(x, y, z);
             if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                if (tileAS.isEditor(player)) {
+                if (tileAS.isEditor(player.getPersistentID())) {
                     tileAS.resetEditor();
                 } else {
                     return null;
