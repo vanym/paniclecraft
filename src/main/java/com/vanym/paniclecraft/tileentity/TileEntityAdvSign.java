@@ -181,6 +181,11 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     @Override
+    public boolean onlyOpsCanSetNbt() {
+        return true;
+    }
+    
+    @Override
     @OnlyIn(Dist.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
         return new AxisAlignedBB(this.pos).grow(0.25D);

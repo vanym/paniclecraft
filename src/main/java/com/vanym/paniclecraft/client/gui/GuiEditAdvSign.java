@@ -79,44 +79,50 @@ public class GuiEditAdvSign extends Screen {
                 200,
                 20,
                 I18n.format("gui.done"),
-                this::actionPerformed);
-        this.buttonAddLine =
-                new Button(xCenter + 59, this.height / 4 + 68, 20, 20, "+", this::actionPerformed);
+                b->this.minecraft.displayGuiScreen(null));
+        this.buttonAddLine = new Button(xCenter + 59, this.height / 4 + 68, 20, 20, "+", b-> {
+            AdvSignText text = this.getState().getText();
+            text.getLines().add(new StringTextComponent(""));
+            text.fixSize();
+            this.updateElements();
+        });
         this.buttonRemoveLine = new Button(
                 this.buttonAddLine.x + 21,
                 this.buttonAddLine.y,
                 20,
                 20,
                 "-",
-                this::actionPerformed);
-        this.buttonCopy = new Button(
-                xCenter - 100,
-                this.height / 4 + 99,
-                40,
-                20,
-                "Copy",
-                this::actionPerformed);
-        this.buttonPaste = new Button(
-                xCenter - 59,
-                this.height / 4 + 99,
-                40,
-                20,
-                "Paste",
-                this::actionPerformed);
-        this.buttonToggleStick = new Button(
-                xCenter - 100,
-                this.height / 4 + 57,
-                55,
-                20,
-                "Stick: ",
-                this::actionPerformed);
-        this.buttonFlip = new Button(
-                xCenter - 100,
-                this.height / 4 + 78,
-                60,
-                20,
-                "Side: ",
-                this::actionPerformed);
+                b-> {
+                    AdvSignText text = this.getState().getText();
+                    text.removeLast();
+                    text.fixSize();
+                    this.getState()
+                        .switchToLine(Math.min(this.getState().getLine(),
+                                               text.getLines().size() - 1));
+                    this.updateElements();
+                });
+        this.buttonCopy = new Button(xCenter - 100, this.height / 4 + 99, 40, 20, "Copy", b-> {
+            GuiUtils.setClipboardString(this.getState()
+                                            .getText()
+                                            .getLines()
+                                            .stream()
+                                            .map(ITextComponent::getFormattedText)
+                                            .map(FormattingUtils::trimReset)
+                                            .collect(Collectors.joining(System.lineSeparator())));
+        });
+        this.buttonPaste = new Button(xCenter - 59, this.height / 4 + 99, 40, 20, "Paste", b-> {
+            this.getState().pasteFull(GuiUtils.getClipboardString());
+            this.updateElements();
+        });
+        this.buttonToggleStick =
+                new Button(xCenter - 100, this.height / 4 + 57, 55, 20, "Stick: ", b-> {
+                    this.sign.setForm(AdvSignForm.byIndex(this.sign.getForm().getIndex() + 1));
+                    this.updateElements();
+                });
+        this.buttonFlip = new Button(xCenter - 100, this.height / 4 + 78, 60, 20, "Side: ", b-> {
+            this.front = !this.front;
+            this.updateElements();
+        });
         this.sliderDir = new GuiCircularSlider(xCenter - 100, this.height / 4 + 15, 40, 40);
         this.sliderDir.setGetter(()->this.sign.getDirection() / 360.0D);
         this.sliderDir.setSetter(v-> {
@@ -172,42 +178,6 @@ public class GuiEditAdvSign extends Screen {
         ++this.updateCounter;
         this.standColorHex.tick();
         this.textColorHex.tick();
-    }
-    
-    protected void actionPerformed(Button button) {
-        if (button == this.buttonDone) {
-            this.minecraft.displayGuiScreen(null);
-        } else if (button == this.buttonAddLine) {
-            AdvSignText text = this.getState().getText();
-            text.getLines().add(new StringTextComponent(""));
-            text.fixSize();
-            this.updateElements();
-        } else if (button == this.buttonRemoveLine) {
-            AdvSignText text = this.getState().getText();
-            text.removeLast();
-            text.fixSize();
-            this.getState()
-                .switchToLine(Math.min(this.getState().getLine(),
-                                       text.getLines().size() - 1));
-            this.updateElements();
-        } else if (button == this.buttonCopy) {
-            GuiUtils.setClipboardString(this.getState()
-                                            .getText()
-                                            .getLines()
-                                            .stream()
-                                            .map(ITextComponent::getFormattedText)
-                                            .map(FormattingUtils::trimReset)
-                                            .collect(Collectors.joining(System.lineSeparator())));
-        } else if (button == this.buttonPaste) {
-            this.getState().pasteFull(GuiUtils.getClipboardString());
-            this.updateElements();
-        } else if (button == this.buttonToggleStick) {
-            this.sign.setForm(AdvSignForm.byIndex(this.sign.getForm().getIndex() + 1));
-            this.updateElements();
-        } else if (button == this.buttonFlip) {
-            this.front = !this.front;
-            this.updateElements();
-        }
     }
     
     @Override
