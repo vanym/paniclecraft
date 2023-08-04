@@ -24,7 +24,7 @@ public class GuiStyleEditor extends AbstractButton {
     protected final Consumer<ChatStyle> updater;
     protected final Supplier<Boolean> highlighted;
     
-    public GuiStyleEditor(int id,
+    public GuiStyleEditor(
             int x,
             int y,
             int width,
@@ -33,7 +33,7 @@ public class GuiStyleEditor extends AbstractButton {
             Supplier<Boolean> highlighted,
             ChatStyle style,
             EnumChatFormatting iconType) {
-        super(id, x, y, width, height, "");
+        super(x, y, width, height, "");
         this.style = style.createShallowCopy().setParentStyle(null);
         this.iconType = Objects.requireNonNull(iconType);
         this.updater = Objects.requireNonNull(updater);
@@ -76,7 +76,6 @@ public class GuiStyleEditor extends AbstractButton {
     }
     
     public static GuiStyleEditor create(
-            int id,
             int x,
             int y,
             int width,
@@ -86,7 +85,6 @@ public class GuiStyleEditor extends AbstractButton {
             EnumChatFormatting code) {
         ChatStyle style = FormattingUtils.toStyle(code);
         return new GuiStyleEditor(
-                id,
                 x,
                 y,
                 width,
@@ -102,7 +100,6 @@ public class GuiStyleEditor extends AbstractButton {
     }
     
     public static List<GuiStyleEditor> createMenu(
-            int id,
             int x,
             int y,
             Supplier<ChatStyle> getter,
@@ -113,16 +110,15 @@ public class GuiStyleEditor extends AbstractButton {
              i++) {
             int offsetX = (i % 4) * 8, offsetY = (i / 4) * 8;
             EnumChatFormatting code = EnumChatFormatting.values()[i];
-            list.add(create(id++, x + 7 + offsetX, y + offsetY, 7, 7, updater, getter, code));
+            list.add(create(x + 7 + offsetX, y + offsetY, 7, 7, updater, getter, code));
         }
         for (int i = EnumChatFormatting.OBFUSCATED.ordinal(), k = 0;
              i <= EnumChatFormatting.ITALIC.ordinal();
              i++, k++) {
             EnumChatFormatting code = EnumChatFormatting.values()[i];
-            list.add(create(id++, x + k * 8, y + 33, 6, 9, updater, getter, code));
+            list.add(create(x + k * 8, y + 33, 6, 9, updater, getter, code));
         }
         list.add(new GuiStyleEditor(
-                id++,
                 x,
                 y + 24,
                 6,

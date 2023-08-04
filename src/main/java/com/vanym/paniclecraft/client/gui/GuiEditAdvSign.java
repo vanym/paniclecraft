@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.gui.element.AbstractButton;
+import com.vanym.paniclecraft.client.gui.element.Button;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
 import com.vanym.paniclecraft.client.gui.element.GuiStyleEditor;
@@ -43,13 +44,13 @@ public class GuiEditAdvSign extends GuiScreen {
     
     protected int updateCounter;
     
-    protected GuiButton buttonDone;
-    protected GuiButton buttonCopy;
-    protected GuiButton buttonPaste;
-    protected GuiButton buttonAddLine;
-    protected GuiButton buttonRemoveLine;
-    protected GuiButton buttonToggleStick;
-    protected GuiButton buttonFlip;
+    protected Button buttonDone;
+    protected Button buttonCopy;
+    protected Button buttonPaste;
+    protected Button buttonAddLine;
+    protected Button buttonRemoveLine;
+    protected Button buttonToggleStick;
+    protected Button buttonFlip;
     
     protected GuiCircularSlider sliderDir;
     
@@ -71,23 +72,56 @@ public class GuiEditAdvSign extends GuiScreen {
     @SuppressWarnings("unchecked")
     public void initGui() {
         int xCenter = this.width / 2;
-        this.buttonDone =
-                new GuiButton(0, xCenter - 100, this.height / 4 + 120, I18n.format("gui.done"));
-        this.buttonAddLine = new GuiButton(1, xCenter + 59, this.height / 4 + 68, 20, 20, "+");
-        this.buttonRemoveLine = new GuiButton(
-                2,
+        this.buttonDone = new Button(
+                xCenter - 100,
+                this.height / 4 + 120,
+                200,
+                20,
+                I18n.format("gui.done"),
+                b->this.mc.displayGuiScreen(null));
+        this.buttonAddLine = new Button(xCenter + 59, this.height / 4 + 68, 20, 20, "+", b-> {
+            AdvSignText text = this.getState().getText();
+            text.getLines().add(new ChatComponentText(""));
+            text.fixSize();
+            this.updateElements();
+        });
+        this.buttonRemoveLine = new Button(
                 this.buttonAddLine.xPosition + 21,
                 this.buttonAddLine.yPosition,
                 20,
                 20,
-                "-");
-        this.buttonCopy =
-                new GuiButton(4, xCenter - 100, this.height / 4 + 99, 40, 20, "Copy");
-        this.buttonPaste =
-                new GuiButton(5, xCenter - 59, this.height / 4 + 99, 40, 20, "Paste");
+                "-",
+                b-> {
+                    AdvSignText text = this.getState().getText();
+                    text.removeLast();
+                    text.fixSize();
+                    this.getState()
+                        .switchToLine(Math.min(this.getState().getLine(),
+                                               text.getLines().size() - 1));
+                    this.updateElements();
+                });
+        this.buttonCopy = new Button(xCenter - 100, this.height / 4 + 99, 40, 20, "Copy", b-> {
+            GuiUtils.setClipboardString(this.getState()
+                                            .getText()
+                                            .getLines()
+                                            .stream()
+                                            .map(IChatComponent::getFormattedText)
+                                            .map(FormattingUtils::trimReset)
+                                            .collect(Collectors.joining(System.lineSeparator())));
+        });
+        this.buttonPaste = new Button(xCenter - 59, this.height / 4 + 99, 40, 20, "Paste", b-> {
+            this.getState().pasteFull(GuiUtils.getClipboardString());
+            this.updateElements();
+        });
         this.buttonToggleStick =
-                new GuiButton(14, xCenter - 100, this.height / 4 + 57, 55, 20, "Stick: ");
-        this.buttonFlip = new GuiButton(20, xCenter - 100, this.height / 4 + 78, 60, 20, "Side: ");
+                new Button(xCenter - 100, this.height / 4 + 57, 55, 20, "Stick: ", b-> {
+                    this.sign.setForm(AdvSignForm.byIndex(this.sign.getForm().getIndex() + 1));
+                    this.updateElements();
+                });
+        this.buttonFlip = new Button(xCenter - 100, this.height / 4 + 78, 60, 20, "Side: ", b-> {
+            this.front = !this.front;
+            this.updateElements();
+        });
         this.sliderDir = new GuiCircularSlider(15, xCenter - 100, this.height / 4 + 15, 40, 40);
         this.sliderDir.setGetter(()->this.sign.getDirection() / 360.0D);
         this.sliderDir.setSetter(v-> {
@@ -110,7 +144,7 @@ public class GuiEditAdvSign extends GuiScreen {
                 new GuiHexColorField(this.fontRendererObj, xCenter + 48, this.height / 4 + 90);
         this.textColorHex.setSetter(rgb->this.getState().getText().setTextColor(new Color(rgb)));
         List<GuiStyleEditor> stylingMenu =
-                GuiStyleEditor.createMenu(33, xCenter + 61, this.height / 4 + 25,
+                GuiStyleEditor.createMenu(xCenter + 61, this.height / 4 + 25,
                                           ()->this.getState().getInput().getStyle(),
                                           (style)-> {
                                               SideEditState state = this.getState();
@@ -147,42 +181,7 @@ public class GuiEditAdvSign extends GuiScreen {
     
     @Override
     protected void actionPerformed(GuiButton button) {
-        if (AbstractButton.hook(button)) {
-            return;
-        }
-        if (button.id == this.buttonDone.id) {
-            this.mc.displayGuiScreen(null);
-        } else if (button.id == this.buttonAddLine.id) {
-            AdvSignText text = this.getState().getText();
-            text.getLines().add(new ChatComponentText(""));
-            text.fixSize();
-            this.updateElements();
-        } else if (button.id == this.buttonRemoveLine.id) {
-            AdvSignText text = this.getState().getText();
-            text.removeLast();
-            text.fixSize();
-            this.getState()
-                .switchToLine(Math.min(this.getState().getLine(),
-                                       text.getLines().size() - 1));
-            this.updateElements();
-        } else if (button.id == this.buttonCopy.id) {
-            GuiUtils.setClipboardString(this.getState()
-                                            .getText()
-                                            .getLines()
-                                            .stream()
-                                            .map(IChatComponent::getFormattedText)
-                                            .map(FormattingUtils::trimReset)
-                                            .collect(Collectors.joining(System.lineSeparator())));
-        } else if (button.id == this.buttonPaste.id) {
-            this.getState().pasteFull(GuiUtils.getClipboardString());
-            this.updateElements();
-        } else if (button.id == this.buttonToggleStick.id) {
-            this.sign.setForm(AdvSignForm.byIndex(this.sign.getForm().getIndex() + 1));
-            this.updateElements();
-        } else if (button.id == this.buttonFlip.id) {
-            this.front = !this.front;
-            this.updateElements();
-        }
+        AbstractButton.hook(button);
     }
     
     @Override
