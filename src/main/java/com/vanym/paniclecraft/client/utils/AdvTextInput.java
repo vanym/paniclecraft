@@ -145,7 +145,14 @@ public class AdvTextInput {
     }
     
     protected boolean move(int i, boolean select, boolean words) {
-        if (this.setCursorPos(this.cursorPos + i)) {
+        int pos;
+        if (words) {
+            String str = this.getComponent().getUnformattedText();
+            pos = GuiUtils.getWordPosition(str, i, this.cursorPos, true);
+        } else {
+            pos = this.cursorPos + i;
+        }
+        if (this.setCursorPos(pos)) {
             if (!select) {
                 this.selectionPos = this.cursorPos;
             }

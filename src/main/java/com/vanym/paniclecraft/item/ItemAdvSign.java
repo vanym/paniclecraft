@@ -162,7 +162,7 @@ public class ItemAdvSign extends ItemMod3 {
             if (facing == EnumFacing.DOWN) {
                 tileAS.setDirection(player.getHorizontalFacing().getHorizontalAngle());
             }
-            tileAS.setEditor(player);
+            tileAS.setEditor(player.getPersistentID());
         }
         stack.shrink(1);
         player.openGui(Core.instance, GUIs.ADVSIGN.ordinal(),
