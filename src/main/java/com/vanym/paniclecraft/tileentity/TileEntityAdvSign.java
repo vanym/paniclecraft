@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
-import com.vanym.paniclecraft.datafix.fixes.AdvSignSidesFix;
-import com.vanym.paniclecraft.utils.JUtils;
 import com.vanym.paniclecraft.utils.NumberUtils;
 
 import net.minecraft.nbt.NBTTagCompound;
@@ -65,7 +63,6 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public void readFromNBT(NBTTagCompound nbtTag, boolean fromStack) {
-        AdvSignSidesFix.processSignTag(nbtTag); // backwards compatibility with 2.12.0.0
         if (nbtTag.hasKey(TAG_FRONTTEXT, 10)) {
             this.frontText.deserializeNBT(nbtTag.getCompoundTag(TAG_FRONTTEXT));
         }
@@ -157,8 +154,6 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     public static boolean isValidTag(NBTTagCompound signTag) {
-        // backwards compatibility with 2.12.0.0
-        signTag = JUtils.peek(AdvSignSidesFix::processSignTag, (NBTTagCompound)signTag.copy());
         return new Color(signTag.getInteger(TAG_STANDCOLOR), true).getAlpha() == 0xff
             && Stream.of(TAG_FRONTTEXT, TAG_BACKTEXT)
                      .map(signTag::getCompoundTag)

@@ -39,6 +39,10 @@ public interface IModComponent {
         return null;
     }
     
+    default public int getDataFixerVersion() {
+        return 0;
+    }
+    
     default public void setServerSideConfig(IServerSideConfig config) {}
     
     default public IServerSideConfig getServerSideConfig() {

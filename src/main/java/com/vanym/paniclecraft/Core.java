@@ -21,6 +21,7 @@ import com.vanym.paniclecraft.core.component.ModComponentCannon;
 import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
+import com.vanym.paniclecraft.datafix.ITypedFixableData;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,6 +31,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.CompoundDataFixer;
+import net.minecraftforge.common.util.ModFixs;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
@@ -79,6 +82,8 @@ public class Core implements IGuiHandler {
     public CreativeTabMod3 tab;
     
     public CommandMod3 command;
+    
+    public ModFixs datafixes;
     
     public ModConfig config;
     
@@ -143,6 +148,12 @@ public class Core implements IGuiHandler {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, instance);
+        CompoundDataFixer datafixer = FMLCommonHandler.instance().getDataFixer();
+        this.datafixes = datafixer.init(DEF.MOD_ID, Core.instance.getComponents()
+                                                                 .stream()
+                                                                 .map(IModComponent::getDataFixerVersion)
+                                                                 .max(Integer::compare)
+                                                                 .orElse(0));
         for (IModComponent component : Core.instance.getComponents()) {
             component.init(this.config);
         }
@@ -180,6 +191,10 @@ public class Core implements IGuiHandler {
         if (this.config.hasChanged()) {
             this.config.save();
         }
+    }
+    
+    public void registerDataFix(ITypedFixableData fix) {
+        fix.getTypes().forEach(type->this.datafixes.registerFix(type, fix));
     }
     
     public FMLEmbeddedChannel getChannel(Side source) {
