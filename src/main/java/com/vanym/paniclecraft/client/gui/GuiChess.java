@@ -26,16 +26,16 @@ public class GuiChess extends Screen {
     protected static final ResourceLocation BUTTONS_TEXTURE =
             new ResourceLocation(DEF.MOD_ID, "textures/gui/chess_buttons.png");
     
-    protected final GuiSquareButton[] fieldButtons = new GuiSquareButton[64];
-    protected final GuiChooseButton[] chooseButtons = new GuiChooseButton[4];
+    protected final SquareButton[] fieldButtons = new SquareButton[64];
+    protected final ChooseButton[] chooseButtons = new ChooseButton[4];
     
-    protected final TileEntityChessDesk tileChess;
+    protected final TileEntityChessDesk chessdesk;
     
     protected int select = -1;
     
     public GuiChess(TileEntityChessDesk tile) {
         super(NarratorChatListener.field_216868_a);
-        this.tileChess = tile;
+        this.chessdesk = tile;
     }
     
     @Override
@@ -47,58 +47,25 @@ public class GuiChess extends Screen {
         for (int i = 0; i < this.fieldButtons.length; ++i) {
             int x = i % 8;
             int y = i / 8;
-            this.addButton(this.fieldButtons[i] =
-                    new GuiSquareButton(i, left + 20 * x, bottom - 20 * y));
+            this.fieldButtons[i] = new SquareButton(i, left + 20 * x, bottom - 20 * y);
         }
-        this.addButton(this.chooseButtons[0] = new GuiChooseButton(ChessGame.KNIGHT));
-        this.addButton(this.chooseButtons[1] = new GuiChooseButton(ChessGame.BISHOP));
-        this.addButton(this.chooseButtons[2] = new GuiChooseButton(ChessGame.ROOK));
-        this.addButton(this.chooseButtons[3] = new GuiChooseButton(ChessGame.QUEEN));
+        this.chooseButtons[0] = new ChooseButton(ChessGame.KNIGHT);
+        this.chooseButtons[1] = new ChooseButton(ChessGame.BISHOP);
+        this.chooseButtons[2] = new ChooseButton(ChessGame.ROOK);
+        this.chooseButtons[3] = new ChooseButton(ChessGame.QUEEN);
+        Arrays.stream(this.fieldButtons).forEachOrdered(this::addButton);
+        Arrays.stream(this.chooseButtons).forEachOrdered(this::addButton);
         this.updateButtons();
     }
     
-    protected void actionPerformed(AbstractButton button) {
-        ChessGame game = this.tileChess.getGame();
-        if (button instanceof GuiSquareButton) {
-            GuiSquareButton buttonSquare = (GuiSquareButton)button;
-            int y = buttonSquare.pos / 8;
-            if (buttonSquare.pos == this.select) {
-                this.select = -1;
-                this.updateButtons();
-            } else if (this.select == -1 || game.isCurrentSide(buttonSquare.pos)) {
-                this.select = buttonSquare.pos;
-                this.updateButtons();
-            } else {
-                byte fromP = game.getPiece(this.select);
-                byte fromA = (byte)Math.abs(fromP);
-                boolean fromW = fromP > 0;
-                if (fromA == ChessGame.PAWN && (y == 0 || y == 7)) {
-                    this.addChoose(fromW, buttonSquare.pos);
-                } else {
-                    ChessGame.Move move = new ChessGame.Move(this.select, buttonSquare.pos);
-                    this.sendMove(move);
-                }
-            }
-        } else if (button instanceof GuiChooseButton) {
-            GuiChooseButton buttonChoose = (GuiChooseButton)button;
-            byte fromP = game.getPiece(this.select);
-            ChessGame.Move move = new ChessGame.Move(
-                    this.select,
-                    buttonChoose.chooseSelect,
-                    fromP,
-                    buttonChoose.getPiece());
-            this.sendMove(move);
-        }
-    }
-    
     protected void sendMove(ChessGame.Move move) {
-        Core.instance.network.sendToServer(new MessageChessMove(this.tileChess.getPos(), move));
+        Core.instance.network.sendToServer(new MessageChessMove(this.chessdesk.getPos(), move));
     }
     
     protected void updateButtons() {
-        ChessGame game = this.tileChess.getGame();
+        ChessGame game = this.chessdesk.getGame();
         for (int i = 0; i < this.fieldButtons.length; ++i) {
-            GuiSquareButton button = this.fieldButtons[i];
+            SquareButton button = this.fieldButtons[i];
             button.active = (this.select == i)
                 || game.isCurrentSide(button.pos)
                 || (this.select != -1 && game.canMove(this.select, i));
@@ -106,8 +73,8 @@ public class GuiChess extends Screen {
         Arrays.stream(this.chooseButtons).forEach(b->b.visible = false);
     }
     
-    public void updateGui(TileEntityChessDesk tile) {
-        if (this.tileChess == tile) {
+    public void update(TileEntityChessDesk tile) {
+        if (this.chessdesk == tile) {
             this.select = -1;
             this.updateButtons();
         }
@@ -120,7 +87,7 @@ public class GuiChess extends Screen {
         int left = centerX - 110 + x * 20;
         int top = white ? centerY - 100 : centerY + 80;
         for (int i = 0; i < this.chooseButtons.length; ++i) {
-            GuiChooseButton chooseButton = this.chooseButtons[i];
+            ChooseButton chooseButton = this.chooseButtons[i];
             chooseButton.chooseSelect = id;
             chooseButton.white = white;
             chooseButton.visible = true;
@@ -158,11 +125,11 @@ public class GuiChess extends Screen {
     
     @Override
     public void tick() {
-        if ((this.tileChess.getWorld()
-                           .getTileEntity(this.tileChess.getPos()) == null)
+        if ((this.chessdesk.getWorld()
+                           .getTileEntity(this.chessdesk.getPos()) == null)
             || this.minecraft.player.getDistanceSq(new Vec3d(
-                    this.tileChess.getPos()).add(0.5D, 0.5D, 0.5D)) > 64.0D) {
-            this.charTyped((char)0, 1); // close
+                    this.chessdesk.getPos()).add(0.5D, 0.5D, 0.5D)) > 64.0D) {
+            this.onClose();
         }
     }
     
@@ -177,8 +144,8 @@ public class GuiChess extends Screen {
     
     protected String getMovesString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < this.tileChess.moves.size(); ++i) {
-            TileEntityChessDesk.Move m = this.tileChess.moves.get(i);
+        for (int i = 0; i < this.chessdesk.moves.size(); ++i) {
+            TileEntityChessDesk.Move m = this.chessdesk.moves.get(i);
             if (i % 2 == 0) {
                 int line = i / 2;
                 if (line != 0) {
@@ -194,11 +161,11 @@ public class GuiChess extends Screen {
         return sb.toString();
     }
     
-    protected class GuiSquareButton extends GuiChessButton {
+    protected class SquareButton extends ChessButton {
         
         public final int pos;
         
-        public GuiSquareButton(int pos, int x, int y) {
+        public SquareButton(int pos, int x, int y) {
             super(x, y);
             this.pos = pos;
             this.active = false;
@@ -206,7 +173,7 @@ public class GuiChess extends Screen {
         
         @Override
         protected byte getPiece() {
-            return GuiChess.this.tileChess.getGame().getPiece(this.pos);
+            return GuiChess.this.chessdesk.getGame().getPiece(this.pos);
         }
         
         @Override
@@ -214,10 +181,11 @@ public class GuiChess extends Screen {
             if (this.active && hovered) {
                 return 1;
             }
-            ChessGame game = GuiChess.this.tileChess.getGame();
+            ChessGame game = GuiChess.this.chessdesk.getGame();
+            int sel = GuiChess.this.select;
             boolean lastFrom = (this.pos == game.lastFrom());
             boolean lastTo = (this.pos == game.lastTo());
-            boolean selected = (this.pos == GuiChess.this.select);
+            boolean selected = (this.pos == sel);
             if (selected) {
                 return 3;
             } else if (this.active) {
@@ -225,7 +193,7 @@ public class GuiChess extends Screen {
                     return 6;
                 } else if (lastTo) {
                     return 7;
-                } else if (GuiChess.this.select != -1 && !game.isCurrentSide(this.pos)) {
+                } else if (sel != -1 && !game.isCurrentSide(this.pos)) {
                     return 2;
                 } else {
                     return 0;
@@ -240,16 +208,39 @@ public class GuiChess extends Screen {
                 }
             }
         }
+        
+        @Override
+        public void onPress() {
+            ChessGame game = GuiChess.this.chessdesk.getGame();
+            int y = this.pos / 8;
+            if (this.pos == GuiChess.this.select) {
+                GuiChess.this.select = -1;
+                GuiChess.this.updateButtons();
+            } else if (GuiChess.this.select == -1 || game.isCurrentSide(this.pos)) {
+                GuiChess.this.select = this.pos;
+                GuiChess.this.updateButtons();
+            } else {
+                byte fromP = game.getPiece(GuiChess.this.select);
+                byte fromA = (byte)Math.abs(fromP);
+                boolean fromW = fromP > 0;
+                if (fromA == ChessGame.PAWN && (y == 0 || y == 7)) {
+                    GuiChess.this.addChoose(fromW, this.pos);
+                } else {
+                    ChessGame.Move move = new ChessGame.Move(GuiChess.this.select, this.pos);
+                    GuiChess.this.sendMove(move);
+                }
+            }
+        }
     }
     
-    protected class GuiChooseButton extends GuiChessButton {
+    protected class ChooseButton extends ChessButton {
         
         protected final byte piece;
         
         protected boolean white;
         protected int chooseSelect = -1;
         
-        public GuiChooseButton(byte piece) {
+        public ChooseButton(byte piece) {
             super(0, 0);
             this.piece = piece;
             this.visible = false;
@@ -263,17 +254,22 @@ public class GuiChess extends Screen {
                 return (byte)-this.piece;
             }
         }
-    }
-    
-    protected abstract class GuiChessButton extends AbstractButton {
-        
-        public GuiChessButton(int x, int y) {
-            super(x, y, 20, 20, "");
-        }
         
         @Override
         public void onPress() {
-            GuiChess.this.actionPerformed(this);
+            ChessGame game = GuiChess.this.chessdesk.getGame();
+            int sel = GuiChess.this.select;
+            byte fromP = game.getPiece(sel);
+            ChessGame.Move move =
+                    new ChessGame.Move(sel, this.chooseSelect, fromP, this.getPiece());
+            GuiChess.this.sendMove(move);
+        }
+    }
+    
+    protected static abstract class ChessButton extends AbstractButton {
+        
+        public ChessButton(int x, int y) {
+            super(x, y, 20, 20, "");
         }
         
         protected abstract byte getPiece();
