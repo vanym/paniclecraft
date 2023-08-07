@@ -16,7 +16,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.CompoundDataFixer;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -78,6 +80,12 @@ public class ModComponentCannon extends ModComponent {
             return;
         }
         this.myServerConfig.read(config);
+    }
+    
+    @Override
+    public void init(ModConfig config) {
+        CompoundDataFixer fixer = FMLCommonHandler.instance().getDataFixer();
+        TileEntityCannon.registerFixesCannon(fixer);
     }
     
     @Override

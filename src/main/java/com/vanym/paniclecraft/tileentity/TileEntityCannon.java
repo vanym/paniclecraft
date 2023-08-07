@@ -15,6 +15,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.datafix.IDataWalker;
+import net.minecraft.util.datafix.walkers.ItemStackData;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -314,5 +318,10 @@ public class TileEntityCannon extends TileEntityBase implements IInventory, ITic
     public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
         return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
             || super.hasCapability(capability, facing);
+    }
+    
+    public static void registerFixesCannon(DataFixer fixer) {
+        IDataWalker walker = new ItemStackData(TileEntityCannon.class, TAG_STACK);
+        fixer.registerWalker(FixTypes.BLOCK_ENTITY, walker);
     }
 }
