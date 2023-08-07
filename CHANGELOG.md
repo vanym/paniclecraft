@@ -7,6 +7,7 @@
 
 ### Fixed
  - Thread safeness of peripherals
+ - Cannon datafix of inside item
 
 ## 2.12.0.0 - 2023-06-05
 ### Added
