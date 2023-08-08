@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.google.gson.JsonSyntaxException;
+
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -126,10 +128,14 @@ public class AdvSignText implements INBTSerializable<CompoundNBT> {
         this.textColor = new Color(nbtTag.getInt(TAG_TEXTCOLOR), true);
         this.lines.clear();
         ListNBT linesTag = nbtTag.getList(TAG_LINES, 8);
-        IntStream.range(0, linesTag.size())
-                 .mapToObj(linesTag::getString)
-                 .map(ITextComponent.Serializer::fromJson)
-                 .forEachOrdered(this.lines::add);
+        try {
+            IntStream.range(0, linesTag.size())
+                     .mapToObj(linesTag::getString)
+                     .map(ITextComponent.Serializer::fromJson)
+                     .forEachOrdered(this.lines::add);
+        } catch (JsonSyntaxException e) {
+            this.lines.clear();
+        }
     }
     
     protected static boolean isValid(ITextComponent component) {
