@@ -1,3 +1,11 @@
 {
-  "type": "paniclecraft:paintingframe_remove_painting"
+  "type": "paniclecraft:paintingframe_remove_painting",
+  "order": [
+    "front",
+    "right",
+    "top",
+    "left",
+    "back",
+    "bottom"
+  ]
 }

@@ -2,7 +2,10 @@ package com.vanym.paniclecraft.recipe;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
 import com.vanym.paniclecraft.item.ItemPainting;
@@ -15,23 +18,20 @@ import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     
     protected final Direction[] removeOrder;
     
-    public RecipePaintingFrameRemovePainting(ResourceLocation id) {
-        this(id, ItemPaintingFrame.SideName.stream()
-                                           .map(ItemPaintingFrame.SideName::getSide)
-                                           .toArray(Direction[]::new));
-    }
-    
-    protected RecipePaintingFrameRemovePainting(ResourceLocation id, Direction[] removeOrder) {
+    public RecipePaintingFrameRemovePainting(ResourceLocation id, Direction[] removeOrder) {
         this(id, removeOrder, removeOrder.length > 0 ? removeOrder[0] : null);
     }
     
@@ -114,5 +114,38 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     @Override
     public IRecipeSerializer<?> getSerializer() {
         return Core.instance.painting.recipeTypePaintingFrameRemove;
+    }
+    
+    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>>
+            implements
+                IRecipeSerializer<RecipePaintingFrameRemovePainting> {
+        
+        @Override
+        public RecipePaintingFrameRemovePainting read(ResourceLocation recipeId, JsonObject json) {
+            JsonArray order = JSONUtils.getJsonArray(json, "order");
+            Direction[] removeOrder = IntStream.range(0, order.size())
+                                               .limit(18)
+                                               .mapToObj(i->RecipeUtils.getSide(order, "order", i))
+                                               .toArray(Direction[]::new);
+            return new RecipePaintingFrameRemovePainting(recipeId, removeOrder);
+        }
+        
+        @Override
+        public RecipePaintingFrameRemovePainting read(
+                ResourceLocation recipeId,
+                PacketBuffer buffer) {
+            return new RecipePaintingFrameRemovePainting(
+                    recipeId,
+                    Arrays.stream(buffer.readVarIntArray(18))
+                          .mapToObj(Direction::byIndex)
+                          .toArray(Direction[]::new));
+        }
+        
+        @Override
+        public void write(PacketBuffer buffer, RecipePaintingFrameRemovePainting recipe) {
+            buffer.writeVarIntArray(Arrays.stream(recipe.removeOrder)
+                                          .mapToInt(Direction::getIndex)
+                                          .toArray());
+        }
     }
 }

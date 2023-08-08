@@ -213,8 +213,8 @@ public class ModComponentPainting extends ModComponent {
                 new RecipePaintingFrame.Serializer().setRegistryName("paintingframe");
         this.recipeTypePaintingFrameAdd =
                 new RecipePaintingFrameAddPainting.Serializer().setRegistryName("paintingframe_add_painting");
-        this.recipeTypePaintingFrameRemove = new SpecialRecipeSerializer<>(
-                RecipePaintingFrameRemovePainting::new).setRegistryName("paintingframe_remove_painting");
+        this.recipeTypePaintingFrameRemove =
+                new RecipePaintingFrameRemovePainting.Serializer().setRegistryName("paintingframe_remove_painting");
     }
     
     @SubscribeEvent
