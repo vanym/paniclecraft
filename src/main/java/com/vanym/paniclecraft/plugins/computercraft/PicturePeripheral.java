@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
 import java.awt.Color;
+import java.util.Optional;
 
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
@@ -14,7 +15,9 @@ public abstract class PicturePeripheral extends PeripheralBase {
     @PeripheralMethod(0)
     protected String getName() throws LuaException, InterruptedException {
         synchronized (this.syncObject()) {
-            return this.findPicture().getName();
+            return Optional.ofNullable(this.findPicture().getName())
+                           .map(t->t.getString())
+                           .orElse(null);
         }
     }
     

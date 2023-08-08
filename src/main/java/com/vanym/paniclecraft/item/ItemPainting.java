@@ -167,7 +167,7 @@ public class ItemPainting extends BlockItem {
         if (pictureTag != null && !pictureTag.isEmpty()) {
             picture.deserializeNBT(pictureTag);
             if (itemStack.hasDisplayName()) {
-                picture.setName(itemStack.getDisplayName().getFormattedText());
+                picture.setName(itemStack.getDisplayName());
             }
             return true;
         }
@@ -175,9 +175,7 @@ public class ItemPainting extends BlockItem {
     }
     
     public static void putPictureTag(ItemStack stack, CompoundNBT pictureTag) {
-        ItemPaintingFrame.removePictureTagName(pictureTag)
-                         .map(StringTextComponent::new)
-                         .ifPresent(stack::setDisplayName);
+        ItemPaintingFrame.removePictureTagName(pictureTag).ifPresent(stack::setDisplayName);
         ItemUtils.getOrCreateBlockEntityTag(stack).put(TAG_PICTURE, pictureTag);
     }
     

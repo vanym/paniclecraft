@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.google.gson.JsonSyntaxException;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPaintingFrame;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
@@ -170,17 +171,21 @@ public class ItemPaintingFrame extends BlockItem {
         return tagOpt;
     }
     
-    public static void putPictureTagName(CompoundNBT pictureTag, String name) {
-        pictureTag.putString(Picture.TAG_NAME, name);
+    public static void putPictureTagName(CompoundNBT pictureTag, ITextComponent name) {
+        pictureTag.putString(Picture.TAG_NAME, ITextComponent.Serializer.toJson(name));
     }
     
-    public static Optional<String> removePictureTagName(CompoundNBT pictureTag) {
+    public static Optional<ITextComponent> removePictureTagName(CompoundNBT pictureTag) {
         if (!pictureTag.contains(Picture.TAG_NAME, 8)) {
             return Optional.empty();
         }
         String name = pictureTag.getString(Picture.TAG_NAME);
         pictureTag.remove(Picture.TAG_NAME);
-        return Optional.of(name);
+        try {
+            return Optional.of(ITextComponent.Serializer.fromJson(name));
+        } catch (JsonSyntaxException e) {
+            return Optional.empty();
+        }
     }
     
     public static enum SideName {

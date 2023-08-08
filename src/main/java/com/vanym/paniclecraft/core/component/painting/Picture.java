@@ -9,6 +9,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
@@ -21,6 +22,7 @@ import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NumberNBT;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -32,7 +34,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     protected final boolean hasAlpha;
     
     protected boolean editable = true;
-    protected String name;
+    protected ITextComponent name;
     
     protected Image image;
     
@@ -304,7 +306,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         return this.holder.getNeighborPicture(offsetX, offsetY);
     }
     
-    public String getName() {
+    public ITextComponent getName() {
         return this.name;
     }
     
@@ -479,8 +481,8 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         return true;
     }
     
-    public void setName(String name) {
-        if (name.isEmpty()) {
+    public void setName(ITextComponent name) {
+        if (name == null || name.getString().isEmpty()) {
             name = null;
         }
         this.name = name;
@@ -508,7 +510,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         CompoundNBT nbtTag = new CompoundNBT();
         nbtTag.putBoolean(TAG_EDITABLE, this.editable);
         if (this.name != null) {
-            nbtTag.putString(TAG_NAME, this.name);
+            nbtTag.putString(TAG_NAME, ITextComponent.Serializer.toJson(this.name));
         }
         CompoundNBT nbtImageTag = new CompoundNBT();
         this.writeImage(nbtImageTag);
@@ -524,7 +526,11 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
             this.editable = nbtTag.getBoolean(TAG_EDITABLE);
         }
         if (nbtTag.contains(TAG_NAME)) {
-            this.setName(nbtTag.getString(TAG_NAME));
+            try {
+                this.setName(ITextComponent.Serializer.fromJson(nbtTag.getString(TAG_NAME)));
+            } catch (JsonSyntaxException e) {
+                this.name = null;
+            }
         } else {
             this.name = null;
         }
