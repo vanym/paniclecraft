@@ -25,15 +25,6 @@ public class RecipePaintingFrame extends ShapedRecipe {
             String group,
             int recipeWidth,
             int recipeHeight,
-            NonNullList<Ingredient> recipeItems) {
-        this(id, group, recipeWidth, recipeHeight, recipeItems,
-             ItemPaintingFrame.SideName.FRONT.getSide());
-    }
-    
-    protected RecipePaintingFrame(ResourceLocation id,
-            String group,
-            int recipeWidth,
-            int recipeHeight,
             NonNullList<Ingredient> recipeItems,
             Direction pside) {
         super(id, group, recipeWidth, recipeHeight, recipeItems,
@@ -41,10 +32,10 @@ public class RecipePaintingFrame extends ShapedRecipe {
         this.side = Objects.requireNonNull(pside);
     }
     
-    protected RecipePaintingFrame(ShapedRecipe recipe) {
+    protected RecipePaintingFrame(Direction pside, ShapedRecipe recipe) {
         this(recipe.getId(), recipe.getGroup(),
              recipe.getWidth(), recipe.getHeight(),
-             recipe.getIngredients());
+             recipe.getIngredients(), pside);
     }
     
     @Override
@@ -73,13 +64,23 @@ public class RecipePaintingFrame extends ShapedRecipe {
             String itemId = Core.instance.painting.itemPaintingFrame.getRegistryName().toString();
             stack.addProperty("item", itemId);
             json.add("result", stack);
+            Direction side = RecipeUtils.getSide(json, "side");
             ShapedRecipe recipe = super.read(recipeId, json);
-            return new RecipePaintingFrame(recipe);
+            return new RecipePaintingFrame(side, recipe);
         }
         
         @Override
         public RecipePaintingFrame read(ResourceLocation recipeId, PacketBuffer buffer) {
-            return new RecipePaintingFrame(super.read(recipeId, buffer));
+            Direction side = Direction.byIndex(buffer.readVarInt());
+            ShapedRecipe recipe = super.read(recipeId, buffer);
+            return new RecipePaintingFrame(side, recipe);
+        }
+        
+        @Override
+        public void write(PacketBuffer buf, ShapedRecipe recipeUncasted) {
+            final RecipePaintingFrame recipe = (RecipePaintingFrame)recipeUncasted;
+            buf.writeVarInt(recipe.side.getIndex());
+            super.write(buf, recipe);
         }
     }
 }

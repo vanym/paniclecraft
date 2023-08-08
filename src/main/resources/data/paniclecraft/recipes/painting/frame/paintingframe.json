@@ -1,5 +1,6 @@
 {
   "type": "paniclecraft:paintingframe",
+  "side": "front",
   "pattern": [
     "sss",
     "sps",
