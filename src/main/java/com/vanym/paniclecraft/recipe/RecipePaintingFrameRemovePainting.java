@@ -32,11 +32,16 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     }
     
     protected RecipePaintingFrameRemovePainting(ResourceLocation id, Direction[] removeOrder) {
+        this(id, removeOrder, removeOrder.length > 0 ? removeOrder[0] : null);
+    }
+    
+    protected RecipePaintingFrameRemovePainting(
+            ResourceLocation id,
+            Direction[] removeOrder,
+            Direction first) {
         super(id, "", new ItemStack(Core.instance.painting.itemPainting),
               NonNullList.from(Ingredient.EMPTY,
-                               Optional.of(ItemPaintingFrame.SideName.FRONT)
-                                       .map(ItemPaintingFrame.SideName::getSide)
-                                       .map(ItemPaintingFrame::getItemWithEmptyPictures)
+                               Optional.of(ItemPaintingFrame.getItemWithEmptyPictures(first))
                                        .map(Ingredient::fromStacks)
                                        .get()));
         this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);

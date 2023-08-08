@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.recipe;
 
+import java.util.Objects;
+
 import com.google.gson.JsonObject;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.inventory.InventoryUtils;
@@ -11,18 +13,32 @@ import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 
 public class RecipePaintingFrame extends ShapedRecipe {
+    
+    protected final Direction side;
     
     public RecipePaintingFrame(ResourceLocation id,
             String group,
             int recipeWidth,
             int recipeHeight,
             NonNullList<Ingredient> recipeItems) {
+        this(id, group, recipeWidth, recipeHeight, recipeItems,
+             ItemPaintingFrame.SideName.FRONT.getSide());
+    }
+    
+    protected RecipePaintingFrame(ResourceLocation id,
+            String group,
+            int recipeWidth,
+            int recipeHeight,
+            NonNullList<Ingredient> recipeItems,
+            Direction pside) {
         super(id, group, recipeWidth, recipeHeight, recipeItems,
-              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
+              ItemPaintingFrame.getItemWithEmptyPictures(pside));
+        this.side = Objects.requireNonNull(pside);
     }
     
     protected RecipePaintingFrame(ShapedRecipe recipe) {
@@ -35,7 +51,7 @@ public class RecipePaintingFrame extends ShapedRecipe {
     public ItemStack getCraftingResult(CraftingInventory inv) {
         ItemStack frame = super.getCraftingResult(inv);
         ItemStack painting = InventoryUtils.findItem(inv, Core.instance.painting.itemPainting);
-        RecipeUtils.addPainting(frame, painting, ItemPaintingFrame.SideName.FRONT.getSide());
+        RecipeUtils.addPainting(frame, painting, this.side);
         return frame;
     }
     
