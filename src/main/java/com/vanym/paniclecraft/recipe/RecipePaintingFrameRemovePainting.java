@@ -28,8 +28,14 @@ public class RecipePaintingFrameRemovePainting extends RecipeRegister.ShapelessO
     }
     
     protected RecipePaintingFrameRemovePainting(EnumFacing[] removeOrder) {
+        this(removeOrder, removeOrder.length > 0 ? removeOrder[0] : null);
+    }
+    
+    protected RecipePaintingFrameRemovePainting(
+            EnumFacing[] removeOrder,
+            EnumFacing first) {
         super(Core.instance.painting.itemPainting,
-              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
+              ItemPaintingFrame.getItemWithEmptyPictures(first));
         this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);
     }
     
