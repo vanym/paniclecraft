@@ -29,8 +29,14 @@ public class RecipePaintingFrameRemovePainting extends ShapelessOreRecipe {
     }
     
     protected RecipePaintingFrameRemovePainting(ForgeDirection[] removeOrder) {
+        this(removeOrder, removeOrder.length > 0 ? removeOrder[0] : null);
+    }
+    
+    protected RecipePaintingFrameRemovePainting(
+            ForgeDirection[] removeOrder,
+            ForgeDirection first) {
         super(Core.instance.painting.itemPainting,
-              ItemPaintingFrame.getItemWithEmptyPictures(ItemPaintingFrame.SideName.FRONT.getSide()));
+              ItemPaintingFrame.getItemWithEmptyPictures(first));
         this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);
     }
     

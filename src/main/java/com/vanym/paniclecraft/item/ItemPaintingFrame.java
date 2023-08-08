@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -125,9 +126,9 @@ public class ItemPaintingFrame extends ItemBlockMod3 {
             return getItemWithPictures(null);
         }
         Map<ForgeDirection, Picture> map = new HashMap<>();
-        for (ForgeDirection pside : psides) {
-            map.put(pside, null);
-        }
+        Arrays.stream(psides)
+              .filter(Objects::nonNull)
+              .forEach(pside->map.put(pside, null));
         return getItemWithPictures(map);
     }
     
