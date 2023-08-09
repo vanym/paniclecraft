@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.google.gson.JsonObject;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -58,8 +59,9 @@ public class ConfigCondition implements ICondition {
     public boolean test() {
         return ModList.get()
                       .getModContainerById(this.namespace)
-                      .map(mc->ObfuscationReflectionHelper.<EnumMap<ModConfig.Type, ModConfig>,
-                          ModContainer>getPrivateValue(ModContainer.class, mc, "configs"))
+                      .map(mc->JUtils.trap(()->ObfuscationReflectionHelper.<
+                          EnumMap<ModConfig.Type, ModConfig>,
+                          ModContainer>getPrivateValue(ModContainer.class, mc, "configs")))
                       .map(configs->configs.get(this.type))
                       .map(config-> {
                           ForgeConfigSpec spec = config.getSpec();
