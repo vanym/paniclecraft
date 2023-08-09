@@ -14,6 +14,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -165,7 +166,7 @@ public class Version {
         params.accept("forge", ForgeVersion.getVersion());
         params.accept("minecraft", MinecraftForge.MC_VERSION);
         Side side = FMLCommonHandler.instance().getSide();
-        params.accept("side", Objects.toString(side).toLowerCase());
+        params.accept("side", Objects.toString(side).toLowerCase(Locale.ROOT));
         boolean deobfEnv = (boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment");
         if (deobfEnv) {
             params.accept("environment", "deobfuscated");

@@ -1,12 +1,13 @@
 package com.vanym.paniclecraft.core.component.advsign;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 public enum AdvSignForm {
     WALL, STICK_DOWN;
     
     public String getName() {
-        return this.name().toLowerCase();
+        return this.name().toLowerCase(Locale.ROOT);
     }
     
     public int getIndex() {

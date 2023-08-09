@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -40,12 +41,13 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     @PeripheralMethod(31)
     protected Object getAvailableSides() {
         return Arrays.stream(ForgeDirection.VALID_DIRECTIONS)
-                     .collect(Collectors.toMap(f->f.ordinal() + 1, f->f.toString().toLowerCase()));
+                     .collect(Collectors.toMap(f->f.ordinal() + 1,
+                                               f->f.toString().toLowerCase(Locale.ROOT)));
     }
     
     @PeripheralMethod(32)
     protected String getCurrentSide() {
-        return this.pside.get().toString().toLowerCase();
+        return this.pside.get().toString().toLowerCase(Locale.ROOT);
     }
     
     @PeripheralMethod(33)
