@@ -5,6 +5,9 @@
  - Advanced sign on back writing
  - Advanced sign styling menu
 
+### Changed
+ - Painting commands config prefix to "`allow`"
+
 ### Fixed
  - Thread safeness of peripherals
 

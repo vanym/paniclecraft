@@ -138,16 +138,16 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         @Override
         public boolean canCommandSenderUseCommand(ICommandSender sender) {
             if (!this.edit && !this.to
-                && Core.instance.painting.server.freePaintOnBlockView) {
+                && Core.instance.painting.server.allowPaintOnBlockView) {
                 return true;
             } else if (this.edit && !this.to
-                && Core.instance.painting.server.freePaintOnBlockEditView) {
+                && Core.instance.painting.server.allowPaintOnBlockEditView) {
                 return true;
             } else if (!this.edit && this.to
-                && Core.instance.painting.server.freePaintOnBlockViewTo) {
+                && Core.instance.painting.server.allowPaintOnBlockViewTo) {
                 return true;
             } else if (this.edit && this.to
-                && Core.instance.painting.server.freePaintOnBlockEditViewTo) {
+                && Core.instance.painting.server.allowPaintOnBlockEditViewTo) {
                 return true;
             } else {
                 return super.canCommandSenderUseCommand(sender);
