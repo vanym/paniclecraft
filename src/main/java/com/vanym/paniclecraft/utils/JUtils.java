@@ -25,4 +25,20 @@ public class JUtils {
             return obj;
         };
     }
+    
+    public static <T> T trap(Supplier<T> sup) {
+        return trap(sup, ()->null);
+    }
+    
+    public static <T> T trap(Supplier<T> sup, Supplier<T> orElse) {
+        return trap(sup, (e)->orElse.get());
+    }
+    
+    public static <T> T trap(Supplier<T> sup, Function<Exception, T> orElse) {
+        try {
+            return sup.get();
+        } catch (Exception e) {
+            return orElse.apply(e);
+        }
+    }
 }
