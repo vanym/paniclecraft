@@ -25,12 +25,17 @@ import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
+import com.vanym.paniclecraft.recipe.conditions.ConfigCondition;
 import com.vanym.paniclecraft.server.ServerProxy;
 
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -82,6 +87,7 @@ public class Core {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         ModLoadingContext context = ModLoadingContext.get();
         bus.addListener(this::setup);
+        bus.register(this);
         MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
         RecipeDummy.REGISTER.register(bus);
         this.command.addSubCommand(new CommandVersion());
@@ -120,5 +126,10 @@ public class Core {
     
     protected void serverStarting(FMLServerStartingEvent event) {
         event.getCommandDispatcher().register(this.command.register());
+    }
+    
+    @SubscribeEvent
+    protected void registerConditions(RegistryEvent.Register<IRecipeSerializer<?>> event) {
+        CraftingHelper.register(ConfigCondition.Serializer.INSTANCE);
     }
 }
