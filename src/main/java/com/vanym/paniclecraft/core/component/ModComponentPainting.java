@@ -709,14 +709,14 @@ public class ModComponentPainting extends ModComponent {
     
     public class ChangeableServerConfig {
         
-        public boolean freePaintingView = true;
-        public boolean freePaintingEditView = false;
-        public boolean freePaintingViewTo = false;
-        public boolean freePaintingEditViewTo = false;
-        public boolean freePaintOnBlockView = true;
-        public boolean freePaintOnBlockEditView = false;
-        public boolean freePaintOnBlockViewTo = false;
-        public boolean freePaintOnBlockEditViewTo = false;
+        public boolean allowPaintingView = true;
+        public boolean allowPaintingEditView = false;
+        public boolean allowPaintingViewTo = false;
+        public boolean allowPaintingEditViewTo = false;
+        public boolean allowPaintOnBlockView = true;
+        public boolean allowPaintOnBlockEditView = false;
+        public boolean allowPaintOnBlockViewTo = false;
+        public boolean allowPaintOnBlockEditViewTo = false;
         
         protected ChangeableServerConfig() {}
         
@@ -725,29 +725,29 @@ public class ModComponentPainting extends ModComponent {
             config.restartless();
             final String COMMENT_PREFIX =
                     String.format("allow any player use command:\n/%s ", CommandMod3.NAME);
-            this.freePaintingView =
-                    config.getBoolean("freePaintingView", category, true,
+            this.allowPaintingView =
+                    config.getBoolean("allowPaintingView", category, true,
                                       COMMENT_PREFIX + "painting view" + "\n");
-            this.freePaintingEditView =
-                    config.getBoolean("freePaintingEditView", category, false,
+            this.allowPaintingEditView =
+                    config.getBoolean("allowPaintingEditView", category, false,
                                       COMMENT_PREFIX + "painting editview" + "\n");
-            this.freePaintingViewTo =
-                    config.getBoolean("freePaintingViewTo", category, false,
+            this.allowPaintingViewTo =
+                    config.getBoolean("allowPaintingViewTo", category, false,
                                       COMMENT_PREFIX + "painting viewto" + "\n");
-            this.freePaintingEditViewTo =
-                    config.getBoolean("freePaintingEditViewTo", category, false,
+            this.allowPaintingEditViewTo =
+                    config.getBoolean("allowPaintingEditViewTo", category, false,
                                       COMMENT_PREFIX + "painting editviewto" + "\n");
-            this.freePaintOnBlockView =
-                    config.getBoolean("freePaintOnBlockView", category, true,
+            this.allowPaintOnBlockView =
+                    config.getBoolean("allowPaintOnBlockView", category, true,
                                       COMMENT_PREFIX + "paintonblock view" + "\n");
-            this.freePaintOnBlockEditView =
-                    config.getBoolean("freePaintOnBlockEditView", category, false,
+            this.allowPaintOnBlockEditView =
+                    config.getBoolean("allowPaintOnBlockEditView", category, false,
                                       COMMENT_PREFIX + "paintonblock editview" + "\n");
-            this.freePaintOnBlockViewTo =
-                    config.getBoolean("freePaintOnBlockViewTo", category, false,
+            this.allowPaintOnBlockViewTo =
+                    config.getBoolean("allowPaintOnBlockViewTo", category, false,
                                       COMMENT_PREFIX + "paintonblock viewto" + "\n");
-            this.freePaintOnBlockEditViewTo =
-                    config.getBoolean("freePaintOnBlockEditViewTo", category, false,
+            this.allowPaintOnBlockEditViewTo =
+                    config.getBoolean("allowPaintOnBlockEditViewTo", category, false,
                                       COMMENT_PREFIX + "paintonblock editviewto" + "\n");
             config.restartlessReset();
             return this;
