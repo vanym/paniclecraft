@@ -547,22 +547,22 @@ public class ModComponentPainting extends ModComponent {
     
     public class ServerConfig {
         
-        public boolean freePaintingView = true;
-        protected final ForgeConfigSpec.BooleanValue freePaintingViewSpec;
-        public boolean freePaintingEditView = false;
-        protected final ForgeConfigSpec.BooleanValue freePaintingEditViewSpec;
-        public boolean freePaintingViewTo = false;
-        protected final ForgeConfigSpec.BooleanValue freePaintingViewToSpec;
-        public boolean freePaintingEditViewTo = false;
-        protected final ForgeConfigSpec.BooleanValue freePaintingEditViewToSpec;
-        public boolean freePaintOnBlockView = true;
-        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockViewSpec;
-        public boolean freePaintOnBlockEditView = false;
-        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockEditViewSpec;
-        public boolean freePaintOnBlockViewTo = false;
-        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockViewToSpec;
-        public boolean freePaintOnBlockEditViewTo = false;
-        protected final ForgeConfigSpec.BooleanValue freePaintOnBlockEditViewToSpec;
+        public boolean allowPaintingView = true;
+        protected final ForgeConfigSpec.BooleanValue allowPaintingViewSpec;
+        public boolean allowPaintingEditView = false;
+        protected final ForgeConfigSpec.BooleanValue allowPaintingEditViewSpec;
+        public boolean allowPaintingViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue allowPaintingViewToSpec;
+        public boolean allowPaintingEditViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue allowPaintingEditViewToSpec;
+        public boolean allowPaintOnBlockView = true;
+        protected final ForgeConfigSpec.BooleanValue allowPaintOnBlockViewSpec;
+        public boolean allowPaintOnBlockEditView = false;
+        protected final ForgeConfigSpec.BooleanValue allowPaintOnBlockEditViewSpec;
+        public boolean allowPaintOnBlockViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue allowPaintOnBlockViewToSpec;
+        public boolean allowPaintOnBlockEditViewTo = false;
+        protected final ForgeConfigSpec.BooleanValue allowPaintOnBlockEditViewToSpec;
         
         protected ServerConfig(ForgeConfigSpec.Builder serverBuilder) {
             FMLJavaModLoadingContext.get().getModEventBus().register(this);
@@ -570,30 +570,30 @@ public class ModComponentPainting extends ModComponent {
             serverBuilder.push(ModComponentPainting.this.getName());
             final String COMMENT_PREFIX =
                     String.format("allow any player use command:\n/%s ", CommandMod3.NAME);
-            this.freePaintingViewSpec =
+            this.allowPaintingViewSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "painting view" + "\n")
-                                 .define("freePaintingView", true);
-            this.freePaintingEditViewSpec =
+                                 .define("allowPaintingView", true);
+            this.allowPaintingEditViewSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "painting editview" + "\n")
-                                 .define("freePaintingEditView", false);
-            this.freePaintingViewToSpec =
+                                 .define("allowPaintingEditView", false);
+            this.allowPaintingViewToSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "painting viewto" + "\n")
-                                 .define("freePaintingViewTo", false);
-            this.freePaintingEditViewToSpec =
+                                 .define("allowPaintingViewTo", false);
+            this.allowPaintingEditViewToSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "painting editviewto" + "\n")
-                                 .define("freePaintingEditViewTo", false);
-            this.freePaintOnBlockViewSpec =
+                                 .define("allowPaintingEditViewTo", false);
+            this.allowPaintOnBlockViewSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "paintonblock view" + "\n")
-                                 .define("freePaintOnBlockView", true);
-            this.freePaintOnBlockEditViewSpec =
+                                 .define("allowPaintOnBlockView", true);
+            this.allowPaintOnBlockEditViewSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "paintonblock editview" + "\n")
-                                 .define("freePaintOnBlockEditView", false);
-            this.freePaintOnBlockViewToSpec =
+                                 .define("allowPaintOnBlockEditView", false);
+            this.allowPaintOnBlockViewToSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "paintonblock viewto" + "\n")
-                                 .define("freePaintOnBlockViewTo", false);
-            this.freePaintOnBlockEditViewToSpec =
+                                 .define("allowPaintOnBlockViewTo", false);
+            this.allowPaintOnBlockEditViewToSpec =
                     serverBuilder.comment(COMMENT_PREFIX + "paintonblock editviewto" + "\n")
-                                 .define("freePaintOnBlockEditViewTo", false);
+                                 .define("allowPaintOnBlockEditViewTo", false);
             serverBuilder.pop();
         }
         

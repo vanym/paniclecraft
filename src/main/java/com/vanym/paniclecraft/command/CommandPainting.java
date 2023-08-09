@@ -51,16 +51,16 @@ public class CommandPainting extends TreeCommandBase {
         @Override
         public boolean checkPermission(CommandSource source) {
             if (!this.edit && !this.to
-                && Core.instance.painting.server.freePaintingView) {
+                && Core.instance.painting.server.allowPaintingView) {
                 return true;
             } else if (this.edit && !this.to
-                && Core.instance.painting.server.freePaintingEditView) {
+                && Core.instance.painting.server.allowPaintingEditView) {
                 return true;
             } else if (!this.edit && this.to
-                && Core.instance.painting.server.freePaintingViewTo) {
+                && Core.instance.painting.server.allowPaintingViewTo) {
                 return true;
             } else if (this.edit && this.to
-                && Core.instance.painting.server.freePaintingEditViewTo) {
+                && Core.instance.painting.server.allowPaintingEditViewTo) {
                 return true;
             } else {
                 return super.checkPermission(source);
