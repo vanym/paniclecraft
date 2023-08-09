@@ -1,18 +1,31 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "i",
-    "b"
-  ],
-  "key": {
-    "i": {
-      "tag": "forge:ingots/iron"
-    },
-    "b": {
-      "item": "paniclecraft:paintingtool_brush"
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "paniclecraft:config",
+          "location": "paniclecraft:painting.recipe.paintingtoolRemoverFromBrush"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          "i",
+          "b"
+        ],
+        "key": {
+          "i": {
+            "tag": "forge:ingots/iron"
+          },
+          "b": {
+            "item": "paniclecraft:paintingtool_brush"
+          }
+        },
+        "result": {
+          "item": "paniclecraft:paintingtool_remover"
+        }
+      }
     }
-  },
-  "result": {
-    "item": "paniclecraft:paintingtool_remover"
-  }
+  ]
 }

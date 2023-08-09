@@ -1,11 +1,24 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
+  "type": "forge:conditional",
+  "recipes": [
     {
-      "tag": "minecraft:signs"
+      "conditions": [
+        {
+          "type": "paniclecraft:config",
+          "location": "paniclecraft:advsign.recipe.advancedSignEasy"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "ingredients": [
+          {
+            "tag": "minecraft:signs"
+          }
+        ],
+        "result": {
+          "item": "paniclecraft:advanced_sign"
+        }
+      }
     }
-  ],
-  "result": {
-    "item": "paniclecraft:advanced_sign"
-  }
+  ]
 }

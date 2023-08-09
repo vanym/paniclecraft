@@ -158,6 +158,7 @@ public class ModComponentPainting extends ModComponent {
         ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
         this.config = new Config(serverBuilder);
         this.server = new ServerConfig(serverBuilder);
+        this.initRecipesConfig(serverBuilder);
         
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
             this.perFrameUse = new ItemPaintingTool.PerFrameEventHandler();
@@ -215,6 +216,16 @@ public class ModComponentPainting extends ModComponent {
                 new RecipePaintingFrameAddPainting.Serializer().setRegistryName("paintingframe_add_painting");
         this.recipeTypePaintingFrameRemove =
                 new RecipePaintingFrameRemovePainting.Serializer().setRegistryName("paintingframe_remove_painting");
+    }
+    
+    protected void initRecipesConfig(ForgeConfigSpec.Builder serverBuilder) {
+        serverBuilder.push(Arrays.asList(this.getName(), "recipe"));
+        serverBuilder.define("palette", false);
+        serverBuilder.define("paintingtoolRemover", false);
+        serverBuilder.define("paintingtoolRemoverFromBrush", false);
+        serverBuilder.define("paintingtoolRemoverSmall", false);
+        serverBuilder.define("paintingtoolRemoverSmallFromBrushSmall", false);
+        serverBuilder.pop(2);
     }
     
     @SubscribeEvent

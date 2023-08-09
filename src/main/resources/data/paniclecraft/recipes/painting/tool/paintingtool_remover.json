@@ -1,18 +1,31 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "i",
-    "s"
-  ],
-  "key": {
-    "i": {
-      "tag": "forge:ingots/iron"
-    },
-    "s": {
-      "tag": "forge:rods/wooden"
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "paniclecraft:config",
+          "location": "paniclecraft:painting.recipe.paintingtoolRemover"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          "i",
+          "s"
+        ],
+        "key": {
+          "i": {
+            "tag": "forge:ingots/iron"
+          },
+          "s": {
+            "tag": "forge:rods/wooden"
+          }
+        },
+        "result": {
+          "item": "paniclecraft:paintingtool_remover"
+        }
+      }
     }
-  },
-  "result": {
-    "item": "paniclecraft:paintingtool_remover"
-  }
+  ]
 }

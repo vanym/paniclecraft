@@ -1,20 +1,33 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
+  "type": "forge:conditional",
+  "recipes": [
     {
-      "tag": "minecraft:wooden_slabs"
-    },
-    {
-      "tag": "forge:dyes/red"
-    },
-    {
-      "tag": "forge:dyes/green"
-    },
-    {
-      "tag": "forge:dyes/blue"
+      "conditions": [
+        {
+          "type": "paniclecraft:config",
+          "location": "paniclecraft:painting.recipe.palette"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "ingredients": [
+          {
+            "tag": "minecraft:wooden_slabs"
+          },
+          {
+            "tag": "forge:dyes/red"
+          },
+          {
+            "tag": "forge:dyes/green"
+          },
+          {
+            "tag": "forge:dyes/blue"
+          }
+        ],
+        "result": {
+          "item": "paniclecraft:palette"
+        }
+      }
     }
-  ],
-  "result": {
-    "item": "paniclecraft:palette"
-  }
+  ]
 }

@@ -1,18 +1,31 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "f",
-    "s"
-  ],
-  "key": {
-    "f": {
-      "item": "minecraft:flint"
-    },
-    "s": {
-      "tag": "forge:rods/wooden"
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "paniclecraft:config",
+          "location": "paniclecraft:painting.recipe.paintingtoolRemoverSmall"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          "f",
+          "s"
+        ],
+        "key": {
+          "f": {
+            "item": "minecraft:flint"
+          },
+          "s": {
+            "tag": "forge:rods/wooden"
+          }
+        },
+        "result": {
+          "item": "paniclecraft:paintingtool_remover_small"
+        }
+      }
     }
-  },
-  "result": {
-    "item": "paniclecraft:paintingtool_remover_small"
-  }
+  ]
 }

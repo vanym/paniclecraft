@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.core.component;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -47,6 +48,9 @@ public class ModComponentAdvSign extends ModComponent {
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
         
+        ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
+        this.initRecipesConfig(serverBuilder);
+        
         this.itemAdvSign = new ItemAdvSign();
         this.blockAdvSign = new BlockAdvSign();
         
@@ -64,6 +68,13 @@ public class ModComponentAdvSign extends ModComponent {
             this.renderTileAdvSign = clientBuilder.define("advSignTile", true)::get;
             clientBuilder.pop();
         });
+    }
+    
+    protected void initRecipesConfig(ForgeConfigSpec.Builder serverBuilder) {
+        serverBuilder.push(Arrays.asList(this.getName(), "recipe"));
+        serverBuilder.define("advancedSignEasy", true);
+        serverBuilder.define("advancedSignBook", false);
+        serverBuilder.pop(2);
     }
     
     @SubscribeEvent

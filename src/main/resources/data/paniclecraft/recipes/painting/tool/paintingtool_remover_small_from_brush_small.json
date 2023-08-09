@@ -1,18 +1,31 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "f",
-    "b"
-  ],
-  "key": {
-    "f": {
-      "item": "minecraft:flint"
-    },
-    "b": {
-      "item": "paniclecraft:paintingtool_brush_small"
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "paniclecraft:config",
+          "location": "paniclecraft:painting.recipe.paintingtoolRemoverSmallFromBrushSmall"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          "f",
+          "b"
+        ],
+        "key": {
+          "f": {
+            "item": "minecraft:flint"
+          },
+          "b": {
+            "item": "paniclecraft:paintingtool_brush_small"
+          }
+        },
+        "result": {
+          "item": "paniclecraft:paintingtool_remover_small"
+        }
+      }
     }
-  },
-  "result": {
-    "item": "paniclecraft:paintingtool_remover_small"
-  }
+  ]
 }
