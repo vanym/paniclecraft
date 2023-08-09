@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.core.component.advsign;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import net.minecraft.util.IStringSerializable;
 
@@ -9,7 +10,7 @@ public enum AdvSignForm implements IStringSerializable {
     
     @Override
     public String getName() {
-        return this.name().toLowerCase();
+        return this.name().toLowerCase(Locale.ROOT);
     }
     
     public int getIndex() {

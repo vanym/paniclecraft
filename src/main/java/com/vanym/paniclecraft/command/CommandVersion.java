@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.command;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -35,7 +36,8 @@ public class CommandVersion extends CommandBase {
         if (Stream.of(Status.PENDING, Status.FAILED, Status.UP_TO_DATE).noneMatch(e->e == status)) {
             formatArgs.add(Version.getTarget());
         }
-        String transl = this.getTranslationPrefix() + "." + Objects.toString(status).toLowerCase();
+        String transl = this.getTranslationPrefix() + "." +
+            Objects.toString(status).toLowerCase(Locale.ROOT);
         context.getSource()
                .sendFeedback(new TranslationTextComponent(transl, formatArgs.toArray()), false);
         return 1;
