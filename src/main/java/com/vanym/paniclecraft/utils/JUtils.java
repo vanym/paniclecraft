@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.utils;
 
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,17 +27,17 @@ public class JUtils {
         };
     }
     
-    public static <T> T trap(Supplier<T> sup) {
+    public static <T> T trap(Callable<T> sup) {
         return trap(sup, ()->null);
     }
     
-    public static <T> T trap(Supplier<T> sup, Supplier<T> orElse) {
+    public static <T> T trap(Callable<T> sup, Supplier<T> orElse) {
         return trap(sup, (e)->orElse.get());
     }
     
-    public static <T> T trap(Supplier<T> sup, Function<Exception, T> orElse) {
+    public static <T> T trap(Callable<T> sup, Function<Exception, T> orElse) {
         try {
-            return sup.get();
+            return sup.call();
         } catch (Exception e) {
             return orElse.apply(e);
         }
