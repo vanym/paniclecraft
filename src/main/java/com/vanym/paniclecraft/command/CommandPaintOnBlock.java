@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.command;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -22,6 +23,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
     
@@ -83,7 +86,13 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                                                           coords.getZ())
                                              .grow(radius);
             int count = EntityPaintOnBlock.clearArea(world, box);
-            String name = world.getWorldInfo().getWorldName();
+            String name = Optional.of(world)
+                                  .map(World::getDimension)
+                                  .map(Dimension::getType)
+                                  .map(DimensionType::getKey)
+                                  .map(d->"minecraft".equals(d.getNamespace()) ? d.getPath()
+                                                                               : d.toString())
+                                  .orElse("world");
             source.sendFeedback(new TranslationTextComponent(
                     this.getTranslationPrefix() + ".clear",
                     count,
