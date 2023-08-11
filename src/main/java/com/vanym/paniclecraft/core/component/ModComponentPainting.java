@@ -181,7 +181,7 @@ public class ModComponentPainting extends ModComponent {
     }
     
     protected void applyConfig() {
-        if (this.config.anyBlockValidForPaint) {
+        if (this.config.anyBlockPaintable) {
             MinecraftForge.EVENT_BUS.register(AnyBlockPaintableEventHandler.instance);
         } else {
             MinecraftForge.EVENT_BUS.unregister(AnyBlockPaintableEventHandler.instance);
@@ -525,7 +525,7 @@ public class ModComponentPainting extends ModComponent {
         public final SortedMap<Integer, Double> smallRemoverRadiuses;
         
         public boolean allowPaintOnBlock = false;
-        public boolean anyBlockValidForPaint = false;
+        public boolean anyBlockPaintable = false;
         
         public boolean copyOnAnvil = true;
         public int copyOnAnvilCost = 5;
@@ -566,7 +566,7 @@ public class ModComponentPainting extends ModComponent {
             this();
             this.paintingPlaceStack = config.paintingPlaceStack;
             this.allowPaintOnBlock = config.allowPaintOnBlock;
-            this.anyBlockValidForPaint = config.anyBlockValidForPaint;
+            this.anyBlockPaintable = config.anyBlockPaintable;
             this.copyOnAnvil = config.copyOnAnvil;
             this.copyOnAnvilCost = config.copyOnAnvilCost;
             this.paintingMaxCraftableWidth = config.paintingMaxCraftableWidth;
@@ -606,8 +606,8 @@ public class ModComponentPainting extends ModComponent {
                     config.getInt("paintOnBlockDefaultHeight", category, 16, 1,
                                   ModComponentPainting.this.MAX_HEIGHT,
                                   "(highly recommended to equals width)");
-            this.anyBlockValidForPaint =
-                    config.getBoolean("anyBlockValidForPaint", category, false, "");
+            this.anyBlockPaintable =
+                    config.getBoolean("anyBlockPaintable", category, false, "");
             this.paintingMaxCraftableWidth =
                     config.getInt("paintingMaxCraftableWidth", category, 64, 1,
                                   ModComponentPainting.this.MAX_WIDTH, "");
@@ -667,7 +667,7 @@ public class ModComponentPainting extends ModComponent {
         public void fromBytes(ByteBuf buf) {
             this.paintingPlaceStack = buf.readInt();
             this.allowPaintOnBlock = buf.readBoolean();
-            this.anyBlockValidForPaint = buf.readBoolean();
+            this.anyBlockPaintable = buf.readBoolean();
             this.copyOnAnvil = buf.readBoolean();
             this.copyOnAnvilCost = buf.readInt();
             this.paintingMaxCraftableWidth = buf.readInt();
@@ -686,7 +686,7 @@ public class ModComponentPainting extends ModComponent {
         public void toBytes(ByteBuf buf) {
             buf.writeInt(this.paintingPlaceStack);
             buf.writeBoolean(this.allowPaintOnBlock);
-            buf.writeBoolean(this.anyBlockValidForPaint);
+            buf.writeBoolean(this.anyBlockPaintable);
             buf.writeBoolean(this.copyOnAnvil);
             buf.writeInt(this.copyOnAnvilCost);
             buf.writeInt(this.paintingMaxCraftableWidth);
