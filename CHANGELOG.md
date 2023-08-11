@@ -7,6 +7,7 @@
 
 ### Changed
  - Painting commands config prefix to "`allow`"
+ - Config "`anyBlockValidForPaint`" to "`anyBlockPaintable`"
 
 ### Fixed
  - Thread safeness of peripherals
