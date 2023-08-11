@@ -39,7 +39,7 @@ public class ItemUtils {
     }
     
     public static void cleanTag(ItemStack stack) {
-        if (stack.hasTag() && stack.getTag().isEmpty()) {
+        if (getTag(stack).filter(CompoundNBT::isEmpty).isPresent()) {
             stack.setTag(null);
         }
     }
