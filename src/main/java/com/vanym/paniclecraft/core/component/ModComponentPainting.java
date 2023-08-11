@@ -28,7 +28,7 @@ import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.container.ContainerPalette;
 import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
-import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
+import com.vanym.paniclecraft.core.component.painting.AnyBlockPaintableEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintOnBlockEventHandler;
 import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
@@ -260,10 +260,10 @@ public class ModComponentPainting extends ModComponent {
     }
     
     protected void applyConfig() {
-        if (this.config.anyBlockValidForPaint) {
-            MinecraftForge.EVENT_BUS.register(AnyBlockValidForPaintEventHandler.instance);
+        if (this.config.anyBlockPaintable) {
+            MinecraftForge.EVENT_BUS.register(AnyBlockPaintableEventHandler.instance);
         } else {
-            MinecraftForge.EVENT_BUS.unregister(AnyBlockValidForPaintEventHandler.instance);
+            MinecraftForge.EVENT_BUS.unregister(AnyBlockPaintableEventHandler.instance);
         }
         if (this.config.copyOnAnvil) {
             MinecraftForge.EVENT_BUS.register(AnvilCopyEventHandler.instance);
@@ -390,8 +390,8 @@ public class ModComponentPainting extends ModComponent {
         
         public boolean allowPaintOnBlock = false;
         protected final ForgeConfigSpec.BooleanValue allowPaintOnBlockSpec;
-        public boolean anyBlockValidForPaint = false;
-        protected final ForgeConfigSpec.BooleanValue anyBlockValidForPaintSpec;
+        public boolean anyBlockPaintable = false;
+        protected final ForgeConfigSpec.BooleanValue anyBlockPaintableSpec;
         protected int paintOnBlockDefaultWidth = 16;
         protected final ForgeConfigSpec.IntValue paintOnBlockDefaultWidthSpec;
         protected int paintOnBlockDefaultHeight = 16;
@@ -450,7 +450,7 @@ public class ModComponentPainting extends ModComponent {
                                  .defineInRange("paintingDefaultHeight", 16, 1,
                                                 ModComponentPainting.this.MAX_HEIGHT);
             this.allowPaintOnBlockSpec = serverBuilder.define("allowPaintOnBlock", false);
-            this.anyBlockValidForPaintSpec = serverBuilder.define("anyBlockValidForPaint", false);
+            this.anyBlockPaintableSpec = serverBuilder.define("anyBlockPaintable", false);
             this.paintOnBlockDefaultWidthSpec =
                     serverBuilder.defineInRange("paintOnBlockDefaultWidth", 16, 1,
                                                 ModComponentPainting.this.MAX_WIDTH);
