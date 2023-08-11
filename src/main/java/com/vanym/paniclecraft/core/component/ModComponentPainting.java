@@ -28,7 +28,7 @@ import com.vanym.paniclecraft.command.CommandPaintOnBlock;
 import com.vanym.paniclecraft.command.CommandPainting;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.component.painting.AnvilCopyEventHandler;
-import com.vanym.paniclecraft.core.component.painting.AnyBlockValidForPaintEventHandler;
+import com.vanym.paniclecraft.core.component.painting.AnyBlockPaintableEventHandler;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintOnBlockEventHandler;
 import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
@@ -182,9 +182,9 @@ public class ModComponentPainting extends ModComponent {
     
     protected void applyConfig() {
         if (this.config.anyBlockValidForPaint) {
-            MinecraftForge.EVENT_BUS.register(AnyBlockValidForPaintEventHandler.instance);
+            MinecraftForge.EVENT_BUS.register(AnyBlockPaintableEventHandler.instance);
         } else {
-            MinecraftForge.EVENT_BUS.unregister(AnyBlockValidForPaintEventHandler.instance);
+            MinecraftForge.EVENT_BUS.unregister(AnyBlockPaintableEventHandler.instance);
         }
         if (this.config.copyOnAnvil) {
             MinecraftForge.EVENT_BUS.register(AnvilCopyEventHandler.instance);

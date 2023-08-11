@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.api.event.BlockSidePaintabilityEvent;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
@@ -61,8 +62,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -605,8 +604,8 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             state.addCollisionBoxToList(world, pos, absoluteBox, list, null, false);
             valid = !list.isEmpty() && list.stream().allMatch(absoluteBox::equals);
         }
-        BlockSideValidForPaint event =
-                new BlockSideValidForPaint(world, pos, state, side, valid, air, liquid);
+        BlockSidePaintabilityEvent event =
+                new BlockSidePaintabilityEvent(world, pos, state, pside, valid, air, liquid);
         MinecraftForge.EVENT_BUS.post(event);
         switch (event.getResult()) {
             case ALLOW:
@@ -620,29 +619,5 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             break;
         }
         return valid;
-    }
-    
-    @Event.HasResult
-    public static class BlockSideValidForPaint extends BlockEvent {
-        
-        public final int side;
-        public final boolean valid;
-        public final boolean air;
-        public final boolean liquid;
-        
-        public BlockSideValidForPaint(
-                World world,
-                BlockPos pos,
-                IBlockState state,
-                int side,
-                boolean valid,
-                boolean air,
-                boolean liquid) {
-            super(world, pos, state);
-            this.side = side;
-            this.valid = valid;
-            this.air = air;
-            this.liquid = liquid;
-        }
     }
 }
