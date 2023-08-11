@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.api.event.BlockSidePaintabilityEvent;
 import com.vanym.paniclecraft.core.component.painting.IPictureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
@@ -15,7 +16,6 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
-import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -31,7 +31,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.event.world.BlockEvent;
 
 public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
@@ -567,8 +566,18 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 break;
             }
         }
-        BlockSideValidForPaint event =
-                new BlockSideValidForPaint(x, y, z, world, block, meta, side, valid, air, liquid);
+        BlockSidePaintabilityEvent event =
+                new BlockSidePaintabilityEvent(
+                        x,
+                        y,
+                        z,
+                        world,
+                        block,
+                        meta,
+                        pside,
+                        valid,
+                        air,
+                        liquid);
         MinecraftForge.EVENT_BUS.post(event);
         switch (event.getResult()) {
             case ALLOW:
@@ -582,31 +591,5 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             break;
         }
         return valid;
-    }
-    
-    @Event.HasResult
-    public static class BlockSideValidForPaint extends BlockEvent {
-        
-        public final int side;
-        public final boolean valid;
-        public final boolean air;
-        public final boolean liquid;
-        
-        public BlockSideValidForPaint(int x,
-                int y,
-                int z,
-                World world,
-                Block block,
-                int meta,
-                int side,
-                boolean valid,
-                boolean air,
-                boolean liquid) {
-            super(x, y, z, world, block, meta);
-            this.side = side;
-            this.valid = valid;
-            this.air = air;
-            this.liquid = liquid;
-        }
     }
 }
