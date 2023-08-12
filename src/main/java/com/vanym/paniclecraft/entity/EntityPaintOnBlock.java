@@ -60,7 +60,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.api.distmarker.Dist;
@@ -586,9 +588,9 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             valid = false;
             liquid = true;
         } else if (state.isOpaqueCube(world, pos)) {
-            BlockPos offpos = pos.offset(pside);
-            BlockState neighborState = world.getBlockState(pos.offset(pside));
-            valid = !neighborState.isOpaqueCube(world, offpos);
+            BlockPos neighborPos = pos.offset(pside);
+            BlockState neighborState = world.getBlockState(neighborPos);
+            valid = !neighborState.isOpaqueCube(world, neighborPos);
         } else if (Block.hasSolidSide(state, world, pos, pside)) {
             valid = true;
         } else if (Stream.of(StairsBlock.class, FenceBlock.class, WallBlock.class, PaneBlock.class,
@@ -613,7 +615,12 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             valid = value != null && !value.isAscending();
         } else {
             VoxelShape shape = state.getShape(world, pos);
-            valid = shape.toBoundingBoxList().size() == 1;
+            if (shape.toBoundingBoxList().size() == 1) {
+                VoxelShape collision = state.getCollisionShape(world, pos);
+                valid = !VoxelShapes.compare(shape, collision, IBooleanFunction.NOT_SAME);
+            } else {
+                valid = false;
+            }
         }
         BlockSidePaintabilityEvent event =
                 new BlockSidePaintabilityEvent(world, pos, state, pside, valid, air, liquid);
