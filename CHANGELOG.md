@@ -4,6 +4,7 @@
 ### Added
  - Advanced sign on back writing
  - Advanced sign styling menu
+ - Painting frame support of turtle suck command
 
 ### Changed
  - Painting commands config prefix to "`allow`"

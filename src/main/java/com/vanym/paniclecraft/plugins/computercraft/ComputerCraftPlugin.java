@@ -12,6 +12,7 @@ import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.MinecraftForge;
 
 public class ComputerCraftPlugin implements IModComponent {
     
@@ -28,6 +29,7 @@ public class ComputerCraftPlugin implements IModComponent {
     protected final IPeripheralProvider paintingFramePeripheralProvider =
             PaintingFramePeripheral::getPeripheral;
     protected final TurtlePaintBrush turtlePaintBrush = new TurtlePaintBrush();
+    protected final TurtleSuckPaintingFrame turtleSuckPaintingFrame = new TurtleSuckPaintingFrame();
     
     @Override
     public void preInit(ModConfig config) {
@@ -45,6 +47,9 @@ public class ComputerCraftPlugin implements IModComponent {
         }
         if (config.getBoolean("turtleUpgradePaintBrush", this.getName(), true, "")) {
             ComputerCraftAPI.registerTurtleUpgrade(this.turtlePaintBrush);
+        }
+        if (config.getBoolean("turtleSuckPaintingFrame", this.getName(), true, "")) {
+            MinecraftForge.EVENT_BUS.register(this.turtleSuckPaintingFrame);
         }
     }
     
