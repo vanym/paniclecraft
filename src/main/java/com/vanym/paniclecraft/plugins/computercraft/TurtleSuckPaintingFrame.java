@@ -63,8 +63,8 @@ public class TurtleSuckPaintingFrame {
         }
         
         @Override
-        public boolean hasCapability(Capability<?> cap, @Nullable EnumFacing facing) {
-            return facing != null && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
+        public boolean hasCapability(Capability<?> cap, @Nullable EnumFacing side) {
+            return side != null && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
                 && Arrays.stream(Thread.currentThread().getStackTrace())
                          .limit(16)
                          .map(StackTraceElement::getClassName)
@@ -73,9 +73,9 @@ public class TurtleSuckPaintingFrame {
         
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T getCapability(Capability<T> cap, @Nullable EnumFacing facing) {
-            if (this.hasCapability(cap, facing)) {
-                return (T)new TurtleSuckPaintingFrameSideItemHandler(this.frame, facing);
+        public <T> T getCapability(Capability<T> cap, @Nullable EnumFacing side) {
+            if (this.hasCapability(cap, side)) {
+                return (T)new TurtleSuckPaintingFrameSideItemHandler(this.frame, side);
             }
             return null;
         }
@@ -111,15 +111,17 @@ public class TurtleSuckPaintingFrame {
                 return this.getStackInSlot(slot);
             }
             EntityPlayer player = TurtleSuckPaintingFrame.this.getPlayer();
-            return SideUtils.callSync(this.frame.getWorld() != null
+            ItemStack stack = SideUtils.callSync(this.frame.getWorld() != null
                 && !this.frame.getWorld().isRemote, this.frame, ()-> {
                     Picture picture = this.frame.getPicture(this.index);
                     if (player != null) {
                         BlockPaintingContainer.rotatePicture(player, picture, this.side, false);
                     }
-                    this.clearPicture();
+                    this.frame.clearPicture(this.index);
                     return ItemPainting.getPictureAsItem(picture);
                 });
+            this.frame.markForUpdate();
+            return stack;
         }
     }
 }
