@@ -35,15 +35,11 @@ public class TurtleSuckPaintingFrame {
     
     protected final ThreadLocal<Reference<PlayerEntity>> turtlePlayer = new ThreadLocal<>();
     
+    // @formatter:off
     protected boolean active = false;
-    
-    public void enable() {
-        this.active = true;
-    }
-    
-    public void disable() {
-        this.active = false;
-    }
+    public void enable() { this.active = true; }
+    public void disable() { this.active = false; }
+    // @formatter:on
     
     @SubscribeEvent
     protected void attachCapability(AttachCapabilitiesEvent<TileEntity> event) {
@@ -124,15 +120,17 @@ public class TurtleSuckPaintingFrame {
                 return this.getStackInSlot(slot);
             }
             PlayerEntity player = TurtleSuckPaintingFrame.this.getPlayer();
-            return SideUtils.callSync(this.frame.getWorld() != null
+            ItemStack stack = SideUtils.callSync(this.frame.getWorld() != null
                 && !this.frame.getWorld().isRemote, this.frame, ()-> {
                     Picture picture = this.frame.getPicture(this.index);
                     if (player != null) {
                         BlockPaintingContainer.rotatePicture(player, picture, this.side, false);
                     }
-                    this.clearPicture();
+                    this.frame.clearPicture(this.index);
                     return ItemPainting.getPictureAsItem(picture);
                 });
+            this.frame.markForUpdate();
+            return stack;
         }
     }
 }
