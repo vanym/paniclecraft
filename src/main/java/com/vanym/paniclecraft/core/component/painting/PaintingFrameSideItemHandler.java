@@ -38,12 +38,16 @@ public class PaintingFrameSideItemHandler implements IItemHandler {
             return stack;
         }
         if (!simulate) {
-            SideUtils.runSync(this.frame.getWorld() != null
-                && !this.frame.getWorld().isRemote, this.frame,
-                              ()->this.frame.createPicture(this.index, stack));
-            this.frame.markForUpdate();
+            this.createPicture(stack);
         }
         return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - 1);
+    }
+    
+    protected void createPicture(ItemStack stack) {
+        SideUtils.runSync(this.frame.getWorld() != null
+            && !this.frame.getWorld().isRemote, this.frame,
+                          ()->this.frame.createPicture(this.index, stack));
+        this.frame.markForUpdate();
     }
     
     @Override
@@ -53,12 +57,16 @@ public class PaintingFrameSideItemHandler implements IItemHandler {
         }
         ItemStack stack = this.getStackInSlot(slot);
         if (!simulate) {
-            SideUtils.runSync(this.frame.getWorld() != null
-                && !this.frame.getWorld().isRemote, this.frame,
-                              ()->this.frame.clearPicture(this.index));
-            this.frame.markForUpdate();
+            this.clearPicture();
         }
         return stack;
+    }
+    
+    protected void clearPicture() {
+        SideUtils.runSync(this.frame.getWorld() != null
+            && !this.frame.getWorld().isRemote, this.frame,
+                          ()->this.frame.clearPicture(this.index));
+        this.frame.markForUpdate();
     }
     
     @Override
