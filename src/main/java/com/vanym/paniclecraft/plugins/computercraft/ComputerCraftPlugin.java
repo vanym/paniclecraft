@@ -47,6 +47,9 @@ public class ComputerCraftPlugin implements IModComponent {
     protected Supplier<Boolean> peripheralPaintingFrame;
     protected final TurtlePaintBrush turtlePaintBrush = new TurtlePaintBrush();
     protected Supplier<Boolean> turtleUpgradePaintBrush;
+    protected final TurtleSuckPaintingFrame turtleSuckPaintingFrameHandler =
+            new TurtleSuckPaintingFrame();
+    protected Supplier<Boolean> turtleSuckPaintingFrame;
     
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
@@ -60,6 +63,7 @@ public class ComputerCraftPlugin implements IModComponent {
         this.peripheralPainting = serverBuilder.define("peripheralPainting", false)::get;
         this.peripheralPaintingFrame = serverBuilder.define("peripheralPaintingFrame", false)::get;
         this.turtleUpgradePaintBrush = serverBuilder.define("turtleUpgradePaintBrush", true)::get;
+        this.turtleSuckPaintingFrame = serverBuilder.define("turtleSuckPaintingFrame", true)::get;
         serverBuilder.pop();
     }
     
@@ -72,6 +76,7 @@ public class ComputerCraftPlugin implements IModComponent {
               .map(pair->makeConditionalProvider(pair.getLeft(), pair.getRight()))
               .forEach(ComputerCraftAPI::registerPeripheralProvider);
         ComputerCraftAPI.registerTurtleUpgrade(this.turtlePaintBrush);
+        MinecraftForge.EVENT_BUS.register(this.turtleSuckPaintingFrameHandler);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(EventPriority.NORMAL, this::configChanged);
         this.applyConfig();
@@ -91,6 +96,11 @@ public class ComputerCraftPlugin implements IModComponent {
             TurtleUpgrades.enable(this.turtlePaintBrush);
         } else {
             TurtleUpgrades.disable(this.turtlePaintBrush);
+        }
+        if (this.turtleSuckPaintingFrame.get()) {
+            this.turtleSuckPaintingFrameHandler.enable();
+        } else {
+            this.turtleSuckPaintingFrameHandler.disable();
         }
     }
     
