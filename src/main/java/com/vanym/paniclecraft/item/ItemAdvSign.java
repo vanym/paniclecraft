@@ -36,6 +36,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -63,9 +64,13 @@ public class ItemAdvSign extends Item {
                 lines.stream()
                      .map(ITextComponent::getString)
                      .map(StringTextComponent::new)
+                     .peek(line->line.applyTextStyle(TextFormatting.GRAY))
                      .forEachOrdered(list::add);
             } else {
-                list.add(new TranslationTextComponent(this.getTranslationKey() + ".showtext"));
+                ITextComponent showText = new TranslationTextComponent(
+                        this.getTranslationKey() + ".showtext");
+                showText.applyTextStyle(TextFormatting.GRAY);
+                list.add(showText);
             }
         });
     }
