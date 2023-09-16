@@ -12,10 +12,12 @@ import java.util.Date;
 
 import org.lwjgl.opengl.GL11;
 
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -50,8 +52,10 @@ public class GuiPaintingView extends GuiScreen {
     protected int controlsX;
     protected int controlsEndX;
     
-    protected final GuiButton buttonExport =
-            new GuiButton(1, 0, 0, 60, 20, I18n.format("gui.paintingview.export"));
+    protected final GuiButton buttonExport = JUtils.make(()-> {
+        String text = I18n.format(String.format("gui.%s.paintingview.export", DEF.MOD_ID));
+        return new GuiButton(1, 0, 0, 60, 20, text);
+    });
     
     public GuiPaintingView(ContainerPaintingViewClient view) {
         this.view = view;
@@ -150,9 +154,13 @@ public class GuiPaintingView extends GuiScreen {
                     ClickEvent.Action.OPEN_FILE,
                     file.getAbsolutePath()));
             style.setUnderlined(true);
-            message = new ChatComponentTranslation("painting.export.success", link);
+            message = new ChatComponentTranslation(
+                    String.format("chat.%s.painting.export.success", DEF.MOD_ID),
+                    link);
         } catch (IOException e) {
-            message = new ChatComponentTranslation("painting.export.failure", e.getMessage());
+            message = new ChatComponentTranslation(
+                    String.format("chat.%s.painting.export.failure", DEF.MOD_ID),
+                    e.getMessage());
         }
         this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }
@@ -164,9 +172,12 @@ public class GuiPaintingView extends GuiScreen {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             ImageSelection selection = new ImageSelection(img);
             clipboard.setContents(selection, null);
-            message = new ChatComponentTranslation("painting.export.copy.success");
+            message = new ChatComponentTranslation(
+                    String.format("chat.%s.painting.export.copy.success", DEF.MOD_ID));
         } catch (Exception e) {
-            message = new ChatComponentTranslation("painting.export.copy.failure", e.getMessage());
+            message = new ChatComponentTranslation(
+                    String.format("chat.%s.painting.export.copy.failure", DEF.MOD_ID),
+                    e.getMessage());
         }
         this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }
