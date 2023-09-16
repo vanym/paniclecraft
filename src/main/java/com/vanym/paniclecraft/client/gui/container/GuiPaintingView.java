@@ -10,11 +10,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -49,8 +51,10 @@ public class GuiPaintingView extends GuiScreen {
     protected int controlsX;
     protected int controlsEndX;
     
-    protected final GuiButton buttonExport =
-            new GuiButton(1, 0, 0, 60, 20, I18n.format("gui.paintingview.export"));
+    protected final GuiButton buttonExport = JUtils.make(()-> {
+        String text = I18n.format(String.format("gui.%s.paintingview.export", DEF.MOD_ID));
+        return new GuiButton(1, 0, 0, 60, 20, text);
+    });
     
     public GuiPaintingView(ContainerPaintingViewClient view) {
         this.view = view;
@@ -149,9 +153,13 @@ public class GuiPaintingView extends GuiScreen {
                     ClickEvent.Action.OPEN_FILE,
                     file.getAbsolutePath()));
             style.setUnderlined(true);
-            message = new TextComponentTranslation("painting.export.success", link);
+            message = new TextComponentTranslation(
+                    String.format("chat.%s.painting.export.success", DEF.MOD_ID),
+                    link);
         } catch (IOException e) {
-            message = new TextComponentTranslation("painting.export.failure", e.getMessage());
+            message = new TextComponentTranslation(
+                    String.format("chat.%s.painting.export.failure", DEF.MOD_ID),
+                    e.getMessage());
         }
         this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }
@@ -163,9 +171,12 @@ public class GuiPaintingView extends GuiScreen {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             ImageSelection selection = new ImageSelection(img);
             clipboard.setContents(selection, null);
-            message = new TextComponentTranslation("painting.export.copy.success");
+            message = new TextComponentTranslation(
+                    String.format("chat.%s.painting.export.copy.success", DEF.MOD_ID));
         } catch (Exception e) {
-            message = new TextComponentTranslation("painting.export.copy.failure", e.getMessage());
+            message = new TextComponentTranslation(
+                    String.format("chat.%s.painting.export.copy.failure", DEF.MOD_ID),
+                    e.getMessage());
         }
         this.mc.ingameGUI.getChatGUI().printChatMessage(message);
     }

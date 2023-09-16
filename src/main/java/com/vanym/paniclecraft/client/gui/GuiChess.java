@@ -140,7 +140,8 @@ public class GuiChess extends GuiScreen {
         String moves = this.getMovesString();
         if (!moves.isEmpty()) {
             GuiUtils.setClipboardString(moves);
-            ITextComponent message = new TextComponentTranslation("chess.export.copy.success");
+            ITextComponent message = new TextComponentTranslation(
+                    String.format("chat.%s.chess.export.copy.success", DEF.MOD_ID));
             this.mc.ingameGUI.getChatGUI().printChatMessage(message);
         }
     }
