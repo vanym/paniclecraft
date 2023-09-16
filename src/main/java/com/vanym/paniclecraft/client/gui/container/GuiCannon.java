@@ -107,13 +107,16 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
         this.font.drawString(this.title.getFormattedText(), 8, 6, 0x404040);
         this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(),
                              8, this.ySize - 96 + 2, 0x404040);
-        this.font.drawString(I18n.format("gui.cannon.direction"), 62, 8, 0x404040);
+        String directionString = I18n.format(String.format("gui.%s.cannon.direction", DEF.MOD_ID));
+        this.font.drawString(directionString, 62, 8, 0x404040);
         double dir = this.container.cannon.getDirection();
         this.font.drawString(String.format("%.4f", dir), 62, 18, 0x404040);
-        this.font.drawString(I18n.format("gui.cannon.height"), 40, 48, 0x404040);
+        String heightString = I18n.format(String.format("gui.%s.cannon.height", DEF.MOD_ID));
+        this.font.drawString(heightString, 40, 48, 0x404040);
         double height = this.container.cannon.getHeight();
         this.font.drawString(String.format("%.4f", height), 40, 58, 0x404040);
-        this.font.drawString(I18n.format("gui.cannon.strength"), 30, 28, 0x404040);
+        String strengthString = I18n.format(String.format("gui.%s.cannon.strength", DEF.MOD_ID));
+        this.font.drawString(strengthString, 30, 28, 0x404040);
         double strength = this.container.cannon.getStrength();
         this.font.drawString(String.format("%.4f", strength), 30, 38, 0x404040);
         RenderHelper.enableGUIStandardItemLighting();

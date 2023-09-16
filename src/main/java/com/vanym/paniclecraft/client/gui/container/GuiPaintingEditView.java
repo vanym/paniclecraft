@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
@@ -25,6 +26,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
 import com.vanym.paniclecraft.utils.ColorUtils;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -51,9 +53,21 @@ import net.minecraftforge.fml.network.NetworkDirection;
 @OnlyIn(Dist.CLIENT)
 public class GuiPaintingEditView extends GuiPaintingView {
     
-    protected final Button buttonImport;
-    protected final Button buttonImportSave;
-    protected final Button buttonImportCancel;
+    protected final Button buttonImport = JUtils.make(()-> {
+        String text = I18n.format(String.format("gui.%s.paintingview.import", DEF.MOD_ID));
+        return new Button(0, 0, 60, 20, text, b->this.paintingImport());
+    });
+    
+    protected final Button buttonImportSave = JUtils.make(()-> {
+        String text = I18n.format(String.format("gui.%s.paintingview.importsave", DEF.MOD_ID));
+        return new Button(0, 0, 60, 20, text, b->this.paintingImportSave());
+    });
+    
+    protected final Button buttonImportCancel = JUtils.make(()-> {
+        String text = I18n.format(String.format("gui.%s.paintingview.importcancel", DEF.MOD_ID));
+        return new Button(0, 0, 60, 20, text, b->this.paintingImportCancel());
+    });
+    
     protected TextFieldWidget textImport;
     
     protected BufferedImage importImage;
@@ -69,14 +83,6 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     public GuiPaintingEditView(ContainerPaintingViewClient view, ITextComponent title) {
         super(view, title);
-        String textImport = I18n.format("gui.paintingview.import");
-        this.buttonImport = new Button(0, 0, 60, 20, textImport, b->this.paintingImport());
-        String textImportSave = I18n.format("gui.paintingview.importsave");
-        this.buttonImportSave =
-                new Button(0, 0, 60, 20, textImportSave, b->this.paintingImportSave());
-        String textImportCancel = I18n.format("gui.paintingview.importcancel");
-        this.buttonImportCancel =
-                new Button(0, 0, 60, 20, textImportCancel, b->this.paintingImportCancel());
         this.buttonImportSave.visible = false;
         this.buttonImportCancel.visible = false;
     }
@@ -318,8 +324,9 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 img = readfile(text);
             }
         } catch (Exception e) {
-            TranslationTextComponent message =
-                    new TranslationTextComponent("painting.import.failure", e.getMessage());
+            ITextComponent message = new TranslationTextComponent(
+                    String.format("chat.%s.painting.import.failure", DEF.MOD_ID),
+                    e.getMessage());
             this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
             return;
         }

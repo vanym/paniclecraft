@@ -11,12 +11,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IHasContainer;
@@ -52,13 +54,14 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     protected int controlsX;
     protected int controlsEndX;
     
-    protected final Button buttonExport;
+    protected final Button buttonExport = JUtils.make(()-> {
+        String text = I18n.format(String.format("gui.%s.paintingview.export", DEF.MOD_ID));
+        return new Button(0, 0, 60, 20, text, b->this.paintingExport());
+    });
     
     public GuiPaintingView(ContainerPaintingViewClient view, ITextComponent title) {
         super(title);
         this.view = view;
-        String textExport = I18n.format("gui.paintingview.export");
-        this.buttonExport = new Button(0, 0, 60, 20, textExport, b->this.paintingExport());
     }
     
     @Override
@@ -153,9 +156,13 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                     ClickEvent.Action.OPEN_FILE,
                     file.getAbsolutePath()));
             style.setUnderlined(true);
-            message = new TranslationTextComponent("painting.export.success", link);
+            message = new TranslationTextComponent(
+                    String.format("chat.%s.painting.export.success", DEF.MOD_ID),
+                    link);
         } catch (IOException e) {
-            message = new TranslationTextComponent("painting.export.failure", e.getMessage());
+            message = new TranslationTextComponent(
+                    String.format("chat.%s.painting.export.failure", DEF.MOD_ID),
+                    e.getMessage());
         }
         this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
     }
@@ -167,9 +174,12 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             ImageSelection selection = new ImageSelection(img);
             clipboard.setContents(selection, null);
-            message = new TranslationTextComponent("painting.export.copy.success");
+            message = new TranslationTextComponent(
+                    String.format("chat.%s.painting.export.copy.success", DEF.MOD_ID));
         } catch (Exception e) {
-            message = new TranslationTextComponent("painting.export.copy.failure", e.getMessage());
+            message = new TranslationTextComponent(
+                    String.format("chat.%s.painting.export.copy.failure", DEF.MOD_ID),
+                    e.getMessage());
         }
         this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
     }
