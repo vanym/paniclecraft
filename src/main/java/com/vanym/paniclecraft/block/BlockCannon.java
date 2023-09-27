@@ -23,6 +23,9 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -31,11 +34,13 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class BlockCannon extends ContainerBlock {
     
+    protected static final VoxelShape CANNON_SHAPE =
+            VoxelShapes.create(0.0D, 0.0D, 0.0D, 1.0D, 1.0D / 16.0D, 1.0D);
+    
     public BlockCannon() {
         super(Block.Properties.create(Material.ANVIL)
                               .sound(SoundType.STONE)
-                              .hardnessAndResistance(1.5F)
-                              .doesNotBlockMovement());
+                              .hardnessAndResistance(1.5F));
         this.setRegistryName("cannon");
     }
     
@@ -75,6 +80,15 @@ public class BlockCannon extends ContainerBlock {
     @Override
     public BlockRenderLayer getRenderLayer() {
         return BlockRenderLayer.CUTOUT;
+    }
+    
+    @Override
+    public VoxelShape getCollisionShape(
+            BlockState state,
+            IBlockReader world,
+            BlockPos pos,
+            ISelectionContext context) {
+        return CANNON_SHAPE;
     }
     
     @Override
