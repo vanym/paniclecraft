@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -10,12 +11,15 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.utils.ColorUtils;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -69,6 +73,28 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
                  .forEachOrdered(list::add);
         }
+    }
+    
+    @Override
+    public void fillItemGroup(ItemGroup creativetab, NonNullList<ItemStack> list) {
+        super.fillItemGroup(creativetab, list);
+        if (!this.isInGroup(creativetab)) {
+            return;
+        }
+        JUtils.make(()-> {
+            switch (this.type) {
+                case BRUSH: // red, green, blue
+                    return IntStream.of(0x993333, 0x667F33, 0x334CB2);
+                case SMALLBRUSH: // black
+                    return IntStream.of(0x191919);
+                default:
+                    return IntStream.empty();
+            }
+        }).mapToObj(color-> {
+            ItemStack stack = new ItemStack(this);
+            this.setColor(stack, color);
+            return stack;
+        }).forEachOrdered(list::add);
     }
     
     @Override
