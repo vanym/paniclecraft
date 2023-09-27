@@ -9,6 +9,7 @@
 ### Changed
  - Painting commands config prefix to "`allow`"
  - Config "`anyBlockValidForPaint`" to "`anyBlockPaintable`"
+ - Cannon pedestal solidness
 
 ### Fixed
  - Thread safeness of peripherals

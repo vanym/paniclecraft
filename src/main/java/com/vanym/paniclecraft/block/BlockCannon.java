@@ -28,6 +28,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockCannon extends BlockContainerMod3 {
     
+    protected static final AxisAlignedBB CANNON_AABB =
+            new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D / 16.0D, 1.0D);
+    
     public BlockCannon() {
         super(Material.ANVIL);
         this.setRegistryName("cannon");
@@ -63,7 +66,7 @@ public class BlockCannon extends BlockContainerMod3 {
             IBlockState state,
             IBlockAccess world,
             BlockPos pos) {
-        return NULL_AABB;
+        return CANNON_AABB;
     }
     
     @Override
