@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
@@ -105,7 +106,19 @@ public class ItemPaintBrush extends ItemPaintingTool implements IWithSubtypes, I
         }
         ItemPaintBrush brush = (ItemPaintBrush)this;
         list.add(brush.getBrush());
+        // red, green, blue
+        IntStream.of(0x993333, 0x667F33, 0x334CB2).mapToObj(color-> {
+            ItemStack stack = brush.getBrush();
+            this.setColor(stack, color);
+            return stack;
+        }).forEachOrdered(list::add);
         list.add(brush.getSmallBrush());
+        // black
+        IntStream.of(0x191919).mapToObj(color-> {
+            ItemStack stack = brush.getSmallBrush();
+            this.setColor(stack, color);
+            return stack;
+        }).forEachOrdered(list::add);
         list.add(brush.getFiller());
         list.add(brush.getColorPicker());
     }
