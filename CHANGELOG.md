@@ -4,6 +4,7 @@
 ### Added
  - Advanced sign on back writing
  - Advanced sign styling menu
+ - Color brushes in creative tab
 
 ### Changed
  - Painting commands config prefix to "`allow`"
