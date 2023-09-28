@@ -126,7 +126,7 @@ public class ItemPainting extends ItemMod3 {
         --stack.stackSize;
         tilePF.markForUpdate();
         world.notifyBlockChange(tilePF.xCoord, tilePF.yCoord, tilePF.zCoord, tilePF.getBlockType());
-        JUtils.runIf(world.isRemote, this::showRemoveTooltip);
+        JUtils.runIf(world.isRemote, ()->Core.instance.shooter.once(this::showRemoveTooltip));
         return true;
     }
     
