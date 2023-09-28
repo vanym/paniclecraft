@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
 import com.vanym.paniclecraft.client.gui.element.GuiHexColorField;
 import com.vanym.paniclecraft.client.gui.element.GuiStyleEditor;
@@ -252,6 +253,11 @@ public class GuiEditAdvSign extends Screen {
         this.drawCenteredString(this.font, I18n.format("sign.edit"), this.width / 2, 40, 0xffffff);
         if (this.isRotating()) {
             this.sliderDir.render(mouseX, mouseY, renderPartialTicks);
+            String tooltipKey =
+                    Screen.hasShiftDown() ? "gui.%s.advanced_sign.slider_unshift_tooltip"
+                                          : "gui.%s.advanced_sign.slider_shift_tooltip";
+            this.drawCenteredString(this.font, I18n.format(String.format(tooltipKey, DEF.MOD_ID)),
+                                    this.width / 2, this.height - 75, 0xffffff);
             return;
         }
         this.drawSign();
