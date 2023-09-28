@@ -15,6 +15,7 @@ import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.IProxy;
+import com.vanym.paniclecraft.core.Shooter;
 import com.vanym.paniclecraft.core.SyncTileEntityUpdater;
 import com.vanym.paniclecraft.core.Version;
 import com.vanym.paniclecraft.core.component.IModComponent;
@@ -73,6 +74,8 @@ public class Core {
                           .simpleChannel();
     
     public final SyncTileEntityUpdater syncTileEntityUpdater = new SyncTileEntityUpdater();
+    
+    public final Shooter shooter = new Shooter();
     
     protected final List<IModComponent> components = new ArrayList<>(
             Arrays.asList(this.broom, this.advSign, this.painting,

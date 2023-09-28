@@ -11,6 +11,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -61,5 +62,10 @@ public class GuiUtils {
         field.setMaxStringLength(Integer.MAX_VALUE);
         field.setText(str);
         return field.getNthWordFromPosWS(n, cursor, skipSpaces);
+    }
+    
+    public static void showFloatingTooltip(ITextComponent line) {
+        Minecraft mc = Minecraft.getInstance();
+        mc.ingameGUI.setOverlayMessage(line.getFormattedText(), false);
     }
 }

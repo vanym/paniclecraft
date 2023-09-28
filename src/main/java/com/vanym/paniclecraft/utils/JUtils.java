@@ -42,4 +42,10 @@ public class JUtils {
             return orElse.apply(e);
         }
     }
+    
+    public static void runIf(boolean doRun, Runnable action) {
+        if (doRun) {
+            action.run();
+        }
+    }
 }

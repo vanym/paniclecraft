@@ -9,16 +9,20 @@ import javax.annotation.Nullable;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererPainting;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.ItemUtils;
+import com.vanym.paniclecraft.utils.JUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.GameSettings;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -132,6 +136,7 @@ public class ItemPainting extends BlockItem {
         });
         stack.shrink(1);
         tilePF.markForUpdate();
+        JUtils.runIf(world.isRemote, ()->Core.instance.shooter.once(this::showRemoveTooltip));
         return ActionResultType.SUCCESS;
     }
     
@@ -160,6 +165,16 @@ public class ItemPainting extends BlockItem {
                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
                  .forEachOrdered(list::add);
         });
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    protected void showRemoveTooltip() {
+        Minecraft mc = Minecraft.getInstance();
+        GameSettings settings = mc.gameSettings;
+        GuiUtils.showFloatingTooltip(new TranslationTextComponent(
+                this.getTranslationKey() + ".remove_tooltip",
+                settings.keyBindSneak.getLocalizedName(),
+                settings.keyBindUseItem.getLocalizedName()));
     }
     
     public static boolean fillPicture(Picture picture, ItemStack itemStack) {
