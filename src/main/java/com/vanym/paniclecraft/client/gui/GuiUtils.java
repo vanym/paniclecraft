@@ -13,6 +13,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.IChatComponent;
 
 @SideOnly(Side.CLIENT)
 public class GuiUtils {
@@ -78,7 +79,7 @@ public class GuiUtils {
         return field.func_146197_a(n, cursor, skipSpaces);
     }
     
-    public static void showFloatingTooltip(String line) {
-        Minecraft.getMinecraft().ingameGUI.func_110326_a(line, false);
+    public static void showFloatingTooltip(IChatComponent line) {
+        Minecraft.getMinecraft().ingameGUI.func_110326_a(line.getFormattedText(), false);
     }
 }
