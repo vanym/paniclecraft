@@ -11,6 +11,7 @@ import com.vanym.paniclecraft.core.CreativeTabMod3;
 import com.vanym.paniclecraft.core.GUIs;
 import com.vanym.paniclecraft.core.IProxy;
 import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.core.Shooter;
 import com.vanym.paniclecraft.core.SyncTileEntityUpdater;
 import com.vanym.paniclecraft.core.Version;
 import com.vanym.paniclecraft.core.component.IModComponent;
@@ -91,6 +92,8 @@ public class Core implements IGuiHandler {
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
     
     public final SyncTileEntityUpdater syncTileEntityUpdater = new SyncTileEntityUpdater();
+    
+    public final Shooter shooter = new Shooter();
     
     protected final List<IModComponent> components = new ArrayList<>(
             Arrays.asList(this.broom, this.advSign, this.painting,

@@ -7,17 +7,21 @@ import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.ItemUtils;
+import com.vanym.paniclecraft.utils.JUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -30,6 +34,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -129,6 +134,7 @@ public class ItemPainting extends ItemMod3 {
         });
         stack.shrink(1);
         tilePF.markForUpdate();
+        JUtils.runIf(world.isRemote, ()->Core.instance.shooter.once(this::showRemoveTooltip));
         return EnumActionResult.SUCCESS;
     }
     
@@ -163,6 +169,15 @@ public class ItemPainting extends ItemMod3 {
             }
             list.add(pictureSizeInformation(pictureTag));
         });
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected void showRemoveTooltip() {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        GuiUtils.showFloatingTooltip(new TextComponentTranslation(
+                this.getUnlocalizedName() + ".remove_tooltip",
+                settings.keyBindSneak.getDisplayName(),
+                settings.keyBindUseItem.getDisplayName()));
     }
     
     public static boolean fillPicture(Picture picture, ItemStack itemStack) {

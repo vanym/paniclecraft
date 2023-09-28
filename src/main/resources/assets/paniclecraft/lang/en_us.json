@@ -7,6 +7,7 @@
 
   "block.paniclecraft.painting": "Canvas",
   "block.paniclecraft.painting.uneditable": "Uneditable",
+  "block.paniclecraft.painting.remove_tooltip": "Click empty-handed, sneaking to remove canvas",
   "block.paniclecraft.paintingframe": "Canvas Frame",
   "item.paniclecraft.paintingtool_brush": "Paint Brush",
   "item.paniclecraft.paintingtool_brush_small": "Small Paint Brush",

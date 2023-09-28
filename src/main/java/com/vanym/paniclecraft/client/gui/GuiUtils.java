@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -81,5 +82,9 @@ public class GuiUtils {
         field.setMaxStringLength(Integer.MAX_VALUE);
         field.setText(str);
         return field.getNthWordFromPosWS(n, cursor, skipSpaces);
+    }
+    
+    public static void showFloatingTooltip(ITextComponent line) {
+        Minecraft.getMinecraft().ingameGUI.setOverlayMessage(line.getFormattedText(), false);
     }
 }
