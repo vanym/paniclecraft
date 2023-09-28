@@ -77,4 +77,8 @@ public class GuiUtils {
         field.setText(str);
         return field.func_146197_a(n, cursor, skipSpaces);
     }
+    
+    public static void showFloatingTooltip(String line) {
+        Minecraft.getMinecraft().ingameGUI.func_110326_a(line, false);
+    }
 }

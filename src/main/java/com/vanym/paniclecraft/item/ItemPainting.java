@@ -5,16 +5,21 @@ import java.util.Optional;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.ItemUtils;
+import com.vanym.paniclecraft.utils.JUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -121,6 +126,7 @@ public class ItemPainting extends ItemMod3 {
         --stack.stackSize;
         tilePF.markForUpdate();
         world.notifyBlockChange(tilePF.xCoord, tilePF.yCoord, tilePF.zCoord, tilePF.getBlockType());
+        JUtils.runIf(world.isRemote, this::showRemoveTooltip);
         return true;
     }
     
@@ -150,6 +156,17 @@ public class ItemPainting extends ItemMod3 {
             }
             list.add(pictureSizeInformation(pictureTag));
         });
+    }
+    
+    @SideOnly(Side.CLIENT)
+    protected void showRemoveTooltip() {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        int useKey = settings.keyBindUseItem.getKeyCode();
+        int sneakKey = settings.keyBindSneak.getKeyCode();
+        String line = I18n.format(this.getUnlocalizedName() + ".remove_tooltip",
+                                  GameSettings.getKeyDisplayString(sneakKey),
+                                  GameSettings.getKeyDisplayString(useKey));
+        GuiUtils.showFloatingTooltip(line);
     }
     
     public static boolean fillPicture(Picture picture, ItemStack itemStack) {
