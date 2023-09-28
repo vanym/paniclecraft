@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.lwjgl.input.Keyboard;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.AbstractButton;
 import com.vanym.paniclecraft.client.gui.element.Button;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -235,6 +236,12 @@ public class GuiEditAdvSign extends GuiScreen {
                                 0xffffff);
         if (this.sliderDir.isPressed()) {
             this.sliderDir.drawButton(this.mc, mouseX, mouseY, renderPartialTicks);
+            String tooltipKey =
+                    GuiScreen.isShiftKeyDown() ? "gui.%s.advanced_sign.slider_unshift_tooltip"
+                                               : "gui.%s.advanced_sign.slider_shift_tooltip";
+            this.drawCenteredString(this.fontRenderer,
+                                    I18n.format(String.format(tooltipKey, DEF.MOD_ID)),
+                                    this.width / 2, this.height - 75, 0xffffff);
             return;
         }
         this.drawSign();

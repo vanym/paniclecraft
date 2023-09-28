@@ -123,7 +123,19 @@ public class GuiCannon extends GuiContainer {
         this.fontRenderer.drawString(strengthString, 30, 28, 0x404040);
         double strength = this.container.cannon.getStrength();
         this.fontRenderer.drawString(String.format("%.4f", strength), 30, 38, 0x404040);
+        if (this.isRotating()) {
+            String tooltipKey = GuiScreen.isShiftKeyDown() ? "gui.%s.cannon.slider_unshift_tooltip"
+                                                           : "gui.%s.cannon.slider_shift_tooltip";
+            this.drawCenteredString(this.fontRenderer,
+                                    I18n.format(String.format(tooltipKey, DEF.MOD_ID)),
+                                    this.xSize / 2, this.ySize + 6, 0xd0d0d0);
+        }
         RenderHelper.enableGUIStandardItemLighting();
+    }
+    
+    protected boolean isRotating() {
+        return Stream.of(this.sliderDir, this.sliderHeight, this.sliderStrength)
+                     .anyMatch(GuiCircularSlider::isPressed);
     }
     
     @Override
