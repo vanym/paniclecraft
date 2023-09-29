@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -51,6 +53,7 @@ import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.color.ItemColors;
@@ -622,6 +625,16 @@ public class ModComponentPainting extends ModComponent {
         public boolean paintingFrameInfoSideLetters = false;
         protected final ForgeConfigSpec.BooleanValue paintingFrameInfoSideLettersSpec;
         
+        public String paintBrushTooltipFormat = "";
+        protected final ForgeConfigSpec.ConfigValue<String> paintBrushTooltipSpec;
+        public String paintBrushShiftTooltipFormat = "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d";
+        protected final ForgeConfigSpec.ConfigValue<String> paintBrushShiftTooltipSpec;
+        public String paintBrushPaletteTooltipFormat = "#%pc%1$02X%pa%2$02X%p9%3$02X";
+        protected final ForgeConfigSpec.ConfigValue<String> paintBrushPaletteTooltipSpec;
+        public String paintBrushPaletteShiftTooltipFormat =
+                "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d%n#%pc%1$02X%pa%2$02X%p9%3$02X";
+        protected final ForgeConfigSpec.ConfigValue<String> paintBrushPaletteShiftTooltipSpec;
+        
         public boolean renderPaintingTile = true;
         protected final ForgeConfigSpec.BooleanValue renderPaintingTileSpec;
         public int renderPaintingTilePartFrameType = 1;
@@ -662,6 +675,24 @@ public class ModComponentPainting extends ModComponent {
                                  .define("forceUnhidePaintRemover", true);
             this.paintingFrameInfoSideLettersSpec =
                     clientBuilder.define("paintingFrameInfoSideLetters", false);
+            Predicate<Object> tooltipFormatChecker = (s)->s instanceof String && JUtils.trap(()-> {
+                String.format(Locale.ROOT, convertTooltipFormat((String)s), 0, 0, 0, 0);
+            });
+            this.paintBrushTooltipSpec =
+                    clientBuilder.define("paintBrushTooltipFormat", "", tooltipFormatChecker);
+            this.paintBrushShiftTooltipSpec =
+                    clientBuilder.define("paintBrushShiftTooltipFormat",
+                                         "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d",
+                                         tooltipFormatChecker);
+            this.paintBrushPaletteTooltipSpec =
+                    clientBuilder.define("paintBrushPaletteTooltipFormat",
+                                         "#%pc%1$02X%pa%2$02X%p9%3$02X",
+                                         tooltipFormatChecker);
+            this.paintBrushPaletteShiftTooltipSpec =
+                    clientBuilder.define("paintBrushPaletteShiftTooltipFormat",
+                                         "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d%n" +
+                                             "#%pc%1$02X%pa%2$02X%p9%3$02X",
+                                         tooltipFormatChecker);
             clientBuilder.pop();
             
             clientBuilder.push(CLIENT_RENDER);
@@ -717,6 +748,14 @@ public class ModComponentPainting extends ModComponent {
         
         protected void configChanged() {
             putValues(this);
+            this.paintBrushTooltipFormat =
+                    convertTooltipFormat(this.paintBrushTooltipSpec.get());
+            this.paintBrushShiftTooltipFormat =
+                    convertTooltipFormat(this.paintBrushShiftTooltipSpec.get());
+            this.paintBrushPaletteTooltipFormat =
+                    convertTooltipFormat(this.paintBrushPaletteTooltipSpec.get());
+            this.paintBrushPaletteShiftTooltipFormat =
+                    convertTooltipFormat(this.paintBrushPaletteShiftTooltipSpec.get());
             this.renderPaintingTileMaxRenderDistanceSquared =
                     Math.pow(this.renderPaintingTileMaxRenderDistanceSpec.get(), 2.0D);
             this.renderPaintingFrameTileMaxRenderDistanceSquared =
@@ -751,6 +790,11 @@ public class ModComponentPainting extends ModComponent {
                            | IllegalAccessException e) {
                   }
               });
+    }
+    
+    protected static String convertTooltipFormat(String raw) {
+        return raw.replaceAll("%n", "\n")
+                  .replaceAll("%p", "\u00a7");
     }
     
     protected static void parseRadiuses(

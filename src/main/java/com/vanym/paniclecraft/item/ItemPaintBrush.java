@@ -2,17 +2,21 @@ package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.gui.container.GuiPalette;
+import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.utils.ColorUtils;
 import com.vanym.paniclecraft.utils.JUtils;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.util.ITooltipFlag;
@@ -21,7 +25,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -55,23 +58,30 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void addInformation(
-            ItemStack itemStack,
+            ItemStack stack,
             @Nullable World world,
             List<ITextComponent> list,
             ITooltipFlag flag) {
-        super.addInformation(itemStack, world, list, flag);
-        if (Screen.hasShiftDown()) {
-            Color color = new Color(this.getColor(itemStack));
-            Stream.Builder<ITextComponent> lines = Stream.builder();
-            lines.add(new StringTextComponent("R: ").appendSibling(new StringTextComponent(
-                    Integer.toString(color.getRed())).applyTextStyle(TextFormatting.RED)));
-            lines.add(new StringTextComponent("G: ").appendSibling(new StringTextComponent(
-                    Integer.toString(color.getGreen())).applyTextStyle(TextFormatting.GREEN)));
-            lines.add(new StringTextComponent("B: ").appendSibling(new StringTextComponent(
-                    Integer.toString(color.getBlue())).applyTextStyle(TextFormatting.BLUE)));
-            lines.build()
-                 .peek(line->line.applyTextStyle(TextFormatting.GRAY))
-                 .forEachOrdered(list::add);
+        super.addInformation(stack, world, list, flag);
+        Minecraft minecraft = Minecraft.getInstance();
+        boolean shift = Screen.hasShiftDown();
+        boolean palette = minecraft.currentScreen instanceof GuiPalette;
+        String format =
+                palette ? (shift ? Core.instance.painting.clientConfig.paintBrushPaletteShiftTooltipFormat
+                                 : Core.instance.painting.clientConfig.paintBrushPaletteTooltipFormat)
+                        : (shift ? Core.instance.painting.clientConfig.paintBrushShiftTooltipFormat
+                                 : Core.instance.painting.clientConfig.paintBrushTooltipFormat);
+        if (!format.isEmpty()) {
+            Color color = new Color(this.getColor(stack));
+            String formatted = String.format(Locale.ROOT, format,
+                                             color.getRed(),
+                                             color.getGreen(),
+                                             color.getBlue(),
+                                             ColorUtils.getAlphaless(color));
+            Stream.of(formatted.split("\n"))
+                  .map(FormattingUtils::parseLine)
+                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                  .forEachOrdered(list::add);
         }
     }
     
