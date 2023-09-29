@@ -3,9 +3,11 @@ package com.vanym.paniclecraft.core.component;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -761,6 +763,12 @@ public class ModComponentPainting extends ModComponent {
         
         public boolean paintingFrameInfoSideLetters = false;
         
+        public String paintBrushTooltipFormat = "";
+        public String paintBrushShiftTooltipFormat = "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d";
+        public String paintBrushPaletteTooltipFormat = "#%pc%1$02X%pa%2$02X%p9%3$02X";
+        public String paintBrushPaletteShiftTooltipFormat =
+                "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d%n#%pc%1$02X%pa%2$02X%p9%3$02X";
+        
         public boolean renderPaintingTile = true;
         public boolean renderPaintingItem = true;
         public int renderPaintingTilePartFrameType = 1;
@@ -789,6 +797,19 @@ public class ModComponentPainting extends ModComponent {
                                       "show paint remover in creative tab even\n if paint on block is not allowed");
             this.paintingFrameInfoSideLetters =
                     config.getBoolean("paintingFrameInfoSideLetters", category, false, "");
+            
+            this.paintBrushTooltipFormat =
+                    getPaintBrushTooltipFormat(config, "paintBrushTooltipFormat", category, "");
+            this.paintBrushShiftTooltipFormat =
+                    getPaintBrushTooltipFormat(config, "paintBrushShiftTooltipFormat", category,
+                                               "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d");
+            this.paintBrushPaletteTooltipFormat =
+                    getPaintBrushTooltipFormat(config, "paintBrushPaletteTooltipFormat", category,
+                                               "#%pc%1$02X%pa%2$02X%p9%3$02X");
+            this.paintBrushPaletteShiftTooltipFormat =
+                    getPaintBrushTooltipFormat(config, "paintBrushPaletteShiftTooltipFormat",
+                                               category, "R: %pc%1$d%nG: %pa%2$d%nB: %p9%3$d%n" +
+                                                   "#%pc%1$02X%pa%2$02X%p9%3$02X");
             
             final String PART_RENDER_TYPE = String.join("\n", "render type of specific part",
                                                         "-1: disable", "0: smooth lighting off",
@@ -846,6 +867,24 @@ public class ModComponentPainting extends ModComponent {
                     config.getBoolean("paintingNoneSelectionBox", CLIENT_RENDER, false, "");
             config.restartlessReset();
             return this;
+        }
+    }
+    
+    protected static String getPaintBrushTooltipFormat(
+            ModConfig config,
+            String name,
+            String category,
+            String defaultValue) {
+        Function<String, String> convert =
+                (raw)->raw.replaceAll("%n", "\n")
+                          .replaceAll("%p", "\u00a7");
+        try {
+            String raw = config.getString(name, category, defaultValue, "");
+            String format = convert.apply(raw);
+            String.format(Locale.ROOT, format, 0, 0, 0, 0);
+            return format;
+        } catch (Throwable e) {
+            return convert.apply(defaultValue);
         }
     }
     
