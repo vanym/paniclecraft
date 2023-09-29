@@ -5,6 +5,7 @@
  - Advanced sign on back writing
  - Advanced sign styling menu
  - Color brushes in creative tab
+ - Paint brush configurable tooltip format
 
 ### Changed
  - Painting commands config prefix to "`allow`"
