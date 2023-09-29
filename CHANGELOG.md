@@ -5,6 +5,7 @@
  - Advanced sign on back writing
  - Advanced sign styling menu
  - Color brushes in creative tab
+ - Paint brush configurable tooltip format
  - Painting frame support of turtle suck command
 
 ### Changed

@@ -35,12 +35,19 @@ public class JUtils {
         return trap(sup, (e)->orElse.get());
     }
     
-    public static <T> T trap(Callable<T> sup, Function<Exception, T> orElse) {
+    public static <T> T trap(Callable<T> sup, Function<Throwable, T> orElse) {
         try {
             return sup.call();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return orElse.apply(e);
         }
+    }
+    
+    public static boolean trap(Runnable action) {
+        return trap(()-> {
+            action.run();
+            return true;
+        }, ()->false);
     }
     
     public static void runIf(boolean doRun, Runnable action) {
