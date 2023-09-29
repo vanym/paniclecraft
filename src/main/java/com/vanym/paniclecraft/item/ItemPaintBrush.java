@@ -1,19 +1,23 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.gui.container.GuiPalette;
 import com.vanym.paniclecraft.core.component.painting.IColorizeable;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.utils.ColorUtils;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.util.ITooltipFlag;
@@ -70,16 +74,26 @@ public class ItemPaintBrush extends ItemPaintingTool implements IWithSubtypes, I
     @Override
     @SideOnly(Side.CLIENT)
     public void addInformation(
-            ItemStack itemStack,
+            ItemStack stack,
             @Nullable World world,
             List<String> list,
             ITooltipFlag flag) {
-        super.addInformation(itemStack, world, list, flag);
-        if (GuiScreen.isShiftKeyDown()) {
-            Color color = new Color(this.getColor(itemStack));
-            list.add("R: \u00a7c" + color.getRed());
-            list.add("G: \u00a7a" + color.getGreen());
-            list.add("B: \u00a79" + color.getBlue());
+        super.addInformation(stack, world, list, flag);
+        boolean shift = GuiScreen.isShiftKeyDown();
+        boolean palette = Minecraft.getMinecraft().currentScreen instanceof GuiPalette;
+        String format =
+                palette ? (shift ? Core.instance.painting.clientConfig.paintBrushPaletteShiftTooltipFormat
+                                 : Core.instance.painting.clientConfig.paintBrushPaletteTooltipFormat)
+                        : (shift ? Core.instance.painting.clientConfig.paintBrushShiftTooltipFormat
+                                 : Core.instance.painting.clientConfig.paintBrushTooltipFormat);
+        if (!format.isEmpty()) {
+            Color color = new Color(this.getColor(stack));
+            String formatted = String.format(Locale.ROOT, format,
+                                             color.getRed(),
+                                             color.getGreen(),
+                                             color.getBlue(),
+                                             ColorUtils.getAlphaless(color));
+            list.addAll(Arrays.asList(formatted.split("\n")));
         }
     }
     
