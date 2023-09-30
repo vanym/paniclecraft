@@ -6,6 +6,7 @@
  - Advanced sign styling menu
  - Color brushes in creative tab
  - Paint brush configurable tooltip format
+ - Painting view opening by empty-handed right click
  - Painting frame support of turtle suck command
 
 ### Changed

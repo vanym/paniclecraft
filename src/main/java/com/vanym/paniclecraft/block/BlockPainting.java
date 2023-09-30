@@ -153,13 +153,16 @@ public class BlockPainting extends BlockPaintingContainer {
             World world,
             BlockPos pos,
             IBlockState state,
-            EntityPlayer entityPlayer,
+            EntityPlayer player,
             EnumHand hand,
             EnumFacing side,
             float hitX,
             float hitY,
             float hitZ) {
-        if (!entityPlayer.isSneaking()) {
+        if (super.onBlockActivated(world, pos, state, player, hand, side, hitX, hitY, hitZ)) {
+            return true;
+        }
+        if (!player.isSneaking()) {
             return false;
         }
         TileEntity tile = world.getTileEntity(pos);
@@ -169,7 +172,7 @@ public class BlockPainting extends BlockPaintingContainer {
         if (world.isRemote) {
             return true;
         }
-        return this.removedByPlayer(state, world, pos, entityPlayer, false);
+        return this.removedByPlayer(state, world, pos, player, false);
     }
     
     @Override

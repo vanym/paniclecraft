@@ -1,14 +1,25 @@
 package com.vanym.paniclecraft.block;
 
+import java.util.stream.Stream;
+
+import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
 public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
@@ -21,6 +32,37 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
     public double getPaintingOutlineSize() {
         return this.paintingOutlineSize;
+    }
+    
+    @Override
+    public boolean onBlockActivated(
+            World world,
+            BlockPos pos,
+            IBlockState state,
+            EntityPlayer player,
+            EnumHand hand,
+            EnumFacing side,
+            float hitX,
+            float hitY,
+            float hitZ) {
+        if (!Core.instance.painting.config.openViewByClick
+            || player.isSneaking()
+            || Stream.of(EnumHand.MAIN_HAND, EnumHand.OFF_HAND)
+                     .map(player::getHeldItem)
+                     .anyMatch(stack->!stack.isEmpty())) {
+            return false;
+        }
+        if (world.isRemote) {
+            return true;
+        }
+        WorldPicturePoint point =
+                new WorldPicturePoint(WorldPictureProvider.ANYTILE, world, pos, side.getIndex());
+        ContainerPaintingViewServer view = ContainerPaintingViewServer.makeFullView(point, 128);
+        if (view != null && player instanceof EntityPlayerMP) {
+            view.setEditable(player.capabilities.isCreativeMode && player.canUseCommand(2, ""));
+            ContainerPaintingViewServer.openGui((EntityPlayerMP)player, view);
+        }
+        return true;
     }
     
     public static int getRotate(Entity player, EnumFacing side, boolean place) {
