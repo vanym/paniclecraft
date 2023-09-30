@@ -52,18 +52,21 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
                      .anyMatch(stack->!stack.isEmpty())) {
             return false;
         }
-        if (world.isRemote) {
-            return true;
-        }
         WorldPicturePoint point =
                 new WorldPicturePoint(
                         WorldPictureProvider.ANYTILE,
                         world,
                         pos,
                         hit.getFace().getIndex());
+        if (world.isRemote) {
+            return point.getPicture() != null;
+        }
         ContainerPaintingViewServer.Provider view =
                 ContainerPaintingViewServer.makeFullView(point, 128);
-        if (view != null && player instanceof ServerPlayerEntity) {
+        if (view == null) {
+            return false;
+        }
+        if (player instanceof ServerPlayerEntity) {
             view.setEditable(player.abilities.isCreativeMode && player.hasPermissionLevel(2));
             NetworkHooks.openGui((ServerPlayerEntity)player, view, view);
         }
