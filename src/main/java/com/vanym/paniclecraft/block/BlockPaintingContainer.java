@@ -69,13 +69,16 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
             || player.getHeldItem() != null) {
             return false;
         }
-        if (world.isRemote) {
-            return true;
-        }
         WorldPicturePoint point =
                 new WorldPicturePoint(WorldPictureProvider.ANYTILE, world, x, y, z, side);
+        if (world.isRemote) {
+            return point.getPicture() != null;
+        }
         ContainerPaintingViewServer view = ContainerPaintingViewServer.makeFullView(point, 128);
-        if (view != null && player instanceof EntityPlayerMP) {
+        if (view == null) {
+            return false;
+        }
+        if (player instanceof EntityPlayerMP) {
             view.setEditable(player.capabilities.isCreativeMode
                 && player.canCommandSenderUseCommand(2, ""));
             ContainerPaintingViewServer.openGui((EntityPlayerMP)player, view);
