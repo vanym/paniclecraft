@@ -405,6 +405,9 @@ public class ModComponentPainting extends ModComponent {
         public int paintingMaxCraftableHeight = 64;
         protected final ForgeConfigSpec.IntValue paintingMaxCraftableHeightSpec;
         
+        public boolean openViewByClick = true;
+        protected final ForgeConfigSpec.BooleanValue openViewByClickSpec;
+        
         public boolean copyOnAnvil = true;
         protected final ForgeConfigSpec.BooleanValue copyOnAnvilSpec;
         public int copyOnAnvilCost = 5;
@@ -467,6 +470,9 @@ public class ModComponentPainting extends ModComponent {
             this.paintingMaxCraftableHeightSpec =
                     serverBuilder.defineInRange("paintingMaxCraftableHeight", 64, 1,
                                                 ModComponentPainting.this.MAX_HEIGHT);
+            this.openViewByClickSpec =
+                    serverBuilder.comment("open painting view by right clicking with empty hand")
+                                 .define("openViewByClick", true);
             this.copyOnAnvilSpec = serverBuilder.define("copyOnAnvil", true);
             this.copyOnAnvilCostSpec = serverBuilder.defineInRange("copyOnAnvilCost", 5, 0, 40);
             

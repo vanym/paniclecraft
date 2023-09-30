@@ -156,10 +156,13 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             BlockState state,
             World world,
             BlockPos pos,
-            PlayerEntity entityPlayer,
+            PlayerEntity player,
             Hand hand,
             BlockRayTraceResult hit) {
-        if (!entityPlayer.isSneaking()) {
+        if (super.onBlockActivated(state, world, pos, player, hand, hit)) {
+            return true;
+        }
+        if (!player.isSneaking()) {
             return false;
         }
         TileEntity tile = world.getTileEntity(pos);
@@ -169,8 +172,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
         if (world.isRemote) {
             return true;
         }
-        return this.removedByPlayer(state, world, pos, entityPlayer, false,
-                                    world.getFluidState(pos));
+        return this.removedByPlayer(state, world, pos, player, false, world.getFluidState(pos));
     }
     
     @Override

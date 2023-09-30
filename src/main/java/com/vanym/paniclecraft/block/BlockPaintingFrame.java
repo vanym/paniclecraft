@@ -89,6 +89,9 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             PlayerEntity player,
             Hand hand,
             BlockRayTraceResult hit) {
+        if (super.onBlockActivated(state, world, pos, player, hand, hit)) {
+            return true;
+        }
         if (!player.isSneaking()) {
             return false;
         }
