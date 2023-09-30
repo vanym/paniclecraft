@@ -528,6 +528,8 @@ public class ModComponentPainting extends ModComponent {
         public boolean allowPaintOnBlock = false;
         public boolean anyBlockPaintable = false;
         
+        public boolean openViewByClick = true;
+        
         public boolean copyOnAnvil = true;
         public int copyOnAnvilCost = 5;
         
@@ -615,6 +617,8 @@ public class ModComponentPainting extends ModComponent {
             this.paintingMaxCraftableHeight =
                     config.getInt("paintingMaxCraftableHeight", category, 64, 1,
                                   ModComponentPainting.this.MAX_HEIGHT, "");
+            this.openViewByClick = config.getBoolean("openViewByClick", category, true,
+                                                     "open painting view by right clicking with empty hand");
             this.copyOnAnvil = config.getBoolean("copyOnAnvil", category, true, "");
             this.copyOnAnvilCost = config.getInt("copyOnAnvilCost", category, 5, 0, 40, "");
             
@@ -669,6 +673,7 @@ public class ModComponentPainting extends ModComponent {
             this.paintingPlaceStack = buf.readInt();
             this.allowPaintOnBlock = buf.readBoolean();
             this.anyBlockPaintable = buf.readBoolean();
+            this.openViewByClick = buf.readBoolean();
             this.copyOnAnvil = buf.readBoolean();
             this.copyOnAnvilCost = buf.readInt();
             this.paintingMaxCraftableWidth = buf.readInt();
@@ -688,6 +693,7 @@ public class ModComponentPainting extends ModComponent {
             buf.writeInt(this.paintingPlaceStack);
             buf.writeBoolean(this.allowPaintOnBlock);
             buf.writeBoolean(this.anyBlockPaintable);
+            buf.writeBoolean(this.openViewByClick);
             buf.writeBoolean(this.copyOnAnvil);
             buf.writeInt(this.copyOnAnvilCost);
             buf.writeInt(this.paintingMaxCraftableWidth);

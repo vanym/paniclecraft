@@ -81,6 +81,9 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             float hitX,
             float hitY,
             float hitZ) {
+        if (super.onBlockActivated(world, x, y, z, player, side, hitX, hitY, hitZ)) {
+            return true;
+        }
         if (!player.isSneaking()) {
             return false;
         }

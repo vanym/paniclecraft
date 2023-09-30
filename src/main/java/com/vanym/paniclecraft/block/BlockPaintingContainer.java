@@ -1,6 +1,10 @@
 package com.vanym.paniclecraft.block;
 
+import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.container.ContainerPaintingViewServer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
+import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
+import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -9,11 +13,13 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public abstract class BlockPaintingContainer extends BlockContainerMod3 {
@@ -45,6 +51,36 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     
     public double getPaintingOutlineSize() {
         return this.paintingOutlineSize;
+    }
+    
+    @Override
+    public boolean onBlockActivated(
+            World world,
+            int x,
+            int y,
+            int z,
+            EntityPlayer player,
+            int side,
+            float hitX,
+            float hitY,
+            float hitZ) {
+        if (!Core.instance.painting.config.openViewByClick
+            || player.isSneaking()
+            || player.getHeldItem() != null) {
+            return false;
+        }
+        if (world.isRemote) {
+            return true;
+        }
+        WorldPicturePoint point =
+                new WorldPicturePoint(WorldPictureProvider.ANYTILE, world, x, y, z, side);
+        ContainerPaintingViewServer view = ContainerPaintingViewServer.makeFullView(point, 128);
+        if (view != null && player instanceof EntityPlayerMP) {
+            view.setEditable(player.capabilities.isCreativeMode
+                && player.canCommandSenderUseCommand(2, ""));
+            ContainerPaintingViewServer.openGui((EntityPlayerMP)player, view);
+        }
+        return true;
     }
     
     @SideOnly(Side.CLIENT)
