@@ -10,6 +10,7 @@ import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityAdvSignRender
 import com.vanym.paniclecraft.command.CommandAdvSign;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.datafix.fixes.AdvSignSidesFix;
+import com.vanym.paniclecraft.datafix.fixes.BlockEntityTagFix;
 import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.network.message.MessageAdvSignOpenGui;
@@ -95,6 +96,7 @@ public class ModComponentAdvSign extends ModComponent {
     @Override
     public void init(ModConfig config) {
         AdvSignSidesFix.all().forEach(Core.instance::registerDataFix); // 1
+        BlockEntityTagFix.advsign().forEach(Core.instance::registerDataFix); // 2
     }
     
     @Override
@@ -130,7 +132,7 @@ public class ModComponentAdvSign extends ModComponent {
     
     @Override
     public int getDataFixerVersion() {
-        return AdvSignSidesFix.VERSION;
+        return BlockEntityTagFix.VERSION;
     }
     
     @Override

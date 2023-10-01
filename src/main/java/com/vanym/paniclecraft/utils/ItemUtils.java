@@ -7,6 +7,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ItemUtils {
     
+    public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+    
     public static Optional<NBTTagCompound> getTag(ItemStack stack) {
         return Optional.ofNullable(stack.getTagCompound());
     }
@@ -27,14 +29,17 @@ public class ItemUtils {
     }
     
     public static Optional<NBTTagCompound> getBlockEntityTag(ItemStack stack) {
-        return getTag(stack);
+        return Optional.ofNullable(stack.getSubCompound(BLOCK_ENTITY_TAG));
     }
     
     public static NBTTagCompound getOrCreateBlockEntityTag(ItemStack stack) {
-        return getOrCreateTag(stack);
+        return stack.getOrCreateSubCompound(BLOCK_ENTITY_TAG);
     }
     
     public static void cleanBlockEntityTag(ItemStack stack) {
+        getTag(stack).filter(t->t.hasKey(BLOCK_ENTITY_TAG, 10))
+                     .filter(t->t.getCompoundTag(BLOCK_ENTITY_TAG).hasNoTags())
+                     .ifPresent(t->t.removeTag(BLOCK_ENTITY_TAG));
         cleanTag(stack);
     }
 }

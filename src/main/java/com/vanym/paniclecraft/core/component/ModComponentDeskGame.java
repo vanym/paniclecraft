@@ -8,6 +8,7 @@ import com.vanym.paniclecraft.block.BlockChessDesk;
 import com.vanym.paniclecraft.client.renderer.item.ItemRendererChessDesk;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityChessDeskRenderer;
 import com.vanym.paniclecraft.core.ModConfig;
+import com.vanym.paniclecraft.datafix.fixes.BlockEntityTagFix;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
 import com.vanym.paniclecraft.recipe.RecipeRegister;
@@ -87,6 +88,11 @@ public class ModComponentDeskGame extends ModComponent {
     }
     
     @Override
+    public void init(ModConfig config) {
+        BlockEntityTagFix.deskgame().forEach(Core.instance::registerDataFix); // 2
+    }
+    
+    @Override
     @SideOnly(Side.CLIENT)
     public void initClient(ModConfig config) {
         if (!this.isEnabled()) {
@@ -115,6 +121,11 @@ public class ModComponentDeskGame extends ModComponent {
                                                                    this.tileChessDeskRenderer);
         }
         config.restartlessReset();
+    }
+    
+    @Override
+    public int getDataFixerVersion() {
+        return BlockEntityTagFix.VERSION;
     }
     
     @Override

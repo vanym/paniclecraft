@@ -37,8 +37,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemAdvSign extends ItemMod3 {
     
-    public static final String TAG_SIGN = "Sign";
-    
     public ItemAdvSign() {
         this.setMaxStackSize(16);
         this.setRegistryName("advanced_sign");
@@ -182,18 +180,16 @@ public class ItemAdvSign extends ItemMod3 {
     }
     
     protected static void putSign(ItemStack stack, NBTTagCompound tag) {
-        ItemUtils.getOrCreateTag(stack).setTag(TAG_SIGN, tag);
+        ItemUtils.getOrCreateBlockEntityTag(stack).merge(tag);
     }
     
     protected static void removeSign(ItemStack stack) {
-        ItemUtils.getTag(stack).ifPresent(tag->tag.removeTag(TAG_SIGN));
+        stack.removeSubCompound(ItemUtils.BLOCK_ENTITY_TAG);
         ItemUtils.cleanTag(stack);
     }
     
     public static Optional<NBTTagCompound> getSign(ItemStack stack) {
-        return ItemUtils.getTag(stack)
-                        .filter(tag->tag.hasKey(TAG_SIGN, 10))
-                        .map(tag->tag.getCompoundTag(TAG_SIGN));
+        return ItemUtils.getBlockEntityTag(stack);
     }
     
     protected static Optional<AdvSignText> getSide(ItemStack stack, boolean front) {

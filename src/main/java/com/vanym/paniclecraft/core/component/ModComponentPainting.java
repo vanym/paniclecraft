@@ -34,6 +34,7 @@ import com.vanym.paniclecraft.core.component.painting.AnyBlockPaintableEventHand
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintOnBlockEventHandler;
 import com.vanym.paniclecraft.core.component.painting.WorldUnloadEventHandler;
+import com.vanym.paniclecraft.datafix.fixes.BlockEntityTagFix;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.item.ItemPaintBrush;
 import com.vanym.paniclecraft.item.ItemPaintRemover;
@@ -395,6 +396,11 @@ public class ModComponentPainting extends ModComponent {
     }
     
     @Override
+    public void init(ModConfig config) {
+        BlockEntityTagFix.painting().forEach(Core.instance::registerDataFix); // 2
+    }
+    
+    @Override
     @SideOnly(Side.CLIENT)
     @SuppressWarnings("deprecation")
     public void initClient(ModConfig config) {
@@ -482,6 +488,11 @@ public class ModComponentPainting extends ModComponent {
     public void registerItemColors(ColorHandlerEvent.Item event) {
         event.getItemColors()
              .registerItemColorHandler(this.itemPaintBrush.color(), this.itemPaintBrush);
+    }
+    
+    @Override
+    public int getDataFixerVersion() {
+        return BlockEntityTagFix.VERSION;
     }
     
     @Override
