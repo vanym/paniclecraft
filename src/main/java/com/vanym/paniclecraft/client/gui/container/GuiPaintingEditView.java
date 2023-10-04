@@ -21,6 +21,7 @@ import org.lwjgl.input.Mouse;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.gui.element.Button;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Image;
@@ -30,7 +31,6 @@ import com.vanym.paniclecraft.network.message.MessagePaintingViewAddPicture;
 import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -51,19 +51,19 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiPaintingEditView extends GuiPaintingView {
     
-    protected final GuiButton buttonImport = JUtils.make(()-> {
+    protected final Button buttonImport = JUtils.make(()-> {
         String text = I18n.format(String.format("gui.%s.paintingview.import", DEF.MOD_ID));
-        return new GuiButton(2, 0, 0, 60, 20, text);
+        return new Button(2, 0, 0, 60, 20, text, b->this.paintingImport());
     });
     
-    protected final GuiButton buttonImportSave = JUtils.make(()-> {
+    protected final Button buttonImportSave = JUtils.make(()-> {
         String text = I18n.format(String.format("gui.%s.paintingview.importsave", DEF.MOD_ID));
-        return new GuiButton(3, 0, 0, 60, 20, text);
+        return new Button(3, 0, 0, 60, 20, text, b->this.paintingImportSave());
     });
     
-    protected final GuiButton buttonImportCancel = JUtils.make(()-> {
+    protected final Button buttonImportCancel = JUtils.make(()-> {
         String text = I18n.format(String.format("gui.%s.paintingview.importcancel", DEF.MOD_ID));
-        return new GuiButton(4, 0, 0, 60, 20, text);
+        return new Button(4, 0, 0, 60, 20, text, b->this.paintingImportCancel());
     });
     
     protected GuiTextField textImport;
@@ -326,19 +326,6 @@ public class GuiPaintingEditView extends GuiPaintingView {
         int realViewY = this.viewY * this.mc.displayHeight / this.height;
         int realViewHeight = this.getViewHeight() * this.mc.displayHeight / this.height;
         return (real - realViewY) * this.view.getHeight() / realViewHeight;
-    }
-    
-    @Override
-    public void actionPerformed(GuiButton button) {
-        if (button.id == this.buttonImport.id) {
-            this.paintingImport();
-        } else if (button.id == this.buttonImportSave.id) {
-            this.paintingImportSave();
-        } else if (button.id == this.buttonImportCancel.id) {
-            this.paintingImportCancel();
-        } else {
-            super.actionPerformed(button);
-        }
     }
     
     protected void paintingImport() {
