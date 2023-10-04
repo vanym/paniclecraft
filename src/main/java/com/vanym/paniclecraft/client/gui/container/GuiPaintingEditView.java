@@ -102,7 +102,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         super.setWorldAndResolution(mc, width, height);
         this.buttonImport.xPosition = this.buttonExport.xPosition - 5 - this.buttonImport.width;
         this.buttonImport.yPosition = this.buttonExport.yPosition;
-        this.textImport.xPosition = Math.min(this.controlsX, this.viewX);
+        this.textImport.xPosition = Math.min(this.controlsX, this.viewX) + 1;
         this.textImport.yPosition = this.buttonImport.yPosition;
         this.textImport.width = this.buttonImport.xPosition - 5 - this.textImport.xPosition;
         this.buttonImportSave.xPosition = this.buttonImport.xPosition;
