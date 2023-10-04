@@ -3,9 +3,9 @@
   "item.paniclecraft.broom": "Broom",
 
   "item.paniclecraft.advanced_sign": "Advanced Sign",
-  "item.paniclecraft.advanced_sign.showtext": "Press <shift> to see text",
-  "gui.paniclecraft.advanced_sign.slider_shift_tooltip": "Press <shift> to strict rotation",
-  "gui.paniclecraft.advanced_sign.slider_unshift_tooltip": "Unpress <shift> to free rotation",
+  "item.paniclecraft.advanced_sign.showtext": "Hold <shift> to see text",
+  "gui.paniclecraft.advanced_sign.slider_shift_tooltip": "Hold <shift> to strict rotation",
+  "gui.paniclecraft.advanced_sign.slider_unshift_tooltip": "Unhold <shift> to free rotation",
 
   "block.paniclecraft.painting": "Canvas",
   "block.paniclecraft.painting.uneditable": "Uneditable",
@@ -40,8 +40,8 @@
   "gui.paniclecraft.cannon.direction": "Direction",
   "gui.paniclecraft.cannon.height": "Height",
   "gui.paniclecraft.cannon.strength": "Strength",
-  "gui.paniclecraft.cannon.slider_shift_tooltip": "Press <shift> to strict rotation",
-  "gui.paniclecraft.cannon.slider_unshift_tooltip": "Unpress <shift> to free rotation",
+  "gui.paniclecraft.cannon.slider_shift_tooltip": "Hold <shift> to strict rotation",
+  "gui.paniclecraft.cannon.slider_unshift_tooltip": "Unhold <shift> to free rotation",
 
   "block.paniclecraft.chess_desk": "Chess Board",
   "block.paniclecraft.chess_desk.moves": "Moves: %d",
