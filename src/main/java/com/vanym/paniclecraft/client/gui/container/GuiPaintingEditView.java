@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -103,7 +104,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         super.setWorldAndResolution(mc, width, height);
         this.buttonImport.x = this.buttonExport.x - 5 - this.buttonImport.width;
         this.buttonImport.y = this.buttonExport.y;
-        this.textImport.x = Math.min(this.controlsX, this.viewX);
+        this.textImport.x = Math.min(this.controlsX, this.viewX) + 1;
         this.textImport.y = this.buttonImport.y;
         this.textImport.width = this.buttonImport.x - 5 - this.textImport.x;
         this.buttonImportSave.x = this.buttonImport.x;
@@ -239,6 +240,30 @@ public class GuiPaintingEditView extends GuiPaintingView {
             }
         }
         GlStateManager.disableBlend();
+    }
+    
+    @Override
+    protected void drawHelp() {
+        boolean importing = (this.importImage != null);
+        if (importing) {
+            String line = I18n.format(String.format("gui.%s.paintingview.help.show", DEF.MOD_ID));
+            int lineWidth = this.fontRenderer.getStringWidth(line);
+            int x, y;
+            if (this.controlsX + 1 <= this.buttonImportCancel.x - lineWidth - 2) {
+                x = Math.max(this.controlsX + 1, this.buttonImportCancel.x - lineWidth - 4);
+                y = this.height - 19;
+            } else {
+                x = this.width - lineWidth - 2;
+                y = 2;
+            }
+            this.fontRenderer.drawString(line, x, y, 0x7f7f7f);
+        }
+        if (this.textImport.isFocused() || !Keyboard.isKeyDown(Keyboard.KEY_H)) {
+            return;
+        }
+        String translationKey = String.format("gui.%s.paintingview.help.%s", DEF.MOD_ID,
+                                              importing ? "importing" : "import");
+        this.drawHelp(Arrays.asList(I18n.format(translationKey).split(System.lineSeparator())));
     }
     
     @Override
@@ -436,8 +461,9 @@ public class GuiPaintingEditView extends GuiPaintingView {
             case 156: // enter numpad
                 if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
                     this.paintingImport();
-                    return;
                 }
+                return;
+            case 32: // d
             case 205: { // right
                 int moveX;
                 if (GuiScreen.isCtrlKeyDown()) {
@@ -451,6 +477,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return;
             }
+            case 30: // a
             case 203: { // left
                 int moveX;
                 if (GuiScreen.isCtrlKeyDown()) {
@@ -464,6 +491,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return;
             }
+            case 31: // s
             case 208: { // down
                 int moveY;
                 if (GuiScreen.isCtrlKeyDown()) {
@@ -477,6 +505,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return;
             }
+            case 17: // w
             case 200: { // up
                 int moveY;
                 if (GuiScreen.isCtrlKeyDown()) {
