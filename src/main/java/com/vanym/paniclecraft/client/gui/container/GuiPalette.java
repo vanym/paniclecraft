@@ -127,13 +127,13 @@ public class GuiPalette extends GuiContainer implements IContainerListener {
     protected boolean switchTextTyped(char character, int key) {
         boolean up;
         switch (key) {
-            case 200: // up
+            case Keyboard.KEY_UP:
                 up = true;
             break;
-            case 15: // tab
-            case 28: // enter
-            case 156: // enter numpad
-            case 208: // down
+            case Keyboard.KEY_TAB:
+            case Keyboard.KEY_RETURN:
+            case Keyboard.KEY_NUMPADENTER:
+            case Keyboard.KEY_DOWN:
                 up = false;
             break;
             default:

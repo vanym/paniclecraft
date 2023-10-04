@@ -192,13 +192,14 @@ public class GuiEditAdvSign extends GuiScreen {
             || this.textColorHex.textboxKeyTyped(character, key)) {
             return;
         }
-        if (key == 1) {
+        if (key == Keyboard.KEY_ESCAPE) {
             this.actionPerformed(this.buttonDone);
             return;
         }
-        if (key == 200 /* up */ || key == 201 /* page up */) {
+        if (key == Keyboard.KEY_UP || key == Keyboard.KEY_PRIOR /* page up */) {
             this.getState().switchLine(-1);
-        } else if (Stream.of(208, 209, 15, 28, 156 /* down, page down, tab, enter, enter numpad */)
+        } else if (Stream.of(Keyboard.KEY_DOWN, Keyboard.KEY_NEXT, Keyboard.KEY_TAB,
+                             Keyboard.KEY_RETURN, Keyboard.KEY_NUMPADENTER)
                          .anyMatch(code->code == key)) {
             this.getState().switchLine(+1);
         } else {

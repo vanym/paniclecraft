@@ -212,7 +212,8 @@ public class GuiPaintingView extends GuiScreen {
             this.paintingCopy();
             return;
         }
-        if (key == 1 || key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
+        if (key == Keyboard.KEY_ESCAPE ||
+            key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
             this.mc.player.closeScreen();
         }
     }
