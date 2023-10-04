@@ -22,6 +22,10 @@
   "item.paniclecraft.palette.inventory": "Palette",
 
   "gui.paniclecraft.paintingview.export": "Export",
+  "gui.paniclecraft.paintingview.help.show": "Hold h for help",
+  "gui.paniclecraft.paintingview.help.export": "Press ctrl+c to copy image",
+  "gui.paniclecraft.paintingview.help.import": "Press ctrl+c to copy image%nPress ctrl+v to paste image",
+  "gui.paniclecraft.paintingview.help.importing": "Use arrows, wasd or mouse to move image%nHold ctrl to move to edge%nHold shift to move by image sized step%nPress space to move to center%nPress ctrl+space to fill whole area",
   "chat.paniclecraft.painting.export.success": "Saved painting as %s",
   "chat.paniclecraft.painting.export.failure": "Couldn't save painting: %s",
   "chat.paniclecraft.painting.export.copy.success": "Copy painting to clipboard",

@@ -8,11 +8,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
@@ -112,6 +116,7 @@ public class GuiPaintingView extends GuiScreen {
             this.fontRendererObj.drawString(sb.toString(), 2, 2, 0x7f7f7f);
         }
         super.drawScreen(mouseX, mouseY, renderPartialTicks);
+        this.drawHelp();
     }
     
     protected void drawPainting() {
@@ -131,6 +136,25 @@ public class GuiPaintingView extends GuiScreen {
             }
         }
         GL11.glDisable(GL11.GL_BLEND);
+    }
+    
+    protected void drawHelp() {
+        if (!Keyboard.isKeyDown(Keyboard.KEY_H)) {
+            return;
+        }
+        String translationKey = String.format("gui.%s.paintingview.help.export", DEF.MOD_ID);
+        this.drawHelp(Arrays.asList(I18n.format(translationKey).split(System.lineSeparator())));
+    }
+    
+    protected void drawHelp(List<String> lines) {
+        int lineHeight = 14;
+        int y = this.height / 2 - lines.size() * (lineHeight / 2);
+        for (String line : lines) {
+            int x = (this.width - this.fontRendererObj.getStringWidth(line)) / 2;
+            GuiUtils.drawString8xOutline(this.fontRendererObj, line,
+                                         x, y + (lineHeight - 10) / 2, 0xe0e0e0);
+            y += lineHeight;
+        }
     }
     
     @Override
