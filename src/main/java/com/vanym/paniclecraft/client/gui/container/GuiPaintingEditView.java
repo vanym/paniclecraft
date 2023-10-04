@@ -450,14 +450,14 @@ public class GuiPaintingEditView extends GuiPaintingView {
             return;
         }
         switch (key) {
-            case 28: // enter
-            case 156: // enter numpad
+            case Keyboard.KEY_RETURN:
+            case Keyboard.KEY_NUMPADENTER:
                 if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
                     this.paintingImport();
                 }
                 return;
-            case 32: // d
-            case 205: { // right
+            case Keyboard.KEY_D:
+            case Keyboard.KEY_RIGHT: {
                 int moveX;
                 if (GuiScreen.isCtrlKeyDown()) {
                     moveX = this.view.getWidth() - this.importTextureWidth;
@@ -470,8 +470,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return;
             }
-            case 30: // a
-            case 203: { // left
+            case Keyboard.KEY_A:
+            case Keyboard.KEY_LEFT: {
                 int moveX;
                 if (GuiScreen.isCtrlKeyDown()) {
                     moveX = 0;
@@ -484,8 +484,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return;
             }
-            case 31: // s
-            case 208: { // down
+            case Keyboard.KEY_S:
+            case Keyboard.KEY_DOWN: {
                 int moveY;
                 if (GuiScreen.isCtrlKeyDown()) {
                     moveY = this.view.getHeight() - this.importTextureHeight;
@@ -498,8 +498,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return;
             }
-            case 17: // w
-            case 200: { // up
+            case Keyboard.KEY_W:
+            case Keyboard.KEY_UP: {
                 int moveY;
                 if (GuiScreen.isCtrlKeyDown()) {
                     moveY = 0;
@@ -512,7 +512,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return;
             }
-            case 57: // space
+            case Keyboard.KEY_SPACE:
                 if (GuiScreen.isCtrlKeyDown()) {
                     this.fillFull();
                 } else {

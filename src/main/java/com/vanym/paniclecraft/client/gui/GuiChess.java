@@ -2,6 +2,8 @@ package com.vanym.paniclecraft.client.gui;
 
 import java.util.Arrays;
 
+import org.lwjgl.input.Keyboard;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.AbstractButton;
@@ -118,7 +120,7 @@ public class GuiChess extends GuiScreen {
             return;
         }
         if (key == this.mc.gameSettings.keyBindInventory.getKeyCode()) {
-            key = 1;
+            key = Keyboard.KEY_ESCAPE;
         }
         super.keyTyped(character, key);
     }
