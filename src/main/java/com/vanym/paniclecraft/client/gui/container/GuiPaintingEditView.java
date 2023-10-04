@@ -461,15 +461,15 @@ public class GuiPaintingEditView extends GuiPaintingView {
             return true;
         }
         switch (key) {
-            case 257: // enter
-            case 335: // enter numpad
+            case GLFW.GLFW_KEY_ENTER:
+            case GLFW.GLFW_KEY_KP_ENTER:
                 if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
                     this.paintingImport();
                     return true;
                 }
                 return false;
-            case 68: // d
-            case 262: { // right
+            case GLFW.GLFW_KEY_D:
+            case GLFW.GLFW_KEY_RIGHT: {
                 int moveX;
                 if (Screen.hasControlDown()) {
                     moveX = this.view.getWidth() - this.importTextureWidth;
@@ -482,8 +482,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return true;
             }
-            case 65: // a
-            case 263: { // left
+            case GLFW.GLFW_KEY_A:
+            case GLFW.GLFW_KEY_LEFT: {
                 int moveX;
                 if (Screen.hasControlDown()) {
                     moveX = 0;
@@ -496,8 +496,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return true;
             }
-            case 83: // s
-            case 264: { // down
+            case GLFW.GLFW_KEY_S:
+            case GLFW.GLFW_KEY_DOWN: {
                 int moveY;
                 if (Screen.hasControlDown()) {
                     moveY = this.view.getHeight() - this.importTextureHeight;
@@ -510,8 +510,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return true;
             }
-            case 87: // w
-            case 265: { // up
+            case GLFW.GLFW_KEY_W:
+            case GLFW.GLFW_KEY_UP: {
                 int moveY;
                 if (Screen.hasControlDown()) {
                     moveY = 0;
@@ -524,7 +524,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return true;
             }
-            case 32: // space
+            case GLFW.GLFW_KEY_SPACE:
                 if (Screen.hasControlDown()) {
                     this.fillFull();
                 } else {

@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -183,11 +185,11 @@ public class GuiEditAdvSign extends Screen {
     
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        if (key == 265 /* up */ || key == 266 /* page up */) {
+        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_PAGE_UP) {
             this.getState().switchLine(-1);
             return true;
-        } else if (Stream.of(264, 267, 258, 257, 335
-        /* down, page down, tab, enter, enter numpad */)
+        } else if (Stream.of(GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_PAGE_DOWN, GLFW.GLFW_KEY_TAB,
+                             GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER)
                          .anyMatch(code->code == key)) {
             this.getState().switchLine(+1);
             return true;

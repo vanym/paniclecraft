@@ -5,6 +5,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -120,13 +122,13 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     protected boolean switchKeyPressed(int key, int scanCode, int modifiers) {
         boolean up;
         switch (key) {
-            case 265: // up
+            case GLFW.GLFW_KEY_UP:
                 up = true;
             break;
-            case 258: // tab
-            case 257: // enter
-            case 335: // enter numpad
-            case 264: // down
+            case GLFW.GLFW_KEY_TAB:
+            case GLFW.GLFW_KEY_ENTER:
+            case GLFW.GLFW_KEY_KP_ENTER:
+            case GLFW.GLFW_KEY_DOWN:
                 up = false;
             break;
             default:

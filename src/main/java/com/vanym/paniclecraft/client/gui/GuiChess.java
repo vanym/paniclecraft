@@ -2,6 +2,8 @@ package com.vanym.paniclecraft.client.gui;
 
 import java.util.Arrays;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
@@ -111,7 +113,7 @@ public class GuiChess extends Screen {
     public boolean keyPressed(int key, int scanCode, int modifiers) {
         InputMappings.Input inputCode = InputMappings.getInputByCode(key, scanCode);
         if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(inputCode)) {
-            key = 256;
+            key = GLFW.GLFW_KEY_ESCAPE;
         }
         if (super.keyPressed(key, scanCode, modifiers)) {
             return true;
