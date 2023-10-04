@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 
@@ -44,27 +46,27 @@ public class AdvTextInput {
             return true;
         } else {
             boolean words = Screen.hasControlDown();
-            if (key == 259 /* backspace */) {
+            if (key == GLFW.GLFW_KEY_BACKSPACE) {
                 this.backspace(words);
                 return true;
-            } else if (key == 261 /* delete */) {
+            } else if (key == GLFW.GLFW_KEY_DELETE) {
                 this.delete(words);
                 return true;
             } else {
                 boolean select = Screen.hasShiftDown();
-                if (key == 262 /* right */) {
+                if (key == GLFW.GLFW_KEY_RIGHT) {
                     this.right(select, words);
                     return true;
-                } else if (key == 263 /* left */) {
+                } else if (key == GLFW.GLFW_KEY_LEFT) {
                     this.left(select, words);
                     return true;
-                } else if (key == 268 /* home */) {
+                } else if (key == GLFW.GLFW_KEY_HOME) {
                     this.home(select);
                     return true;
-                } else if (key == 269 /* end */) {
+                } else if (key == GLFW.GLFW_KEY_END) {
                     this.end(select);
                     return true;
-                } else if (key == 260 /* insert */) {
+                } else if (key == GLFW.GLFW_KEY_INSERT) {
                     // nope
                 }
             }
