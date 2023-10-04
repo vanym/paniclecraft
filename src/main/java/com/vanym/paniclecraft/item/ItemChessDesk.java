@@ -15,13 +15,16 @@ import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -50,6 +53,16 @@ public class ItemChessDesk extends BlockItem {
             return 0;
         }
         return -1;
+    }
+    
+    @Override
+    protected boolean onBlockPlaced(
+            BlockPos pos,
+            World worldIn,
+            @Nullable PlayerEntity player,
+            ItemStack stack,
+            BlockState state) {
+        return false; // skip
     }
     
     @Override

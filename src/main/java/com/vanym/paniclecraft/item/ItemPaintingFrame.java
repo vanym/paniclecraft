@@ -20,12 +20,15 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.ItemUtils;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -56,6 +59,16 @@ public class ItemPaintingFrame extends BlockItem {
             return 0;
         }
         return -1;
+    }
+    
+    @Override
+    protected boolean onBlockPlaced(
+            BlockPos pos,
+            World worldIn,
+            @Nullable PlayerEntity player,
+            ItemStack stack,
+            BlockState state) {
+        return false; // skip
     }
     
     @Override

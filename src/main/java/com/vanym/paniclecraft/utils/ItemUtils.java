@@ -12,6 +12,8 @@ import net.minecraft.util.Hand;
 
 public class ItemUtils {
     
+    public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+    
     public static <T extends LivingEntity> Consumer<T> onBroken(EquipmentSlotType slotType) {
         return e->e.sendBreakAnimation(slotType);
     }
@@ -45,14 +47,17 @@ public class ItemUtils {
     }
     
     public static Optional<CompoundNBT> getBlockEntityTag(ItemStack stack) {
-        return getTag(stack);
+        return Optional.ofNullable(stack.getChildTag(BLOCK_ENTITY_TAG));
     }
     
     public static CompoundNBT getOrCreateBlockEntityTag(ItemStack stack) {
-        return getOrCreateTag(stack);
+        return stack.getOrCreateChildTag(BLOCK_ENTITY_TAG);
     }
     
     public static void cleanBlockEntityTag(ItemStack stack) {
+        getTag(stack).filter(t->t.contains(BLOCK_ENTITY_TAG, 10))
+                     .filter(t->t.getCompound(BLOCK_ENTITY_TAG).isEmpty())
+                     .ifPresent(t->t.remove(BLOCK_ENTITY_TAG));
         cleanTag(stack);
     }
 }

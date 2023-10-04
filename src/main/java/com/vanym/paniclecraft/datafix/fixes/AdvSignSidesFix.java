@@ -13,6 +13,8 @@ import net.minecraft.util.text.ITextComponent;
 
 public class AdvSignSidesFix {
     
+    public static final int VERSION = 1;
+    
     public static void processSignTag(CompoundNBT sign) {
         if (sign.contains("FrontText")
             || sign.contains("BackText")
