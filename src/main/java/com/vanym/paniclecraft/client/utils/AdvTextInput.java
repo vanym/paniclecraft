@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.lwjgl.input.Keyboard;
+
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 
@@ -44,27 +46,29 @@ public class AdvTextInput {
             return true;
         } else {
             boolean words = GuiScreen.isCtrlKeyDown();
-            if (key == 14 /* backspace */) {
+            if (key == Keyboard.KEY_BACK /* backspace */) {
                 this.backspace(words);
                 return true;
-            } else if (key == 211 /* delete */) {
+            } else if (key == Keyboard.KEY_DELETE) {
                 this.delete(words);
                 return true;
             } else {
                 boolean select = GuiScreen.isShiftKeyDown();
-                if (key == 205 /* right */) {
+                if (key == Keyboard.KEY_RIGHT) {
                     this.right(select, words);
                     return true;
-                } else if (key == 203 /* left */) {
+                } else if (key == Keyboard.KEY_LEFT) {
                     this.left(select, words);
                     return true;
-                } else if (key == 199 /* home */ || key == 71 /* shift + home numpad */) {
+                } else if (key == Keyboard.KEY_HOME
+                    || key == Keyboard.KEY_NUMPAD7 /* shift + home numpad */) {
                     this.home(select);
                     return true;
-                } else if (key == 207 /* end */ || key == 79 /* shift + end numpad */) {
+                } else if (key == Keyboard.KEY_END
+                    || key == Keyboard.KEY_NUMPAD1 /* shift + end numpad */) {
                     this.end(select);
                     return true;
-                } else if (key == 210 /* insert */) {
+                } else if (key == Keyboard.KEY_INSERT) {
                     // nope
                 }
             }
