@@ -429,8 +429,9 @@ public class GuiPaintingEditView extends GuiPaintingView {
             case 156: // enter numpad
                 if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
                     this.paintingImport();
-                    return;
                 }
+                return;
+            case 32: // d
             case 205: { // right
                 int moveX;
                 if (GuiScreen.isCtrlKeyDown()) {
@@ -444,6 +445,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return;
             }
+            case 30: // a
             case 203: { // left
                 int moveX;
                 if (GuiScreen.isCtrlKeyDown()) {
@@ -457,6 +459,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return;
             }
+            case 31: // s
             case 208: { // down
                 int moveY;
                 if (GuiScreen.isCtrlKeyDown()) {
@@ -470,6 +473,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return;
             }
+            case 17: // w
             case 200: { // up
                 int moveY;
                 if (GuiScreen.isCtrlKeyDown()) {
