@@ -12,12 +12,16 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
+
+import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
@@ -107,7 +111,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         super.init(mc, width, height);
         this.buttonImport.x = this.buttonExport.x - 5 - this.buttonImport.getWidth();
         this.buttonImport.y = this.buttonExport.y;
-        this.textImport.x = Math.min(this.controlsX, this.viewX);
+        this.textImport.x = Math.min(this.controlsX, this.viewX) + 1;
         this.textImport.y = this.buttonImport.y;
         this.textImport.setWidth(this.buttonImport.x - 5 - this.textImport.x);
         this.buttonImportSave.x = this.buttonImport.x;
@@ -246,6 +250,30 @@ public class GuiPaintingEditView extends GuiPaintingView {
             }
         }
         GlStateManager.disableBlend();
+    }
+    
+    @Override
+    protected void drawHelp() {
+        boolean importing = (this.importImage != null);
+        if (importing) {
+            String line = I18n.format(String.format("gui.%s.paintingview.help.show", DEF.MOD_ID));
+            int lineWidth = this.font.getStringWidth(line);
+            int x, y;
+            if (this.controlsX + 1 <= this.buttonImportCancel.x - lineWidth - 2) {
+                x = Math.max(this.controlsX + 1, this.buttonImportCancel.x - lineWidth - 4);
+                y = this.height - 19;
+            } else {
+                x = this.width - lineWidth - 2;
+                y = 2;
+            }
+            this.font.drawString(line, x, y, 0x7f7f7f);
+        }
+        if (this.textImport.isFocused() || !GuiUtils.isKeyDown(GLFW.GLFW_KEY_H)) {
+            return;
+        }
+        String translationKey = String.format("gui.%s.paintingview.help.%s", DEF.MOD_ID,
+                                              importing ? "importing" : "import");
+        this.drawHelp(Arrays.asList(I18n.format(translationKey).split(System.lineSeparator())));
     }
     
     @Override
@@ -439,6 +467,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
                     this.paintingImport();
                     return true;
                 }
+                return false;
+            case 68: // d
             case 262: { // right
                 int moveX;
                 if (Screen.hasControlDown()) {
@@ -452,6 +482,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return true;
             }
+            case 65: // a
             case 263: { // left
                 int moveX;
                 if (Screen.hasControlDown()) {
@@ -465,6 +496,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureX(moveX);
                 return true;
             }
+            case 83: // s
             case 264: { // down
                 int moveY;
                 if (Screen.hasControlDown()) {
@@ -478,6 +510,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 this.setImportTextureY(moveY);
                 return true;
             }
+            case 87: // w
             case 265: { // up
                 int moveY;
                 if (Screen.hasControlDown()) {

@@ -8,10 +8,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
@@ -118,6 +123,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
             this.font.drawString(sb.toString(), 2, 2, 0x7f7f7f);
         }
         super.render(mouseX, mouseY, renderPartialTicks);
+        this.drawHelp();
     }
     
     protected void drawPainting() {
@@ -140,6 +146,24 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
             }
         }
         GlStateManager.disableBlend();
+    }
+    
+    protected void drawHelp() {
+        if (!GuiUtils.isKeyDown(GLFW.GLFW_KEY_H)) {
+            return;
+        }
+        String translationKey = String.format("gui.%s.paintingview.help.export", DEF.MOD_ID);
+        this.drawHelp(Arrays.asList(I18n.format(translationKey).split(System.lineSeparator())));
+    }
+    
+    protected void drawHelp(List<String> lines) {
+        int lineHeight = 14;
+        int y = this.height / 2 - lines.size() * (lineHeight / 2);
+        for (String line : lines) {
+            int x = (this.width - this.font.getStringWidth(line)) / 2;
+            GuiUtils.drawString8xOutline(this.font, line, x, y + (lineHeight - 10) / 2, 0xe0e0e0);
+            y += lineHeight;
+        }
     }
     
     protected void paintingExport() {

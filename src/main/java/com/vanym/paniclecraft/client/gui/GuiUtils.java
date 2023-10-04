@@ -7,10 +7,12 @@ import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -45,6 +47,38 @@ public class GuiUtils {
     
     public static void drawHighlight(int x1, int y1, int x2, int y2) {
         new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, "").drawSelectionBox(x1, y1, x2, y2);
+    }
+    
+    public static void drawString8xOutline(
+            FontRenderer font,
+            String line,
+            int x,
+            int y,
+            int textColor) {
+        drawString8xOutline(font, line, x, y, textColor, ~textColor & 0xffffff);
+    }
+    
+    public static void drawString8xOutline(
+            FontRenderer font,
+            String line,
+            int x,
+            int y,
+            int textColor,
+            int outlineColor) {
+        for (int py = -1; py <= 1; ++py) {
+            for (int px = -1; px <= 1; ++px) {
+                if (px == 0 && py == 0) {
+                    continue;
+                }
+                font.drawString(line, x + px, y + py, outlineColor);
+            }
+        }
+        font.drawString(line, x, y, textColor);
+    }
+    
+    public static boolean isKeyDown(int key) {
+        Minecraft minecraft = Minecraft.getInstance();
+        return InputMappings.isKeyDown(minecraft.mainWindow.getHandle(), key);
     }
     
     public static void setClipboardString(String string) {
