@@ -17,6 +17,8 @@ import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
+import com.vanym.paniclecraft.client.gui.element.AbstractButton;
+import com.vanym.paniclecraft.client.gui.element.Button;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
@@ -56,9 +58,9 @@ public class GuiPaintingView extends GuiScreen {
     protected int controlsX;
     protected int controlsEndX;
     
-    protected final GuiButton buttonExport = JUtils.make(()-> {
+    protected final Button buttonExport = JUtils.make(()-> {
         String text = I18n.format(String.format("gui.%s.paintingview.export", DEF.MOD_ID));
-        return new GuiButton(1, 0, 0, 60, 20, text);
+        return new Button(1, 0, 0, 60, 20, text, b->this.paintingExport());
     });
     
     public GuiPaintingView(ContainerPaintingViewClient view) {
@@ -159,9 +161,7 @@ public class GuiPaintingView extends GuiScreen {
     
     @Override
     public void actionPerformed(GuiButton button) {
-        if (button.id == this.buttonExport.id) {
-            this.paintingExport();
-        }
+        AbstractButton.hook(button);
     }
     
     protected void paintingExport() {
