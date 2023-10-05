@@ -61,12 +61,16 @@ public class GuiUtils {
             int y,
             int textColor,
             int outlineColor) {
-        for (int py = -1; py <= 1; ++py) {
-            for (int px = -1; px <= 1; ++px) {
+        final int offsetSize = font.getUnicodeFlag() ? 1 : 2;
+        for (int py = -offsetSize; py <= offsetSize; ++py) {
+            for (int px = -offsetSize; px <= offsetSize; ++px) {
                 if (px == 0 && py == 0) {
                     continue;
                 }
-                font.drawString(line, x + px, y + py, outlineColor);
+                GL11.glPushMatrix();
+                GL11.glTranslatef(px * 0.5F, py * 0.5F, 0.0F);
+                font.drawString(line, x, y, outlineColor);
+                GL11.glPopMatrix();
             }
         }
         font.drawString(line, x, y, textColor);
