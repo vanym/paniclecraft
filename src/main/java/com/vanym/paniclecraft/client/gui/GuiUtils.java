@@ -1,6 +1,8 @@
 package com.vanym.paniclecraft.client.gui;
 
 import java.awt.Color;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 
@@ -8,6 +10,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -65,12 +68,27 @@ public class GuiUtils {
             int y,
             int textColor,
             int outlineColor) {
-        for (int py = -1; py <= 1; ++py) {
-            for (int px = -1; px <= 1; ++px) {
+        Stream<Float> offsets =
+                IntStream.range(0, line.length())
+                         .mapToObj(line::charAt)
+                         .filter(c->c != ' ')
+                         .map(font.font::findGlyph)
+                         .map(IGlyph::getShadowOffset);
+        float max = 0.0F, min = Float.POSITIVE_INFINITY;
+        for (float offset : (Iterable<Float>)offsets::iterator) {
+            max = Math.max(max, offset);
+            min = Math.min(min, offset);
+        }
+        final int offsetSize = Math.min(3, Math.round(max / min));
+        for (int py = -offsetSize; py <= offsetSize; ++py) {
+            for (int px = -offsetSize; px <= offsetSize; ++px) {
                 if (px == 0 && py == 0) {
                     continue;
                 }
-                font.drawString(line, x + px, y + py, outlineColor);
+                GlStateManager.pushMatrix();
+                GlStateManager.translatef(px * min, py * min, 0.0F);
+                font.drawString(line, x, y, outlineColor);
+                GlStateManager.popMatrix();
             }
         }
         font.drawString(line, x, y, textColor);
