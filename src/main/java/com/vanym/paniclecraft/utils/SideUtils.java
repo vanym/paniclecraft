@@ -45,4 +45,8 @@ public class SideUtils {
             throw new RuntimeException(e);
         }
     }
+    
+    public static void runOnDist(Side on, Runnable run) {
+        JUtils.runIf(FMLCommonHandler.instance().getSide() == on, run);
+    }
 }
