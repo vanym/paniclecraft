@@ -1,7 +1,6 @@
 package com.vanym.paniclecraft.item;
 
 import java.text.DecimalFormat;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -58,7 +57,8 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
     protected ItemPaintingTool(Item.Properties properties) {
         super(properties);
-        DistExecutor.runWhenOn(Dist.CLIENT, ()->()->this.brushUseMessages = new HashSet<>());
+        DistExecutor.runWhenOn(Dist.CLIENT, ()->()->this.brushUseMessages =
+                Core.instance.painting.paintingToolUseSet);
     }
     
     @Override

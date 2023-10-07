@@ -5,9 +5,11 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -142,6 +144,8 @@ public class ModComponentPainting extends ModComponent {
     public PictureTextureCache textureCache;
     
     @OnlyIn(Dist.CLIENT)
+    public Set<MessagePaintingToolUse> paintingToolUseSet;
+    @OnlyIn(Dist.CLIENT)
     protected ItemPaintingTool.PerFrameEventHandler perFrameUse;
     @OnlyIn(Dist.CLIENT)
     protected TileEntityPaintingRenderer paintingTileRenderer;
@@ -164,6 +168,7 @@ public class ModComponentPainting extends ModComponent {
         this.initRecipesConfig(serverBuilder);
         
         DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
+            this.paintingToolUseSet = new HashSet<>();
             this.perFrameUse = new ItemPaintingTool.PerFrameEventHandler();
             this.textureCache = new PictureTextureCache();
             this.paintingSpecialSelectionBox = null;
