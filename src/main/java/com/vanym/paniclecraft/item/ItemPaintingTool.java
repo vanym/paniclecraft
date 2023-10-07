@@ -1,7 +1,6 @@
 package com.vanym.paniclecraft.item;
 
 import java.text.DecimalFormat;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -52,7 +51,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     
     protected ItemPaintingTool() {
         if (FMLCommonHandler.instance().getSide().isClient()) {
-            this.brushUseMessages = new HashSet<>();
+            this.brushUseMessages = Core.instance.painting.paintingToolUseSet;
         }
     }
     

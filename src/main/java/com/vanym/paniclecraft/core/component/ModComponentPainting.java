@@ -4,9 +4,11 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -58,6 +60,7 @@ import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -106,6 +109,8 @@ public class ModComponentPainting extends ModComponent {
     public ChangeableServerConfig server = new ChangeableServerConfig();
     
     @SideOnly(Side.CLIENT)
+    public Set<MessagePaintingToolUse> paintingToolUseSet;
+    @SideOnly(Side.CLIENT)
     protected ItemPaintingTool.PerFrameEventHandler perFrameUse;
     @SideOnly(Side.CLIENT)
     protected TileEntityPaintingRenderer paintingTileRenderer;
@@ -135,6 +140,7 @@ public class ModComponentPainting extends ModComponent {
         this.enabled = true;
         MinecraftForge.EVENT_BUS.register(this);
         
+        SideUtils.runOnDist(Side.CLIENT, ()->this.paintingToolUseSet = new HashSet<>());
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPaintRemover = new ItemPaintRemover();
         this.itemPalette = new ItemPalette();
