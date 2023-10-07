@@ -38,6 +38,16 @@ public abstract class TileEntityBase extends TileEntity {
     }
     
     @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound nbtTag) {
+        nbtTag = super.writeToNBT(nbtTag);
+        if (nbtTag.hasKey("ForgeCaps", 10) &&
+            nbtTag.getCompoundTag("ForgeCaps").hasNoTags()) {
+            nbtTag.removeTag("ForgeCaps");
+        }
+        return nbtTag;
+    }
+    
+    @Override
     public NBTTagCompound getUpdateTag() {
         return this.writeToNBT(new NBTTagCompound());
     }
