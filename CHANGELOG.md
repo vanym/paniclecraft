@@ -8,6 +8,7 @@
  - Paint brush configurable tooltip format
  - Painting view opening by empty-handed right click
  - Painting frame support of turtle suck command
+ - Several tooltips
 
 ### Changed
  - Painting commands config prefix to "`allow`"
@@ -17,6 +18,7 @@
 ### Fixed
  - Thread safeness of peripherals
  - Cannon datafix of inside item
+ - Painting tool on use changing
 
 ## 2.12.0.0 - 2023-06-05
 ### Added
