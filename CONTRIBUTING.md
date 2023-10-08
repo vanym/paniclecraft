@@ -4,9 +4,7 @@ Please don't forget about all supported versions and if possible make changes to
 
 ## Translations
 
-To add, change translations, you need to commit and pull request to the `1.7.10` branch, and then merge to others. Feel free to skip commands translations.
-
-[Lang files](src/main/resources/assets/paniclecraft/lang/) should be identical in all version branches.
+Check `translations` branch for a translations contributing information. [Lang files](src/main/resources/assets/paniclecraft/lang/) should be identical in all versions branches.
 
 ## Code
 
