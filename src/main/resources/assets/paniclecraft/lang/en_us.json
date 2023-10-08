@@ -4,6 +4,15 @@
 
   "item.paniclecraft.advanced_sign": "Advanced Sign",
   "item.paniclecraft.advanced_sign.showtext": "Hold <shift> to see text",
+  "gui.paniclecraft.advanced_sign.copy": "Copy",
+  "gui.paniclecraft.advanced_sign.paste": "Paste",
+  "gui.paniclecraft.advanced_sign.stick.on": "Stick: ON",
+  "gui.paniclecraft.advanced_sign.stick.off": "Stick: OFF",
+  "gui.paniclecraft.advanced_sign.side.front": "Side: Front",
+  "gui.paniclecraft.advanced_sign.side.back": "Side: Back",
+  "gui.paniclecraft.advanced_sign.lines": "Lines:%2$s",
+  "gui.paniclecraft.advanced_sign.color.text": "Text:",
+  "gui.paniclecraft.advanced_sign.color.stand": "Stand:",
   "gui.paniclecraft.advanced_sign.slider_shift_tooltip": "Hold <shift> to strict rotation",
   "gui.paniclecraft.advanced_sign.slider_unshift_tooltip": "Unhold <shift> to free rotation",
 
