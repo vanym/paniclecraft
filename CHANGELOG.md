@@ -2,6 +2,17 @@
 
 ## Unreleased
 ### Added
+ - Blocks water loggability
+ - Recipes json configuration
+
+### Changed
+ - Upgrade to 1.14.4
+ - Config structure
+ - Paint on blocks validness check
+ - Items IDs
+
+## Unreleased
+### Added
  - Advanced sign on back writing
  - Advanced sign styling menu
  - Color brushes in creative tab
