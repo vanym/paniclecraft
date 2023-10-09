@@ -164,8 +164,7 @@ public class ItemPainting extends ItemMod3 {
         getPictureTag(itemStack).ifPresent(pictureTag-> {
             if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                 !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                list.add(I18n.format(this.getUnlocalizedName() +
-                    ".uneditable"));
+                list.add(I18n.format(this.getUnlocalizedName() + ".uneditable"));
             }
             list.add(pictureSizeInformation(pictureTag));
         });
