@@ -4,7 +4,6 @@ import com.vanym.paniclecraft.Core;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
 public abstract class BlockContainerMod3 extends BlockContainer {
@@ -20,8 +19,10 @@ public abstract class BlockContainerMod3 extends BlockContainer {
     }
     
     @Override
+    @SuppressWarnings("deprecation")
     public String getLocalizedName() {
-        return I18n.format(this.getUnlocalizedName()).trim();
+        return net.minecraft.util.text.translation.//
+                I18n.translateToLocal(this.getUnlocalizedName()).trim();
     }
     
     public static String getUnlocalizedName(ResourceLocation id) {
