@@ -20,12 +20,12 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -166,8 +166,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             if (itemTag.hasKey(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 StringBuilder sb = new StringBuilder();
-                sb.append(StatCollector.translateToLocal(IMod3Item.getUnlocalizedName("paintingtool") +
-                    ".radius"));
+                sb.append(I18n.format(IMod3Item.getUnlocalizedName("paintingtool") + ".radius"));
                 sb.append(": ");
                 sb.append(NUMBER_FORMATTER.format(radius));
                 list.add(sb.toString());

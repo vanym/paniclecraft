@@ -18,6 +18,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -25,7 +26,6 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -151,8 +151,7 @@ public class ItemPainting extends ItemMod3 {
         getPictureTag(itemStack).ifPresent(pictureTag-> {
             if (pictureTag.hasKey(Picture.TAG_EDITABLE) &&
                 !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
-                    ".uneditable"));
+                list.add(I18n.format(this.getUnlocalizedName() + ".uneditable"));
             }
             list.add(pictureSizeInformation(pictureTag));
         });
