@@ -157,8 +157,7 @@ public class ItemPainting extends BlockItem {
             Stream.Builder<ITextComponent> lines = Stream.builder();
             if (pictureTag.contains(Picture.TAG_EDITABLE) &&
                 !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                lines.add(new TranslationTextComponent(
-                        this.getTranslationKey() + ".uneditable"));
+                lines.add(new TranslationTextComponent(this.getTranslationKey() + ".uneditable"));
             }
             lines.add(new StringTextComponent(pictureSizeInformation(pictureTag)));
             lines.build()

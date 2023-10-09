@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -19,6 +20,7 @@ import com.vanym.paniclecraft.utils.ItemUtils;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -37,7 +39,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -57,20 +58,29 @@ public class ItemAdvSign extends Item {
             @Nullable World world,
             List<ITextComponent> list,
             ITooltipFlag flag) {
-        getSide(stack, !Screen.hasControlDown()).map(AdvSignText::getLines).ifPresent(lines-> {
-            if (Screen.hasShiftDown()) {
+        boolean showFront = Screen.hasShiftDown();
+        boolean showBack = Screen.hasControlDown();
+        if (showFront || showBack) {
+            getSide(stack, showFront).map(AdvSignText::getLines).ifPresent(lines-> {
                 lines.stream()
                      .map(ITextComponent::getString)
                      .map(StringTextComponent::new)
                      .peek(line->line.applyTextStyle(TextFormatting.GRAY))
                      .forEachOrdered(list::add);
-            } else {
-                ITextComponent showText = new TranslationTextComponent(
-                        this.getTranslationKey() + ".showtext");
-                showText.applyTextStyle(TextFormatting.GRAY);
-                list.add(showText);
-            }
-        });
+            });
+        } else if (getSide(stack, false).filter(t->!t.isEmpty()).isPresent()) {
+            Stream.of(I18n.format(this.getTranslationKey() +
+                ".showtext.both").split(System.lineSeparator()))
+                  .map(StringTextComponent::new)
+                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                  .forEachOrdered(list::add);
+        } else if (getSide(stack, true).isPresent()) {
+            Stream.of(I18n.format(this.getTranslationKey() +
+                ".showtext.frontonly").split(System.lineSeparator()))
+                  .map(StringTextComponent::new)
+                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                  .forEachOrdered(list::add);
+        }
     }
     
     @Override
