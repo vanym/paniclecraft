@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.12.2.0 - 2023-10-09
 ### Added
  - Advanced sign on back writing
  - Advanced sign styling menu
