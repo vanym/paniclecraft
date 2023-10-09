@@ -3,7 +3,8 @@
   "item.paniclecraft.broom": "Broom",
 
   "item.paniclecraft.advanced_sign": "Advanced Sign",
-  "item.paniclecraft.advanced_sign.showtext": "Hold <shift> to see text",
+  "item.paniclecraft.advanced_sign.showtext.frontonly": "Hold <shift> to see text",
+  "item.paniclecraft.advanced_sign.showtext.both": "Hold <shift> to see front text%nHold <ctrl> to see back text",
   "gui.paniclecraft.advanced_sign.copy": "Copy",
   "gui.paniclecraft.advanced_sign.paste": "Paste",
   "gui.paniclecraft.advanced_sign.stick.on": "Stick: ON",

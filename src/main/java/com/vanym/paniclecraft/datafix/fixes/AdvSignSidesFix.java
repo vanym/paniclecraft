@@ -37,7 +37,7 @@ public class AdvSignSidesFix {
                  .forEachOrdered(lines::add);
         frontText.setTextColor(new Color(sign.getInteger("TextColor"), true));
         sign.setTag("FrontText", frontText.serializeNBT());
-        sign.setTag("BackText", frontText.serializeNBT());
+        sign.setTag("BackText", new AdvSignText().serializeNBT());
         sign.removeTag("Lines");
         sign.removeTag("TextColor");
         if (sign.hasKey("Form") || !sign.hasKey("OnStick", 1)) {

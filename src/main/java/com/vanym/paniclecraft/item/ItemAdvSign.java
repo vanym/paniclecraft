@@ -49,14 +49,19 @@ public class ItemAdvSign extends ItemMod3 {
             @Nullable World world,
             List<String> list,
             ITooltipFlag flag) {
-        getSide(stack, !GuiScreen.isCtrlKeyDown()).map(AdvSignText::getLines).ifPresent(lines-> {
-            if (GuiScreen.isShiftKeyDown()) {
+        boolean showFront = GuiScreen.isShiftKeyDown();
+        boolean showBack = GuiScreen.isCtrlKeyDown();
+        if (showFront || showBack) {
+            getSide(stack, showFront).map(AdvSignText::getLines).ifPresent(lines-> {
                 lines.stream().map(ITextComponent::getUnformattedText).forEachOrdered(list::add);
-            } else {
-                list.add(I18n.format(this.getUnlocalizedName() +
-                    ".showtext"));
-            }
-        });
+            });
+        } else if (getSide(stack, false).filter(t->!t.isEmpty()).isPresent()) {
+            list.addAll(Arrays.asList(I18n.format(this.getUnlocalizedName() +
+                ".showtext.both").split(System.lineSeparator())));
+        } else if (getSide(stack, true).isPresent()) {
+            list.addAll(Arrays.asList(I18n.format(this.getUnlocalizedName() +
+                ".showtext.frontonly").split(System.lineSeparator())));
+        }
     }
     
     @Override
