@@ -15,6 +15,7 @@ import com.vanym.paniclecraft.utils.ItemUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,7 +24,6 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -44,14 +44,19 @@ public class ItemAdvSign extends ItemMod3 {
             EntityPlayer player,
             List list,
             boolean advancedItemTooltips) {
-        getSide(stack, !GuiScreen.isCtrlKeyDown()).map(AdvSignText::getLines).ifPresent(lines-> {
-            if (GuiScreen.isShiftKeyDown()) {
+        boolean showFront = GuiScreen.isShiftKeyDown();
+        boolean showBack = GuiScreen.isCtrlKeyDown();
+        if (showFront || showBack) {
+            getSide(stack, showFront).map(AdvSignText::getLines).ifPresent(lines-> {
                 lines.stream().map(IChatComponent::getUnformattedText).forEachOrdered(list::add);
-            } else {
-                list.add(StatCollector.translateToLocal(this.getUnlocalizedName() +
-                    ".showtext"));
-            }
-        });
+            });
+        } else if (getSide(stack, false).filter(t->!t.isEmpty()).isPresent()) {
+            list.addAll(Arrays.asList(I18n.format(this.getUnlocalizedName() +
+                ".showtext.both").split(System.lineSeparator())));
+        } else if (getSide(stack, true).isPresent()) {
+            list.addAll(Arrays.asList(I18n.format(this.getUnlocalizedName() +
+                ".showtext.frontonly").split(System.lineSeparator())));
+        }
     }
     
     @Override
