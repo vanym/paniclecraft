@@ -2,6 +2,8 @@
 
 PanicleCraft is a mod with a miscellaneous components. **Open [images](IMAGES.md) to see how they looks like.**
 
+![](images/screenshotcut_tab_items.png)
+
 ## Components
 
 ### Paint brushes, paintings, graffiti
@@ -15,6 +17,8 @@ Canvas can be placed inside the frame on all sides. Thus, you can place a block 
 Painted picture can be exported in painting view. Also having permission you can import images into painting.
 
 Paintings can be combined in a crafting table and copied on an anvil.
+
+![](images/screenshot_painting_brush_02.png)
 
 ### Chess
 
