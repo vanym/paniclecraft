@@ -51,7 +51,7 @@ Also you should enable crafting recipes of paint removers by changing the config
 
 ### Editview
 
-Op players can open painting editview gui with import feature by `/paniclecraft painting editview` command. To allow this for any player change the config parameter `painting` → `freePaintingEditView` to `true`.
+Op players can open painting editview gui with import feature by `/paniclecraft painting editview` command. To allow this for any player change the config parameter `painting` → `allowPaintingEditView` to `true`.
 
 ### Disable components
 
