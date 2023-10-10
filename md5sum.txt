@@ -1,0 +1,4 @@
+d8f33ca2f79a5e084117655328759611  paniclecraft-1.12.2-2.12.0.0.jar
+393ec0aee996d5f8610b9d2259dd2294  paniclecraft-1.12.2-2.12.2.0.jar
+69d274cfa2098f4e35ef9af3baa43378  paniclecraft-1.7.10-2.7.0.0.jar
+014b131cf31a7878e7af76298dbb7d69  paniclecraft-1.7.10-2.7.2.0.jar
