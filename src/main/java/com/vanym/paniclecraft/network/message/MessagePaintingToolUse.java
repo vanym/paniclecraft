@@ -81,11 +81,8 @@ public class MessagePaintingToolUse implements IMessage {
         @Override
         public IMessage onMessage(MessagePaintingToolUse message, MessageContext ctx) {
             EntityPlayer playerEntity = ctx.getServerHandler().playerEntity;
-            if (playerEntity.getHeldItem() == null) {
-                return null;
-            }
-            ItemStack heldItem = playerEntity.getHeldItem();
-            if (!(heldItem.getItem() instanceof ItemPaintingTool)) {
+            ItemStack heldItem = playerEntity.itemInUse;
+            if (heldItem == null || !(heldItem.getItem() instanceof ItemPaintingTool)) {
                 return null;
             }
             World world = playerEntity.worldObj;
