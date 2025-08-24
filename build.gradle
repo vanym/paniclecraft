@@ -2,8 +2,18 @@
 
 buildscript {
     repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
+        maven {
+            name 'Maven Central'
+            url 'https://repo.maven.apache.org/maven2/'
+        }
+        maven {
+            name 'Forge'
+            url 'https://maven.minecraftforge.net/releases/'
+        }
+        maven {
+            name 'NeoForged'
+            url 'https://maven.neoforged.net/releases/'
+        }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '[6.0,6.2)', changing: true
