@@ -49,6 +49,12 @@ buildscript {
         classpath 'org.ow2.asm:asm-debug-all-custom:5.0.3'
         classpath 'net.minecraftforge.gradle:ForgeGradle:1.2.13'
     }
+    configurations.all {
+        resolutionStrategy {
+            // Forcing versions for outdated packages
+            force 'org.eclipse.jdt:org.eclipse.jdt.core:3.10.0'
+        }
+    }
 }
 plugins {
     id 'java-library'
