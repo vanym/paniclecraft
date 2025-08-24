@@ -1,10 +1,4 @@
-//version: 1674845916
-/*
- DO NOT CHANGE THIS FILE!
- Also, you may replace this file at any time if there is an update available.
- Please check https://github.com/GTNewHorizons/ExampleMod1.7.10/blob/master/build.gradle for updates.
- */
-
+// Based on https://github.com/GTNewHorizons/ExampleMod1.7.10/blob/408c4febad24bc65cade069f719f358d657aab51/build.gradle
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
@@ -74,10 +68,6 @@ plugins {
     id 'com.modrinth.minotaur' version '2.+' apply false
     id 'com.matthewprenger.cursegradle' version '1.4.0' apply false
 }
-boolean settingsupdated = verifySettingsGradle()
-settingsupdated = verifyGitAttributes() || settingsupdated
-if (settingsupdated)
-    throw new GradleException("Settings has been updated, please re-run task.")
 
 dependencies {
     implementation 'com.diffplug:blowdryer:1.6.0'
@@ -828,99 +818,6 @@ def addCurseForgeRelation(type, name) {
     CurseArtifact artifact = project.curseforge.curseProjects[0].mainArtifact
     CurseRelation rel = (artifact.curseRelations ?: (artifact.curseRelations = new CurseRelation()))
     rel."$type"(name)
-}
-
-// Updating
-task updateBuildScript {
-    doLast {
-        if (performBuildScriptUpdate(projectDir.toString())) return
-
-        print("Build script already up-to-date!")
-    }
-}
-
-if (!project.getGradle().startParameter.isOffline() && !Boolean.getBoolean('DISABLE_BUILDSCRIPT_UPDATE_CHECK') && isNewBuildScriptVersionAvailable(projectDir.toString())) {
-    if (autoUpdateBuildScript.toBoolean()) {
-        performBuildScriptUpdate(projectDir.toString())
-    } else {
-        out.style(Style.SuccessHeader).println("Build script update available! Run 'gradle updateBuildScript'")
-    }
-}
-
-static URL availableBuildScriptUrl() {
-    new URL("https://raw.githubusercontent.com/GTNewHorizons/ExampleMod1.7.10/master/build.gradle")
-}
-
-static URL exampleSettingsGradleUrl() {
-    new URL("https://raw.githubusercontent.com/GTNewHorizons/ExampleMod1.7.10/master/settings.gradle.example")
-}
-
-static URL exampleGitAttributesUrl() {
-    new URL("https://raw.githubusercontent.com/GTNewHorizons/ExampleMod1.7.10/master/.gitattributes")
-}
-
-
-boolean verifyGitAttributes() {
-    def gitattributesFile = getFile(".gitattributes")
-    if (!gitattributesFile.exists()) {
-        println("Downloading default .gitattributes")
-        exampleGitAttributesUrl().withInputStream { i -> gitattributesFile.withOutputStream { it << i } }
-        exec {
-            workingDir '.'
-            commandLine 'git', 'add', '--renormalize', '.'
-        }
-        return true
-    }
-    return false
-}
-
-boolean verifySettingsGradle() {
-    def settingsFile = getFile("settings.gradle")
-    if (!settingsFile.exists()) {
-        println("Downloading default settings.gradle")
-        exampleSettingsGradleUrl().withInputStream { i -> settingsFile.withOutputStream { it << i } }
-        return true
-    }
-    return false
-}
-
-boolean performBuildScriptUpdate(String projectDir) {
-    if (isNewBuildScriptVersionAvailable(projectDir)) {
-        def buildscriptFile = getFile("build.gradle")
-        availableBuildScriptUrl().withInputStream { i -> buildscriptFile.withOutputStream { it << i } }
-        out.style(Style.Success).print("Build script updated. Please REIMPORT the project or RESTART your IDE!")
-        boolean settingsupdated = verifySettingsGradle()
-        settingsupdated = verifyGitAttributes() || settingsupdated
-        if (settingsupdated)
-            throw new GradleException("Settings has been updated, please re-run task.")
-        return true
-    }
-    return false
-}
-
-boolean isNewBuildScriptVersionAvailable(String projectDir) {
-    Map parameters = ["connectTimeout": 2000, "readTimeout": 2000]
-
-    String currentBuildScript = getFile("build.gradle").getText()
-    String currentBuildScriptHash = getVersionHash(currentBuildScript)
-    String availableBuildScript = availableBuildScriptUrl().newInputStream(parameters).getText()
-    String availableBuildScriptHash = getVersionHash(availableBuildScript)
-
-    boolean isUpToDate = currentBuildScriptHash.empty || availableBuildScriptHash.empty || currentBuildScriptHash == availableBuildScriptHash
-    return !isUpToDate
-}
-
-static String getVersionHash(String buildScriptContent) {
-    String versionLine = buildScriptContent.find("^//version: [a-z0-9]*")
-    if (versionLine != null) {
-        return versionLine.split(": ").last()
-    }
-    return ""
-}
-
-configure(updateBuildScript) {
-    group = 'forgegradle'
-    description = 'Updates the build script to the latest version'
 }
 
 // Parameter Deobfuscation
