@@ -9,6 +9,7 @@ import java.util.SortedMap;
 import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.utils.ClientUtils;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
@@ -64,6 +65,9 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     
     @SideOnly(Side.CLIENT)
     protected void onUsingTickClient(ItemStack stack, EntityLivingBase player, int count) {
+        if (!ClientUtils.isMe(player)) {
+            return;
+        }
         Minecraft mc = Minecraft.getMinecraft();
         MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
         if (mes != null) {
@@ -78,7 +82,7 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             World world,
             EntityLivingBase player,
             int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient() && ClientUtils.isMe(player)) {
             this.flashBrushUseMessages();
         }
     }
@@ -160,7 +164,8 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.setActiveHand(hand);
-            if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            if (FMLCommonHandler.instance().getEffectiveSide().isClient()
+                && ClientUtils.isMe(entityPlayer)) {
                 this.brushUseMessages.clear();
             }
             return EnumActionResult.SUCCESS;
