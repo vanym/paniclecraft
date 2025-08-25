@@ -2,6 +2,7 @@
 
 ## Unreleased
 ### Fixed
+ - Client imitate painting tool use, after other players
  - Server allows imitated painting tool use
 
 ## 2.7.2.0 - 2023-10-09
