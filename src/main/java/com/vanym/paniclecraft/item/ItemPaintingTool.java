@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.utils.ClientUtils;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
@@ -70,6 +71,9 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
     @OnlyIn(Dist.CLIENT)
     protected void onUsingTickClient(ItemStack stack, LivingEntity player, int count) {
+        if (!ClientUtils.isMe(player)) {
+            return;
+        }
         Minecraft mc = Minecraft.getInstance();
         MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
         if (mes != null) {
@@ -84,7 +88,7 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
             World world,
             LivingEntity player,
             int count) {
-        if (EffectiveSide.get().isClient()) {
+        if (EffectiveSide.get().isClient() && ClientUtils.isMe(player)) {
             this.flashBrushUseMessages();
         }
     }
@@ -164,7 +168,7 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.setActiveHand(hand);
-            if (EffectiveSide.get().isClient()) {
+            if (EffectiveSide.get().isClient() && ClientUtils.isMe(entityPlayer)) {
                 this.brushUseMessages.clear();
             }
             return ActionResultType.SUCCESS;
