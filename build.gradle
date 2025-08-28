@@ -105,6 +105,9 @@ idea {
     }
 }
 
+tasks.eclipse.dependsOn setupDecompWorkspace
+tasks.idea.dependsOn setupDecompWorkspace
+
 boolean disableSpotless = project.hasProperty("disableSpotless") ? project.disableSpotless.toBoolean() : false
 
 if (!disableSpotless) {
@@ -446,6 +449,8 @@ reobf {
         addExtraSrgFile mixinSrg
     }
 }
+
+tasks.jar.finalizedBy('reobf')
 
 afterEvaluate {
     if (usesMixins.toBoolean()) {
