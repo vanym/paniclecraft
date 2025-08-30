@@ -8,17 +8,17 @@ repositories {
 
 dependencies {
     // CodeChickenLib-1.7.10-1.1.3.141-dev.jar 0217fdc23e8ef7916a4cf88012ad8a68
-    compileOnly "codechicken:CodeChickenLib:1.7.10-1.1.3.141:dev"
-    runtime "codechicken:CodeChickenLib:1.7.10-1.1.3.141:dev"
+    compileOnly "codechicken:CodeChickenLib:${minecraftVersion}-${codechickenlibVersion}:dev"
+    runtime "codechicken:CodeChickenLib:${minecraftVersion}-${codechickenlibVersion}:dev"
     // CodeChickenCore-1.7.10-1.0.7.48-dev.jar 7b130c10f70c79b4bd79d63ece99e6dc
-    compileOnly "codechicken:CodeChickenCore:1.7.10-1.0.7.48:dev"
-    runtime "codechicken:CodeChickenCore:1.7.10-1.0.7.48:dev"
+    compileOnly "codechicken:CodeChickenCore:${minecraftVersion}-${codechickencoreVersion}:dev"
+    runtime "codechicken:CodeChickenCore:${minecraftVersion}-${codechickencoreVersion}:dev"
     // NotEnoughItems-1.7.10-1.0.5.120-dev.jar df45d2e6357b06abedb68e77e133f07f
-    compileOnly "codechicken:NotEnoughItems:1.7.10-1.0.5.120:dev"
-    runtime "codechicken:NotEnoughItems:1.7.10-1.0.5.120:dev"
+    compileOnly "codechicken:NotEnoughItems:${minecraftVersion}-${notenoughitemsVersion}:dev"
+    runtime "codechicken:NotEnoughItems:${minecraftVersion}-${notenoughitemsVersion}:dev"
     // ComputerCraft1.75.jar 3d4ab469b955a3def59e260da660927c
-    compileOnly "dan200:ComputerCraft:1.75"
-    runtime "dan200:ComputerCraft:1.75"
+    compileOnly "dan200:ComputerCraft:${computercraftVersion}"
+    runtime "dan200:ComputerCraft:${computercraftVersion}"
 }
 
 task downloadJars {
