@@ -1,12 +1,12 @@
 
 repositories {
     maven {
-        name = "cc-tweaked"
-        url = "https://squiddev.cc/maven/"
+        name 'cc-tweaked'
+        url 'https://squiddev.cc/maven/'
     }
     maven {
-        name = "jei"
-        url "https://dvs1.progwml6.com/files/maven/"
+        name 'jei'
+        url 'https://dvs1.progwml6.com/files/maven/'
     }
 }
 
