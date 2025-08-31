@@ -253,6 +253,11 @@ reobf {}
 
 tasks.jar.finalizedBy('reobf')
 
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
 afterEvaluate {}
 
 runClient {
