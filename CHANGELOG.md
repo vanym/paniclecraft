@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.7.2.1 - 2025-08-31
 ### Added
  - Custom version compatibility checker
 
