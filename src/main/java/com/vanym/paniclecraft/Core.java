@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.vanym.paniclecraft.block.IMod3Block;
 import com.vanym.paniclecraft.command.CommandMod3;
@@ -24,6 +25,7 @@ import com.vanym.paniclecraft.core.component.ModComponentDeskGame;
 import com.vanym.paniclecraft.core.component.ModComponentPainting;
 import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.item.IMod3Item;
+import com.vanym.paniclecraft.network.ProtocolVersion;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
 
@@ -44,6 +46,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLEmbeddedChannel;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
+import cpw.mods.fml.common.network.NetworkCheckHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -92,6 +95,7 @@ public class Core implements IGuiHandler {
     
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
+    public final String networkProtocolVersion = "2";
     
     public final SyncTileEntityUpdater syncTileEntityUpdater = new SyncTileEntityUpdater();
     
@@ -127,6 +131,9 @@ public class Core implements IGuiHandler {
         if (this.config.getBoolean("creativeTab", "general", true, "")) {
             this.tab = new CreativeTabMod3(DEF.MOD_ID);
         }
+        
+        // Loading protocol versions key/value map by checking self version
+        ProtocolVersion.getSupposedVersion(Version.getVersion());
         
         if (this.config.getBoolean("versionCheck", "general", true, "")) {
             Version.startVersionCheck();
@@ -285,5 +292,17 @@ public class Core implements IGuiHandler {
         } else {
             return null;
         }
+    }
+    
+    @NetworkCheckHandler
+    public boolean checkRemoteModVersion(Map<String, String> remoteVersions, Side remoteSide) {
+        String remoteVersion = remoteVersions.get(DEF.MOD_ID);
+        if (remoteVersion == null) {
+            return remoteSide == Side.SERVER;
+        } else if (remoteVersion.equals(Version.getVersion())) {
+            return true;
+        }
+        String remoteProtocolVersion = ProtocolVersion.getSupposedVersion(remoteVersion);
+        return this.networkProtocolVersion.equals(remoteProtocolVersion);
     }
 }
