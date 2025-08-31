@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+### Added
+ - Custom version compatibility checker
+
 ### Fixed
  - Client imitate painting tool use, after other players
 

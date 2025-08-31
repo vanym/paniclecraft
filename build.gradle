@@ -56,13 +56,20 @@ checkPropertyExists("development_environment_username")
 
 String identified_version
 String version_override = System.getenv("VERSION") ?: null
-try {
-    identified_version = (version_override == null) ? gitVersion() : version_override
+boolean explicit_version
+if (version_override != null) {
+    identified_version = version_override
+    explicit_version = true
+} else try {
+    identified_version = gitVersion()
+    def details = versionDetails()
+    explicit_version = details.isCleanTag
 } catch (Exception ignored) {
     println('This mod must be version controlled by Git AND the repository must provide at least one tag,\n' +
             'or the VERSION override must be set!')
     version_override = 'NO-GIT-TAG-SET'
     identified_version = version_override
+    explicit_version = false
 }
 version = minecraft_version + '-' + identified_version
 ext {
@@ -190,6 +197,19 @@ processResources {
             fileInfo.exclude()
             def jsonFile = new File(destinationDir, fileInfo.path)
             jsonFile.text = '{}\n'
+        }
+    }
+
+    if (explicit_version) {
+        from(sourceSets.main.resources.srcDirs) {
+            include 'assets/' + mod_id + '/protocol_versions.json'
+
+            eachFile { fileInfo->
+                def versionsMap = new groovy.json.JsonSlurper().parse(file)
+                if (!versionsMap.containsKey(mod_version)) {
+                    throw new GradleException("Can't find \"${mod_version}\" in ${fileInfo.name} file")
+                }
+            }
         }
     }
 
