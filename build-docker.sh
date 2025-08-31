@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env bash
 
 set -e
 
@@ -15,4 +15,4 @@ docker run --rm -it \
     -v "$DEPS_VOLUME":/root/.gradle/caches \
     -v "$DEPS_VOLUME":/root/.gradle/wrapper \
     openjdk:8u342-jdk-bullseye ./gradlew jar --no-daemon
-chown --reference=. -R ./libs ./out
+chown --reference=. -R "$PWD/out"
