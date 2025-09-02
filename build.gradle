@@ -22,9 +22,11 @@ buildscript {
 
 plugins {
     id 'com.palantir.git-version' version '0.13.0' apply false
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+' apply false
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 
 if (project.file('.git/HEAD').isFile()) {

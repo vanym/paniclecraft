@@ -1,0 +1,13 @@
+
+pluginManagement {
+    repositories {
+        maven {
+            name 'Gradle Central'
+            url 'https://plugins.gradle.org/m2/'
+        }
+        maven {
+            name 'ParchmentMC'
+            url 'https://maven.parchmentmc.org/'
+        }
+    }
+}
