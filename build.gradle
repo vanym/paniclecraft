@@ -65,12 +65,7 @@ if (identified_version == version_override) {
 }
 
 group = mod_group
-
-if (project.hasProperty("custom_archive_basename") && custom_archive_basename) {
-    archivesBaseName = custom_archive_basename
-} else {
-    archivesBaseName = mod_id
-}
+archivesBaseName = mod_id
 
 minecraft {
     mappings channel: "${mcp_mappings_channel}", version: "${mcp_mappings_version}"
