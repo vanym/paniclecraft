@@ -81,12 +81,7 @@ if (identified_version == version_override) {
 }
 
 group = mod_group
-
-if (project.hasProperty("customArchiveBaseName") && customArchiveBaseName) {
-    archivesBaseName = customArchiveBaseName
-} else {
-    archivesBaseName = mod_id
-}
+archivesBaseName = mod_id
 
 def arguments = []
 def jvmArguments = []
