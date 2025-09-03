@@ -52,7 +52,7 @@ public class ItemBroom extends Item {
     
     protected void collectItems(ItemStack stack, World world, PlayerEntity player, Hand hand) {
         final double distance = this.distance.get();
-        AxisAlignedBB box = GeometryUtils.getPointBox(player.x, player.y, player.z)
+        AxisAlignedBB box = GeometryUtils.getPointBox(player.getX(), player.getY(), player.getZ())
                                          .inflate(distance)
                                          .inflate(2.0D);
         List<ItemEntity> list = world.getEntitiesOfClass(ItemEntity.class, box);

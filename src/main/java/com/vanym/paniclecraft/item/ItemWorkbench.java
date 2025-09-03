@@ -25,7 +25,7 @@ public class ItemWorkbench extends Item implements INamedContainerProvider {
     public ItemWorkbench(Supplier<Integer> durability) {
         super(Props.create()
                    .durability(8192)
-                   .setTEISR(()->ItemRendererPortableWorkbench::new));
+                   .setISTER(()->ItemRendererPortableWorkbench::new));
         this.setRegistryName("portable_workbench");
         this.durability = durability;
     }

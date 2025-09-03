@@ -41,7 +41,7 @@ public class ItemPaintingFrame extends BlockItem {
     protected static final String TAG_PICTURE_N = TileEntityPaintingFrame.TAG_PICTURE_N;
     
     public ItemPaintingFrame(Block block) {
-        super(block, Props.create().setTEISR(()->ItemRendererPaintingFrame::create));
+        super(block, Props.create().setISTER(()->ItemRendererPaintingFrame::create));
         this.setRegistryName(block.getRegistryName());
     }
     
