@@ -138,11 +138,66 @@ public class GeometryUtils {
         if (dir.getAxis() == axis.getAxis()) {
             return dir;
         }
-        dir = dir.getClockWise(axis.getAxis());
+        dir = rotateBy(dir, axis.getAxis());
         if (axis.getAxisDirection() == AxisDirection.NEGATIVE) {
             dir = dir.getOpposite();
         }
         return dir;
+    }
+    
+    protected static Direction rotateBy(Direction dir, Direction.Axis axis) {
+        switch (axis) {
+            case X:
+                if (dir != Direction.WEST && dir != Direction.EAST) {
+                    return rotateByX(dir);
+                }
+                return dir;
+            case Y:
+                if (dir != Direction.UP && dir != Direction.DOWN) {
+                    return dir.getClockWise();
+                }
+                return dir;
+            case Z:
+                if (dir != Direction.NORTH && dir != Direction.SOUTH) {
+                    return rotateByZ(dir);
+                }
+                return dir;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+    
+    protected static Direction rotateByX(Direction dir) {
+        switch (dir) {
+            case NORTH:
+                return Direction.DOWN;
+            case EAST:
+            case WEST:
+            default:
+                throw new IllegalStateException();
+            case SOUTH:
+                return Direction.UP;
+            case UP:
+                return Direction.NORTH;
+            case DOWN:
+                return Direction.SOUTH;
+        }
+    }
+    
+    protected static Direction rotateByZ(Direction dir) {
+        switch (dir) {
+            case EAST:
+                return Direction.DOWN;
+            case SOUTH:
+            default:
+                throw new IllegalStateException();
+            case WEST:
+                return Direction.UP;
+            case UP:
+                return Direction.EAST;
+            case DOWN:
+                return Direction.WEST;
+        }
     }
     
     protected static TileOnSide getZTileOnSide(Direction zdir) {
