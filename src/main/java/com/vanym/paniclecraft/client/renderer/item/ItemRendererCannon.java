@@ -37,7 +37,7 @@ public class ItemRendererCannon extends ItemStackTileEntityRenderer {
     
     @SubscribeEvent
     public void preEntityRender(RenderLivingEvent.Pre<LivingEntity, ?> event) {
-        this.setHeight(event.getEntity().rotationPitch);
+        this.setHeight(event.getEntity().xRot);
     }
     
     @SubscribeEvent

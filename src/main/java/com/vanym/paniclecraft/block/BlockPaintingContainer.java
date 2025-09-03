@@ -38,7 +38,7 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
     }
     
     @Override
-    public boolean onBlockActivated(
+    public boolean use(
             BlockState state,
             World world,
             BlockPos pos,
@@ -48,7 +48,7 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
         if (!Core.instance.painting.config.openViewByClick
             || player.isSneaking()
             || Stream.of(Hand.MAIN_HAND, Hand.OFF_HAND)
-                     .map(player::getHeldItem)
+                     .map(player::getItemInHand)
                      .anyMatch(stack->!stack.isEmpty())) {
             return false;
         }
@@ -57,8 +57,8 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
                         WorldPictureProvider.ANYTILE,
                         world,
                         pos,
-                        hit.getFace().getIndex());
-        if (world.isRemote) {
+                        hit.getDirection().get3DDataValue());
+        if (world.isClientSide) {
             return point.getPicture() != null;
         }
         ContainerPaintingViewServer.Provider view =
@@ -67,7 +67,7 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
             return false;
         }
         if (player instanceof ServerPlayerEntity) {
-            view.setEditable(player.abilities.isCreativeMode && player.hasPermissionLevel(2));
+            view.setEditable(player.abilities.instabuild && player.hasPermissions(2));
             NetworkHooks.openGui((ServerPlayerEntity)player, view, view);
         }
         return true;
@@ -77,7 +77,7 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
         if (side != Direction.DOWN && side != Direction.UP) {
             return 0;
         }
-        int rot = MathHelper.floor((double)(player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int rot = MathHelper.floor((double)(player.yRot * 4.0F / 360.0F) + 0.5D) & 3;
         if ((side == Direction.UP) != place) {
             rot = (4 - rot) % 4;
         }
@@ -95,10 +95,10 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
     
     public static Direction getStackDirection(PlayerEntity player, Direction side) {
         Direction dir = side.getOpposite();
-        Vec3d dirvec = new Vec3d(dir.getDirectionVec());
-        Vec3d lookvec = new Vec3d(Direction.SOUTH.getDirectionVec());
-        lookvec = lookvec.rotatePitch(-(player.rotationPitch * 0.999F) * (float)Math.PI / 180.0F);
-        lookvec = lookvec.rotateYaw(-player.rotationYaw * (float)Math.PI / 180.0F);
+        Vec3d dirvec = new Vec3d(dir.getNormal());
+        Vec3d lookvec = new Vec3d(Direction.SOUTH.getNormal());
+        lookvec = lookvec.xRot(-(player.xRot * 0.999F) * (float)Math.PI / 180.0F);
+        lookvec = lookvec.yRot(-player.yRot * (float)Math.PI / 180.0F);
         Vec3d stackvec = lookvec.subtract(dirvec);
         Direction stackdir = GeometryUtils.getDirectionByVec(stackvec);
         if (stackdir == dir || stackdir == side) {

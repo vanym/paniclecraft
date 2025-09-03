@@ -64,7 +64,7 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
         // @formatter:on
         Minecraft mc = Minecraft.getInstance();
         return Pair.of(mc.getItemRenderer()
-                         .getItemModelMesher()
+                         .getItemModelShaper()
                          .getItemModel(this.getCraftingItem()),
                        transform);
     }

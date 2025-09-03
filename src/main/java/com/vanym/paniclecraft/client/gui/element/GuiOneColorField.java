@@ -13,7 +13,7 @@ public class GuiOneColorField extends TextFieldWidget {
     
     public GuiOneColorField(FontRenderer font, int x, int y, int width, int height) {
         super(font, x, y, width, height, "");
-        this.setMaxStringLength(3);
+        this.setMaxLength(3);
         this.fixate();
     }
     
@@ -22,8 +22,8 @@ public class GuiOneColorField extends TextFieldWidget {
     }
     
     @Override
-    public void setFocused2(boolean focus) {
-        super.setFocused2(focus);
+    public void setFocus(boolean focus) {
+        super.setFocus(focus);
         if (!focus) {
             this.fixate();
         }
@@ -32,19 +32,19 @@ public class GuiOneColorField extends TextFieldWidget {
     protected void fixate() {
         int num;
         try {
-            num = Integer.decode(this.getText());
+            num = Integer.decode(this.getValue());
         } catch (NumberFormatException e) {
             num = 0;
         }
-        this.setText(Integer.toString(num));
+        this.setValue(Integer.toString(num));
     }
     
     public int getSelectionEnd() {
-        return this.selectionEnd;
+        return this.highlightPos;
     }
     
     @Override
-    public void writeText(String text) {
+    public void insertText(String text) {
         StringBuilder sb = new StringBuilder();
         char[] chars = text.toCharArray();
         for (char c : chars) {
@@ -53,12 +53,12 @@ public class GuiOneColorField extends TextFieldWidget {
             }
             sb.append(c);
         }
-        super.writeText(sb.toString());
+        super.insertText(sb.toString());
     }
     
     @Override
     public boolean charTyped(char character, int modifiers) {
-        String previousText = this.getText();
+        String previousText = this.getValue();
         if (!super.charTyped(character, modifiers)) {
             return false;
         }
@@ -68,7 +68,7 @@ public class GuiOneColorField extends TextFieldWidget {
     
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        String previousText = this.getText();
+        String previousText = this.getValue();
         if (!super.keyPressed(key, scanCode, modifiers)) {
             return false;
         }
@@ -78,7 +78,7 @@ public class GuiOneColorField extends TextFieldWidget {
     
     protected void afterCheck(String previousText) {
         this.checkNum();
-        String text = this.getText();
+        String text = this.getValue();
         if (previousText.equals(text)) {
             return;
         }
@@ -103,7 +103,7 @@ public class GuiOneColorField extends TextFieldWidget {
     }
     
     protected boolean checkNum() {
-        String text = this.getText();
+        String text = this.getValue();
         if (text.isEmpty()) {
             return false;
         }
@@ -116,13 +116,13 @@ public class GuiOneColorField extends TextFieldWidget {
             return false;
         }
         if (num > 0xff) {
-            this.setText(Integer.toString(0xff));
-            this.setCursorPosition(pos);
-            this.setSelectionPos(sel);
+            this.setValue(Integer.toString(0xff));
+            this.moveCursorTo(pos);
+            this.setHighlightPos(sel);
             return true;
         }
         if (num < 0) {
-            this.setText(Integer.toString(0));
+            this.setValue(Integer.toString(0));
             return true;
         }
         return false;

@@ -62,7 +62,7 @@ public class ModComponentCannon extends ModComponent {
         this.blockCannon = new BlockCannon();
         this.itemCannon = new BlockItem(
                 this.blockCannon,
-                new Item.Properties().group(Core.instance.tab)
+                new Item.Properties().tab(Core.instance.tab)
                                      .setTEISR(()->ItemRendererCannon::createRegistered));
         this.itemCannon.setRegistryName(this.blockCannon.getRegistryName());
         this.tileEntityCannon = new TileEntityType<>(
@@ -101,9 +101,9 @@ public class ModComponentCannon extends ModComponent {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
-        ScreenManager.registerFactory(this.containerCannon, GuiCannon::new);
+        ScreenManager.register(this.containerCannon, GuiCannon::new);
         this.tileCannonRenderer = new TileEntityCannonRenderer();
-        this.tileCannonRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+        this.tileCannonRenderer.init(TileEntityRendererDispatcher.instance);
         if (this.renderTileCannon.get()) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCannon.class,
                                                          this.tileCannonRenderer);

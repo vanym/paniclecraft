@@ -46,7 +46,7 @@ public class RecipeDummy {
         protected Shaped(ShapedRecipe recipe) {
             this(recipe.getId(), recipe.getGroup(),
                  recipe.getWidth(), recipe.getHeight(),
-                 recipe.getIngredients(), recipe.getRecipeOutput());
+                 recipe.getIngredients(), recipe.getResultItem());
         }
         
         @Override
@@ -55,7 +55,7 @@ public class RecipeDummy {
         }
         
         @Override
-        public ItemStack getCraftingResult(CraftingInventory inv) {
+        public ItemStack assemble(CraftingInventory inv) {
             return ItemStack.EMPTY;
         }
         
@@ -67,13 +67,13 @@ public class RecipeDummy {
         public static class Serializer extends ShapedRecipe.Serializer {
             
             @Override
-            public Shaped read(ResourceLocation recipeId, JsonObject json) {
-                return new Shaped(super.read(recipeId, json));
+            public Shaped fromJson(ResourceLocation recipeId, JsonObject json) {
+                return new Shaped(super.fromJson(recipeId, json));
             }
             
             @Override
-            public Shaped read(ResourceLocation recipeId, PacketBuffer buf) {
-                return new Shaped(super.read(recipeId, buf));
+            public Shaped fromNetwork(ResourceLocation recipeId, PacketBuffer buf) {
+                return new Shaped(super.fromNetwork(recipeId, buf));
             }
         }
     }
@@ -89,7 +89,7 @@ public class RecipeDummy {
         
         protected Shapeless(ShapelessRecipe recipe) {
             this(recipe.getId(), recipe.getGroup(),
-                 recipe.getRecipeOutput(), recipe.getIngredients());
+                 recipe.getResultItem(), recipe.getIngredients());
         }
         
         @Override
@@ -98,7 +98,7 @@ public class RecipeDummy {
         }
         
         @Override
-        public ItemStack getCraftingResult(CraftingInventory inv) {
+        public ItemStack assemble(CraftingInventory inv) {
             return ItemStack.EMPTY;
         }
         
@@ -110,13 +110,13 @@ public class RecipeDummy {
         public static class Serializer extends ShapelessRecipe.Serializer {
             
             @Override
-            public Shapeless read(ResourceLocation recipeId, JsonObject json) {
-                return new Shapeless(super.read(recipeId, json));
+            public Shapeless fromJson(ResourceLocation recipeId, JsonObject json) {
+                return new Shapeless(super.fromJson(recipeId, json));
             }
             
             @Override
-            public Shapeless read(ResourceLocation recipeId, PacketBuffer buf) {
-                return new Shapeless(super.read(recipeId, buf));
+            public Shapeless fromNetwork(ResourceLocation recipeId, PacketBuffer buf) {
+                return new Shapeless(super.fromNetwork(recipeId, buf));
             }
         }
     }

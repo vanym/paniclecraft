@@ -21,7 +21,7 @@ public class ItemRendererPortableWorkbench extends ItemStackTileEntityRenderer {
     
     @Override
     public void renderByItem(ItemStack stack) {
-        Minecraft.getInstance().getTextureManager().bindTexture(TEXTURE);
+        Minecraft.getInstance().getTextureManager().bind(TEXTURE);
         GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
         GlStateManager.translatef(0.5F, -0.0625F, -0.5F);
         this.model.render(0.0625F);

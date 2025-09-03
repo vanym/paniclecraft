@@ -33,7 +33,7 @@ public class GuiHexColorField extends TextFieldWidget {
     
     public GuiHexColorField(FontRenderer font, int x, int y, int width, int height) {
         super(font, x, y, width, height, "");
-        this.setMaxStringLength(7);
+        this.setMaxLength(7);
         this.fixate();
     }
     
@@ -42,8 +42,8 @@ public class GuiHexColorField extends TextFieldWidget {
     }
     
     @Override
-    public void setFocused2(boolean focus) {
-        super.setFocused2(focus);
+    public void setFocus(boolean focus) {
+        super.setFocus(focus);
         if (!focus) {
             this.fixate();
         }
@@ -52,7 +52,7 @@ public class GuiHexColorField extends TextFieldWidget {
     protected void fixate() {
         int rgb;
         try {
-            rgb = Integer.decode(this.getText());
+            rgb = Integer.decode(this.getValue());
         } catch (NumberFormatException e) {
             rgb = 0;
         }
@@ -60,21 +60,21 @@ public class GuiHexColorField extends TextFieldWidget {
     }
     
     public void setRGB(int rgb) {
-        this.setText(String.format("#%06X", rgb));
+        this.setValue(String.format("#%06X", rgb));
     }
     
     @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
+    public void setEditable(boolean enabled) {
+        super.setEditable(enabled);
         this.isEnabled = enabled;
     }
     
     protected int getSelectionEnd() {
-        return this.selectionEnd;
+        return this.highlightPos;
     }
     
     @Override
-    public void writeText(String text) {
+    public void insertText(String text) {
         this.clearSign();
         StringBuilder sb = new StringBuilder();
         char[] chars = text.toCharArray();
@@ -91,11 +91,11 @@ public class GuiHexColorField extends TextFieldWidget {
             c = Character.toUpperCase(c);
             sb.append(c);
         }
-        super.writeText(sb.toString());
+        super.insertText(sb.toString());
     }
     
     protected boolean clearSign() {
-        String text = this.getText();
+        String text = this.getValue();
         int pos = this.getCursorPosition();
         int sel = this.getSelectionEnd();
         boolean skiped = false;
@@ -115,15 +115,15 @@ public class GuiHexColorField extends TextFieldWidget {
                 }
             }
         }
-        this.setText(sb.toString());
-        this.setCursorPosition(pos);
-        this.setSelectionPos(sel);
+        this.setValue(sb.toString());
+        this.moveCursorTo(pos);
+        this.setHighlightPos(sel);
         return skiped;
     }
     
     @Override
     public boolean charTyped(char character, int modifiers) {
-        String previousText = this.getText();
+        String previousText = this.getValue();
         if (!super.charTyped(character, modifiers)) {
             return false;
         }
@@ -133,7 +133,7 @@ public class GuiHexColorField extends TextFieldWidget {
     
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        String previousText = this.getText();
+        String previousText = this.getValue();
         if (!super.keyPressed(key, scanCode, modifiers)) {
             return false;
         }
@@ -146,7 +146,7 @@ public class GuiHexColorField extends TextFieldWidget {
         if (this.setter == null) {
             return;
         }
-        String text = this.getText();
+        String text = this.getValue();
         if (previousText.equals(text)) {
             return;
         }
@@ -169,27 +169,27 @@ public class GuiHexColorField extends TextFieldWidget {
     }
     
     protected boolean checkPrefix() {
-        String text = this.getText();
+        String text = this.getValue();
         if (text.isEmpty() || text.startsWith("#")) {
             return false;
         }
         int pos = this.getCursorPosition();
         int sel = this.getSelectionEnd();
-        this.setText("#" + text);
-        this.setCursorPosition(pos + 1);
-        this.setSelectionPos(sel + 1);
+        this.setValue("#" + text);
+        this.moveCursorTo(pos + 1);
+        this.setHighlightPos(sel + 1);
         return true;
     }
     
     @Override
     public void renderButton(int x, int y, float partialTicks) {
-        if (!this.getVisible()) {
+        if (!this.isVisible()) {
             return;
         }
         int pos = this.getCursorPosition();
         int sel = this.getSelectionEnd();
-        String text = this.getText();
-        String textNum = this.getText();
+        String text = this.getValue();
+        String textNum = this.getValue();
         Iterator<String> it;
         if (this.isEnabled) {
             it = COLORS_ENABLED.iterator();
@@ -202,15 +202,15 @@ public class GuiHexColorField extends TextFieldWidget {
             String colorCode = it.hasNext() ? it.next() : "\u00a7f";
             sb.insert(i, colorCode);
         }
-        this.setMaxStringLength(7 + Math.max(0, length - 1) * 2);
-        this.setText(sb.toString());
-        this.setCursorPosition(convertPos(pos));
-        this.setSelectionPos(convertPos(sel));
+        this.setMaxLength(7 + Math.max(0, length - 1) * 2);
+        this.setValue(sb.toString());
+        this.moveCursorTo(convertPos(pos));
+        this.setHighlightPos(convertPos(sel));
         super.renderButton(x, y, partialTicks);
-        this.setText(text);
-        this.setMaxStringLength(7);
-        this.setCursorPosition(pos);
-        this.setSelectionPos(sel);
+        this.setValue(text);
+        this.setMaxLength(7);
+        this.moveCursorTo(pos);
+        this.setHighlightPos(sel);
     }
     
     protected static int convertPos(int pos) {

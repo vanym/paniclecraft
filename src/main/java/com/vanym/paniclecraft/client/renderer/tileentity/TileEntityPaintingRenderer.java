@@ -55,7 +55,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
     
     protected void initRenderers() {
         if (this.blockRenderer == null) {
-            this.blockRenderer = Minecraft.getInstance().getBlockRendererDispatcher();
+            this.blockRenderer = Minecraft.getInstance().getBlockRenderer();
         }
         if (this.itemRenderer == null) {
             this.itemRenderer = Minecraft.getInstance().getItemRenderer();
@@ -77,13 +77,13 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
     }
     
     public static void renderInWorldEnable() {
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
                                  GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         GlStateManager.enableBlend();
         GlStateManager.disableCull();
         
-        if (Minecraft.isAmbientOcclusionEnabled()) {
+        if (Minecraft.useAmbientOcclusion()) {
             GlStateManager.shadeModel(GL11.GL_SMOOTH);
         } else {
             GlStateManager.shadeModel(GL11.GL_FLAT);
@@ -91,7 +91,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
     }
     
     public static void renderInWorldDisable() {
-        RenderHelper.enableStandardItemLighting();
+        RenderHelper.turnOn();
     }
     
     public void renderInWorld(
@@ -105,7 +105,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         if (destroyStage < 0) {
             renderInWorldEnable();
         } else {
-            RenderHelper.disableStandardItemLighting();
+            RenderHelper.turnOff();
         }
         this.renderPainting(te, x, y, z, destroyStage);
         renderInWorldDisable();
@@ -125,37 +125,37 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
             double z,
             int destroyStage) {
         this.initRenderers();
-        World world = tile.getWorld();
-        BlockPos pos = tile.getPos();
+        World world = tile.getLevel();
+        BlockPos pos = tile.getBlockPos();
         BlockState state = this.getActualState(tile);
-        long rand = tile.hasWorld() ? state.getPositionRandom(pos) : 0;
-        IBakedModel model = this.blockRenderer.getModelForState(state);
-        if (!tile.hasWorld()) {
+        long rand = tile.hasLevel() ? state.getSeed(pos) : 0;
+        IBakedModel model = this.blockRenderer.getBlockModel(state);
+        if (!tile.hasLevel()) {
             model = new BakedModelStatedWrapper<>(model, state);
         }
-        BlockModelRenderer render = this.blockRenderer.getBlockModelRenderer();
+        BlockModelRenderer render = this.blockRenderer.getModelRenderer();
         IProfiler theProfiler = null;
         if (world != null && Core.instance.painting.clientConfig.renderProfiling) {
             theProfiler = world.getProfiler();
         }
         if (theProfiler != null) {
-            theProfiler.startSection(tile.getType().getRegistryName().toString());
+            theProfiler.push(tile.getType().getRegistryName().toString());
         }
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buf = tessellator.getBuffer();
-        buf.setTranslation(x - (double)pos.getX(), y - (double)pos.getY(), z - (double)pos.getZ());
+        BufferBuilder buf = tessellator.getBuilder();
+        buf.offset(x - (double)pos.getX(), y - (double)pos.getY(), z - (double)pos.getZ());
         if (this.renderFrameType >= 0) {
             if (theProfiler != null) {
-                theProfiler.startSection("frame");
+                theProfiler.push("frame");
             }
-            this.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
+            this.bindTexture(AtlasTexture.LOCATION_BLOCKS);
             IBakedModel frameModel = new BakedModelFrame(model);
-            if (tile.hasWorld()) {
+            if (tile.hasLevel()) {
                 buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
                 if (destroyStage >= 0) {
-                    AtlasTexture tex = Minecraft.getInstance().getTextureMap();
+                    AtlasTexture tex = Minecraft.getInstance().getTextureAtlas();
                     TextureAtlasSprite sprite =
-                            tex.getAtlasSprite("minecraft:block/destroy_stage_" + destroyStage);
+                            tex.getTexture("minecraft:block/destroy_stage_" + destroyStage);
                     frameModel =
                             ForgeHooksClient.getDamageModel(model, sprite, state, world, pos, rand);
                     buf.noColor();
@@ -169,12 +169,12 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                                            buf, true, new Random(rand), rand,
                                            EmptyModelData.INSTANCE);
                 }
-                tessellator.draw();
+                tessellator.end();
             } else {
-                this.itemRenderer.renderItem(this.renderStack, frameModel);
+                this.itemRenderer.render(this.renderStack, frameModel);
             }
             if (theProfiler != null) {
-                theProfiler.endSection(); // frame
+                theProfiler.pop(); // frame
             }
         }
         if (this.renderPictureType >= 0 && destroyStage < 0) {
@@ -185,16 +185,16 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                     continue;
                 }
                 if (theProfiler != null) {
-                    theProfiler.startSection("picture");
-                    theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
-                    theProfiler.startSection("bind");
+                    theProfiler.push("picture");
+                    theProfiler.push(picture.getWidth() + "x" + picture.getHeight());
+                    theProfiler.push("bind");
                 }
                 TextureAtlasSprite sprite = bindTexture(picture);
                 if (theProfiler != null) {
-                    theProfiler.endSection(); // bind
+                    theProfiler.pop(); // bind
                 }
                 IBakedModel pictureModel = new BakedModelPicture(model, side, sprite);
-                if (tile.hasWorld()) {
+                if (tile.hasLevel()) {
                     buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
                     if (this.renderPictureType > 0) {
                         render.renderModelSmooth(world, pictureModel, state, pos,
@@ -205,28 +205,28 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                                                buf, true, new Random(rand), rand,
                                                EmptyModelData.INSTANCE);
                     }
-                    tessellator.draw();
+                    tessellator.end();
                 } else {
-                    this.itemRenderer.renderItem(this.renderStack, pictureModel);
+                    this.itemRenderer.render(this.renderStack, pictureModel);
                 }
                 if (theProfiler != null) {
-                    theProfiler.endSection(); // WxH
-                    theProfiler.endSection(); // picture
+                    theProfiler.pop(); // WxH
+                    theProfiler.pop(); // picture
                 }
             }
         }
-        buf.setTranslation(0.0D, 0.0D, 0.0D);
+        buf.offset(0.0D, 0.0D, 0.0D);
         if (theProfiler != null) {
-            theProfiler.endSection(); // root
+            theProfiler.pop(); // root
         }
     }
     
     protected BlockState getActualState(TileEntityPaintingContainer tile) {
-        if (tile.hasWorld()) {
-            World world = tile.getWorld();
-            return world.getBlockState(tile.getPos());
+        if (tile.hasLevel()) {
+            World world = tile.getLevel();
+            return world.getBlockState(tile.getBlockPos());
         }
-        return Core.instance.painting.blockPainting.getDefaultState();
+        return Core.instance.painting.blockPainting.defaultBlockState();
     }
     
     protected Picture getPicture(TileEntityPaintingContainer tile, int index) {
@@ -279,7 +279,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         @Override
         protected List<BakedQuad> wrapQuads(List<BakedQuad> quads) {
             return quads.stream()
-                        .filter(q->!q.hasTintIndex())
+                        .filter(q->!q.isTinted())
                         .collect(Collectors.toList());
         }
     }
@@ -304,7 +304,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         }
         
         @Override
-        public TextureAtlasSprite getParticleTexture() {
+        public TextureAtlasSprite getParticleIcon() {
             return this.sprite;
         }
         
@@ -315,7 +315,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
             }
             
             @Override
-            public boolean hasTintIndex() {
+            public boolean isTinted() {
                 return false;
             }
         }

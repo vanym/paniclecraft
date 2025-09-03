@@ -38,7 +38,7 @@ public class TileEntityCannonRenderer extends TileEntityRenderer<TileEntityCanno
         GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
         GlStateManager.translatef(0.0F, 0.5F, 0.0F);
         if (destroyStage >= 0) {
-            this.bindTexture(DESTROY_STAGES[destroyStage]);
+            this.bindTexture(BREAKING_LOCATIONS[destroyStage]);
             GlStateManager.matrixMode(GL11.GL_TEXTURE);
             GlStateManager.pushMatrix();
             GlStateManager.scalef(8.0F, 4.0F, 1.0F);

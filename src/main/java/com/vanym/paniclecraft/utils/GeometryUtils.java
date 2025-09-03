@@ -11,7 +11,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 
 public class GeometryUtils {
     
-    protected static final AxisAlignedBB FULL_BLOCK = VoxelShapes.fullCube().getBoundingBox();
+    protected static final AxisAlignedBB FULL_BLOCK = VoxelShapes.block().bounds();
     
     public static AxisAlignedBB getFullBlockBox() {
         return FULL_BLOCK;
@@ -51,7 +51,7 @@ public class GeometryUtils {
     
     public static AxisAlignedBB getBoundsBySide(int side, double width) {
         AxisAlignedBB box = setMaxZ(FULL_BLOCK, width);
-        Direction zdir = Direction.byIndex(side).getOpposite();
+        Direction zdir = Direction.from3DDataValue(side).getOpposite();
         TileOnSide tside = getZTileOnSide(zdir);
         return tside.fromSideCoords(box);
     }
@@ -67,7 +67,7 @@ public class GeometryUtils {
     }
     
     public static Vec3d getInBlockVec(BlockRayTraceResult target) {
-        return target.getHitVec().subtract(new Vec3d(target.getPos()));
+        return target.getLocation().subtract(new Vec3d(target.getBlockPos()));
     }
     
     public static AxisAlignedBB rotateXYInnerEdge(AxisAlignedBB box, double radians) {
@@ -116,14 +116,14 @@ public class GeometryUtils {
     }
     
     public static Direction getDirectionByVec(Vec3d lookVec) {
-        return Direction.getFacingFromVector((float)lookVec.x, (float)lookVec.y, (float)lookVec.z);
+        return Direction.getNearest((float)lookVec.x, (float)lookVec.y, (float)lookVec.z);
     }
     
     public static BlockRayTraceResult rayTraceBlocks(PlayerEntity player, double distance) {
         Vec3d pos = player.getEyePosition(1.0F);
-        Vec3d look = player.getLookVec();
+        Vec3d look = player.getLookAngle();
         Vec3d posTo = pos.add(look.scale(distance));
-        return player.world.rayTraceBlocks(new RayTraceContext(
+        return player.level.clip(new RayTraceContext(
                 pos,
                 posTo,
                 RayTraceContext.BlockMode.OUTLINE,
@@ -138,7 +138,7 @@ public class GeometryUtils {
         if (dir.getAxis() == axis.getAxis()) {
             return dir;
         }
-        dir = dir.rotateAround(axis.getAxis());
+        dir = dir.getClockWise(axis.getAxis());
         if (axis.getAxisDirection() == AxisDirection.NEGATIVE) {
             dir = dir.getOpposite();
         }
@@ -146,7 +146,7 @@ public class GeometryUtils {
     }
     
     protected static TileOnSide getZTileOnSide(Direction zdir) {
-        Direction xdir = Direction.byIndex((zdir.getIndex() + 2) % 6);
+        Direction xdir = Direction.from3DDataValue((zdir.get3DDataValue() + 2) % 6);
         return new TileOnSide(xdir, zdir);
     }
 }

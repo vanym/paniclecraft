@@ -47,19 +47,19 @@ public class CommandAdvSign extends TreeCommandBase {
         @Override
         public LiteralArgumentBuilder<CommandSource> register() {
             return Commands.literal(this.getName())
-                           .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                           .requires(cs->cs.hasPermission(this.getRequiredPermissionLevel()))
                            .executes(this::execute);
         }
         
         public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
-            ServerPlayerEntity player = context.getSource().asPlayer();
+            ServerPlayerEntity player = context.getSource().getPlayerOrException();
             BlockRayTraceResult target = CommandUtils.rayTraceBlocks(player);
-            TileEntity tile = player.getEntityWorld().getTileEntity(target.getPos());
+            TileEntity tile = player.getCommandSenderWorld().getBlockEntity(target.getBlockPos());
             if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                tileAS.setEditor(player.getUniqueID());
-                Core.instance.network.sendTo(new MessageAdvSignOpenGui(tileAS.getPos()),
-                                             player.connection.getNetworkManager(),
+                tileAS.setEditor(player.getUUID());
+                Core.instance.network.sendTo(new MessageAdvSignOpenGui(tileAS.getBlockPos()),
+                                             player.connection.getConnection(),
                                              NetworkDirection.PLAY_TO_CLIENT);
             } else {
                 throw REQUIRES_ADVSIGN_EXCEPTION_TYPE.create();

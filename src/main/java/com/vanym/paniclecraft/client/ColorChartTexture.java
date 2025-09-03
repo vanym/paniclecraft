@@ -26,10 +26,10 @@ public class ColorChartTexture extends SimpleTexture implements Closeable {
     }
     
     @Override
-    protected SimpleTexture.TextureData func_215246_b(IResourceManager resourceManager) {
-        SimpleTexture.TextureData data = super.func_215246_b(resourceManager);
+    protected SimpleTexture.TextureData getTextureImage(IResourceManager resourceManager) {
+        SimpleTexture.TextureData data = super.getTextureImage(resourceManager);
         try {
-            this.img = data.func_217800_b();
+            this.img = data.getImage();
         } catch (IOException e) {
         }
         return TextureDataUncloseable.wrap(data);
@@ -70,7 +70,7 @@ public class ColorChartTexture extends SimpleTexture implements Closeable {
         
         public static TextureDataUncloseable wrap(SimpleTexture.TextureData data) {
             try {
-                return new TextureDataUncloseable(data.func_217798_a(), data.func_217800_b());
+                return new TextureDataUncloseable(data.getTextureMetadata(), data.getImage());
             } catch (IOException e) {
                 return new TextureDataUncloseable(e);
             }

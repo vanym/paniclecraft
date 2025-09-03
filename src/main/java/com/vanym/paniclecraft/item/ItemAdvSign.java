@@ -47,13 +47,13 @@ import net.minecraftforge.fml.common.thread.EffectiveSide;
 public class ItemAdvSign extends Item {
     
     public ItemAdvSign() {
-        super(Props.create().maxStackSize(16).setTEISR(()->ItemRendererAdvSign::new));
+        super(Props.create().stacksTo(16).setTEISR(()->ItemRendererAdvSign::new));
         this.setRegistryName("advanced_sign");
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(
+    public void appendHoverText(
             ItemStack stack,
             @Nullable World world,
             List<ITextComponent> list,
@@ -65,20 +65,20 @@ public class ItemAdvSign extends Item {
                 lines.stream()
                      .map(ITextComponent::getString)
                      .map(StringTextComponent::new)
-                     .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                     .peek(line->line.withStyle(TextFormatting.GRAY))
                      .forEachOrdered(list::add);
             });
         } else if (getSide(stack, false).filter(t->!t.isEmpty()).isPresent()) {
-            Stream.of(I18n.format(this.getTranslationKey() +
+            Stream.of(I18n.get(this.getDescriptionId() +
                 ".showtext.both").split(System.lineSeparator()))
                   .map(StringTextComponent::new)
-                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                  .peek(line->line.withStyle(TextFormatting.GRAY))
                   .forEachOrdered(list::add);
         } else if (getSide(stack, true).isPresent()) {
-            Stream.of(I18n.format(this.getTranslationKey() +
+            Stream.of(I18n.get(this.getDescriptionId() +
                 ".showtext.frontonly").split(System.lineSeparator()))
                   .map(StringTextComponent::new)
-                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                  .peek(line->line.withStyle(TextFormatting.GRAY))
                   .forEachOrdered(list::add);
         }
     }
@@ -90,11 +90,11 @@ public class ItemAdvSign extends Item {
     }
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(
+    public ActionResult<ItemStack> use(
             World world,
             PlayerEntity player,
             Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = player.getItemInHand(hand);
         if (getSign(stack).isPresent() && player.isSneaking()) {
             removeSign(stack);
             return new ActionResult<>(ActionResultType.SUCCESS, stack);
@@ -105,12 +105,12 @@ public class ItemAdvSign extends Item {
     
     @Override
     public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
-        if (context.isPlacerSneaking()) {
+        if (context.isSneaking()) {
             return ActionResultType.PASS;
         }
-        World world = context.getWorld();
-        BlockPos pos = context.getPos();
-        TileEntity tile = world.getTileEntity(pos);
+        World world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        TileEntity tile = world.getBlockEntity(pos);
         CompoundNBT signTag = null;
         if (tile instanceof SignTileEntity) {
             SignTileEntity tileS = (SignTileEntity)tile;
@@ -118,8 +118,8 @@ public class ItemAdvSign extends Item {
             AdvSignText text = new AdvSignText();
             List<ITextComponent> lines = text.getLines();
             lines.clear();
-            Arrays.stream(tileS.signText)
-                  .map(ITextComponent::getFormattedText)
+            Arrays.stream(tileS.messages)
+                  .map(ITextComponent::getColoredString)
                   .map(FormattingUtils::parseLine)
                   .forEachOrdered(lines::add);
             signTag.put(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
@@ -140,42 +140,42 @@ public class ItemAdvSign extends Item {
     }
     
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
-        World world = context.getWorld();
-        BlockPos pos = context.getPos();
-        Direction facing = context.getFace();
+    public ActionResultType useOn(ItemUseContext context) {
+        World world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        Direction facing = context.getClickedFace();
         if (!world.getBlockState(pos).getMaterial().isSolid()) {
             return ActionResultType.FAIL;
         }
-        ItemStack stack = context.getItem();
-        pos = pos.offset(facing);
+        ItemStack stack = context.getItemInHand();
+        pos = pos.relative(facing);
         Block block = Core.instance.advSign.blockAdvSign;
         PlayerEntity player = context.getPlayer();
-        if (!player.canPlayerEdit(pos, facing, stack)
-            || !world.setBlockState(pos,
+        if (!player.mayUseItemAt(pos, facing, stack)
+            || !world.setBlock(pos,
                                     block.getStateForPlacement(new BlockItemUseContext(context)),
                                     11)) {
             return ActionResultType.FAIL;
         }
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
             getSign(stack).filter(TileEntityAdvSign::isValidTag)
                           .ifPresent(signTag->tileAS.read(signTag, true));
             if (facing == Direction.UP) {
                 tileAS.setForm(AdvSignForm.STICK_DOWN);
-                double direction = Math.round(180.0D + player.rotationYaw);
+                double direction = Math.round(180.0D + player.yRot);
                 tileAS.setDirection(direction);
             }
             if (facing == Direction.DOWN) {
-                tileAS.setDirection(player.getHorizontalFacing().getHorizontalAngle());
+                tileAS.setDirection(player.getDirection().toYRot());
             }
-            tileAS.setEditor(player.getUniqueID());
+            tileAS.setEditor(player.getUUID());
         }
         stack.shrink(1);
         if (EffectiveSide.get().isClient()) {
-            TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getTileEntity(pos);
-            Minecraft.getInstance().displayGuiScreen(new GuiEditAdvSign(tileAS));
+            TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getBlockEntity(pos);
+            Minecraft.getInstance().setScreen(new GuiEditAdvSign(tileAS));
         }
         return ActionResultType.SUCCESS;
     }
@@ -196,7 +196,7 @@ public class ItemAdvSign extends Item {
     }
     
     protected static void removeSign(ItemStack stack) {
-        stack.removeChildTag(ItemUtils.BLOCK_ENTITY_TAG);
+        stack.removeTagKey(ItemUtils.BLOCK_ENTITY_TAG);
         ItemUtils.cleanTag(stack);
     }
     

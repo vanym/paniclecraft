@@ -9,6 +9,8 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
+import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
+
 public class ItemPaintRemover extends ItemPaintingTool {
     
     public static enum Type {
@@ -25,14 +27,14 @@ public class ItemPaintRemover extends ItemPaintingTool {
     protected final Type type;
     
     public ItemPaintRemover(Type type) {
-        super(Props.create().maxStackSize(1));
+        super(Props.create().stacksTo(1));
         this.type = type;
         this.setRegistryName(type.id);
     }
     
     @Override
-    public void fillItemGroup(ItemGroup creativetab, NonNullList<ItemStack> list) {
-        if (!this.isInGroup(creativetab)) {
+    public void fillItemCategory(ItemGroup creativetab, NonNullList<ItemStack> list) {
+        if (!this.allowdedIn(creativetab)) {
             return;
         }
         if (!Core.instance.painting.clientConfig.forceUnhidePaintRemover

@@ -62,7 +62,7 @@ public class ItemPaintingFrame extends BlockItem {
     }
     
     @Override
-    protected boolean onBlockPlaced(
+    protected boolean updateCustomBlockEntityTag(
             BlockPos pos,
             World worldIn,
             @Nullable PlayerEntity player,
@@ -74,7 +74,7 @@ public class ItemPaintingFrame extends BlockItem {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(
+    public void appendHoverText(
             ItemStack stack,
             @Nullable World world,
             List<ITextComponent> list,
@@ -103,7 +103,7 @@ public class ItemPaintingFrame extends BlockItem {
                 sb.append("×");
                 sb.append(count);
                 list.add(new StringTextComponent(
-                        sb.toString()).applyTextStyle(TextFormatting.GRAY));
+                        sb.toString()).withStyle(TextFormatting.GRAY));
             });
         }
     }
@@ -132,7 +132,7 @@ public class ItemPaintingFrame extends BlockItem {
             if (picture == null) {
                 continue;
             }
-            Direction pside = Direction.byIndex(i);
+            Direction pside = Direction.from3DDataValue(i);
             map.put(pside, picture);
         }
         return getItemWithPictures(map);
@@ -153,7 +153,7 @@ public class ItemPaintingFrame extends BlockItem {
             ItemStack stack,
             Direction pside,
             CompoundNBT pictureTag) {
-        putPictureTag(stack, pside.getIndex(), pictureTag);
+        putPictureTag(stack, pside.get3DDataValue(), pictureTag);
     }
     
     public static void putPictureTag(ItemStack stack, int side, CompoundNBT pictureTag) {
@@ -162,7 +162,7 @@ public class ItemPaintingFrame extends BlockItem {
     }
     
     public static Optional<CompoundNBT> getPictureTag(ItemStack stack, Direction pside) {
-        return getPictureTag(stack, pside.getIndex());
+        return getPictureTag(stack, pside.get3DDataValue());
     }
     
     public static Optional<CompoundNBT> getPictureTag(ItemStack stack, int side) {
@@ -173,7 +173,7 @@ public class ItemPaintingFrame extends BlockItem {
     }
     
     public static Optional<CompoundNBT> removePictureTag(ItemStack stack, Direction pside) {
-        return removePictureTag(stack, pside.getIndex());
+        return removePictureTag(stack, pside.get3DDataValue());
     }
     
     public static Optional<CompoundNBT> removePictureTag(ItemStack stack, int side) {

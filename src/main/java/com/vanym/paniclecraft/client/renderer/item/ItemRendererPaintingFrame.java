@@ -28,7 +28,7 @@ public class ItemRendererPaintingFrame extends ItemStackTileEntityRenderer {
     public ItemRendererPaintingFrame(PictureTextureCache textureCache) {
         this.textureCache = textureCache;
         this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
-        this.paintingFrameTileRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+        this.paintingFrameTileRenderer.init(TileEntityRendererDispatcher.instance);
     }
     
     @Override

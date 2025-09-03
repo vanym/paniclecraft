@@ -21,13 +21,13 @@ public class CreativeTabMod3 extends ItemGroup {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public String getTranslationKey() {
-        return "itemgroup." + this.getTabLabel();
+    public String getName() {
+        return "itemgroup." + this.getLangId();
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public ItemStack createIcon() {
+    public ItemStack makeIcon() {
         return Core.instance.getComponents()
                             .stream()
                             .filter(IModComponent::isEnabled)
@@ -36,7 +36,7 @@ public class CreativeTabMod3 extends ItemGroup {
                             .flatMap(List::stream)
                             .flatMap(item-> {
                                 NonNullList<ItemStack> list = NonNullList.create();
-                                item.fillItemGroup(this, list);
+                                item.fillItemCategory(this, list);
                                 return list.stream();
                             })
                             .findFirst()
@@ -45,7 +45,7 @@ public class CreativeTabMod3 extends ItemGroup {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void fill(NonNullList<ItemStack> stacks) {
+    public void fillItemList(NonNullList<ItemStack> stacks) {
         for (IModComponent component : Core.instance.getComponents()) {
             if (!component.isEnabled()) {
                 continue;
@@ -54,7 +54,7 @@ public class CreativeTabMod3 extends ItemGroup {
             if (items == null) {
                 continue;
             }
-            items.forEach(item->item.fillItemGroup(this, stacks));
+            items.forEach(item->item.fillItemCategory(this, stacks));
         }
     }
 }

@@ -46,7 +46,7 @@ public class CommandPictureResize extends CommandBase {
                 IntegerArgumentType.integer(1, Math.min(widthArgumentType.getMaximum(),
                                                         heightArgumentType.getMaximum()));
         return Commands.literal(this.getName())
-                       .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                       .requires(cs->cs.hasPermission(this.getRequiredPermissionLevel()))
                        .then(Commands.argument("size", sizeArgumentType).executes(this::execute))
                        .then(Commands.argument("width", widthArgumentType)
                                      .then(Commands.argument("height", heightArgumentType)
@@ -63,7 +63,7 @@ public class CommandPictureResize extends CommandBase {
                     IntegerArgumentType.getInteger(context, "height"));
         }
         CommandSource source = context.getSource();
-        ServerPlayerEntity player = source.asPlayer();
+        ServerPlayerEntity player = source.getPlayerOrException();
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
         TranslationTextComponent success = new TranslationTextComponent(
                 String.format("commands.%s.%s.success", DEF.MOD_ID, "pictureresize"),
@@ -73,10 +73,10 @@ public class CommandPictureResize extends CommandBase {
                 size.getHeight());
         int width = size.getWidth(), height = size.getHeight();
         if (SideUtils.callSync(picture.syncObject(), ()->picture.resize(width, height))) {
-            source.sendFeedback(success, false);
+            source.sendSuccess(success, false);
             return 1;
         } else {
-            source.sendErrorMessage(new TranslationTextComponent(
+            source.sendFailure(new TranslationTextComponent(
                     String.format("commands.%s.%s.failure", DEF.MOD_ID, "pictureresize")));
             return 0;
         }

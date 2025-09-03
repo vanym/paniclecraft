@@ -75,7 +75,7 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
+        MessagePaintingToolUse mes = makeBrushUseMessage(mc.level, mc.hitResult);
         if (mes != null) {
             this.brushUseMessages.add(mes);
         }
@@ -83,7 +83,7 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     }
     
     @Override
-    public void onPlayerStoppedUsing(
+    public void releaseUsing(
             ItemStack stack,
             World world,
             LivingEntity player,
@@ -110,8 +110,8 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
             return null;
         }
         BlockRayTraceResult target = (BlockRayTraceResult)atarget;
-        BlockPos pos = target.getPos();
-        int side = target.getFace().getIndex();
+        BlockPos pos = target.getBlockPos();
+        int side = target.getDirection().get3DDataValue();
         boolean tile = true;
         IPictureSize picture = WorldPictureProvider.ANYTILE.getPicture(world, pos, side);
         if (picture == null) {
@@ -148,26 +148,26 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     }
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(
+    public ActionResult<ItemStack> use(
             World world,
             PlayerEntity player,
             Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = player.getItemInHand(hand);
         return new ActionResult<>(ActionResultType.FAIL, stack);
     }
     
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
+    public ActionResultType useOn(ItemUseContext context) {
         PlayerEntity entityPlayer = context.getPlayer();
-        World world = context.getWorld();
-        BlockPos pos = context.getPos();
+        World world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
         Hand hand = context.getHand();
-        int side = context.getFace().getIndex();
+        int side = context.getClickedFace().get3DDataValue();
         if (WorldPictureProvider.ANYTILE.getPicture(world, pos, side) != null
             || (Core.instance.painting.config.allowPaintOnBlock
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
-            entityPlayer.setActiveHand(hand);
+            entityPlayer.startUsingItem(hand);
             if (EffectiveSide.get().isClient() && ClientUtils.isMe(entityPlayer)) {
                 this.brushUseMessages.clear();
             }
@@ -178,7 +178,7 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(
+    public void appendHoverText(
             ItemStack itemStack,
             @Nullable World world,
             List<ITextComponent> list,
@@ -188,9 +188,9 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
             if (itemTag.contains(TAG_RADIUS)) {
                 double radius = this.getPaintingToolRadius(itemStack, null);
                 list.add(new TranslationTextComponent(
-                        "item." + DEF.MOD_ID + ".paintingtool.radius").appendText(": ")
-                                                                      .appendText(NUMBER_FORMATTER.format(radius))
-                                                                      .applyTextStyle(TextFormatting.GRAY));
+                        "item." + DEF.MOD_ID + ".paintingtool.radius").append(": ")
+                                                                      .append(NUMBER_FORMATTER.format(radius))
+                                                                      .withStyle(TextFormatting.GRAY));
             }
         }
     }
@@ -231,10 +231,10 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
         @SubscribeEvent
         public void renderWorldLast(RenderWorldLastEvent event) {
             Minecraft mc = Minecraft.getInstance();
-            ItemStack stack = mc.player.getActiveItemStack();
+            ItemStack stack = mc.player.getUseItem();
             if (stack.getItem() instanceof ItemPaintingTool) {
                 ItemPaintingTool item = (ItemPaintingTool)stack.getItem();
-                MessagePaintingToolUse mes = makeBrushUseMessage(mc.world, mc.objectMouseOver);
+                MessagePaintingToolUse mes = makeBrushUseMessage(mc.level, mc.hitResult);
                 if (mes != null) {
                     item.brushUseMessages.add(mes);
                 }

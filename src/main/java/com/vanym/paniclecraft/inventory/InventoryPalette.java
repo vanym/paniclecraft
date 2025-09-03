@@ -13,7 +13,7 @@ public class InventoryPalette extends Inventory {
     }
     
     @Override
-    public boolean isItemValidForSlot(int i, ItemStack itemStack) {
+    public boolean canPlaceItem(int i, ItemStack itemStack) {
         Item item = itemStack.getItem();
         return item instanceof IColorizeable;
     }

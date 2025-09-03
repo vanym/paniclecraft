@@ -86,7 +86,7 @@ public class AdvTextInput {
     }
     
     protected void insertChar(char c, Style style) {
-        if (SharedConstants.isAllowedCharacter(c)) {
+        if (SharedConstants.isAllowedChatCharacter(c)) {
             this.text.add(this.cursorPos, new Element(c, style));
             this.selectionPos = ++this.cursorPos;
         }
@@ -199,14 +199,14 @@ public class AdvTextInput {
     }
     
     public void applyStyle(Style style) {
-        this.style = style.createShallowCopy().setParentStyle(this.style).createDeepCopy();
+        this.style = style.copy().inheritFrom(this.style).flatCopy();
         if (this.isSelected()) {
             int min = Math.min(this.cursorPos, this.selectionPos);
             int max = Math.max(this.cursorPos, this.selectionPos);
             this.text.subList(min, max)
                      .stream()
-                     .forEach(e->e.setStyle(style.createShallowCopy()
-                                                 .setParentStyle(e.copyStyle())));
+                     .forEach(e->e.setStyle(style.copy()
+                                                 .inheritFrom(e.copyStyle())));
         }
     }
     
@@ -240,11 +240,11 @@ public class AdvTextInput {
     }
     
     public void read(ITextComponent line) {
-        line = FormattingUtils.parseLine(line.getFormattedText());
+        line = FormattingUtils.parseLine(line.getColoredString());
         this.clear();
         line.stream().forEachOrdered(sub-> {
             this.style = sub.getStyle();
-            this.insertText(sub.getUnformattedComponentText());
+            this.insertText(sub.getContents());
         });
     }
     
@@ -289,16 +289,16 @@ public class AdvTextInput {
         }
         
         public void setStyle(Style style) {
-            this.style = style.createDeepCopy();
+            this.style = style.flatCopy();
         }
         
         public Style copyStyle() {
-            return this.style.createDeepCopy();
+            return this.style.flatCopy();
         }
         
         @Override
         public String toString() {
-            return TextFormatting.RESET + this.style.getFormattingCode() + this.symbol;
+            return TextFormatting.RESET + this.style.getLegacyFormatCodes() + this.symbol;
         }
     }
 }

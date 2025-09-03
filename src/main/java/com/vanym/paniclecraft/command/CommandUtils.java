@@ -66,9 +66,9 @@ public class CommandUtils {
         BlockRayTraceResult target = rayTraceBlocks(player);
         return (provider)->new WorldPicturePoint(
                 provider,
-                player.getEntityWorld(),
-                target.getPos(),
-                target.getFace().getIndex());
+                player.getCommandSenderWorld(),
+                target.getBlockPos(),
+                target.getDirection().get3DDataValue());
     }
     
     public static Picture rayTracePicture(

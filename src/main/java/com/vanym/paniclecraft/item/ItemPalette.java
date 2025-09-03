@@ -18,18 +18,18 @@ import net.minecraft.world.World;
 public class ItemPalette extends Item implements INamedContainerProvider {
     
     public ItemPalette() {
-        super(Props.create().maxStackSize(1));
+        super(Props.create().stacksTo(1));
         this.setRegistryName("palette");
     }
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(
+    public ActionResult<ItemStack> use(
             World world,
             PlayerEntity player,
             Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (!world.isRemote) {
-            player.openContainer(this);
+        ItemStack stack = player.getItemInHand(hand);
+        if (!world.isClientSide) {
+            player.openMenu(this);
         }
         return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }
@@ -41,7 +41,7 @@ public class ItemPalette extends Item implements INamedContainerProvider {
     
     @Override
     public ITextComponent getDisplayName() {
-        return new TranslationTextComponent(this.getTranslationKey() + ".inventory");
+        return new TranslationTextComponent(this.getDescriptionId() + ".inventory");
     }
     
     public static boolean canBePalette(ItemStack stack) {

@@ -67,17 +67,17 @@ public class TileEntityCannon extends TileEntityBase
     }
     
     @Override
-    public CompoundNBT write(CompoundNBT nbtTag) {
+    public CompoundNBT save(CompoundNBT nbtTag) {
         return this.write(nbtTag, false);
     }
     
     protected CompoundNBT write(CompoundNBT nbtTag, boolean forClient) {
-        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+        return SideUtils.callSync(this.level != null && !this.level.isClientSide,
                                   this, ()->this.writeAsync(nbtTag, forClient));
     }
     
     protected CompoundNBT writeAsync(CompoundNBT nbtTag, boolean forClient) {
-        nbtTag = super.write(nbtTag);
+        nbtTag = super.save(nbtTag);
         nbtTag.putDouble(TAG_DIRECTION, this.direction);
         nbtTag.putDouble(TAG_HEIGHT, this.height);
         nbtTag.putDouble(TAG_STRENGTH, this.strength);
@@ -90,19 +90,19 @@ public class TileEntityCannon extends TileEntityBase
             nbtTag.remove(TAG_TIMEOUT);
         }
         CompoundNBT itemTag = new CompoundNBT();
-        this.stack.write(itemTag);
+        this.stack.save(itemTag);
         nbtTag.put(TAG_STACK, itemTag);
         return nbtTag;
     }
     
     @Override
-    public void read(CompoundNBT nbtTag) {
-        SideUtils.runSync(this.world != null && !this.world.isRemote,
+    public void load(CompoundNBT nbtTag) {
+        SideUtils.runSync(this.level != null && !this.level.isClientSide,
                           this, ()->this.readAsync(nbtTag));
     }
     
     public void readAsync(CompoundNBT nbtTag) {
-        super.read(nbtTag);
+        super.load(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.height = NumberUtils.finite(nbtTag.getDouble(TAG_HEIGHT));
         this.strength = NumberUtils.finite(nbtTag.getDouble(TAG_STRENGTH));
@@ -110,13 +110,13 @@ public class TileEntityCannon extends TileEntityBase
         this.timeout = nbtTag.getInt(TAG_TIMEOUT);
         if (nbtTag.contains(TAG_STACK, 10)) {
             CompoundNBT itemTag = nbtTag.getCompound(TAG_STACK);
-            this.stack = ItemStack.read(itemTag);
+            this.stack = ItemStack.of(itemTag);
         }
     }
     
     @Override
     public void tick() {
-        if (this.world.isRemote) {
+        if (this.level.isClientSide) {
             return;
         }
         this.timeout = Math.min(this.timeout, Core.instance.cannon.shootTimeout.get());
@@ -124,7 +124,7 @@ public class TileEntityCannon extends TileEntityBase
             this.shoot(this.stack);
             this.stack = ItemStack.EMPTY;
             this.timeout = Core.instance.cannon.shootTimeout.get();
-            this.markDirty();
+            this.setChanged();
         }
         if (this.timeout > 0) {
             --this.timeout;
@@ -196,46 +196,46 @@ public class TileEntityCannon extends TileEntityBase
     
     protected void shoot(ItemStack stack) {
         ItemEntity entityItem = new ItemEntity(
-                this.world,
-                this.pos.getX() + 0.5D,
-                this.pos.getY() + 0.4D,
-                this.pos.getZ() + 0.5D,
+                this.level,
+                this.worldPosition.getX() + 0.5D,
+                this.worldPosition.getY() + 0.4D,
+                this.worldPosition.getZ() + 0.5D,
                 stack);
-        entityItem.setPickupDelay(Core.instance.cannon.pickupDelay.get());
+        entityItem.setPickUpDelay(Core.instance.cannon.pickupDelay.get());
         Vec3d motion = this.getVector();
-        entityItem.setMotion(motion);
-        this.world.addEntity(entityItem);
+        entityItem.setDeltaMovement(motion);
+        this.level.addFreshEntity(entityItem);
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return new AxisAlignedBB(this.pos).grow(0.5D);
+        return new AxisAlignedBB(this.worldPosition).inflate(0.5D);
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public double getMaxRenderDistanceSquared() {
+    public double getViewDistance() {
         return 16384.0D;
     }
     
     @Override
-    public int getSizeInventory() {
+    public int getContainerSize() {
         return 1;
     }
     
     @Override
-    public ItemStack getStackInSlot(int slot) {
+    public ItemStack getItem(int slot) {
         return this.stack;
     }
     
     @Override
-    public ItemStack decrStackSize(int slot, int amount) {
+    public ItemStack removeItem(int slot, int amount) {
         return this.stack.split(amount);
     }
     
     @Override
-    public ItemStack removeStackFromSlot(int slot) {
+    public ItemStack removeItemNoUpdate(int slot) {
         if (!this.stack.isEmpty()) {
             ItemStack itemstack = this.stack;
             this.stack = ItemStack.EMPTY;
@@ -246,11 +246,11 @@ public class TileEntityCannon extends TileEntityBase
     }
     
     @Override
-    public void setInventorySlotContents(int slot, ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
         if (Core.instance.cannon.shootTimeout.get() > 0) {
             this.stack = stack;
-            this.markDirty();
-        } else if (!this.world.isRemote && !stack.isEmpty()) {
+            this.setChanged();
+        } else if (!this.level.isClientSide && !stack.isEmpty()) {
             this.shoot(stack);
         }
     }
@@ -258,22 +258,22 @@ public class TileEntityCannon extends TileEntityBase
     @Override
     public ITextComponent getDisplayName() {
         return new TranslationTextComponent(
-                Core.instance.cannon.blockCannon.getTranslationKey() + ".inventory");
+                Core.instance.cannon.blockCannon.getDescriptionId() + ".inventory");
     }
     
     @Override
-    public int getInventoryStackLimit() {
+    public int getMaxStackSize() {
         return 64;
     }
     
     @Override
-    public boolean isUsableByPlayer(PlayerEntity player) {
-        return this == player.world.getTileEntity(this.pos)
-            && player.getDistanceSq(new Vec3d(this.pos).add(0.5D, 0.5D, 0.5D)) <= 64.0D;
+    public boolean stillValid(PlayerEntity player) {
+        return this == player.level.getBlockEntity(this.worldPosition)
+            && player.distanceToSqr(new Vec3d(this.worldPosition).add(0.5D, 0.5D, 0.5D)) <= 64.0D;
     }
     
     @Override
-    public boolean isItemValidForSlot(int slot, ItemStack stack) {
+    public boolean canPlaceItem(int slot, ItemStack stack) {
         return true;
     }
     
@@ -283,7 +283,7 @@ public class TileEntityCannon extends TileEntityBase
     }
     
     @Override
-    public void clear() {
+    public void clearContent() {
         this.stack = ItemStack.EMPTY;
     }
     
@@ -294,7 +294,7 @@ public class TileEntityCannon extends TileEntityBase
     
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-        if (!this.removed && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (!this.remove && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return this.itemHandler.cast();
         }
         return super.getCapability(capability, facing);

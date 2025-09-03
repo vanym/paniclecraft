@@ -76,10 +76,10 @@ public class GuiCircularSlider extends Widget {
                                          GlStateManager.SourceFactor.ONE,
                                          GlStateManager.DestFactor.ZERO);
         Minecraft mc = Minecraft.getInstance();
-        mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
+        mc.getTextureManager().bind(BUTTON_TEXTURES);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buf = tessellator.getBuffer();
+        BufferBuilder buf = tessellator.getBuilder();
         buf.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION_TEX);
         final double raduish = this.width / 2.0D, raduisv = this.height / 2.0D;
         final double xcenter = this.x + raduish, ycenter = this.y + raduisv;
@@ -93,10 +93,10 @@ public class GuiCircularSlider extends Widget {
             final double vy = ycenter + oy;
             final double tx = (txc + ox) / 256.0D;
             final double ty = (tyc + oy) / 256.0D;
-            buf.pos(vx, vy, this.blitOffset).tex(tx, ty).endVertex();
+            buf.vertex(vx, vy, this.blitOffset).uv(tx, ty).endVertex();
         }
-        buf.pos(xcenter, ycenter, this.blitOffset).tex(txc, tyc).endVertex();
-        tessellator.draw();
+        buf.vertex(xcenter, ycenter, this.blitOffset).uv(txc, tyc).endVertex();
+        tessellator.end();
         GlStateManager.disableBlend();
         if (this.getter == null) {
             return;

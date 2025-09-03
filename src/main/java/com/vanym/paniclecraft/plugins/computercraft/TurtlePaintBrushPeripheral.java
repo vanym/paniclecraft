@@ -168,14 +168,14 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
         if (dir == null) {
             dir = this.turtle.getDirection();
         }
-        BlockPos pos = this.turtle.getPosition().offset(dir);
+        BlockPos pos = this.turtle.getPosition().relative(dir);
         Direction pside = dir.getOpposite();
         for (WorldPictureProvider provider : this.getProviders()) {
             WorldPicturePoint point = new WorldPicturePoint(
                     provider,
                     this.turtle.getWorld(),
                     pos,
-                    pside.getIndex());
+                    pside.get3DDataValue());
             Picture picture = point.getOrCreatePicture();
             if (picture != null) {
                 return picture;
@@ -204,7 +204,7 @@ public class TurtlePaintBrushPeripheral extends PeripheralBase {
     }
     
     protected ItemStack getSelectedStack() {
-        return this.turtle.getInventory().getStackInSlot(this.turtle.getSelectedSlot());
+        return this.turtle.getInventory().getItem(this.turtle.getSelectedSlot());
     }
     
     protected Collection<WorldPictureProvider> getProviders() {

@@ -36,7 +36,7 @@ public class GuiChess extends Screen {
     protected int select = -1;
     
     public GuiChess(TileEntityChessDesk tile) {
-        super(NarratorChatListener.field_216868_a);
+        super(NarratorChatListener.NO_TITLE);
         this.chessdesk = tile;
     }
     
@@ -61,7 +61,7 @@ public class GuiChess extends Screen {
     }
     
     protected void sendMove(ChessGame.Move move) {
-        Core.instance.network.sendToServer(new MessageChessMove(this.chessdesk.getPos(), move));
+        Core.instance.network.sendToServer(new MessageChessMove(this.chessdesk.getBlockPos(), move));
     }
     
     protected void updateButtons() {
@@ -111,8 +111,8 @@ public class GuiChess extends Screen {
     
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        InputMappings.Input inputCode = InputMappings.getInputByCode(key, scanCode);
-        if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(inputCode)) {
+        InputMappings.Input inputCode = InputMappings.getKey(key, scanCode);
+        if (this.minecraft.options.keyInventory.isActiveAndMatches(inputCode)) {
             key = GLFW.GLFW_KEY_ESCAPE;
         }
         if (super.keyPressed(key, scanCode, modifiers)) {
@@ -127,10 +127,10 @@ public class GuiChess extends Screen {
     
     @Override
     public void tick() {
-        if ((this.chessdesk.getWorld()
-                           .getTileEntity(this.chessdesk.getPos()) == null)
-            || this.minecraft.player.getDistanceSq(new Vec3d(
-                    this.chessdesk.getPos()).add(0.5D, 0.5D, 0.5D)) > 64.0D) {
+        if ((this.chessdesk.getLevel()
+                           .getBlockEntity(this.chessdesk.getBlockPos()) == null)
+            || this.minecraft.player.distanceToSqr(new Vec3d(
+                    this.chessdesk.getBlockPos()).add(0.5D, 0.5D, 0.5D)) > 64.0D) {
             this.onClose();
         }
     }
@@ -141,7 +141,7 @@ public class GuiChess extends Screen {
             GuiUtils.setClipboardString(moves);
             ITextComponent message = new TranslationTextComponent(
                     String.format("chat.%s.chess.export.copy.success", DEF.MOD_ID));
-            this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
+            this.minecraft.gui.getChat().addMessage(message);
         }
     }
     
@@ -293,7 +293,7 @@ public class GuiChess extends Screen {
                 return;
             }
             Minecraft minecraft = Minecraft.getInstance();
-            minecraft.getTextureManager().bindTexture(BUTTONS_TEXTURE);
+            minecraft.getTextureManager().bind(BUTTONS_TEXTURE);
             int mode = this.getYImage(this.isHovered());
             this.blit(this.x, this.y,
                       mode * this.width, 0,

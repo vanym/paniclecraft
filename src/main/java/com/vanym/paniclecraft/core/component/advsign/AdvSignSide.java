@@ -20,7 +20,7 @@ public enum AdvSignSide {
     }
     
     AdvSignSide(Direction xDir, int zAxis) {
-        this.axes = new TileOnSide(xDir, Direction.byIndex(this.ordinal()));
+        this.axes = new TileOnSide(xDir, Direction.from3DDataValue(this.ordinal()));
         this.zAxis = zAxis;
     }
     

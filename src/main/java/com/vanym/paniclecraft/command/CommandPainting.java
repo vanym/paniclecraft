@@ -95,11 +95,11 @@ public class CommandPainting extends TreeCommandBase {
             boolean f = true;
             for (IPictureSize size : sizes) {
                 if (!f) {
-                    message = message.appendText(", ");
+                    message = message.append(", ");
                 } else {
                     f = false;
                 }
-                message.appendSibling(this.createTemplate(size));
+                message.append(this.createTemplate(size));
             }
             return message;
         }
@@ -128,7 +128,7 @@ public class CommandPainting extends TreeCommandBase {
                     IntegerArgumentType.integer(1, Math.min(widthArgumentType.getMaximum(),
                                                             heightArgumentType.getMaximum()));
             return Commands.literal(this.getName())
-                           .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                           .requires(cs->cs.hasPermission(this.getRequiredPermissionLevel()))
                            .executes(this::execute)
                            .then(Commands.argument("size", sizeArgumentType)
                                          .executes(this::execute))
@@ -152,7 +152,7 @@ public class CommandPainting extends TreeCommandBase {
                 sizes.addAll(this.createSizesSet(new FixedPictureSize(16)));
                 sizes.addAll(this.createSizesSet(Core.instance.painting.config.paintingDefaultSize));
             }
-            context.getSource().sendFeedback(this.createLine(sizes), false);
+            context.getSource().sendSuccess(this.createLine(sizes), false);
             return sizes.size();
         }
     }

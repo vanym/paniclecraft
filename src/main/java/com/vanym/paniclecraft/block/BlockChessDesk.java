@@ -44,21 +44,21 @@ import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     
-    public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+    public static final DirectionProperty FACING = HorizontalBlock.FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     
     protected static final VoxelShape CHESS_DESK_SHAPE =
-            VoxelShapes.create(0.0D, 0.0D, 0.0D, 1.0D, 3.0D / 16.0D, 1.0D);
+            VoxelShapes.box(0.0D, 0.0D, 0.0D, 1.0D, 3.0D / 16.0D, 1.0D);
     
     public BlockChessDesk() {
-        super(Block.Properties.create(Material.WOOD)
+        super(Block.Properties.of(Material.WOOD)
                               .sound(SoundType.WOOD)
-                              .hardnessAndResistance(0.5F)
+                              .strength(0.5F)
                               .noDrops());
         this.setRegistryName("chess_desk");
-        this.setDefaultState(this.stateContainer.getBaseState()
-                                                .with(FACING, Direction.NORTH)
-                                                .with(WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any()
+                                                .setValue(FACING, Direction.NORTH)
+                                                .setValue(WATERLOGGED, false));
     }
     
     @Override
@@ -72,39 +72,39 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     }
     
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(FACING, WATERLOGGED);
     }
     
     @Override
     @SuppressWarnings("deprecation")
     public IFluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false)
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
                                       : super.getFluidState(state);
     }
     
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
-        return this.getDefaultState()
-                   .with(FACING, context.getPlacementHorizontalFacing())
-                   .with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
+        IFluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
+        return this.defaultBlockState()
+                   .setValue(FACING, context.getHorizontalDirection())
+                   .setValue(WATERLOGGED, fluidstate.getType() == Fluids.WATER);
     }
     
     @Override
     @SuppressWarnings("deprecation")
-    public BlockState updatePostPlacement(
+    public BlockState updateShape(
             BlockState state,
             Direction facing,
             BlockState facingState,
             IWorld world,
             BlockPos currentPos,
             BlockPos facingPos) {
-        if (state.get(WATERLOGGED)) {
-            world.getPendingFluidTicks()
-                 .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        if (state.getValue(WATERLOGGED)) {
+            world.getLiquidTicks()
+                 .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
-        return super.updatePostPlacement(state, facing, facingState, world, currentPos,
+        return super.updateShape(state, facing, facingState, world, currentPos,
                                          facingPos);
     }
     
@@ -124,7 +124,7 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     }
     
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public BlockRenderType getRenderShape(BlockState state) {
         return BlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
@@ -134,7 +134,7 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     }
     
     @Override
-    public boolean onBlockActivated(
+    public boolean use(
             BlockState state,
             World world,
             BlockPos pos,
@@ -142,21 +142,21 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
             Hand hand,
             BlockRayTraceResult hit) {
         if (EffectiveSide.get().isClient()) {
-            TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getTileEntity(pos);
-            Minecraft.getInstance().displayGuiScreen(new GuiChess(tileCD));
+            TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getBlockEntity(pos);
+            Minecraft.getInstance().setScreen(new GuiChess(tileCD));
         }
         return true;
     }
     
     @Override
-    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-        TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getTileEntity(pos);
-        spawnAsEntity(world, pos, ItemChessDesk.getSavedDesk(tileCD));
-        super.onBlockHarvested(world, pos, state, player);
+    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getBlockEntity(pos);
+        popResource(world, pos, ItemChessDesk.getSavedDesk(tileCD));
+        super.playerWillDestroy(world, pos, state, player);
     }
     
     @Override
-    public void onBlockPlacedBy(
+    public void setPlacedBy(
             World world,
             BlockPos pos,
             BlockState state,
@@ -175,7 +175,7 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
             IBlockReader world,
             BlockPos pos,
             PlayerEntity player) {
-        TileEntityChessDesk tile = (TileEntityChessDesk)world.getTileEntity(pos);
+        TileEntityChessDesk tile = (TileEntityChessDesk)world.getBlockEntity(pos);
         return ItemChessDesk.getSavedDesk(tile);
     }
 }

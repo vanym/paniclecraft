@@ -85,7 +85,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     }
     
     @Override
-    public void doRender(
+    public void render(
             EntityPaintOnBlock entity,
             double x,
             double y,
@@ -93,7 +93,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             float entityYaw,
             float partialTicks) {
         if (this.blockRenderer == null) {
-            this.blockRenderer = Minecraft.getInstance().getBlockRendererDispatcher();
+            this.blockRenderer = Minecraft.getInstance().getBlockRenderer();
         }
         TileEntityPaintingRenderer.renderInWorldEnable();
         this.doRenderPaint(entity, x, y, z, entityYaw, partialTicks);
@@ -107,29 +107,29 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             double z,
             float entityYaw,
             float partialTicks) {
-        World world = this.renderManager.world;
+        World world = this.entityRenderDispatcher.level;
         BlockPos pos = entityPOB.getBlockPos();
         IProfiler theProfiler = null;
         if (world != null && Core.instance.painting.clientConfig.renderProfiling) {
             theProfiler = world.getProfiler();
         }
         if (theProfiler != null) {
-            theProfiler.startSection(DEF.MOD_ID + ":" + EntityPaintOnBlock.IN_MOD_ID);
+            theProfiler.push(DEF.MOD_ID + ":" + EntityPaintOnBlock.IN_MOD_ID);
         }
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buf = tessellator.getBuffer();
+        BufferBuilder buf = tessellator.getBuilder();
         if (this.renderPictureTypeSup.get() >= 0) {
             if (theProfiler != null) {
-                theProfiler.startSection("picture");
+                theProfiler.push("picture");
             }
             final double expandBase = 0.0005D;
             final double expandAdjust = 0.0001D;
             final double expandX = expandBase + Math.pow(x / 4, 2) * expandAdjust;
             final double expandY = expandBase + Math.pow(y / 4, 2) * expandAdjust;
             final double expandZ = expandBase + Math.pow(z / 4, 2) * expandAdjust;
-            BlockModelRenderer render = this.blockRenderer.getBlockModelRenderer();
+            BlockModelRenderer render = this.blockRenderer.getModelRenderer();
             BlockState state = world.getBlockState(pos);
-            long rand = MathHelper.getPositionRandom(pos);
+            long rand = MathHelper.getSeed(pos);
             IBakedModel model = this.getModel(state, world, pos);
             for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = entityPOB.getPicture(side);
@@ -137,19 +137,19 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                     continue;
                 }
                 if (theProfiler != null) {
-                    theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
-                    theProfiler.startSection("bind");
+                    theProfiler.push(picture.getWidth() + "x" + picture.getHeight());
+                    theProfiler.push("bind");
                 }
                 TextureAtlasSprite sprite = TileEntityPaintingRenderer.bindTexture(picture);
                 if (theProfiler != null) {
-                    theProfiler.endSection(); // bind
+                    theProfiler.pop(); // bind
                 }
-                Direction pside = Direction.byIndex(side);
+                Direction pside = Direction.from3DDataValue(side);
                 IBakedModel pictureModel =
                         new TileEntityPaintingRenderer.BakedModelPicture(model, side, sprite);
-                buf.setTranslation(x - entityPOB.posX + pside.getXOffset() * expandX,
-                                   y - entityPOB.posY + pside.getYOffset() * expandY,
-                                   z - entityPOB.posZ + pside.getZOffset() * expandZ);
+                buf.offset(x - entityPOB.x + pside.getStepX() * expandX,
+                                   y - entityPOB.y + pside.getStepY() * expandY,
+                                   z - entityPOB.z + pside.getStepZ() * expandZ);
                 buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
                 if (this.renderPictureTypeSup.get() > 0) {
                     render.renderModelSmooth(world, pictureModel, state, pos,
@@ -160,24 +160,24 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                                            buf, true, new Random(rand), rand,
                                            EmptyModelData.INSTANCE);
                 }
-                tessellator.draw();
+                tessellator.end();
                 if (theProfiler != null) {
-                    theProfiler.endSection(); // WxH
+                    theProfiler.pop(); // WxH
                 }
             }
             if (theProfiler != null) {
-                theProfiler.endSection(); // picture
+                theProfiler.pop(); // picture
             }
         }
-        buf.setTranslation(0.0D, 0.0D, 0.0D);
+        buf.offset(0.0D, 0.0D, 0.0D);
         if (theProfiler != null) {
-            theProfiler.endSection(); // root
+            theProfiler.pop(); // root
         }
         
     }
     
     @Override
-    protected ResourceLocation getEntityTexture(EntityPaintOnBlock entity) {
+    protected ResourceLocation getTextureLocation(EntityPaintOnBlock entity) {
         return null;
     }
     
@@ -186,7 +186,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             return this.getModelByCollisionBox(state, world, pos);
         }
         VoxelShape shape = state.getShape(world, pos);
-        return this.getModel(shape.isEmpty() ? null : shape.getBoundingBox());
+        return this.getModel(shape.isEmpty() ? null : shape.bounds());
     }
     
     protected boolean isUsingCollisionBox(BlockState state, World world, BlockPos pos) {
@@ -199,7 +199,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     
     protected IBakedModel getModelByCollisionBox(BlockState state, World world, BlockPos pos) {
         VoxelShape shape = state.getCollisionShape(world, pos);
-        List<AxisAlignedBB> list = shape.toBoundingBoxList()
+        List<AxisAlignedBB> list = shape.toAabbs()
                                         .stream()
                                         .map(box->box.intersect(GeometryUtils.getFullBlockBox()))
                                         .collect(Collectors.toList());
@@ -234,16 +234,16 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             quadsMap.put(side, new ArrayList<>());
         }
         for (BlockPart part : parts) {
-            for (Entry<Direction, BlockPartFace> e : part.mapFaces.entrySet()) {
+            for (Entry<Direction, BlockPartFace> e : part.faces.entrySet()) {
                 Direction side = e.getKey();
                 BlockPartFace face = e.getValue();
                 // use small sprite here to decrease ratio of the shrink done in makeBakedQuad
-                BakedQuad quad = this.faceBakery.makeBakedQuad(part.positionFrom, part.positionTo,
+                BakedQuad quad = this.faceBakery.makeBakedQuad(part.from, part.to,
                                                                face, SMALL_SPRITE, side,
                                                                ModelRotation.X0_Y0,
-                                                               part.partRotation,
+                                                               part.rotation,
                                                                part.shade);
-                quadsMap.getOrDefault(face.cullFace, quads).add(quad);
+                quadsMap.getOrDefault(face.cullForDirection, quads).add(quad);
             }
         }
         return new SimpleBakedModel(
@@ -252,7 +252,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 true,
                 false,
                 FULL_SPRITE,
-                net.minecraft.client.renderer.model.ItemCameraTransforms.DEFAULT,
+                net.minecraft.client.renderer.model.ItemCameraTransforms.NO_TRANSFORMS,
                 ItemOverrideList.EMPTY);
     }
     
@@ -269,7 +269,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                                                     if (GeometryUtils.isTouchingSide(side, box)) {
                                                         cullFace = side;
                                                     }
-                                                    int i = side.getIndex();
+                                                    int i = side.get3DDataValue();
                                                     BlockFaceUV uv = new BlockFaceUV(null, 0);
                                                     return new BlockPartFace(cullFace, i, "", uv);
                                                 }));
@@ -277,8 +277,8 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         // fixing vertical sides rotation
         Arrays.stream(Direction.values())
               .filter(side->side.getAxis().isVertical())
-              .map(part.mapFaces::get)
-              .map(bpf->bpf.blockFaceUV.uvs)
+              .map(part.faces::get)
+              .map(bpf->bpf.uv.uvs)
               .forEach(uvs-> {
                   for (int i = 0; i < uvs.length; ++i) {
                       uvs[i] = 16.0F - uvs[i];

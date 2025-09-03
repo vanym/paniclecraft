@@ -32,7 +32,7 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     }
     
     public Color getColor() {
-        ItemStack stack = this.inventoryPalette.getStackInSlot(0);
+        ItemStack stack = this.inventoryPalette.getItem(0);
         IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
         if (colorizeable == null) {
             return null;
@@ -42,7 +42,7 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     }
     
     public boolean setColor(Color color) {
-        ItemStack stack = this.inventoryPalette.getStackInSlot(0);
+        ItemStack stack = this.inventoryPalette.getItem(0);
         IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
         if (colorizeable == null) {
             return false;
@@ -52,38 +52,38 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     }
     
     @Override
-    public void onInventoryChanged(IInventory inv) {
-        this.onCraftMatrixChanged(inv);
+    public void containerChanged(IInventory inv) {
+        this.slotsChanged(inv);
     }
     
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity player, int slotNum) {
+    public ItemStack quickMoveStack(PlayerEntity player, int slotNum) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = (Slot)this.inventorySlots.get(slotNum);
+        Slot slot = (Slot)this.slots.get(slotNum);
         
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             
             if (slotNum == 0) {
-                if (!this.mergeItemStack(itemstack1, 1, 37, true)) {
+                if (!this.moveItemStackTo(itemstack1, 1, 37, true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (this.inventoryPalette.isItemValidForSlot(0, itemstack1)
-                && this.mergeItemStack(itemstack1, 0, 1, true)) {
+            } else if (this.inventoryPalette.canPlaceItem(0, itemstack1)
+                && this.moveItemStackTo(itemstack1, 0, 1, true)) {
             } else if (slotNum >= 1 && slotNum < 28) {
-                if (!this.mergeItemStack(itemstack1, 28, 37, false)) {
+                if (!this.moveItemStackTo(itemstack1, 28, 37, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (slotNum >= 28 && slotNum < 37) {
-                if (!this.mergeItemStack(itemstack1, 1, 28, false)) {
+                if (!this.moveItemStackTo(itemstack1, 1, 28, false)) {
                     return ItemStack.EMPTY;
                 }
             }
             if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
             
             if (itemstack1.getCount() == itemstack.getCount()) {
@@ -97,16 +97,16 @@ public class ContainerPalette extends ContainerBase implements IInventoryChanged
     }
     
     @Override
-    public void onContainerClosed(PlayerEntity entityPlayer) {
-        super.onContainerClosed(entityPlayer);
-        if (!entityPlayer.world.isRemote) {
-            this.clearContainer(entityPlayer, entityPlayer.world, this.inventoryPalette);
+    public void removed(PlayerEntity entityPlayer) {
+        super.removed(entityPlayer);
+        if (!entityPlayer.level.isClientSide) {
+            this.clearContainer(entityPlayer, entityPlayer.level, this.inventoryPalette);
         }
     }
     
     @Override
-    public boolean canInteractWith(PlayerEntity player) {
-        return ItemPalette.canBePalette(player.getHeldItem(Hand.MAIN_HAND))
-            || ItemPalette.canBePalette(player.getHeldItem(Hand.OFF_HAND));
+    public boolean stillValid(PlayerEntity player) {
+        return ItemPalette.canBePalette(player.getItemInHand(Hand.MAIN_HAND))
+            || ItemPalette.canBePalette(player.getItemInHand(Hand.OFF_HAND));
     }
 }

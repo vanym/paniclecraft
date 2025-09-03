@@ -99,11 +99,11 @@ public class AdvSignText implements INBTSerializable<CompoundNBT> {
                          .allMatch(line->line.length() <= 64 * size
                              && IntStream.range(0, line.length())
                                          .mapToObj(line::charAt)
-                                         .allMatch(SharedConstants::isAllowedCharacter))
+                                         .allMatch(SharedConstants::isAllowedChatCharacter))
             && this.lines.stream()
                          .allMatch(root->FormattingUtils.stream(root)
                                                         .allMatch(comp->comp == root
-                                                            || !comp.getUnformattedComponentText()
+                                                            || !comp.getContents()
                                                                     .isEmpty()));
     }
     

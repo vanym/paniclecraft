@@ -23,9 +23,9 @@ public final class TileOnSide {
     
     public Vec3d toSideCoords(Vec3d vec) {
         return new Vec3d(
-                getCoord(vec, this.xDir.getDirectionVec()),
-                getCoord(vec, this.yDir.getDirectionVec()),
-                getCoord(vec, this.zDir.getDirectionVec()));
+                getCoord(vec, this.xDir.getNormal()),
+                getCoord(vec, this.yDir.getNormal()),
+                getCoord(vec, this.zDir.getNormal()));
     }
     
     public AxisAlignedBB toSideCoords(AxisAlignedBB box) {
@@ -37,9 +37,9 @@ public final class TileOnSide {
     }
     
     public Vec3d fromSideCoords(Vec3d vec) {
-        return Vec3d.ZERO.add(makeCoordOffset(this.xDir.getDirectionVec(), vec.x))
-                         .add(makeCoordOffset(this.yDir.getDirectionVec(), vec.y))
-                         .add(makeCoordOffset(this.zDir.getDirectionVec(), vec.z));
+        return Vec3d.ZERO.add(makeCoordOffset(this.xDir.getNormal(), vec.x))
+                         .add(makeCoordOffset(this.yDir.getNormal(), vec.y))
+                         .add(makeCoordOffset(this.zDir.getNormal(), vec.z));
     }
     
     public AxisAlignedBB fromSideCoords(AxisAlignedBB box) {

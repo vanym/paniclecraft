@@ -24,7 +24,7 @@ public class ItemWorkbench extends Item implements INamedContainerProvider {
     
     public ItemWorkbench(Supplier<Integer> durability) {
         super(Props.create()
-                   .maxDamage(8192)
+                   .durability(8192)
                    .setTEISR(()->ItemRendererPortableWorkbench::new));
         this.setRegistryName("portable_workbench");
         this.durability = durability;
@@ -36,18 +36,18 @@ public class ItemWorkbench extends Item implements INamedContainerProvider {
     }
     
     @Override
-    public boolean isDamageable() {
+    public boolean canBeDepleted() {
         return this.durability.get() > 0;
     }
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(
+    public ActionResult<ItemStack> use(
             World world,
             PlayerEntity player,
             Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (!world.isRemote) {
-            player.openContainer(this);
+        ItemStack stack = player.getItemInHand(hand);
+        if (!world.isClientSide) {
+            player.openMenu(this);
         }
         return new ActionResult<>(ActionResultType.SUCCESS, stack);
     }
@@ -68,6 +68,6 @@ public class ItemWorkbench extends Item implements INamedContainerProvider {
     
     @Override
     public ITextComponent getDisplayName() {
-        return CraftingTableBlock.field_220271_a;
+        return CraftingTableBlock.CONTAINER_TITLE;
     }
 }

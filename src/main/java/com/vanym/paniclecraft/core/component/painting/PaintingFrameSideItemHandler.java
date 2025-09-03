@@ -21,7 +21,7 @@ public class PaintingFrameSideItemHandler implements IItemHandler {
     public PaintingFrameSideItemHandler(TileEntityPaintingFrame frame, Direction side) {
         this.frame = Objects.requireNonNull(frame);
         this.side = Objects.requireNonNull(side);
-        this.index = side.getIndex();
+        this.index = side.get3DDataValue();
     }
     
     @Override
@@ -44,8 +44,8 @@ public class PaintingFrameSideItemHandler implements IItemHandler {
     }
     
     protected void createPicture(ItemStack stack) {
-        SideUtils.runSync(this.frame.getWorld() != null
-            && !this.frame.getWorld().isRemote, this.frame,
+        SideUtils.runSync(this.frame.getLevel() != null
+            && !this.frame.getLevel().isClientSide, this.frame,
                           ()->this.frame.createPicture(this.index, stack));
         this.frame.markForUpdate();
     }
@@ -63,8 +63,8 @@ public class PaintingFrameSideItemHandler implements IItemHandler {
     }
     
     protected void clearPicture() {
-        SideUtils.runSync(this.frame.getWorld() != null
-            && !this.frame.getWorld().isRemote, this.frame,
+        SideUtils.runSync(this.frame.getLevel() != null
+            && !this.frame.getLevel().isClientSide, this.frame,
                           ()->this.frame.clearPicture(this.index));
         this.frame.markForUpdate();
     }

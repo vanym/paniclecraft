@@ -53,8 +53,8 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     @Override
-    public CompoundNBT write(CompoundNBT nbtTag) {
-        super.write(nbtTag);
+    public CompoundNBT save(CompoundNBT nbtTag) {
+        super.save(nbtTag);
         ListNBT list = new ListNBT();
         this.writeMoves(list);
         nbtTag.put(TAG_MOVES, list);
@@ -62,14 +62,14 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     @Override
-    public void read(CompoundNBT nbtTag) {
-        super.read(nbtTag);
+    public void load(CompoundNBT nbtTag) {
+        super.load(nbtTag);
         ListNBT list = nbtTag.getList(TAG_MOVES, 10);
         this.readMoves(list);
     }
     
     public void writeMoves(ListNBT listTag) {
-        SideUtils.runSync(this.world != null && !this.world.isRemote,
+        SideUtils.runSync(this.level != null && !this.level.isClientSide,
                           this, ()->this.writeMovesAsync(listTag));
     }
     
@@ -80,7 +80,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     public void readMoves(ListNBT listTag) {
-        SideUtils.runSync(this.world != null && !this.world.isRemote,
+        SideUtils.runSync(this.level != null && !this.level.isClientSide,
                           this, ()->this.readMovesAsync(listTag));
     }
     
@@ -110,8 +110,8 @@ public class TileEntityChessDesk extends TileEntityBase {
     @OnlyIn(Dist.CLIENT)
     protected void updateScreen() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.currentScreen instanceof GuiChess) {
-            GuiChess screen = (GuiChess)mc.currentScreen;
+        if (mc.screen instanceof GuiChess) {
+            GuiChess screen = (GuiChess)mc.screen;
             screen.update(this);
         }
     }
@@ -123,7 +123,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     public boolean move(ChessGame.Move move, PlayerEntity player) {
-        return this.move(move, player.getName().getString(), player.getUniqueID());
+        return this.move(move, player.getName().getString(), player.getUUID());
     }
     
     public boolean move(ChessGame.Move move, String playerName, UUID playerUUID) {
@@ -150,12 +150,12 @@ public class TileEntityChessDesk extends TileEntityBase {
     @Override
     @OnlyIn(Dist.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return GeometryUtils.setMaxY(GeometryUtils.getFullBlockBox(), 0.5D).offset(this.pos);
+        return GeometryUtils.setMaxY(GeometryUtils.getFullBlockBox(), 0.5D).move(this.worldPosition);
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public double getMaxRenderDistanceSquared() {
+    public double getViewDistance() {
         return 16384.0D;
     }
     

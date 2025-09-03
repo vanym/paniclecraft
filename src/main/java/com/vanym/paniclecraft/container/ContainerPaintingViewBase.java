@@ -48,13 +48,13 @@ public abstract class ContainerPaintingViewBase extends Container {
     }
     
     @Override
-    public boolean canInteractWith(PlayerEntity player) {
+    public boolean stillValid(PlayerEntity player) {
         return true;
     }
     
     @Override
-    public void onContainerClosed(PlayerEntity player) {
-        this.inv.closeInventory(player);
+    public void removed(PlayerEntity player) {
+        this.inv.stopOpen(player);
     }
     
     protected abstract Picture getPicture(int x, int y);
@@ -124,7 +124,7 @@ public abstract class ContainerPaintingViewBase extends Container {
             }
         }
         if (changed) {
-            this.detectAndSendChanges();
+            this.broadcastChanges();
         }
         return changed;
     }
@@ -132,7 +132,7 @@ public abstract class ContainerPaintingViewBase extends Container {
     protected class PictureInv implements IInventory {
         
         @Override
-        public ItemStack getStackInSlot(int slot) {
+        public ItemStack getItem(int slot) {
             Picture picture = ContainerPaintingViewBase.this.getPicture(slot);
             if (!IPictureSize.equals(picture, ContainerPaintingViewBase.this.pictureSize)) {
                 return ItemStack.EMPTY;
@@ -142,7 +142,7 @@ public abstract class ContainerPaintingViewBase extends Container {
         }
         
         @Override
-        public void setInventorySlotContents(int slot, ItemStack stack) {
+        public void setItem(int slot, ItemStack stack) {
             if (stack.getItem() != Core.instance.painting.itemPainting) {
                 ContainerPaintingViewBase.this.clearPicture(slot);
                 return;
@@ -155,51 +155,51 @@ public abstract class ContainerPaintingViewBase extends Container {
         }
         
         @Override
-        public int getSizeInventory() {
+        public int getContainerSize() {
             return ContainerPaintingViewBase.this.getSize();
         }
         
         @Override
-        public ItemStack decrStackSize(int slot, int amount) {
+        public ItemStack removeItem(int slot, int amount) {
             return ItemStack.EMPTY;
         }
         
         @Override
-        public ItemStack removeStackFromSlot(int slot) {
+        public ItemStack removeItemNoUpdate(int slot) {
             return ItemStack.EMPTY;
         }
         
         @Override
-        public int getInventoryStackLimit() {
+        public int getMaxStackSize() {
             return 1;
         }
         
         @Override
-        public void markDirty() {}
+        public void setChanged() {}
         
         @Override
-        public boolean isUsableByPlayer(PlayerEntity player) {
+        public boolean stillValid(PlayerEntity player) {
             return true;
         }
         
         @Override
-        public void openInventory(PlayerEntity player) {}
+        public void startOpen(PlayerEntity player) {}
         
         @Override
-        public void closeInventory(PlayerEntity player) {
-            this.clear();
+        public void stopOpen(PlayerEntity player) {
+            this.clearContent();
         }
         
         @Override
-        public void clear() {
-            int size = this.getSizeInventory();
+        public void clearContent() {
+            int size = this.getContainerSize();
             for (int i = 0; i < size; ++i) {
                 ContainerPaintingViewBase.this.clearPicture(i);
             }
         }
         
         @Override
-        public boolean isItemValidForSlot(int slot, ItemStack stack) {
+        public boolean canPlaceItem(int slot, ItemStack stack) {
             return false;
         }
         

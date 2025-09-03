@@ -28,8 +28,8 @@ public class RecipeColorizeByFiller extends SpecialRecipe {
     public boolean matches(CraftingInventory inv, World world) {
         boolean filler = false;
         boolean colorizeable = false;
-        for (int i = 0; i < inv.getSizeInventory(); ++i) {
-            ItemStack slot = inv.getStackInSlot(i);
+        for (int i = 0; i < inv.getContainerSize(); ++i) {
+            ItemStack slot = inv.getItem(i);
             if (slot.isEmpty()) {
                 continue;
             }
@@ -57,11 +57,11 @@ public class RecipeColorizeByFiller extends SpecialRecipe {
     }
     
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack assemble(CraftingInventory inv) {
         ItemStack fillerStack = ItemStack.EMPTY;
         ItemStack colorizeableStack = ItemStack.EMPTY;
-        for (int i = 0; i < inv.getSizeInventory(); ++i) {
-            ItemStack slot = inv.getStackInSlot(i);
+        for (int i = 0; i < inv.getContainerSize(); ++i) {
+            ItemStack slot = inv.getItem(i);
             Item item = slot.getItem();
             if (item instanceof IPaintingTool) {
                 IPaintingTool tool = (IPaintingTool)item;
@@ -95,9 +95,9 @@ public class RecipeColorizeByFiller extends SpecialRecipe {
     @Override
     public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
         NonNullList<ItemStack> list =
-                NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+                NonNullList.<ItemStack>withSize(inv.getContainerSize(), ItemStack.EMPTY);
         for (int i = 0; i < list.size(); ++i) {
-            ItemStack slot = inv.getStackInSlot(i);
+            ItemStack slot = inv.getItem(i);
             Item item = slot.getItem();
             if (item instanceof IPaintingTool) {
                 IPaintingTool tool = (IPaintingTool)item;
@@ -114,7 +114,7 @@ public class RecipeColorizeByFiller extends SpecialRecipe {
     }
     
     @Override
-    public boolean canFit(int width, int height) {
+    public boolean canCraftInDimensions(int width, int height) {
         return width * height >= 2;
     }
     

@@ -16,10 +16,10 @@ public abstract class TileEntityBase extends TileEntity {
     }
     
     public void markForUpdate() {
-        this.markDirty();
-        if (this.world != null) {
+        this.setChanged();
+        if (this.level != null) {
             BlockState state = this.getBlockState();
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
         }
     }
     
@@ -28,8 +28,8 @@ public abstract class TileEntityBase extends TileEntity {
     }
     
     @Override
-    public CompoundNBT write(CompoundNBT nbtTag) {
-        nbtTag = super.write(nbtTag);
+    public CompoundNBT save(CompoundNBT nbtTag) {
+        nbtTag = super.save(nbtTag);
         if (nbtTag.contains("ForgeCaps", 10) &&
             nbtTag.getCompound("ForgeCaps").isEmpty()) {
             nbtTag.remove("ForgeCaps");
@@ -44,12 +44,12 @@ public abstract class TileEntityBase extends TileEntity {
     
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(this.pos, 0, this.getUpdateTag());
+        return new SUpdateTileEntityPacket(this.worldPosition, 0, this.getUpdateTag());
     }
     
     @Override
     public void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
-        CompoundNBT nbt = packet.getNbtCompound();
+        CompoundNBT nbt = packet.getTag();
         this.handleUpdateTag(nbt);
     }
 }

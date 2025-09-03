@@ -27,7 +27,7 @@ public class RecipePaintingCombine extends ShapedRecipe {
     public RecipePaintingCombine(ResourceLocation id, int sizeX, int sizeY) {
         super(id, "", sizeX, sizeY,
               NonNullList.withSize(sizeX * sizeY,
-                                   Ingredient.fromStacks(ItemPainting.getSizedItem(getDummySize()))),
+                                   Ingredient.of(ItemPainting.getSizedItem(getDummySize()))),
               getItemStack(sizeX, sizeY));
         this.sizeX = sizeX;
         this.sizeY = sizeY;
@@ -69,7 +69,7 @@ public class RecipePaintingCombine extends ShapedRecipe {
     }
     
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack assemble(CraftingInventory inv) {
         Picture[][] pictures = getAsPictures(this.getItemMatrix(inv));
         Picture picture = Picture.merge(pictures);
         return ItemPainting.getPictureAsItem(picture);
@@ -109,7 +109,7 @@ public class RecipePaintingCombine extends ShapedRecipe {
     }
     
     @Override
-    public boolean isDynamic() {
+    public boolean isSpecial() {
         return false; // we want to show this recipe
     }
     
@@ -122,7 +122,7 @@ public class RecipePaintingCombine extends ShapedRecipe {
             CraftingInventory inv,
             int offsetX,
             int offsetY) {
-        return inv.getStackInSlot(offsetX + offsetY * inv.getWidth());
+        return inv.getItem(offsetX + offsetY * inv.getWidth());
     }
     
     protected static Picture[][] getAsPictures(ItemStack[][] stacks) {
@@ -153,21 +153,21 @@ public class RecipePaintingCombine extends ShapedRecipe {
                 IRecipeSerializer<RecipePaintingCombine> {
         
         @Override
-        public RecipePaintingCombine read(ResourceLocation recipeId, JsonObject json) {
-            int width = JSONUtils.getInt(json, "width");
-            int height = JSONUtils.getInt(json, "height");
+        public RecipePaintingCombine fromJson(ResourceLocation recipeId, JsonObject json) {
+            int width = JSONUtils.getAsInt(json, "width");
+            int height = JSONUtils.getAsInt(json, "height");
             return new RecipePaintingCombine(recipeId, width, height);
         }
         
         @Override
-        public RecipePaintingCombine read(ResourceLocation recipeId, PacketBuffer buf) {
+        public RecipePaintingCombine fromNetwork(ResourceLocation recipeId, PacketBuffer buf) {
             int width = buf.readVarInt();
             int height = buf.readVarInt();
             return new RecipePaintingCombine(recipeId, width, height);
         }
         
         @Override
-        public void write(PacketBuffer buf, RecipePaintingCombine recipe) {
+        public void toNetwork(PacketBuffer buf, RecipePaintingCombine recipe) {
             buf.writeVarInt(recipe.getWidth());
             buf.writeVarInt(recipe.getHeight());
         }

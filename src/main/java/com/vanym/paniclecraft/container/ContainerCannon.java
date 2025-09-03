@@ -20,36 +20,36 @@ public class ContainerCannon extends ContainerBase {
         super(Core.instance.cannon.containerCannon, id);
         this.playerInv = playerInv;
         this.cannon = cannon;
-        cannon.openInventory(playerInv.player);
+        cannon.startOpen(playerInv.player);
         this.addSlot(new Slot(cannon, 0, 8, 18));
         this.addPlayerInventorySlots(playerInv);
     }
     
     @Override
-    public boolean canInteractWith(PlayerEntity entityplayer) {
-        return this.cannon.isUsableByPlayer(entityplayer);
+    public boolean stillValid(PlayerEntity entityplayer) {
+        return this.cannon.stillValid(entityplayer);
     }
     
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity player, int slotIndex) {
+    public ItemStack quickMoveStack(PlayerEntity player, int slotIndex) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(slotIndex);
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
+        Slot slot = this.slots.get(slotIndex);
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             
             if (slotIndex == 0) {
-                if (!this.mergeItemStack(itemstack1, 1, 37, true)) {
+                if (!this.moveItemStackTo(itemstack1, 1, 37, true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, 1, false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 0, 1, false)) {
                 return ItemStack.EMPTY;
             }
             
             if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
             
             if (itemstack1.getCount() == itemstack.getCount()) {
@@ -63,9 +63,9 @@ public class ContainerCannon extends ContainerBase {
     }
     
     @Override
-    public void onContainerClosed(PlayerEntity player) {
-        super.onContainerClosed(player);
-        this.cannon.closeInventory(player);
+    public void removed(PlayerEntity player) {
+        super.removed(player);
+        this.cannon.stopOpen(player);
     }
     
     public static ContainerCannon create(
@@ -73,7 +73,7 @@ public class ContainerCannon extends ContainerBase {
             PlayerInventory playerInv,
             PacketBuffer extraData) {
         BlockPos pos = extraData.readBlockPos();
-        TileEntity tile = playerInv.player.world.getTileEntity(pos);
+        TileEntity tile = playerInv.player.level.getBlockEntity(pos);
         TileEntityCannon cannon;
         if (tile instanceof TileEntityCannon) {
             cannon = (TileEntityCannon)tile;

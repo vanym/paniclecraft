@@ -22,7 +22,7 @@ public class ItemBroom extends Item {
     public final Supplier<Double> distance;
     
     public ItemBroom(Supplier<Integer> durability, Supplier<Double> distance) {
-        super(Props.create().maxDamage(3072));
+        super(Props.create().durability(3072));
         this.setRegistryName("broom");
         this.durability = durability;
         this.distance = distance;
@@ -34,17 +34,17 @@ public class ItemBroom extends Item {
     }
     
     @Override
-    public boolean isDamageable() {
+    public boolean canBeDepleted() {
         return this.durability.get() > 0;
     }
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(
+    public ActionResult<ItemStack> use(
             World world,
             PlayerEntity player,
             Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (!world.isRemote) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!world.isClientSide) {
             this.collectItems(stack, world, player, hand);
         }
         return new ActionResult<>(ActionResultType.SUCCESS, stack);
@@ -52,18 +52,18 @@ public class ItemBroom extends Item {
     
     protected void collectItems(ItemStack stack, World world, PlayerEntity player, Hand hand) {
         final double distance = this.distance.get();
-        AxisAlignedBB box = GeometryUtils.getPointBox(player.posX, player.posY, player.posZ)
-                                         .grow(distance)
-                                         .grow(2.0D);
-        List<ItemEntity> list = world.getEntitiesWithinAABB(ItemEntity.class, box);
+        AxisAlignedBB box = GeometryUtils.getPointBox(player.x, player.y, player.z)
+                                         .inflate(distance)
+                                         .inflate(2.0D);
+        List<ItemEntity> list = world.getEntitiesOfClass(ItemEntity.class, box);
         list.stream()
-            .filter(e->player.getDistance(e) <= distance)
-            .filter(player::canEntityBeSeen)
+            .filter(e->player.distanceTo(e) <= distance)
+            .filter(player::canSee)
             .forEach(e-> {
                 int itemSizeWas = e.getItem().getCount();
-                e.onCollideWithPlayer(player);
+                e.playerTouch(player);
                 int itemSize = !e.isAlive() ? 0 : e.getItem().getCount();
-                stack.damageItem(itemSizeWas - itemSize, player, ItemUtils.onBroken(hand));
+                stack.hurtAndBreak(itemSizeWas - itemSize, player, ItemUtils.onBroken(hand));
             });
     }
     

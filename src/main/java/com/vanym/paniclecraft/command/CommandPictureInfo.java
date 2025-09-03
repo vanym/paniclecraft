@@ -34,15 +34,15 @@ public class CommandPictureInfo extends CommandBase {
     @Override
     public LiteralArgumentBuilder<CommandSource> register() {
         return Commands.literal(this.getName())
-                       .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                       .requires(cs->cs.hasPermission(this.getRequiredPermissionLevel()))
                        .executes(this::execute);
     }
     
     public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
         CommandSource source = context.getSource();
-        ServerPlayerEntity player = source.asPlayer();
+        ServerPlayerEntity player = source.getPlayerOrException();
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
-        source.sendFeedback(new StringTextComponent(
+        source.sendSuccess(new StringTextComponent(
                 SideUtils.callSync(picture.syncObject(), picture::toString)), false);
         return 1;
     }

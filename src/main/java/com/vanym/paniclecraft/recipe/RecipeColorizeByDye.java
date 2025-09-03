@@ -22,8 +22,8 @@ public class RecipeColorizeByDye extends SpecialRecipe {
     public boolean matches(CraftingInventory inv, World world) {
         int items = 0;
         int dyes = 0;
-        for (int i = 0; i < inv.getSizeInventory(); i++) {
-            ItemStack slot = inv.getStackInSlot(i);
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack slot = inv.getItem(i);
             if (slot.isEmpty()) {
                 continue;
             }
@@ -37,7 +37,7 @@ public class RecipeColorizeByDye extends SpecialRecipe {
     }
     
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack assemble(CraftingInventory inv) {
         ItemStack itemstack = ItemStack.EMPTY;
         int[] aint = new int[3];
         int i = 0;
@@ -49,8 +49,8 @@ public class RecipeColorizeByDye extends SpecialRecipe {
         float f1;
         int l1;
         
-        for (k = 0; k < inv.getSizeInventory(); ++k) {
-            ItemStack slot = inv.getStackInSlot(k);
+        for (k = 0; k < inv.getContainerSize(); ++k) {
+            ItemStack slot = inv.getItem(k);
             
             if (slot.isEmpty()) {
                 continue;
@@ -83,7 +83,7 @@ public class RecipeColorizeByDye extends SpecialRecipe {
                 }
                 DyeItem dyeItem = (DyeItem)slot.getItem();
                 DyeColor color = dyeItem.getDyeColor();
-                float[] afloat = color.getColorComponentValues();
+                float[] afloat = color.getTextureDiffuseColors();
                 int j1 = (int)(afloat[0] * 255.0F);
                 int k1 = (int)(afloat[1] * 255.0F);
                 l1 = (int)(afloat[2] * 255.0F);
@@ -114,7 +114,7 @@ public class RecipeColorizeByDye extends SpecialRecipe {
     }
     
     @Override
-    public boolean canFit(int width, int height) {
+    public boolean canCraftInDimensions(int width, int height) {
         return width * height >= 2;
     }
     

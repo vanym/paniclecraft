@@ -15,8 +15,8 @@ public class InventoryUtils {
     }
     
     public static Stream<ItemStack> stream(IInventory inv, boolean onClosing) {
-        return IntStream.range(0, inv.getSizeInventory())
-                        .mapToObj(onClosing ? inv::removeStackFromSlot : inv::getStackInSlot);
+        return IntStream.range(0, inv.getContainerSize())
+                        .mapToObj(onClosing ? inv::removeItemNoUpdate : inv::getItem);
     }
     
     public static ItemStack findItem(CraftingInventory inv, Item item) {

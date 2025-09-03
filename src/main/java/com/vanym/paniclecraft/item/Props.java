@@ -7,6 +7,6 @@ import net.minecraft.item.Item;
 public class Props {
     
     static Item.Properties create() {
-        return new Item.Properties().group(Core.instance.tab);
+        return new Item.Properties().tab(Core.instance.tab);
     }
 }

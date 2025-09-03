@@ -17,11 +17,11 @@ public enum PaintingSide {
     public final TileOnSide axes;
     
     PaintingSide(Direction xDir, Direction yDir) {
-        this.axes = new TileOnSide(xDir, yDir, Direction.byIndex(this.ordinal()));
+        this.axes = new TileOnSide(xDir, yDir, Direction.from3DDataValue(this.ordinal()));
     }
     
     public static PaintingSide getSide(@Nonnull Direction side) {
-        return getSide(side.getIndex());
+        return getSide(side.get3DDataValue());
     }
     
     public static PaintingSide getSide(int side) {

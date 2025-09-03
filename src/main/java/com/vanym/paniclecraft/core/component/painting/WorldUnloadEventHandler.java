@@ -11,8 +11,8 @@ public class WorldUnloadEventHandler {
     
     @SubscribeEvent
     public void worldUnload(WorldEvent.Unload event) {
-        World world = event.getWorld().getWorld();
-        for (TileEntity tile : world.loadedTileEntityList) {
+        World world = event.getWorld().getLevel();
+        for (TileEntity tile : world.blockEntityList) {
             if (tile instanceof TileEntityPaintingContainer) {
                 TileEntityPaintingContainer tilePC = (TileEntityPaintingContainer)tile;
                 tilePC.onWorldUnload();

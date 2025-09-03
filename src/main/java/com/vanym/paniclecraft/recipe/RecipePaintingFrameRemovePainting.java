@@ -40,9 +40,9 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
             Direction[] removeOrder,
             Direction first) {
         super(id, "", new ItemStack(Core.instance.painting.itemPainting),
-              NonNullList.from(Ingredient.EMPTY,
+              NonNullList.of(Ingredient.EMPTY,
                                Optional.of(ItemPaintingFrame.getItemWithEmptyPictures(first))
-                                       .map(Ingredient::fromStacks)
+                                       .map(Ingredient::of)
                                        .get()));
         this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);
     }
@@ -59,8 +59,8 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     }
     
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
-        ItemStack painting = super.getCraftingResult(inv);
+    public ItemStack assemble(CraftingInventory inv) {
+        ItemStack painting = super.assemble(inv);
         ItemStack frame = InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         if (!frame.hasTag()) {
             return painting;
@@ -81,10 +81,10 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     @Override
     public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
         NonNullList<ItemStack> list =
-                NonNullList.<ItemStack>withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+                NonNullList.<ItemStack>withSize(inv.getContainerSize(), ItemStack.EMPTY);
         ItemStack frame = ItemStack.EMPTY;
         for (int i = 0; i < list.size(); ++i) {
-            ItemStack slot = inv.getStackInSlot(i);
+            ItemStack slot = inv.getItem(i);
             Item item = slot.getItem();
             if (item == Core.instance.painting.itemPaintingFrame) {
                 ItemStack stack = slot.copy();
@@ -107,7 +107,7 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
     }
     
     @Override
-    public boolean isDynamic() {
+    public boolean isSpecial() {
         return false; // we want to show this recipe
     }
     
@@ -121,8 +121,8 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
                 IRecipeSerializer<RecipePaintingFrameRemovePainting> {
         
         @Override
-        public RecipePaintingFrameRemovePainting read(ResourceLocation recipeId, JsonObject json) {
-            JsonArray order = JSONUtils.getJsonArray(json, "order");
+        public RecipePaintingFrameRemovePainting fromJson(ResourceLocation recipeId, JsonObject json) {
+            JsonArray order = JSONUtils.getAsJsonArray(json, "order");
             Direction[] removeOrder = IntStream.range(0, order.size())
                                                .limit(18)
                                                .mapToObj(i->RecipeUtils.getSide(order, "order", i))
@@ -131,20 +131,20 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
         }
         
         @Override
-        public RecipePaintingFrameRemovePainting read(
+        public RecipePaintingFrameRemovePainting fromNetwork(
                 ResourceLocation recipeId,
                 PacketBuffer buffer) {
             return new RecipePaintingFrameRemovePainting(
                     recipeId,
                     Arrays.stream(buffer.readVarIntArray(18))
-                          .mapToObj(Direction::byIndex)
+                          .mapToObj(Direction::from3DDataValue)
                           .toArray(Direction[]::new));
         }
         
         @Override
-        public void write(PacketBuffer buffer, RecipePaintingFrameRemovePainting recipe) {
+        public void toNetwork(PacketBuffer buffer, RecipePaintingFrameRemovePainting recipe) {
             buffer.writeVarIntArray(Arrays.stream(recipe.removeOrder)
-                                          .mapToInt(Direction::getIndex)
+                                          .mapToInt(Direction::get3DDataValue)
                                           .toArray());
         }
     }

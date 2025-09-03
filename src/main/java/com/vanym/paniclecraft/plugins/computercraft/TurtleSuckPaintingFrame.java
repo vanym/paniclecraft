@@ -101,8 +101,8 @@ public class TurtleSuckPaintingFrame {
         @Override
         protected void createPicture(ItemStack stack) {
             PlayerEntity player = TurtleSuckPaintingFrame.this.getPlayer();
-            SideUtils.runSync(this.frame.getWorld() != null
-                && !this.frame.getWorld().isRemote, this.frame, ()-> {
+            SideUtils.runSync(this.frame.getLevel() != null
+                && !this.frame.getLevel().isClientSide, this.frame, ()-> {
                     Picture picture = this.frame.createPicture(this.index, stack);
                     if (player != null) {
                         BlockPaintingContainer.rotatePicture(player, picture, this.side, true);
@@ -120,8 +120,8 @@ public class TurtleSuckPaintingFrame {
                 return this.getStackInSlot(slot);
             }
             PlayerEntity player = TurtleSuckPaintingFrame.this.getPlayer();
-            ItemStack stack = SideUtils.callSync(this.frame.getWorld() != null
-                && !this.frame.getWorld().isRemote, this.frame, ()-> {
+            ItemStack stack = SideUtils.callSync(this.frame.getLevel() != null
+                && !this.frame.getLevel().isClientSide, this.frame, ()-> {
                     Picture picture = this.frame.getPicture(this.index);
                     if (player != null) {
                         BlockPaintingContainer.rotatePicture(player, picture, this.side, false);

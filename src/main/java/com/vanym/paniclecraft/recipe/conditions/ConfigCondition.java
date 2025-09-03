@@ -98,7 +98,7 @@ public class ConfigCondition implements ICondition {
         
         @Override
         public ConfigCondition read(JsonObject json) {
-            return new ConfigCondition(JSONUtils.getString(json, "location"));
+            return new ConfigCondition(JSONUtils.getAsString(json, "location"));
         }
         
         @Override

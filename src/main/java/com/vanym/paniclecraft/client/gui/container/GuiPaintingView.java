@@ -60,7 +60,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     protected int controlsEndX;
     
     protected final Button buttonExport = JUtils.make(()-> {
-        String text = I18n.format(String.format("gui.%s.paintingview.export", DEF.MOD_ID));
+        String text = I18n.get(String.format("gui.%s.paintingview.export", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingExport());
     });
     
@@ -70,7 +70,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     }
     
     @Override
-    public ContainerPaintingViewBase getContainer() {
+    public ContainerPaintingViewBase getMenu() {
         return this.view;
     }
     
@@ -120,7 +120,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
             sb.append(this.view.getWidth());
             sb.append("×");
             sb.append(this.view.getHeight());
-            this.font.drawString(sb.toString(), 2, 2, 0x7f7f7f);
+            this.font.draw(sb.toString(), 2, 2, 0x7f7f7f);
         }
         super.render(mouseX, mouseY, renderPartialTicks);
         this.drawHelp();
@@ -153,21 +153,21 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
             return;
         }
         String translationKey = String.format("gui.%s.paintingview.help.export", DEF.MOD_ID);
-        this.drawHelp(Arrays.asList(I18n.format(translationKey).split(System.lineSeparator())));
+        this.drawHelp(Arrays.asList(I18n.get(translationKey).split(System.lineSeparator())));
     }
     
     protected void drawHelp(List<String> lines) {
         int lineHeight = 14;
         int y = this.height / 2 - lines.size() * (lineHeight / 2);
         for (String line : lines) {
-            int x = (this.width - this.font.getStringWidth(line)) / 2;
+            int x = (this.width - this.font.width(line)) / 2;
             GuiUtils.drawString8xOutline(this.font, line, x, y + (lineHeight - 10) / 2, 0xe0e0e0);
             y += lineHeight;
         }
     }
     
     protected void paintingExport() {
-        File dir = new File(this.minecraft.gameDir, "paintings");
+        File dir = new File(this.minecraft.gameDirectory, "paintings");
         dir.mkdir();
         File file = getTimestampedPNGFileForDirectory(dir);
         ITextComponent message;
@@ -188,7 +188,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                     String.format("chat.%s.painting.export.failure", DEF.MOD_ID),
                     e.getMessage());
         }
-        this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
+        this.minecraft.gui.getChat().addMessage(message);
     }
     
     protected void paintingCopy() {
@@ -205,7 +205,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                     String.format("chat.%s.painting.export.copy.failure", DEF.MOD_ID),
                     e.getMessage());
         }
-        this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
+        this.minecraft.gui.getChat().addMessage(message);
     }
     
     @Override
@@ -213,8 +213,8 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
         if (super.keyPressed(key, scanCode, modifiers)) {
             return true;
         }
-        InputMappings.Input inputCode = InputMappings.getInputByCode(key, scanCode);
-        if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(inputCode)) {
+        InputMappings.Input inputCode = InputMappings.getKey(key, scanCode);
+        if (this.minecraft.options.keyInventory.isActiveAndMatches(inputCode)) {
             this.onClose();
             return true;
         }
@@ -227,13 +227,13 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     
     @Override
     public void onClose() {
-        this.minecraft.player.closeScreen();
+        this.minecraft.player.closeContainer();
     }
     
     @Override
     public void removed() {
         if (this.minecraft.player != null) {
-            this.view.onContainerClosed(this.minecraft.player);
+            this.view.removed(this.minecraft.player);
         }
     }
     

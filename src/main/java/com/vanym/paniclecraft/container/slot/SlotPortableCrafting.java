@@ -26,12 +26,12 @@ public class SlotPortableCrafting extends CraftingResultSlot {
     @Override
     public ItemStack onTake(PlayerEntity player, ItemStack stack) {
         Stream.of(Hand.MAIN_HAND, Hand.OFF_HAND)
-              .map(player::getHeldItem)
+              .map(player::getItemInHand)
               .filter(ItemWorkbench::canBeWorkbench)
-              .filter(held->held.getItem().isDamageable())
+              .filter(held->held.getItem().canBeDepleted())
               .findFirst()
-              .ifPresent(held->held.damageItem(1, player, ItemUtils.onBroken(held)));
-        player.inventory.markDirty();
+              .ifPresent(held->held.hurtAndBreak(1, player, ItemUtils.onBroken(held)));
+        player.inventory.setChanged();
         return super.onTake(player, stack);
     }
 }

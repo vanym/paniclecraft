@@ -55,17 +55,17 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     
     public BlockAdvSign() {
-        super(Block.Properties.create(Material.WOOD)
+        super(Block.Properties.of(Material.WOOD)
                               .sound(SoundType.WOOD)
-                              .hardnessAndResistance(1.0F)
-                              .doesNotBlockMovement()
+                              .strength(1.0F)
+                              .noCollission()
                               .noDrops());
         this.setRegistryName("advanced_sign");
-        this.setDefaultState(this.stateContainer.getBaseState()
-                                                .with(FACING, Direction.UP)
-                                                .with(FORM, AdvSignForm.WALL)
-                                                .with(ROTATION, 0)
-                                                .with(WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any()
+                                                .setValue(FACING, Direction.UP)
+                                                .setValue(FORM, AdvSignForm.WALL)
+                                                .setValue(ROTATION, 0)
+                                                .setValue(WATERLOGGED, false));
     }
     
     @Override
@@ -80,48 +80,48 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
     
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
-        return this.getDefaultState()
-                   .with(FACING, context.getFace())
-                   .with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
+        IFluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
+        return this.defaultBlockState()
+                   .setValue(FACING, context.getClickedFace())
+                   .setValue(WATERLOGGED, fluidstate.getType() == Fluids.WATER);
     }
     
     @Override
     public BlockState rotate(BlockState state, Rotation rot) {
-        return state.with(FACING, rot.rotate(state.get(FACING)));
+        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
     }
     
     @Override
     public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.toRotation(state.get(FACING)));
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
     
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(FACING, FORM, ROTATION, WATERLOGGED);
     }
     
     @Override
     @SuppressWarnings("deprecation")
     public IFluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false)
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
                                       : super.getFluidState(state);
     }
     
     @Override
     @SuppressWarnings("deprecation")
-    public BlockState updatePostPlacement(
+    public BlockState updateShape(
             BlockState state,
             Direction facing,
             BlockState facingState,
             IWorld world,
             BlockPos currentPos,
             BlockPos facingPos) {
-        if (state.get(WATERLOGGED)) {
-            world.getPendingFluidTicks()
-                 .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        if (state.getValue(WATERLOGGED)) {
+            world.getLiquidTicks()
+                 .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
-        return super.updatePostPlacement(state, facing, facingState, world, currentPos,
+        return super.updateShape(state, facing, facingState, world, currentPos,
                                          facingPos);
     }
     
@@ -133,12 +133,12 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
             ISelectionContext context) {
         Optional<TileEntityAdvSign> oSign =
                 WorldUtils.getTileEntity(world, pos, TileEntityAdvSign.class);
-        AdvSignSide pside = AdvSignSide.getSide(state.get(FACING).getIndex());
-        AdvSignForm form = oSign.map(TileEntityAdvSign::getForm).orElseGet(()->state.get(FORM));
+        AdvSignSide pside = AdvSignSide.getSide(state.getValue(FACING).get3DDataValue());
+        AdvSignForm form = oSign.map(TileEntityAdvSign::getForm).orElseGet(()->state.getValue(FORM));
         AxisAlignedBB box;
         if (form == AdvSignForm.WALL) {
             double direction = oSign.map(TileEntityAdvSign::getDirection)
-                                    .orElseGet(()->state.get(ROTATION) * 22.5D);
+                                    .orElseGet(()->state.getValue(ROTATION) * 22.5D);
             direction = MathHelper.wrapDegrees(direction);
             direction *= pside.zAxis;
             box = new AxisAlignedBB(0.0D, 0.21875D, 0.0D, 1.0D, 0.71875D, 0.125D);
@@ -157,7 +157,7 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
     }
     
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public BlockRenderType getRenderShape(BlockState state) {
         return BlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
@@ -167,15 +167,15 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
     }
     
     @Override
-    public boolean canSpawnInBlock() {
+    public boolean isPossibleToRespawnInThis() {
         return true;
     }
     
     @Override
-    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-        TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getTileEntity(pos);
-        spawnAsEntity(world, pos, ItemAdvSign.getSavedSign(tileAS));
-        super.onBlockHarvested(world, pos, state, player);
+    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getBlockEntity(pos);
+        popResource(world, pos, ItemAdvSign.getSavedSign(tileAS));
+        super.playerWillDestroy(world, pos, state, player);
     }
     
     @Override
@@ -185,7 +185,7 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
             IBlockReader world,
             BlockPos pos,
             PlayerEntity player) {
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         return ItemAdvSign.getSavedSign(tile instanceof TileEntityAdvSign ? (TileEntityAdvSign)tile
                                                                           : null);
     }

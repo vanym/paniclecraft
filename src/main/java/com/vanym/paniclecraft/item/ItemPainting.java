@@ -54,37 +54,37 @@ public class ItemPainting extends BlockItem {
     }
     
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
+    public ActionResultType useOn(ItemUseContext context) {
         PlayerEntity player = context.getPlayer();
         if (player != null && !player.isSneaking()) {
-            World world = context.getWorld();
-            BlockPos pos = context.getPos();
-            TileEntity tile = world.getTileEntity(pos);
+            World world = context.getLevel();
+            BlockPos pos = context.getClickedPos();
+            TileEntity tile = world.getBlockEntity(pos);
             if (tile instanceof TileEntityPaintingFrame) {
                 TileEntityPaintingFrame tilePF = (TileEntityPaintingFrame)tile;
-                ItemStack stack = context.getItem();
-                Direction side = context.getFace();
+                ItemStack stack = context.getItemInHand();
+                Direction side = context.getClickedFace();
                 return this.onItemUseOnFrame(stack, player, world, tilePF,
-                                             side.getIndex());
+                                             side.get3DDataValue());
             }
         }
-        return super.onItemUse(context);
+        return super.useOn(context);
     }
     
     @Override
     @Nullable
-    public BlockItemUseContext getBlockItemUseContext(BlockItemUseContext context) {
+    public BlockItemUseContext updatePlacementContext(BlockItemUseContext context) {
         PlayerEntity player = context.getPlayer();
         if (player == null || player.isSneaking()) {
             return context;
         }
-        World world = context.getWorld();
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(context.getPos());
-        Direction side = context.getFace();
+        World world = context.getLevel();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(context.getClickedPos());
+        Direction side = context.getClickedFace();
         Block self = this.getBlock();
         for (int i = 0; i < Core.instance.painting.config.paintingPlaceStack; i++) {
             BlockState state = world.getBlockState(pos);
-            if (state.getBlock() != self || side != state.get(BlockPainting.FACING)) {
+            if (state.getBlock() != self || side != state.getValue(BlockPainting.FACING)) {
                 break;
             }
             Direction stackdir = BlockPaintingContainer.getStackDirection(player, side);
@@ -93,25 +93,25 @@ public class ItemPainting extends BlockItem {
             }
             pos.move(stackdir);
         }
-        context = BlockItemUseContext.func_221536_a(context, pos, side);
+        context = BlockItemUseContext.at(context, pos, side);
         return context.replacingClickedOnBlock()
             && world.getBlockState(pos).getBlock() != self ? context : null;
     }
     
     @Override
-    protected boolean onBlockPlaced(
+    protected boolean updateCustomBlockEntityTag(
             BlockPos pos,
             World world,
             @Nullable PlayerEntity player,
             ItemStack stack,
             BlockState state) {
-        super.onBlockPlaced(pos, world, player, stack, state);
-        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
-        SideUtils.runSync(!world.isRemote, tileP, ()-> {
+        super.updateCustomBlockEntityTag(pos, world, player, stack, state);
+        TileEntityPainting tileP = (TileEntityPainting)world.getBlockEntity(pos);
+        SideUtils.runSync(!world.isClientSide, tileP, ()-> {
             Picture picture = tileP.getPicture();
             fillPicture(picture, stack);
             if (player != null) {
-                Direction side = state.get(BlockPainting.FACING);
+                Direction side = state.getValue(BlockPainting.FACING);
                 BlockPaintingContainer.rotatePicture(player, picture, side, true);
             }
         });
@@ -127,16 +127,16 @@ public class ItemPainting extends BlockItem {
         if (tilePF.getPicture(side) != null) {
             return ActionResultType.FAIL;
         }
-        SideUtils.runSync(!world.isRemote, tilePF, ()-> {
+        SideUtils.runSync(!world.isClientSide, tilePF, ()-> {
             Picture picture = tilePF.createPicture(side, stack);
             if (player != null) {
-                Direction dir = Direction.byIndex(side);
+                Direction dir = Direction.from3DDataValue(side);
                 BlockPaintingContainer.rotatePicture(player, picture, dir, true);
             }
         });
         stack.shrink(1);
         tilePF.markForUpdate();
-        JUtils.runIf(world.isRemote, ()->Core.instance.shooter.once(this::showRemoveTooltip));
+        JUtils.runIf(world.isClientSide, ()->Core.instance.shooter.once(this::showRemoveTooltip));
         return ActionResultType.SUCCESS;
     }
     
@@ -148,7 +148,7 @@ public class ItemPainting extends BlockItem {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(
+    public void appendHoverText(
             ItemStack itemStack,
             @Nullable World world,
             List<ITextComponent> list,
@@ -157,11 +157,11 @@ public class ItemPainting extends BlockItem {
             Stream.Builder<ITextComponent> lines = Stream.builder();
             if (pictureTag.contains(Picture.TAG_EDITABLE) &&
                 !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
-                lines.add(new TranslationTextComponent(this.getTranslationKey() + ".uneditable"));
+                lines.add(new TranslationTextComponent(this.getDescriptionId() + ".uneditable"));
             }
             lines.add(new StringTextComponent(pictureSizeInformation(pictureTag)));
             lines.build()
-                 .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                 .peek(line->line.withStyle(TextFormatting.GRAY))
                  .forEachOrdered(list::add);
         });
     }
@@ -169,19 +169,19 @@ public class ItemPainting extends BlockItem {
     @OnlyIn(Dist.CLIENT)
     protected void showRemoveTooltip() {
         Minecraft mc = Minecraft.getInstance();
-        GameSettings settings = mc.gameSettings;
+        GameSettings settings = mc.options;
         GuiUtils.showFloatingTooltip(new TranslationTextComponent(
-                this.getTranslationKey() + ".remove_tooltip",
-                settings.keyBindSneak.getLocalizedName(),
-                settings.keyBindUseItem.getLocalizedName()));
+                this.getDescriptionId() + ".remove_tooltip",
+                settings.keySneak.getTranslatedKeyMessage(),
+                settings.keyUse.getTranslatedKeyMessage()));
     }
     
     public static boolean fillPicture(Picture picture, ItemStack itemStack) {
         CompoundNBT pictureTag = getPictureTag(itemStack).orElse(null);
         if (pictureTag != null && !pictureTag.isEmpty()) {
             picture.deserializeNBT(pictureTag);
-            if (itemStack.hasDisplayName()) {
-                picture.setName(itemStack.getDisplayName());
+            if (itemStack.hasCustomHoverName()) {
+                picture.setName(itemStack.getHoverName());
             }
             return true;
         }
@@ -189,7 +189,7 @@ public class ItemPainting extends BlockItem {
     }
     
     public static void putPictureTag(ItemStack stack, CompoundNBT pictureTag) {
-        ItemPaintingFrame.removePictureTagName(pictureTag).ifPresent(stack::setDisplayName);
+        ItemPaintingFrame.removePictureTagName(pictureTag).ifPresent(stack::setHoverName);
         ItemUtils.getOrCreateBlockEntityTag(stack).put(TAG_PICTURE, pictureTag);
     }
     

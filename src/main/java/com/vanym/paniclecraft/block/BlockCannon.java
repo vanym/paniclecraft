@@ -35,25 +35,25 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class BlockCannon extends ContainerBlock {
     
     protected static final VoxelShape CANNON_SHAPE =
-            VoxelShapes.create(0.0D, 0.0D, 0.0D, 1.0D, 1.0D / 16.0D, 1.0D);
+            VoxelShapes.box(0.0D, 0.0D, 0.0D, 1.0D, 1.0D / 16.0D, 1.0D);
     
     public BlockCannon() {
-        super(Block.Properties.create(Material.ANVIL)
+        super(Block.Properties.of(Material.HEAVY_METAL)
                               .sound(SoundType.STONE)
-                              .hardnessAndResistance(1.5F));
+                              .strength(1.5F));
         this.setRegistryName("cannon");
     }
     
     @Override
-    public boolean onBlockActivated(
+    public boolean use(
             BlockState state,
             World world,
             BlockPos pos,
             PlayerEntity player,
             Hand hand,
             BlockRayTraceResult hit) {
-        if (!world.isRemote) {
-            INamedContainerProvider container = this.getContainer(state, world, pos);
+        if (!world.isClientSide) {
+            INamedContainerProvider container = this.getMenuProvider(state, world, pos);
             if (container != null) {
                 NetworkHooks.openGui((ServerPlayerEntity)player, container, pos);
             }
@@ -62,7 +62,7 @@ public class BlockCannon extends ContainerBlock {
     }
     
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public TileEntity newBlockEntity(IBlockReader worldIn) {
         return new TileEntityCannon();
     }
     
@@ -73,7 +73,7 @@ public class BlockCannon extends ContainerBlock {
     }
     
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public BlockRenderType getRenderShape(BlockState state) {
         return BlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
@@ -97,19 +97,19 @@ public class BlockCannon extends ContainerBlock {
     }
     
     @Override
-    public void onBlockPlacedBy(
+    public void setPlacedBy(
             World world,
             BlockPos pos,
             BlockState state,
             @Nullable LivingEntity entity,
             ItemStack stack) {
-        super.onBlockPlacedBy(world, pos, state, entity, stack);
-        TileEntity tile = world.getTileEntity(pos);
+        super.setPlacedBy(world, pos, state, entity, stack);
+        TileEntity tile = world.getBlockEntity(pos);
         if (entity != null && tile instanceof TileEntityCannon) {
             TileEntityCannon tileCannon = (TileEntityCannon)tile;
-            double direction = Math.round(180.0D + entity.rotationYaw);
-            double height = Math.round(entity.rotationPitch);
-            SideUtils.runSync(!world.isRemote, tileCannon, ()-> {
+            double direction = Math.round(180.0D + entity.yRot);
+            double height = Math.round(entity.xRot);
+            SideUtils.runSync(!world.isClientSide, tileCannon, ()-> {
                 tileCannon.setDirection(direction);
                 tileCannon.setHeight(Math.max(0.0D, Math.min(90.0D, height)));
             });
@@ -118,20 +118,20 @@ public class BlockCannon extends ContainerBlock {
     
     @Override
     @SuppressWarnings("deprecation")
-    public void onReplaced(
+    public void onRemove(
             BlockState state,
             World worldIn,
             BlockPos pos,
             BlockState newState,
             boolean isMoving) {
         if (state.getBlock() != newState.getBlock()) {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
+            TileEntity tileentity = worldIn.getBlockEntity(pos);
             if (tileentity instanceof IInventory) {
-                InventoryHelper.dropInventoryItems(worldIn, pos, (IInventory)tileentity);
-                worldIn.updateComparatorOutputLevel(pos, this);
+                InventoryHelper.dropContents(worldIn, pos, (IInventory)tileentity);
+                worldIn.updateNeighbourForOutputSignal(pos, this);
             }
             
-            super.onReplaced(state, worldIn, pos, newState, isMoving);
+            super.onRemove(state, worldIn, pos, newState, isMoving);
         }
     }
 }

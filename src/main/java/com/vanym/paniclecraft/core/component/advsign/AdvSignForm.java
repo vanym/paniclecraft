@@ -9,7 +9,7 @@ public enum AdvSignForm implements IStringSerializable {
     WALL, STICK_DOWN;
     
     @Override
-    public String getName() {
+    public String getSerializedName() {
         return this.name().toLowerCase(Locale.ROOT);
     }
     

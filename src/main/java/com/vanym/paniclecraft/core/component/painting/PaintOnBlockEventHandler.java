@@ -16,7 +16,7 @@ public class PaintOnBlockEventHandler {
     public void entityCanUpdate(EntityEvent.CanUpdate event) {
         Entity entity = event.getEntity();
         if (entity instanceof EntityPaintOnBlock) {
-            ++entity.ticksExisted;
+            ++entity.tickCount;
             entity.tick();
             event.setCanUpdate(false);
         }
@@ -24,7 +24,7 @@ public class PaintOnBlockEventHandler {
     
     @SubscribeEvent
     public void worldUnload(WorldEvent.Unload event) {
-        World world = event.getWorld().getWorld();
+        World world = event.getWorld().getLevel();
         WorldUtils.getEntities(world)
                   .filter(EntityPaintOnBlock.class::isInstance)
                   .map(EntityPaintOnBlock.class::cast)
@@ -38,8 +38,8 @@ public class PaintOnBlockEventHandler {
     }
     
     protected void blockChange(BlockEvent event) {
-        World world = event.getWorld().getWorld();
-        if (world.isRemote) {
+        World world = event.getWorld().getLevel();
+        if (world.isClientSide) {
             return;
         }
         EntityPaintOnBlock entityPOB = EntityPaintOnBlock.getEntity(world, event.getPos());

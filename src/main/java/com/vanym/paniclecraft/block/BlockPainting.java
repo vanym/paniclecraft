@@ -49,65 +49,65 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     
     public BlockPainting() {
-        super(Block.Properties.create(Material.WOOD)
+        super(Block.Properties.of(Material.WOOD)
                               .sound(SoundType.WOOD)
-                              .hardnessAndResistance(0.4F)
+                              .strength(0.4F)
                               .noDrops());
         this.setRegistryName("painting");
-        this.setDefaultState(this.stateContainer.getBaseState()
-                                                .with(FACING, Direction.NORTH)
-                                                .with(WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any()
+                                                .setValue(FACING, Direction.NORTH)
+                                                .setValue(WATERLOGGED, false));
     }
     
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public TileEntity newBlockEntity(IBlockReader worldIn) {
         return new TileEntityPainting();
     }
     
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
-        return this.getDefaultState()
-                   .with(FACING, context.getFace())
-                   .with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
+        IFluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
+        return this.defaultBlockState()
+                   .setValue(FACING, context.getClickedFace())
+                   .setValue(WATERLOGGED, fluidstate.getType() == Fluids.WATER);
     }
     
     @Override
     public BlockState rotate(BlockState state, Rotation rot) {
-        return state.with(FACING, rot.rotate(state.get(FACING)));
+        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
     }
     
     @Override
     public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.toRotation(state.get(FACING)));
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
     
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(FACING, WATERLOGGED);
     }
     
     @Override
     @SuppressWarnings("deprecation")
     public IFluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false)
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
                                       : super.getFluidState(state);
     }
     
     @Override
     @SuppressWarnings("deprecation")
-    public BlockState updatePostPlacement(
+    public BlockState updateShape(
             BlockState state,
             Direction facing,
             BlockState facingState,
             IWorld world,
             BlockPos currentPos,
             BlockPos facingPos) {
-        if (state.get(WATERLOGGED)) {
-            world.getPendingFluidTicks()
-                 .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        if (state.getValue(WATERLOGGED)) {
+            world.getLiquidTicks()
+                 .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
-        return super.updatePostPlacement(state, facing, facingState, world, currentPos,
+        return super.updateShape(state, facing, facingState, world, currentPos,
                                          facingPos);
     }
     
@@ -118,7 +118,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public BlockRenderType getRenderShape(BlockState state) {
         return BlockRenderType.ENTITYBLOCK_ANIMATED;
     }
     
@@ -133,17 +133,17 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             IBlockReader world,
             BlockPos pos,
             ISelectionContext context) {
-        return VoxelShapes.create(this.getBlockBoundsBasedOnState(state.get(FACING).getIndex()));
+        return VoxelShapes.create(this.getBlockBoundsBasedOnState(state.getValue(FACING).get3DDataValue()));
     }
     
     @Override
     @SuppressWarnings("deprecation")
-    public boolean isReplaceable(BlockState state, BlockItemUseContext context) {
-        if (context.isPlacerSneaking()) {
-            return super.isReplaceable(state, context);
+    public boolean canBeReplaced(BlockState state, BlockItemUseContext context) {
+        if (context.isSneaking()) {
+            return super.canBeReplaced(state, context);
         }
-        return context.getItem().getItem() == this.asItem()
-            && state.get(FACING) == context.getFace();
+        return context.getItemInHand().getItem() == this.asItem()
+            && state.getValue(FACING) == context.getClickedFace();
     }
     
     @Override
@@ -152,24 +152,24 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
-    public boolean onBlockActivated(
+    public boolean use(
             BlockState state,
             World world,
             BlockPos pos,
             PlayerEntity player,
             Hand hand,
             BlockRayTraceResult hit) {
-        if (super.onBlockActivated(state, world, pos, player, hand, hit)) {
+        if (super.use(state, world, pos, player, hand, hit)) {
             return true;
         }
         if (!player.isSneaking()) {
             return false;
         }
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile == null || !(tile instanceof TileEntityPainting)) {
             return false;
         }
-        if (world.isRemote) {
+        if (world.isClientSide) {
             return true;
         }
         return this.removedByPlayer(state, world, pos, player, false, world.getFluidState(pos));
@@ -184,12 +184,12 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             boolean willHarvest,
             IFluidState fluid) {
         if (player != null) {
-            TileEntity tile = world.getTileEntity(pos);
+            TileEntity tile = world.getBlockEntity(pos);
             if (tile instanceof TileEntityPainting) {
                 TileEntityPainting tileP = (TileEntityPainting)tile;
                 Picture picture = tileP.getPicture();
-                Direction dir = tileP.getBlockState().get(FACING);
-                SideUtils.runSync(!world.isRemote, tileP,
+                Direction dir = tileP.getBlockState().getValue(FACING);
+                SideUtils.runSync(!world.isClientSide, tileP,
                                   ()->rotatePicture(player, picture, dir, false));
             }
         }
@@ -197,20 +197,20 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
-    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-        TileEntity tile = world.getTileEntity(pos);
+    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof TileEntityPainting) {
             TileEntityPainting tileP = (TileEntityPainting)tile;
             Picture picture = tileP.getPicture();
-            ItemStack stack = SideUtils.callSync(!world.isRemote, tileP,
+            ItemStack stack = SideUtils.callSync(!world.isClientSide, tileP,
                                                  ()->ItemPainting.getPictureAsItem(picture));
-            spawnAsEntity(world, pos, stack);
+            popResource(world, pos, stack);
         }
-        super.onBlockHarvested(world, pos, state, player);
+        super.playerWillDestroy(world, pos, state, player);
     }
     
     public AxisAlignedBB getBlockBoundsBasedOnState(int meta) {
-        int side = Direction.byIndex(meta).getOpposite().getIndex();
+        int side = Direction.from3DDataValue(meta).getOpposite().get3DDataValue();
         return GeometryUtils.getBoundsBySide(side, this.getPaintingOutlineSize());
     }
     
@@ -221,8 +221,8 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             IBlockReader world,
             BlockPos pos,
             PlayerEntity player) {
-        TileEntityPainting tileP = (TileEntityPainting)world.getTileEntity(pos);
-        return SideUtils.callSync(tileP.hasWorld() && !tileP.getWorld().isRemote(), tileP,
+        TileEntityPainting tileP = (TileEntityPainting)world.getBlockEntity(pos);
+        return SideUtils.callSync(tileP.hasLevel() && !tileP.getLevel().isClientSide(), tileP,
                                   ()->ItemPainting.getPictureAsItem(tileP.getPicture()));
     }
 }

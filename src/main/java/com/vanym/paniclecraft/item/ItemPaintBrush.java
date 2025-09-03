@@ -30,6 +30,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
+
 public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
     public static final String TAG_COLOR = "Color";
@@ -50,22 +52,22 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     protected final Type type;
     
     public ItemPaintBrush(Type type) {
-        super(Props.create().maxStackSize(1));
+        super(Props.create().stacksTo(1));
         this.type = type;
         this.setRegistryName(type.id);
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(
+    public void appendHoverText(
             ItemStack stack,
             @Nullable World world,
             List<ITextComponent> list,
             ITooltipFlag flag) {
-        super.addInformation(stack, world, list, flag);
+        super.appendHoverText(stack, world, list, flag);
         Minecraft minecraft = Minecraft.getInstance();
         boolean shift = Screen.hasShiftDown();
-        boolean palette = minecraft.currentScreen instanceof GuiPalette;
+        boolean palette = minecraft.screen instanceof GuiPalette;
         String format =
                 palette ? (shift ? Core.instance.painting.clientConfig.paintBrushPaletteShiftTooltipFormat
                                  : Core.instance.painting.clientConfig.paintBrushPaletteTooltipFormat)
@@ -80,15 +82,15 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
                                              ColorUtils.getAlphaless(color));
             Stream.of(formatted.split("\n"))
                   .map(FormattingUtils::parseLine)
-                  .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                  .peek(line->line.withStyle(TextFormatting.GRAY))
                   .forEachOrdered(list::add);
         }
     }
     
     @Override
-    public void fillItemGroup(ItemGroup creativetab, NonNullList<ItemStack> list) {
-        super.fillItemGroup(creativetab, list);
-        if (!this.isInGroup(creativetab)) {
+    public void fillItemCategory(ItemGroup creativetab, NonNullList<ItemStack> list) {
+        super.fillItemCategory(creativetab, list);
+        if (!this.allowdedIn(creativetab)) {
             return;
         }
         JUtils.make(()-> {

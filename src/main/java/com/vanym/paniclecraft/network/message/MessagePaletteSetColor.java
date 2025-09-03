@@ -26,8 +26,8 @@ public class MessagePaletteSetColor {
     
     public static void handleInWorld(MessagePaletteSetColor message, NetworkEvent.Context ctx) {
         PlayerEntity playerEntity = ctx.getSender();
-        if (playerEntity.openContainer instanceof ContainerPalette) {
-            ContainerPalette palette = (ContainerPalette)playerEntity.openContainer;
+        if (playerEntity.containerMenu instanceof ContainerPalette) {
+            ContainerPalette palette = (ContainerPalette)playerEntity.containerMenu;
             palette.setColor(message.color);
         }
     }

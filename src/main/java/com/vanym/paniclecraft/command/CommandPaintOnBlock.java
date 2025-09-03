@@ -64,7 +64,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         public LiteralArgumentBuilder<CommandSource> register() {
             DoubleArgumentType radiusArgumentType = DoubleArgumentType.doubleArg(0.0D, 1024.0D);
             return Commands.literal(this.getName())
-                           .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                           .requires(cs->cs.hasPermission(this.getRequiredPermissionLevel()))
                            .then(Commands.argument("radius", radiusArgumentType)
                                          .executes(this::execute)
                                          .then(Commands.argument("location", Vec3Argument.vec3())
@@ -76,24 +76,24 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             double radius = DoubleArgumentType.getDouble(context, "radius");
             Vec3d coords;
             try {
-                coords = Vec3Argument.getLocation(context, "location").getPosition(source);
+                coords = Vec3Argument.getCoordinates(context, "location").getPosition(source);
             } catch (IllegalArgumentException e) {
-                coords = source.getPos();
+                coords = source.getPosition();
             }
-            World world = source.getWorld();
-            AxisAlignedBB box = GeometryUtils.getPointBox(coords.getX(),
-                                                          coords.getY(),
-                                                          coords.getZ())
-                                             .grow(radius);
+            World world = source.getLevel();
+            AxisAlignedBB box = GeometryUtils.getPointBox(coords.x(),
+                                                          coords.y(),
+                                                          coords.z())
+                                             .inflate(radius);
             int count = EntityPaintOnBlock.clearArea(world, box);
             String name = Optional.of(world)
                                   .map(World::getDimension)
                                   .map(Dimension::getType)
-                                  .map(DimensionType::getKey)
+                                  .map(DimensionType::getName)
                                   .map(d->"minecraft".equals(d.getNamespace()) ? d.getPath()
                                                                                : d.toString())
                                   .orElse("world");
-            source.sendFeedback(new TranslationTextComponent(
+            source.sendSuccess(new TranslationTextComponent(
                     this.getTranslationPrefix() + ".clear",
                     count,
                     name,
@@ -126,7 +126,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         @Override
         public LiteralArgumentBuilder<CommandSource> register() {
             return Commands.literal(this.getName())
-                           .requires(cs->cs.hasPermissionLevel(this.getRequiredPermissionLevel()))
+                           .requires(cs->cs.hasPermission(this.getRequiredPermissionLevel()))
                            .executes(this::execute)
                            .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                          .executes(this::execute));
@@ -138,25 +138,25 @@ public class CommandPaintOnBlock extends TreeCommandBase {
             try {
                 pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
             } catch (IllegalArgumentException e) {
-                pos = CommandUtils.rayTraceBlocks(source.asPlayer()).getPos();
+                pos = CommandUtils.rayTraceBlocks(source.getPlayerOrException()).getBlockPos();
             }
             EntityPaintOnBlock entityPOB =
-                    EntityPaintOnBlock.getEntity(source.getWorld(), pos);
+                    EntityPaintOnBlock.getEntity(source.getLevel(), pos);
             if (entityPOB == null) {
                 throw this.REQUIRES_PAINTONBLOCK_EXCEPTION_TYPE.create(pos.getX(),
                                                                        pos.getY(),
                                                                        pos.getZ());
             }
             String name = entityPOB.getClass().getSimpleName();
-            int id = entityPOB.getEntityId();
-            UUID uuid = entityPOB.getUniqueID();
+            int id = entityPOB.getId();
+            UUID uuid = entityPOB.getUUID();
             BlockPos entityPos = entityPOB.getBlockPos();
             String line = String.format("%s[x=%d, y=%d, z=%d, id=%d, uuid=%s]", name,
                                         entityPos.getX(),
                                         entityPos.getY(),
                                         entityPos.getZ(),
                                         id, uuid.toString());
-            source.sendFeedback(new StringTextComponent(line), false);
+            source.sendSuccess(new StringTextComponent(line), false);
             return 1;
         }
     }

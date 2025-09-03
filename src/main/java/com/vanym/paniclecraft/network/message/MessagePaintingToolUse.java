@@ -23,7 +23,7 @@ public class MessagePaintingToolUse {
     protected final boolean tile;
     
     public MessagePaintingToolUse(BlockPos pos, int px, int py, byte side, boolean tile) {
-        this.pos = pos.toImmutable();
+        this.pos = pos.immutable();
         this.px = px;
         this.py = py;
         this.side = side;
@@ -69,11 +69,11 @@ public class MessagePaintingToolUse {
     
     public static void handleInWorld(MessagePaintingToolUse message, NetworkEvent.Context ctx) {
         ServerPlayerEntity player = ctx.getSender();
-        ItemStack heldItem = player.getActiveItemStack();
+        ItemStack heldItem = player.getUseItem();
         if (!ItemPaintingTool.class.isInstance(heldItem.getItem())) {
             return;
         }
-        World world = player.world;
+        World world = player.level;
         Picture picture;
         WorldPictureProvider provider = null;
         if (message.tile) {
@@ -87,7 +87,7 @@ public class MessagePaintingToolUse {
             picture = null;
         }
         if (picture == null
-            || !player.canPlayerEdit(message.pos, Direction.byIndex(message.side), heldItem)) {
+            || !player.mayUseItemAt(message.pos, Direction.from3DDataValue(message.side), heldItem)) {
             return;
         }
         picture.usePaintingTool(heldItem, message.px, message.py);

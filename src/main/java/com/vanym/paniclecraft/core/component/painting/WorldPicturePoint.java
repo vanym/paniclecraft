@@ -30,7 +30,7 @@ public final class WorldPicturePoint {
     
     public WorldPicturePoint getNeighborPoint(int xOffset, int yOffset) {
         PaintingSide pside = PaintingSide.getSide(this.side);
-        BlockPos pos = this.pos.offset(pside.axes.xDir, xOffset).offset(pside.axes.yDir, yOffset);
+        BlockPos pos = this.pos.relative(pside.axes.xDir, xOffset).relative(pside.axes.yDir, yOffset);
         return new WorldPicturePoint(this.provider, this.world, pos, this.side);
     }
 }

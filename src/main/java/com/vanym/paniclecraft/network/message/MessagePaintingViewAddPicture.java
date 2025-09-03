@@ -23,13 +23,13 @@ public class MessagePaintingViewAddPicture {
     public static void encode(MessagePaintingViewAddPicture message, PacketBuffer buf) {
         buf.writeInt(message.x);
         buf.writeInt(message.y);
-        buf.writeItemStack(message.stack);
+        buf.writeItem(message.stack);
     }
     
     public static MessagePaintingViewAddPicture decode(PacketBuffer buf) {
         int x = buf.readInt();
         int y = buf.readInt();
-        ItemStack stack = buf.readItemStack();
+        ItemStack stack = buf.readItem();
         return new MessagePaintingViewAddPicture(x, y, stack);
     }
     
@@ -37,10 +37,10 @@ public class MessagePaintingViewAddPicture {
             MessagePaintingViewAddPicture message,
             NetworkEvent.Context ctx) {
         ServerPlayerEntity player = ctx.getSender();
-        if (!ContainerPaintingViewBase.class.isInstance(player.openContainer)) {
+        if (!ContainerPaintingViewBase.class.isInstance(player.containerMenu)) {
             return;
         }
-        ContainerPaintingViewBase view = (ContainerPaintingViewBase)player.openContainer;
+        ContainerPaintingViewBase view = (ContainerPaintingViewBase)player.containerMenu;
         if (!view.editable) {
             return;
         }

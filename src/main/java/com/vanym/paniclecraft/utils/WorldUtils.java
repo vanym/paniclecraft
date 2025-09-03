@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.thread.EffectiveSide;
 public class WorldUtils {
     
     public static Optional<TileEntity> getTileEntity(IBlockReader world, BlockPos pos) {
-        return Optional.ofNullable(world.getTileEntity(pos));
+        return Optional.ofNullable(world.getBlockEntity(pos));
     }
     
     public static <T extends TileEntity> Optional<
@@ -27,7 +27,7 @@ public class WorldUtils {
     public static Stream<Entity> getEntities(World world) {
         if (EffectiveSide.get().isClient() && world instanceof ClientWorld) {
             ClientWorld clientWorld = (ClientWorld)world;
-            return StreamSupport.stream(clientWorld.getAllEntities().spliterator(), false);
+            return StreamSupport.stream(clientWorld.entitiesForRendering().spliterator(), false);
         } else if (world instanceof ServerWorld) {
             return ((ServerWorld)world).getEntities();
         } else {

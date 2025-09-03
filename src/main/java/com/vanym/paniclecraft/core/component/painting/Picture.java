@@ -559,7 +559,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         byte[] raw = null;
         if (nbtImage instanceof ByteArrayNBT) {
             ByteArrayNBT nbtImageBytes = (ByteArrayNBT)nbtImage;
-            packed = nbtImageBytes.getByteArray();
+            packed = nbtImageBytes.getAsByteArray();
         } else if (nbtImage instanceof CompoundNBT) {
             CompoundNBT nbtImageTag = (CompoundNBT)nbtImage;
             width = nbtImageTag.getInt(TAG_IMAGE_WIDTH);
@@ -567,16 +567,16 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
             INBT nbtImageRaw = nbtImageTag.get(TAG_IMAGE_RAWDATA);
             if (nbtImageRaw instanceof ByteArrayNBT) {
                 ByteArrayNBT nbtImageRawBytes = (ByteArrayNBT)nbtImageRaw;
-                raw = nbtImageRawBytes.getByteArray();
+                raw = nbtImageRawBytes.getAsByteArray();
             }
             INBT nbtImagePacked = nbtImageTag.get(TAG_IMAGE_PACKED);
             if (nbtImagePacked instanceof ByteArrayNBT) {
                 ByteArrayNBT nbtImagePackedBytes = (ByteArrayNBT)nbtImagePacked;
-                packed = nbtImagePackedBytes.getByteArray();
+                packed = nbtImagePackedBytes.getAsByteArray();
             }
         } else if (nbtImage instanceof NumberNBT) {
             NumberNBT nbtPrim = (NumberNBT)nbtImage;
-            int rowSize = nbtPrim.getInt();
+            int rowSize = nbtPrim.getAsInt();
             width = rowSize;
             height = rowSize;
         }

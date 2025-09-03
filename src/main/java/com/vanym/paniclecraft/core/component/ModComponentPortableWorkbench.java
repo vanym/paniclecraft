@@ -42,7 +42,7 @@ public class ModComponentPortableWorkbench extends ModComponent {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
-        ScreenManager.registerFactory(this.containerPortableWorkbench, CraftingScreen::new);
+        ScreenManager.register(this.containerPortableWorkbench, CraftingScreen::new);
     }
     
     @Override

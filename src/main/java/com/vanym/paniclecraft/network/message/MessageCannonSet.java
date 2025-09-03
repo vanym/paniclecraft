@@ -67,8 +67,8 @@ public class MessageCannonSet {
     
     public static void handleInWorld(MessageCannonSet message, NetworkEvent.Context ctx) {
         PlayerEntity playerEntity = ctx.getSender();
-        if (playerEntity.openContainer instanceof ContainerCannon) {
-            ContainerCannon containerCannon = (ContainerCannon)playerEntity.openContainer;
+        if (playerEntity.containerMenu instanceof ContainerCannon) {
+            ContainerCannon containerCannon = (ContainerCannon)playerEntity.containerMenu;
             TileEntityCannon tileCannon = containerCannon.cannon;
             if (message.field != null) {
                 synchronized (tileCannon) {

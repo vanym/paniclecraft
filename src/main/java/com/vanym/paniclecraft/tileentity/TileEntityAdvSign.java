@@ -47,7 +47,7 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     @Override
-    public CompoundNBT write(CompoundNBT nbtTag) {
+    public CompoundNBT save(CompoundNBT nbtTag) {
         return this.write(nbtTag, false);
     }
     
@@ -58,14 +58,14 @@ public class TileEntityAdvSign extends TileEntityBase {
         if (toStack) {
             return nbtTag;
         }
-        super.write(nbtTag);
+        super.save(nbtTag);
         nbtTag.putDouble(TAG_DIRECTION, this.direction);
         nbtTag.putInt(TAG_FORM, this.form.getIndex());
         return nbtTag;
     }
     
     @Override
-    public void read(CompoundNBT nbtTag) {
+    public void load(CompoundNBT nbtTag) {
         this.read(nbtTag, false);
     }
     
@@ -80,26 +80,26 @@ public class TileEntityAdvSign extends TileEntityBase {
         if (fromStack) {
             return;
         }
-        super.read(nbtTag);
+        super.load(nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.setForm(AdvSignForm.byIndex(nbtTag.getInt(TAG_FORM)));
     }
     
     @Override
     public void markForUpdate() {
-        this.markDirty();
-        if (this.world != null) {
+        this.setChanged();
+        if (this.level != null) {
             BlockState state = this.getBlockState();
             BlockState actual = state;
             if (state.getBlock() instanceof BlockAdvSign) {
-                actual = state.with(BlockAdvSign.FORM, this.form)
-                              .with(BlockAdvSign.ROTATION,
+                actual = state.setValue(BlockAdvSign.FORM, this.form)
+                              .setValue(BlockAdvSign.ROTATION,
                                     Math.abs((int)Math.round(this.getDirection() / 22.5D)) % 16);
             }
             if (state != actual) {
-                this.world.setBlockState(this.pos, actual);
+                this.level.setBlockAndUpdate(this.worldPosition, actual);
             } else {
-                this.world.notifyBlockUpdate(this.pos, state, actual, 3);
+                this.level.sendBlockUpdated(this.worldPosition, state, actual, 3);
             }
         }
     }
@@ -163,19 +163,19 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     @Override
-    public boolean onlyOpsCanSetNbt() {
+    public boolean onlyOpCanSetNbt() {
         return true;
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return new AxisAlignedBB(this.pos).grow(0.25D);
+        return new AxisAlignedBB(this.worldPosition).inflate(0.25D);
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public double getMaxRenderDistanceSquared() {
+    public double getViewDistance() {
         return 16384.0D;
     }
     

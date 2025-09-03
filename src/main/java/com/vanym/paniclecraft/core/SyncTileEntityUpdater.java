@@ -23,7 +23,7 @@ public class SyncTileEntityUpdater {
         }
         for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
             TileEntityBase tile = it.next();
-            if (event.world == tile.getWorld()) {
+            if (event.world == tile.getLevel()) {
                 if (!tile.isRemoved()) {
                     tile.markForUpdate();
                 }
@@ -34,19 +34,19 @@ public class SyncTileEntityUpdater {
     
     @SubscribeEvent
     public void worldUnload(WorldEvent.Unload event) {
-        if (event.getWorld().isRemote()) {
+        if (event.getWorld().isClientSide()) {
             return;
         }
         for (Iterator<TileEntityBase> it = this.tiles.iterator(); it.hasNext();) {
             TileEntityBase tile = it.next();
-            if (event.getWorld() == tile.getWorld()) {
+            if (event.getWorld() == tile.getLevel()) {
                 it.remove();
             }
         }
     }
     
     public void safeMarkForUpdate(TileEntityBase tile) {
-        if (tile.hasWorld() && tile.getWorld().mainThread != Thread.currentThread()) {
+        if (tile.hasLevel() && tile.getLevel().thread != Thread.currentThread()) {
             this.tiles.add(tile);
             return;
         }

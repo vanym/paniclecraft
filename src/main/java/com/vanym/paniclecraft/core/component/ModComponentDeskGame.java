@@ -73,7 +73,7 @@ public class ModComponentDeskGame extends ModComponent {
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
         this.tileChessDeskRenderer = new TileEntityChessDeskRenderer();
-        this.tileChessDeskRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+        this.tileChessDeskRenderer.init(TileEntityRendererDispatcher.instance);
         if (this.renderTileChessDesk.get()) {
             ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChessDesk.class,
                                                          this.tileChessDeskRenderer);

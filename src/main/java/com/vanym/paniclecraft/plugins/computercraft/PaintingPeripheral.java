@@ -38,7 +38,7 @@ public class PaintingPeripheral extends PicturePeripheral {
     }
     
     public static IPeripheral getPeripheral(World world, BlockPos pos, Direction side) {
-        int pside = side.getOpposite().getIndex();
+        int pside = side.getOpposite().get3DDataValue();
         return Optional.ofNullable(WorldPictureProvider.PAINTING.getPicture(world, pos, pside))
                        .map(PaintingPeripheral::new)
                        .orElse(null);

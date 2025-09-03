@@ -74,13 +74,13 @@ public class PaintingSpecialSelectionBox {
             return;
         }
         BlockRayTraceResult target = event.getTarget();
-        Entity entity = event.getInfo().getRenderViewEntity();
+        Entity entity = event.getInfo().getEntity();
         if (!PlayerEntity.class.isInstance(entity)) {
             return;
         }
         PlayerEntity player = (PlayerEntity)entity;
         ItemStack stack = Stream.of(Hand.MAIN_HAND, Hand.OFF_HAND)
-                                .map(player::getHeldItem)
+                                .map(player::getItemInHand)
                                 .filter(s->!s.isEmpty())
                                 .findFirst()
                                 .orElse(ItemStack.EMPTY);
@@ -92,12 +92,12 @@ public class PaintingSpecialSelectionBox {
         if (!tool.getPaintingToolType(stack).isPixelSelector()) {
             return;
         }
-        BlockPos pos = target.getPos();
+        BlockPos pos = target.getBlockPos();
         Picture picture = new WorldPicturePoint(
                 WorldPictureProvider.ANYTILE,
-                player.world,
+                player.level,
                 pos,
-                target.getFace().getIndex()).getPicture();
+                target.getDirection().get3DDataValue()).getPicture();
         if (picture == null) {
             return;
         }
@@ -105,7 +105,7 @@ public class PaintingSpecialSelectionBox {
         if (this.onlyCancel) {
             return;
         }
-        PaintingSide pside = PaintingSide.getSide(target.getFace());
+        PaintingSide pside = PaintingSide.getSide(target.getDirection());
         double radius = tool.getPaintingToolRadius(stack, picture);
         int width = picture.getWidth();
         int height = picture.getHeight();
@@ -156,10 +156,10 @@ public class PaintingSpecialSelectionBox {
             }
         }
         Stream<AxisAlignedBB> pictureLines = pictureLinesBuilder.build();
-        Vec3d view = event.getInfo().getProjectedView();
+        Vec3d view = event.getInfo().getPosition();
         Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.axes.fromSideCoords(b)
-                                                                         .offset(pos)
-                                                                         .offset(view.func_216371_e()));
+                                                                         .move(pos)
+                                                                         .move(view.reverse()));
         this.drawLines(frameLines);
     }
     
@@ -180,22 +180,22 @@ public class PaintingSpecialSelectionBox {
     
     protected void drawLine(AxisAlignedBB box) {
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buf = tessellator.getBuffer();
+        BufferBuilder buf = tessellator.getBuilder();
         buf.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
         Color color = this.getColor();
         int r = color.getRed(), g = color.getGreen(), b = color.getBlue(), a = color.getAlpha();
         if (box.minX != box.maxX) {
-            buf.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-            buf.pos(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+            buf.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+            buf.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
         }
         if (box.minY != box.maxY) {
-            buf.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-            buf.pos(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+            buf.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+            buf.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
         }
         if (box.minZ != box.maxZ) {
-            buf.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-            buf.pos(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+            buf.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+            buf.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
         }
-        tessellator.draw();
+        tessellator.end();
     }
 }

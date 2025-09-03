@@ -40,7 +40,7 @@ public enum WorldPictureProvider {
     }
     
     public Picture getPicture(World world, BlockPos pos, int side) {
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile != null && this.providerClass.isAssignableFrom(tile.getClass())) {
             ISidePictureProvider provider = (ISidePictureProvider)tile;
             return provider.getPicture(side);

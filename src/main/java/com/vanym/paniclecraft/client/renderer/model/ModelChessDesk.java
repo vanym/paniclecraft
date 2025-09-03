@@ -10,13 +10,13 @@ public class ModelChessDesk extends Model {
     RendererModel Shape1;
     
     public ModelChessDesk() {
-        textureWidth = 64;
-        textureHeight = 32;
+        texWidth = 64;
+        texHeight = 32;
         
         Shape1 = new RendererModel(this, 0, 0);
         Shape1.addBox(-8F, -3F, -8F, 16, 3, 16);
-        Shape1.setRotationPoint(0F, 0F, 0F);
-        Shape1.setTextureSize(64, 32);
+        Shape1.setPos(0F, 0F, 0F);
+        Shape1.setTexSize(64, 32);
         Shape1.mirror = true;
     }
     

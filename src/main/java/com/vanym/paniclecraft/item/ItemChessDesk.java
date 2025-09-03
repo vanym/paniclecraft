@@ -56,7 +56,7 @@ public class ItemChessDesk extends BlockItem {
     }
     
     @Override
-    protected boolean onBlockPlaced(
+    protected boolean updateCustomBlockEntityTag(
             BlockPos pos,
             World worldIn,
             @Nullable PlayerEntity player,
@@ -67,7 +67,7 @@ public class ItemChessDesk extends BlockItem {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(
+    public void appendHoverText(
             ItemStack stack,
             @Nullable World world,
             List<ITextComponent> list,
@@ -79,8 +79,8 @@ public class ItemChessDesk extends BlockItem {
         if (movesTagOpt.isPresent()) {
             ListNBT movesTag = movesTagOpt.get();
             list.add(new TranslationTextComponent(
-                    this.getTranslationKey() + ".moves",
-                    movesTag.size()).applyTextStyle(TextFormatting.GRAY));
+                    this.getDescriptionId() + ".moves",
+                    movesTag.size()).withStyle(TextFormatting.GRAY));
             if (Screen.hasShiftDown()) {
                 Map<CompoundNBT, Integer> white = new HashMap<>(), black = new HashMap<>();
                 for (int i = 0; i < movesTag.size(); ++i) {
@@ -96,7 +96,7 @@ public class ItemChessDesk extends BlockItem {
                     Map<CompoundNBT, Integer> map = side ? white : black;
                     boolean many = map.size() > 1;
                     String translate =
-                            String.format(this.getTranslationKey() + ".player.%s.%s",
+                            String.format(this.getDescriptionId() + ".player.%s.%s",
                                           side ? "white" : "black", many ? "many" : "one");
                     map.entrySet()
                        .stream()
@@ -109,7 +109,7 @@ public class ItemChessDesk extends BlockItem {
                                    many ? new Object[]{name, e.getValue()}
                                         : new Object[]{name});
                        })
-                       .peek(line->line.applyTextStyle(TextFormatting.GRAY))
+                       .peek(line->line.withStyle(TextFormatting.GRAY))
                        .forEach(list::add);
                 });
             }

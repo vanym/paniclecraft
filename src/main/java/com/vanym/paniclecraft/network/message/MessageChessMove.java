@@ -16,26 +16,26 @@ public class MessageChessMove {
     protected final ChessGame.Move move;
     
     public MessageChessMove(BlockPos pos, ChessGame.Move move) {
-        this.pos = pos.toImmutable();
+        this.pos = pos.immutable();
         this.move = move;
     }
     
     public static void encode(MessageChessMove message, PacketBuffer buf) {
         buf.writeBlockPos(message.pos);
-        buf.writeString(message.move.toString(false));
+        buf.writeUtf(message.move.toString(false));
     }
     
     public static MessageChessMove decode(PacketBuffer buf) {
         BlockPos pos = buf.readBlockPos();
-        ChessGame.Move move = new ChessGame.Move(buf.readString());
+        ChessGame.Move move = new ChessGame.Move(buf.readUtf());
         return new MessageChessMove(pos, move);
     }
     
     public static void handleInWorld(MessageChessMove message, NetworkEvent.Context ctx) {
         PlayerEntity player = ctx.getSender();
-        TileEntity tile = player.world.getTileEntity(message.pos);
+        TileEntity tile = player.level.getBlockEntity(message.pos);
         if (message.move != null && tile instanceof TileEntityChessDesk
-            && player.getDistanceSq(new Vec3d(tile.getPos()).add(0.5D, 0.5D, 0.5D)) <= 64.0D) {
+            && player.distanceToSqr(new Vec3d(tile.getBlockPos()).add(0.5D, 0.5D, 0.5D)) <= 64.0D) {
             TileEntityChessDesk tileCD = (TileEntityChessDesk)tile;
             synchronized (tileCD) {
                 tileCD.move(message.move, player);

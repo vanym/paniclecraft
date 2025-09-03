@@ -16,17 +16,17 @@ import net.minecraft.util.text.TextFormatting;
 public class FormattingUtils {
     
     public static ITextComponent parseLine(String line) {
-        Matcher matcher = TextFormatting.FORMATTING_CODE_PATTERN.matcher(line);
+        Matcher matcher = TextFormatting.STRIP_FORMATTING_PATTERN.matcher(line);
         List<ITextComponent> list = new ArrayList<>();
         Style style = new Style();
         for (int last = 0;;) {
             boolean find = matcher.find();
             String sub = find ? line.substring(last, matcher.start()) : line.substring(last);
             if (!sub.isEmpty()) {
-                Style copy = style.createShallowCopy();
+                Style copy = style.copy();
                 int index = list.size() - 1;
                 if (index >= 0 && list.get(index).getStyle().equals(copy)) {
-                    String begin = list.get(index).getUnformattedComponentText();
+                    String begin = list.get(index).getContents();
                     list.set(index, new StringTextComponent(begin + sub).setStyle(copy));
                 } else {
                     list.add(new StringTextComponent(sub).setStyle(copy));
@@ -49,7 +49,7 @@ public class FormattingUtils {
             return list.get(0);
         } else {
             ITextComponent root = new StringTextComponent("");
-            list.forEach(root::appendSibling);
+            list.forEach(root::append);
             return root;
         }
     }
@@ -57,7 +57,7 @@ public class FormattingUtils {
     public static TextFormatting byCode(char code) {
         char lower = Character.toLowerCase(code);
         return Arrays.stream(TextFormatting.values())
-                     .filter(f->f.formattingCode == lower)
+                     .filter(f->f.code == lower)
                      .findAny()
                      .orElse(null);
     }
@@ -110,9 +110,9 @@ public class FormattingUtils {
     }
     
     public static Style invertBy(Style style, Style patch) {
-        Style copy1 = style.createShallowCopy().setParentStyle(null);
-        Style copy2 = style.createShallowCopy()
-                           .setParentStyle(new Style().setColor(TextFormatting.BLACK)
+        Style copy1 = style.copy().inheritFrom(null);
+        Style copy2 = style.copy()
+                           .inheritFrom(new Style().setColor(TextFormatting.BLACK)
                                                       .setObfuscated(true)
                                                       .setBold(true)
                                                       .setStrikethrough(true)
@@ -129,20 +129,20 @@ public class FormattingUtils {
                 style.setColor(patchColor);
             }
         }
-        if (copy1.getObfuscated() == copy2.getObfuscated() && patch.getObfuscated()) {
-            style.setObfuscated(!style.getObfuscated());
+        if (copy1.isObfuscated() == copy2.isObfuscated() && patch.isObfuscated()) {
+            style.setObfuscated(!style.isObfuscated());
         }
-        if (copy1.getBold() == copy2.getBold() && patch.getBold()) {
-            style.setBold(!style.getBold());
+        if (copy1.isBold() == copy2.isBold() && patch.isBold()) {
+            style.setBold(!style.isBold());
         }
-        if (copy1.getStrikethrough() == copy2.getStrikethrough() && patch.getStrikethrough()) {
-            style.setStrikethrough(!style.getStrikethrough());
+        if (copy1.isStrikethrough() == copy2.isStrikethrough() && patch.isStrikethrough()) {
+            style.setStrikethrough(!style.isStrikethrough());
         }
-        if (copy1.getUnderlined() == copy2.getUnderlined() && patch.getUnderlined()) {
-            style.setUnderlined(!style.getUnderlined());
+        if (copy1.isUnderlined() == copy2.isUnderlined() && patch.isUnderlined()) {
+            style.setUnderlined(!style.isUnderlined());
         }
-        if (copy1.getItalic() == copy2.getItalic() && patch.getItalic()) {
-            style.setItalic(!style.getItalic());
+        if (copy1.isItalic() == copy2.isItalic() && patch.isItalic()) {
+            style.setItalic(!style.isItalic());
         }
         return style;
     }
@@ -163,12 +163,12 @@ public class FormattingUtils {
     public static Stream<ITextComponent> fragmentate(ITextComponent component) {
         return stream(component).flatMap(sub-> {
             Style style = sub.getStyle();
-            String str = sub.getUnformattedComponentText();
+            String str = sub.getContents();
             return IntStream.range(0, str.length())
                             .mapToObj(str::charAt)
                             .map(String::valueOf)
                             .map(StringTextComponent::new)
-                            .peek(comp->comp.setStyle(style.createDeepCopy()));
+                            .peek(comp->comp.setStyle(style.flatCopy()));
         });
     }
     

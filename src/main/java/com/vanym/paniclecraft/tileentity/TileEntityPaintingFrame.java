@@ -35,13 +35,13 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     @Override
-    public CompoundNBT write(CompoundNBT nbtTag) {
-        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+    public CompoundNBT save(CompoundNBT nbtTag) {
+        return SideUtils.callSync(this.level != null && !this.level.isClientSide,
                                   this, ()->this.writeAsync(nbtTag));
     }
     
     protected CompoundNBT writeAsync(CompoundNBT nbtTag) {
-        super.write(nbtTag);
+        super.save(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (this.holders[i] != null) {
@@ -52,13 +52,13 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     @Override
-    public void read(CompoundNBT nbtTag) {
-        SideUtils.runSync(this.world != null && !this.world.isRemote,
+    public void load(CompoundNBT nbtTag) {
+        SideUtils.runSync(this.level != null && !this.level.isClientSide,
                           this, ()->this.readAsync(nbtTag));
     }
     
     protected void readAsync(CompoundNBT nbtTag) {
-        super.read(nbtTag);
+        super.load(nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (nbtTag.contains(TAG_PICTURE_I)) {
@@ -72,8 +72,8 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     
     @Override
     public void markForUpdate() {
-        this.markDirty();
-        if (this.world != null) {
+        this.setChanged();
+        if (this.level != null) {
             BlockState state = this.getBlockState();
             BlockState actual = state;
             if (state.getBlock() instanceof BlockPaintingFrame) {
@@ -81,9 +81,9 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
                 actual = blockPF.getActualState(state, this);
             }
             if (state != actual) {
-                this.world.setBlockState(this.pos, actual);
+                this.level.setBlockAndUpdate(this.worldPosition, actual);
             } else {
-                this.world.notifyBlockUpdate(this.pos, state, actual, 3);
+                this.level.sendBlockUpdated(this.worldPosition, state, actual, 3);
             }
         }
     }
@@ -137,32 +137,32 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     protected Picture getNeighborPicture(int side, int offsetX, int offsetY) {
         return new WorldPicturePoint(
                 WorldPictureProvider.PAINTINGFRAME,
-                this.getWorld(),
-                this.getPos(),
+                this.getLevel(),
+                this.getBlockPos(),
                 side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
     }
     
     public void rotateY(int rotUp) {
         Direction rotator = Direction.UP;
         Direction begin = Direction.SOUTH;
-        Picture pictureUp = this.getPicture(rotator.getIndex());
+        Picture pictureUp = this.getPicture(rotator.get3DDataValue());
         if (pictureUp != null) {
             pictureUp.rotate(rotUp);
         }
-        Picture pictureDown = this.getPicture(rotator.getOpposite().getIndex());
+        Picture pictureDown = this.getPicture(rotator.getOpposite().get3DDataValue());
         if (pictureDown != null) {
             pictureDown.rotate((4 - rotUp) % 4);
         }
         for (int i = 0; i < rotUp; i++) {
-            PictureHolder holderBegin = this.holders[begin.getIndex()];
+            PictureHolder holderBegin = this.holders[begin.get3DDataValue()];
             Direction current = begin;
             while (true) {
                 Direction next = GeometryUtils.rotateBy(current, rotator.getOpposite());
                 if (next == begin) {
                     break;
                 }
-                int c = current.getIndex();
-                int n = next.getIndex();
+                int c = current.get3DDataValue();
+                int n = next.get3DDataValue();
                 PictureHolder nextHolder = this.holders[n];
                 this.holders[n] = null;
                 if (nextHolder != null) {
@@ -171,7 +171,7 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
                 this.holders[c] = nextHolder;
                 current = next;
             }
-            int c = current.getIndex();
+            int c = current.get3DDataValue();
             if (holderBegin != null) {
                 holderBegin.setSide(c);
             }
@@ -201,21 +201,21 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
         @Override
         public String toString() {
             return String.format("Frame[x=%d, y=%d, z=%d, side=%s]",
-                                 TileEntityPaintingFrame.this.getPos().getX(),
-                                 TileEntityPaintingFrame.this.getPos().getY(),
-                                 TileEntityPaintingFrame.this.getPos().getZ(),
-                                 Direction.byIndex(this.side));
+                                 TileEntityPaintingFrame.this.getBlockPos().getX(),
+                                 TileEntityPaintingFrame.this.getBlockPos().getY(),
+                                 TileEntityPaintingFrame.this.getBlockPos().getZ(),
+                                 Direction.from3DDataValue(this.side));
         }
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public double getMaxRenderDistanceSquared() {
+    public double getViewDistance() {
         return Core.instance.painting.clientConfig.renderPaintingFrameTileMaxRenderDistanceSquared;
     }
     
     protected void unloadPictures() {
-        SideUtils.runSync(this.world != null && !this.world.isRemote, this,
+        SideUtils.runSync(this.level != null && !this.level.isClientSide, this,
                           ()->Arrays.stream(this.holders)
                                     .filter(Objects::nonNull)
                                     .map(h->h.picture)
@@ -223,8 +223,8 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     @Override
-    public void remove() {
-        super.remove();
+    public void setRemoved() {
+        super.setRemoved();
         this.unloadPictures();
     }
     

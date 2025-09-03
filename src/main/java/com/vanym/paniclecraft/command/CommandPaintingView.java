@@ -45,7 +45,7 @@ public class CommandPaintingView extends CommandBase {
     }
     
     protected boolean checkPermission(CommandSource source) {
-        return source.hasPermissionLevel(2);
+        return source.hasPermission(2);
     }
     
     @Override
@@ -73,7 +73,7 @@ public class CommandPaintingView extends CommandBase {
     }
     
     public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        ServerPlayerEntity player = context.getSource().asPlayer();
+        ServerPlayerEntity player = context.getSource().getPlayerOrException();
         ServerPlayerEntity viewer;
         if (this.to) {
             viewer = EntityArgument.getPlayer(context, "viewer");

@@ -35,7 +35,7 @@ public class GuiStyleEditor extends AbstractButton {
             Style style,
             TextFormatting iconType) {
         super(x, y, width, height, "");
-        this.style = style.createShallowCopy().setParentStyle(null);
+        this.style = style.copy().inheritFrom(null);
         this.iconType = Objects.requireNonNull(iconType);
         this.updater = Objects.requireNonNull(updater);
         this.highlighted = Objects.requireNonNull(highlighted);
@@ -43,7 +43,7 @@ public class GuiStyleEditor extends AbstractButton {
     
     @Override
     public void onPress() {
-        this.updater.accept(this.style.createShallowCopy());
+        this.updater.accept(this.style.copy());
     }
     
     @Override
@@ -52,11 +52,11 @@ public class GuiStyleEditor extends AbstractButton {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        if (this.iconType.isFancyStyling()) {
-            mc.fontRenderer.drawString(this.iconType + this.iconType.name.substring(0, 1),
+        if (this.iconType.isFormat()) {
+            mc.font.draw(this.iconType + this.iconType.name.substring(0, 1),
                                        this.x, this.y, Color.WHITE.getRGB());
         } else if (this.iconType == TextFormatting.RESET) {
-            mc.fontRenderer.drawString("✕", this.x, this.y, Color.WHITE.getRGB());
+            mc.font.draw("✕", this.x, this.y, Color.WHITE.getRGB());
         } else /* colors */ {
             fill(this.x, this.y, this.x + this.width, this.y + this.height,
                  0xff000000 | this.iconType.getColor());
@@ -91,7 +91,7 @@ public class GuiStyleEditor extends AbstractButton {
                 (update)->updater.accept(FormattingUtils.invertBy(update, getter.get())),
                 ()-> {
                     Style parent = getter.get();
-                    Style copy = style.createShallowCopy().setParentStyle(parent);
+                    Style copy = style.copy().inheritFrom(parent);
                     return !copy.isEmpty() && copy.equals(parent);
                 },
                 style,
@@ -124,7 +124,7 @@ public class GuiStyleEditor extends AbstractButton {
                 9,
                 updater,
                 ()->false,
-                new Style().setColor(TextFormatting.RESET).createDeepCopy(),
+                new Style().setColor(TextFormatting.RESET).flatCopy(),
                 TextFormatting.RESET));
         return list;
     }

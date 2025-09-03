@@ -27,25 +27,25 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     }
     
     @Override
-    public CompoundNBT write(CompoundNBT nbtTag) {
-        return SideUtils.callSync(this.world != null && !this.world.isRemote,
+    public CompoundNBT save(CompoundNBT nbtTag) {
+        return SideUtils.callSync(this.level != null && !this.level.isClientSide,
                                   this, ()->this.writeAsync(nbtTag));
     }
     
     protected CompoundNBT writeAsync(CompoundNBT nbtTag) {
-        super.write(nbtTag);
+        super.save(nbtTag);
         nbtTag.put(TAG_PICTURE, this.getPicture().serializeNBT());
         return nbtTag;
     }
     
     @Override
-    public void read(CompoundNBT nbtTag) {
-        SideUtils.runSync(this.world != null && !this.world.isRemote,
+    public void load(CompoundNBT nbtTag) {
+        SideUtils.runSync(this.level != null && !this.level.isClientSide,
                           this, ()->this.readAsync(nbtTag));
     }
     
     protected void readAsync(CompoundNBT nbtTag) {
-        super.read(nbtTag);
+        super.load(nbtTag);
         if (nbtTag.contains(TAG_PICTURE)) {
             this.getPicture().deserializeNBT(nbtTag.getCompound(TAG_PICTURE));
         }
@@ -57,7 +57,7 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     @Override
     public Picture getPicture(int side) {
-        if (side == this.getBlockState().get(BlockPainting.FACING).getIndex()) {
+        if (side == this.getBlockState().getValue(BlockPainting.FACING).get3DDataValue()) {
             return this.getPicture();
         } else {
             return null;
@@ -65,19 +65,19 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     }
     
     protected Picture getNeighborPicture(int offsetX, int offsetY) {
-        int side = this.getBlockState().get(BlockPainting.FACING).getIndex();
+        int side = this.getBlockState().getValue(BlockPainting.FACING).get3DDataValue();
         return new WorldPicturePoint(
                 WorldPictureProvider.PAINTING,
-                this.getWorld(),
-                this.getPos(),
+                this.getLevel(),
+                this.getBlockPos(),
                 side).getNeighborPoint(offsetX, offsetY).getOrCreatePicture();
     }
     
     @Override
     public String toString() {
         return String.format("Painting[x=%d, y=%d, z=%d, facing=%s]",
-                             this.getPos().getX(), this.getPos().getY(), this.getPos().getZ(),
-                             this.getBlockState().get(BlockPainting.FACING));
+                             this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ(),
+                             this.getBlockState().getValue(BlockPainting.FACING));
     }
     
     protected class PictureHolder extends TileEntityPaintingContainer.PictureHolder {
@@ -95,18 +95,18 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public double getMaxRenderDistanceSquared() {
+    public double getViewDistance() {
         return Core.instance.painting.clientConfig.renderPaintingTileMaxRenderDistanceSquared;
     }
     
     protected void unloadPicture() {
-        SideUtils.runSync(this.world != null && !this.world.isRemote,
+        SideUtils.runSync(this.level != null && !this.level.isClientSide,
                           this, this.picture::unload);
     }
     
     @Override
-    public void remove() {
-        super.remove();
+    public void setRemoved() {
+        super.setRemoved();
         this.unloadPicture();
     }
     

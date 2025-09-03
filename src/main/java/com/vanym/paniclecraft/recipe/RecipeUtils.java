@@ -21,8 +21,8 @@ public class RecipeUtils {
         CompoundNBT pictureTag = ItemPainting.getPictureTag(painting)
                                              .map(CompoundNBT::copy)
                                              .orElseGet(CompoundNBT::new);
-        if (painting.hasDisplayName()) {
-            ItemPaintingFrame.putPictureTagName(pictureTag, painting.getDisplayName());
+        if (painting.hasCustomHoverName()) {
+            ItemPaintingFrame.putPictureTagName(pictureTag, painting.getHoverName());
         }
         ItemPaintingFrame.putPictureTag(frame, pside, pictureTag);
     }
@@ -41,9 +41,9 @@ public class RecipeUtils {
                     "Missing " + key + ", expected to find a Int or a String");
         }
         try {
-            return Direction.byIndex(JSONUtils.getInt(ele, key));
+            return Direction.from3DDataValue(JSONUtils.convertToInt(ele, key));
         } catch (JsonSyntaxException e) {
-            return Optional.ofNullable(SideName.byName(JSONUtils.getString(ele, key)))
+            return Optional.ofNullable(SideName.byName(JSONUtils.convertToString(ele, key)))
                            .orElseThrow(IllegalArgumentException::new)
                            .getSide();
         }

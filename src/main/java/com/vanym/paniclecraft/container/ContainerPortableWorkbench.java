@@ -19,18 +19,18 @@ import net.minecraft.util.IWorldPosCallable;
 public class ContainerPortableWorkbench extends WorkbenchContainer {
     
     public ContainerPortableWorkbench(int id, PlayerInventory inventory) {
-        super(id, inventory, IWorldPosCallable.of(inventory.player.world,
-                                                  inventory.player.getPosition()));
-        Slot original = (Slot)this.inventorySlots.get(0);
+        super(id, inventory, IWorldPosCallable.create(inventory.player.level,
+                                                  inventory.player.getCommandSenderBlockPosition()));
+        Slot original = (Slot)this.slots.get(0);
         SlotPortableCrafting slot = new SlotPortableCrafting(
                 inventory.player,
-                this.field_75162_e,
-                this.field_75160_f,
+                this.craftSlots,
+                this.resultSlots,
                 original.getSlotIndex(),
-                original.xPos,
-                original.yPos);
-        slot.slotNumber = original.slotNumber;
-        this.inventorySlots.set(0, slot);
+                original.x,
+                original.y);
+        slot.index = original.index;
+        this.slots.set(0, slot);
     }
     
     @Override
@@ -39,18 +39,18 @@ public class ContainerPortableWorkbench extends WorkbenchContainer {
     }
     
     @Override
-    public ItemStack slotClick(int slotId, int dragType, ClickType clickType, PlayerEntity player) {
-        ItemStack stack = super.slotClick(slotId, dragType, clickType, player);
+    public ItemStack clicked(int slotId, int dragType, ClickType clickType, PlayerEntity player) {
+        ItemStack stack = super.clicked(slotId, dragType, clickType, player);
         if (slotId == 0) {
-            this.detectAndSendChanges();
+            this.broadcastChanges();
         }
         return stack;
     }
     
     @Override
-    public boolean canInteractWith(PlayerEntity player) {
+    public boolean stillValid(PlayerEntity player) {
         return Stream.of(Hand.MAIN_HAND, Hand.OFF_HAND)
-                     .map(player::getHeldItem)
+                     .map(player::getItemInHand)
                      .anyMatch(ItemWorkbench::canBeWorkbench);
     }
 }

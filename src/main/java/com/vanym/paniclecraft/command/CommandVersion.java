@@ -39,7 +39,7 @@ public class CommandVersion extends CommandBase {
         String transl = this.getTranslationPrefix() + "." +
             Objects.toString(status).toLowerCase(Locale.ROOT);
         context.getSource()
-               .sendFeedback(new TranslationTextComponent(transl, formatArgs.toArray()), false);
+               .sendSuccess(new TranslationTextComponent(transl, formatArgs.toArray()), false);
         return 1;
     }
 }

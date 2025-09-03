@@ -15,7 +15,7 @@ public class MessageAdvSignOpenGui {
     public final BlockPos pos;
     
     public MessageAdvSignOpenGui(BlockPos pos) {
-        this.pos = pos.toImmutable();
+        this.pos = pos.immutable();
     }
     
     public static void encode(MessageAdvSignOpenGui message, PacketBuffer buf) {
@@ -30,10 +30,10 @@ public class MessageAdvSignOpenGui {
     public static void handleInWorld(MessageAdvSignOpenGui message, NetworkEvent.Context ctx) {
         if (ctx.getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
             Minecraft minecraft = Minecraft.getInstance();
-            TileEntity tile = minecraft.world.getTileEntity(message.pos);
+            TileEntity tile = minecraft.level.getBlockEntity(message.pos);
             if (tile instanceof TileEntityAdvSign) {
                 TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                Minecraft.getInstance().displayGuiScreen(new GuiEditAdvSign(tileAS));
+                Minecraft.getInstance().setScreen(new GuiEditAdvSign(tileAS));
             }
         }
     }

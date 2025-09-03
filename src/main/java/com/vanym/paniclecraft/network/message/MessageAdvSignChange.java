@@ -13,7 +13,7 @@ public class MessageAdvSignChange {
     protected final CompoundNBT tag;
     
     public MessageAdvSignChange(TileEntityAdvSign sign) {
-        sign.write(this.tag = new CompoundNBT());
+        sign.save(this.tag = new CompoundNBT());
     }
     
     public MessageAdvSignChange(CompoundNBT tag) {
@@ -21,11 +21,11 @@ public class MessageAdvSignChange {
     }
     
     public static void encode(MessageAdvSignChange message, PacketBuffer buf) {
-        buf.writeCompoundTag(message.tag);
+        buf.writeNbt(message.tag);
     }
     
     public static MessageAdvSignChange decode(PacketBuffer buf) {
-        CompoundNBT tag = buf.readCompoundTag();
+        CompoundNBT tag = buf.readNbt();
         return new MessageAdvSignChange(tag);
     }
     
@@ -39,15 +39,15 @@ public class MessageAdvSignChange {
         if (!TileEntityAdvSign.isValidTag(message.tag)) {
             return;
         }
-        TileEntity tile = ctx.getSender().world.getTileEntity(new BlockPos(x, y, z));
+        TileEntity tile = ctx.getSender().level.getBlockEntity(new BlockPos(x, y, z));
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-            if (tileAS.isEditor(ctx.getSender().getUniqueID())) {
+            if (tileAS.isEditor(ctx.getSender().getUUID())) {
                 tileAS.resetEditor();
             } else {
                 return;
             }
-            tileAS.read(message.tag);
+            tileAS.load(message.tag);
             tileAS.markForUpdate();
         }
     }

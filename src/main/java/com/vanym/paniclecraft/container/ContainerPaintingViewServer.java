@@ -160,7 +160,7 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
         
         @Override
         public ITextComponent getDisplayName() {
-            return NarratorChatListener.field_216868_a;
+            return NarratorChatListener.NO_TITLE;
         }
         
         @Override

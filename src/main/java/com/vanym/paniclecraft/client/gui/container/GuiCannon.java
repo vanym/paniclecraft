@@ -39,7 +39,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     @Override
     public void onClose() {
         super.onClose();
-        this.container.cannon.removeStackFromSlot(0);
+        this.container.cannon.removeItemNoUpdate(0);
     }
     
     protected void sendDirection(double value) {
@@ -58,7 +58,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     public void init() {
         super.init();
         this.sliderDir =
-                new GuiCircularSlider(this.guiLeft + this.xSize - 72, this.guiTop + 12, 60, 60);
+                new GuiCircularSlider(this.leftPos + this.imageWidth - 72, this.topPos + 12, 60, 60);
         this.sliderDir.setGetter(()->this.container.cannon.getDirection() / 360.0D);
         this.sliderDir.setSetter(v-> {
             v *= 32.0D;
@@ -70,7 +70,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
         });
         this.sliderDir.setOffset(0.25D);
         this.addButton(this.sliderDir);
-        this.sliderHeight = new GuiCircularSlider(this.guiLeft + 8 - 30, this.guiTop + 38, 60, 60);
+        this.sliderHeight = new GuiCircularSlider(this.leftPos + 8 - 30, this.topPos + 38, 60, 60);
         this.sliderHeight.setGetter(()->0.25D - this.container.cannon.getHeight() / 90.0D * 0.25D);
         this.sliderHeight.setSetter(v-> {
             v = (0.25D - v) / 0.25D;
@@ -84,7 +84,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
         this.sliderHeight.setOffset(-0.25D);
         this.sliderHeight.setMax(0.25D);
         this.addButton(this.sliderHeight);
-        this.sliderStrength = new GuiCircularSlider(this.guiLeft + 75, this.guiTop + 20, 50, 50);
+        this.sliderStrength = new GuiCircularSlider(this.leftPos + 75, this.topPos + 20, 50, 50);
         final double maxStrength = Core.instance.cannon.maxStrength.get();
         this.sliderStrength.setGetter(()->this.container.cannon.getStrength() /
                                           maxStrength * 0.125D);
@@ -104,30 +104,30 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     }
     
     @Override
-    public void drawGuiContainerForegroundLayer(int x, int y) {
-        RenderHelper.disableStandardItemLighting();
-        this.font.drawString(this.title.getFormattedText(), 8, 6, 0x404040);
-        this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(),
-                             8, this.ySize - 96 + 2, 0x404040);
-        String directionString = I18n.format(String.format("gui.%s.cannon.direction", DEF.MOD_ID));
-        this.font.drawString(directionString, 62, 8, 0x404040);
+    public void renderLabels(int x, int y) {
+        RenderHelper.turnOff();
+        this.font.draw(this.title.getColoredString(), 8, 6, 0x404040);
+        this.font.draw(this.inventory.getDisplayName().getColoredString(),
+                             8, this.imageHeight - 96 + 2, 0x404040);
+        String directionString = I18n.get(String.format("gui.%s.cannon.direction", DEF.MOD_ID));
+        this.font.draw(directionString, 62, 8, 0x404040);
         double dir = this.container.cannon.getDirection();
-        this.font.drawString(String.format("%.4f", dir), 62, 18, 0x404040);
-        String heightString = I18n.format(String.format("gui.%s.cannon.height", DEF.MOD_ID));
-        this.font.drawString(heightString, 40, 48, 0x404040);
+        this.font.draw(String.format("%.4f", dir), 62, 18, 0x404040);
+        String heightString = I18n.get(String.format("gui.%s.cannon.height", DEF.MOD_ID));
+        this.font.draw(heightString, 40, 48, 0x404040);
         double height = this.container.cannon.getHeight();
-        this.font.drawString(String.format("%.4f", height), 40, 58, 0x404040);
-        String strengthString = I18n.format(String.format("gui.%s.cannon.strength", DEF.MOD_ID));
-        this.font.drawString(strengthString, 30, 28, 0x404040);
+        this.font.draw(String.format("%.4f", height), 40, 58, 0x404040);
+        String strengthString = I18n.get(String.format("gui.%s.cannon.strength", DEF.MOD_ID));
+        this.font.draw(strengthString, 30, 28, 0x404040);
         double strength = this.container.cannon.getStrength();
-        this.font.drawString(String.format("%.4f", strength), 30, 38, 0x404040);
+        this.font.draw(String.format("%.4f", strength), 30, 38, 0x404040);
         if (this.isRotating()) {
             String tooltipKey = Screen.hasShiftDown() ? "gui.%s.cannon.slider_unshift_tooltip"
                                                       : "gui.%s.cannon.slider_shift_tooltip";
-            this.drawCenteredString(this.font, I18n.format(String.format(tooltipKey, DEF.MOD_ID)),
-                                    this.xSize / 2, this.ySize + 6, 0xd0d0d0);
+            this.drawCenteredString(this.font, I18n.get(String.format(tooltipKey, DEF.MOD_ID)),
+                                    this.imageWidth / 2, this.imageHeight + 6, 0xd0d0d0);
         }
-        RenderHelper.enableGUIStandardItemLighting();
+        RenderHelper.turnOnGui();
     }
     
     protected boolean isRotating() {
@@ -143,7 +143,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     public void render(int mouseX, int mouseY, float renderPartialTicks) {
         this.renderBackground();
         super.render(mouseX, mouseY, renderPartialTicks);
-        this.renderHoveredToolTip(mouseX, mouseY);
+        this.renderTooltip(mouseX, mouseY);
     }
     
     @Override
@@ -171,9 +171,9 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     }
     
     @Override
-    public void drawGuiContainerBackgroundLayer(float f, int i, int j) {
+    public void renderBg(float f, int i, int j) {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI_TEXTURE);
-        this.blit(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+        this.minecraft.getTextureManager().bind(GUI_TEXTURE);
+        this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
 }

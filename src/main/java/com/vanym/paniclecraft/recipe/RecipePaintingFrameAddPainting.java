@@ -49,11 +49,11 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
     }
     
     @Override
-    protected boolean checkMatch(CraftingInventory inv, int x, int y, boolean mirror) {
+    protected boolean matches(CraftingInventory inv, int x, int y, boolean mirror) {
         if (mirror) {
             return false;
         }
-        return super.checkMatch(inv, x, y, mirror);
+        return super.matches(inv, x, y, mirror);
     }
     
     @Override
@@ -66,8 +66,8 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
     }
     
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
-        ItemStack frame = super.getCraftingResult(inv);
+    public ItemStack assemble(CraftingInventory inv) {
+        ItemStack frame = super.assemble(inv);
         ItemStack inputFrame =
                 InventoryUtils.findItem(inv, Core.instance.painting.itemPaintingFrame);
         ItemStack painting = InventoryUtils.findItem(inv, Core.instance.painting.itemPainting);
@@ -79,7 +79,7 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
     }
     
     @Override
-    public boolean isDynamic() {
+    public boolean isSpecial() {
         return false; // we want to show this recipe
     }
     
@@ -106,7 +106,7 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
         IntStream.range(0, input.length)
                  .mapToObj(i->input[i])
                  .map(b->b == 'p' ? p : b == 'f' ? f : ItemStack.EMPTY)
-                 .map(Ingredient::fromStacks)
+                 .map(Ingredient::of)
                  .forEachOrdered(ingredients::add);
         return new ShapedRecipe(id, "", sizeX, sizeY, ingredients, f);
     }
@@ -114,26 +114,26 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
     public static class Serializer extends ShapedRecipe.Serializer {
         
         @Override
-        public RecipePaintingFrameAddPainting read(ResourceLocation recipeId, JsonObject json) {
+        public RecipePaintingFrameAddPainting fromJson(ResourceLocation recipeId, JsonObject json) {
             Direction side = RecipeUtils.getSide(json, "side");
-            int offsetX = JSONUtils.getInt(json, "offsetX");
-            int offsetY = JSONUtils.getInt(json, "offsetY");
+            int offsetX = JSONUtils.getAsInt(json, "offsetX");
+            int offsetY = JSONUtils.getAsInt(json, "offsetY");
             return new RecipePaintingFrameAddPainting(recipeId, side, offsetX, offsetY);
         }
         
         @Override
-        public RecipePaintingFrameAddPainting read(ResourceLocation recipeId, PacketBuffer buf) {
-            Direction side = Direction.byIndex(buf.readVarInt());
-            ShapedRecipe recipe = super.read(recipeId, buf);
+        public RecipePaintingFrameAddPainting fromNetwork(ResourceLocation recipeId, PacketBuffer buf) {
+            Direction side = Direction.from3DDataValue(buf.readVarInt());
+            ShapedRecipe recipe = super.fromNetwork(recipeId, buf);
             return new RecipePaintingFrameAddPainting(recipe, side);
         }
         
         @Override
-        public void write(PacketBuffer buf, ShapedRecipe recipeUncasted) {
+        public void toNetwork(PacketBuffer buf, ShapedRecipe recipeUncasted) {
             final RecipePaintingFrameAddPainting recipe =
                     (RecipePaintingFrameAddPainting)recipeUncasted;
-            buf.writeVarInt(recipe.side.getIndex());
-            super.write(buf, recipe);
+            buf.writeVarInt(recipe.side.get3DDataValue());
+            super.toNetwork(buf, recipe);
         }
     }
 }

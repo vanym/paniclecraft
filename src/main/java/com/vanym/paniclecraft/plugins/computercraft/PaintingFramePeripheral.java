@@ -38,19 +38,19 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     @PeripheralMethod(31)
     protected Object getAvailableSides() {
         return Arrays.stream(Direction.values())
-                     .collect(Collectors.toMap(f->f.getIndex() + 1, f->f.getName2()));
+                     .collect(Collectors.toMap(f->f.get3DDataValue() + 1, f->f.getName()));
     }
     
     @PeripheralMethod(32)
     protected String getCurrentSide() {
-        return Optional.ofNullable(this.pside.get()).map(Direction::getName2).orElse("unknown");
+        return Optional.ofNullable(this.pside.get()).map(Direction::getName).orElse("unknown");
     }
     
     @PeripheralMethod(33)
     protected void setSide(String name) throws LuaException, InterruptedException {
         try {
             this.pside.set(Arrays.stream(Direction.values())
-                                 .filter(f->f.getName2().equalsIgnoreCase(name))
+                                 .filter(f->f.getName().equalsIgnoreCase(name))
                                  .findAny()
                                  .get());
         } catch (NoSuchElementException e) {
@@ -77,7 +77,7 @@ public class PaintingFramePeripheral extends PicturePeripheral {
     @Override
     protected Picture getPicture() {
         return Optional.ofNullable(this.pside.get())
-                       .map(Direction::getIndex)
+                       .map(Direction::get3DDataValue)
                        .map(this.sideProvider::getPicture)
                        .orElse(null);
     }

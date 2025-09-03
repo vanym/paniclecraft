@@ -29,7 +29,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvSign> {
     
-    protected static final ResourceLocation TEXTURE = SignTileEntityRenderer.field_217659_c;
+    protected static final ResourceLocation TEXTURE = SignTileEntityRenderer.OAK_TEXTURE;
     
     protected final SignModel modelSign = new SignModel();
     
@@ -46,11 +46,11 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
         GlStateManager.pushMatrix();
         GlStateManager.translatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
         boolean onStick = tileAS.getForm() == AdvSignForm.STICK_DOWN;
-        this.modelSign.getSignStick().showModel = onStick;
+        this.modelSign.getStick().visible = onStick;
         if (!statik) {
             float rotation = 0.0F;
             float yaxis = 1.0F;
-            switch (tileAS.hasWorld() ? tileAS.getBlockState().get(BlockAdvSign.FACING).getIndex()
+            switch (tileAS.hasLevel() ? tileAS.getBlockState().getValue(BlockAdvSign.FACING).get3DDataValue()
                                       : 1) {
                 case 0:
                     GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
@@ -75,7 +75,7 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             }
         }
         if (destroyStage >= 0) {
-            this.bindTexture(DESTROY_STAGES[destroyStage]);
+            this.bindTexture(BREAKING_LOCATIONS[destroyStage]);
             GlStateManager.matrixMode(GL11.GL_TEXTURE);
             GlStateManager.pushMatrix();
             GlStateManager.scalef(4.0F, 2.0F, 1.0F);
@@ -100,7 +100,7 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             float[] colorf = color.getRGBComponents(null);
             GlStateManager.color4f(colorf[0], colorf[1], colorf[2], colorf[3]);
         }
-        this.modelSign.renderSign();
+        this.modelSign.render();
         GlStateManager.popMatrix();
         if (destroyStage < 0) {
             Stream.of(true, false)
@@ -117,7 +117,7 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
     
     protected void renderSignText(AdvSignText text, boolean front, GuiEditAdvSign gui) {
         float scale = 0.6666667F;
-        FontRenderer font = this.getFontRenderer();
+        FontRenderer font = this.getFont();
         if (font == null) {
             return;
         }
@@ -134,34 +134,34 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
         for (int i = 0; i < size; ++i) {
             AdvTextInput input = gui != null ? gui.getInput(front, i) : null;
             ITextComponent line = input != null ? input.getComponent() : lines.get(i);
-            String colored = line.getFormattedText();
-            int width = font.getStringWidth(colored);
+            String colored = line.getColoredString();
+            int width = font.width(colored);
             int x = -width / 2;
             int y = i * 10 - size * 5;
-            font.drawString(colored, x, y, textColor.getRGB());
+            font.draw(colored, x, y, textColor.getRGB());
             if (input == null) {
                 continue;
             }
             int cursorOffset =
-                    font.getStringWidth(FormattingUtils.substring(line, 0, input.getCursorPos())
-                                                       .getFormattedText());
+                    font.width(FormattingUtils.substring(line, 0, input.getCursorPos())
+                                                       .getColoredString());
             int cursorX = x + cursorOffset;
             if (gui.isBlink()) {
                 if (input.getCursorPos() < line.getString().length()) {
-                    AbstractGui.fill(cursorX, y - 1, cursorX + 1, y + font.FONT_HEIGHT,
+                    AbstractGui.fill(cursorX, y - 1, cursorX + 1, y + font.lineHeight,
                                      0xff000000 | textColor.getRGB());
                 } else {
-                    font.drawString("_", cursorX, y, textColor.getRGB());
+                    font.draw("_", cursorX, y, textColor.getRGB());
                 }
             }
             if (!input.isSelected()) {
                 continue;
             }
             int selOffset =
-                    font.getStringWidth(FormattingUtils.substring(line, 0, input.getSelectionPos())
-                                                       .getFormattedText());
+                    font.width(FormattingUtils.substring(line, 0, input.getSelectionPos())
+                                                       .getColoredString());
             int selectionX = x + selOffset;
-            GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.FONT_HEIGHT);
+            GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.lineHeight);
         }
         GlStateManager.depthMask(true);
         GlStateManager.popMatrix();

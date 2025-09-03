@@ -57,19 +57,19 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         super.init();
         if (chartTexture == null) {
             chartTexture = new ColorChartTexture(CHART_TEXTURE);
-            this.minecraft.getTextureManager().loadTexture(CHART_TEXTURE, chartTexture);
+            this.minecraft.getTextureManager().register(CHART_TEXTURE, chartTexture);
         }
         this.chart =
-                new GuiColorChart(chartTexture, this.guiLeft, this.guiTop, this.xSize, this.ySize);
+                new GuiColorChart(chartTexture, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
         this.children.add(this.chart);
-        this.picker = new GuiColorPicker(this.guiLeft + 8, this.guiTop + 38, 16, 16);
+        this.picker = new GuiColorPicker(this.leftPos + 8, this.topPos + 38, 16, 16);
         this.children.add(this.picker);
-        this.minecraft.keyboardListener.enableRepeatEvents(true);
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         for (int i = 0; i < this.textColor.length; ++i) {
             GuiOneColorField textOne = this.textColor[i] = new GuiOneColorField(
                     this.font,
-                    this.guiLeft + 40,
-                    this.guiTop + 42 - i * 12,
+                    this.leftPos + 40,
+                    this.topPos + 42 - i * 12,
                     26,
                     12);
             int offset = i * 8;
@@ -83,24 +83,24 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             base |= 0xFF << (i * 8);
             int disabled = 0xAA << (i * 8);
             textOne.setTextColor(base);
-            textOne.setDisabledTextColour(disabled);
+            textOne.setTextColorUneditable(disabled);
             this.addButton(textOne);
         }
         this.textHex = new GuiHexColorField(
                 this.font,
-                this.guiLeft + 8,
-                this.guiTop + 58);
+                this.leftPos + 8,
+                this.topPos + 58);
         this.textHex.setSetter(rgb->this.sendColor(new Color(rgb)));
         this.addButton(this.textHex);
-        this.container.removeListener(this);
-        this.container.addListener(this);
+        this.menu.removeSlotListener(this);
+        this.menu.addSlotListener(this);
     }
     
     @Override
     public void onClose() {
         super.onClose();
-        this.minecraft.keyboardListener.enableRepeatEvents(false);
-        this.container.removeListener(this);
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
+        this.menu.removeSlotListener(this);
     }
     
     @Override
@@ -141,23 +141,23 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
                 continue;
             }
             int sel = textOne.getSelectionEnd();
-            textOne.setFocused2(false);
+            textOne.setFocus(false);
             int move = i + (up ? 1 : -1);
             if (move < 0 || move > last) {
-                this.textHex.setFocused2(true);
+                this.textHex.setFocus(true);
                 this.setFocused(this.textHex);
             } else {
                 GuiOneColorField textOneMove = this.textColor[move];
-                textOneMove.setFocused2(true);
-                textOneMove.setCursorPosition(sel);
+                textOneMove.setFocus(true);
+                textOneMove.moveCursorTo(sel);
                 this.setFocused(textOneMove);
             }
             return true;
         }
         if (this.textHex.isFocused()) {
-            this.textHex.setFocused2(false);
+            this.textHex.setFocus(false);
             GuiOneColorField textOneMove = this.textColor[up ? 0 : last];
-            textOneMove.setFocused2(true);
+            textOneMove.setFocus(true);
             this.setFocused(textOneMove);
             return true;
         }
@@ -174,47 +174,47 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         super.setFocused(child);
         Stream.concat(Stream.of(this.textHex), Stream.of(this.textColor))
               .filter(f->f != child)
-              .forEach(f->f.setFocused2(false));
+              .forEach(f->f.setFocus(false));
     }
     
     @Override
     public void render(int mouseX, int mouseY, float renderPartialTicks) {
         this.renderBackground();
         super.render(mouseX, mouseY, renderPartialTicks);
-        this.renderHoveredToolTip(mouseX, mouseY);
+        this.renderTooltip(mouseX, mouseY);
     }
     
     protected void drawInventoriesNames() {
-        this.font.drawString(this.title.getFormattedText(), 8, 6, 0x404040);
-        this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(),
-                             8, this.ySize - 96 + 2, 0x404040);
+        this.font.draw(this.title.getColoredString(), 8, 6, 0x404040);
+        this.font.draw(this.inventory.getDisplayName().getColoredString(),
+                             8, this.imageHeight - 96 + 2, 0x404040);
     }
     
     protected void drawRGBLabels() {
         final String letters = "BGR";
         for (int i = 0; i < this.textColor.length; ++i) {
             GuiOneColorField field = this.textColor[i];
-            int yoffset = (field.getAdjustedWidth() - field.getWidth()) / -4;
-            this.font.drawString(letters.charAt(i) + ": ",
-                                 -this.guiLeft + field.x - 11,
-                                 -this.guiTop + field.y + yoffset,
+            int yoffset = (field.getInnerWidth() - field.getWidth()) / -4;
+            this.font.draw(letters.charAt(i) + ": ",
+                                 -this.leftPos + field.x - 11,
+                                 -this.topPos + field.y + yoffset,
                                  0x404040);
         }
     }
     
     @Override
-    public void drawGuiContainerForegroundLayer(int x, int y) {
-        RenderHelper.disableStandardItemLighting();
+    public void renderLabels(int x, int y) {
+        RenderHelper.turnOff();
         this.drawInventoriesNames();
         this.drawRGBLabels();
-        RenderHelper.enableGUIStandardItemLighting();
+        RenderHelper.turnOnGui();
     }
     
     @Override
-    public void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+    public void renderBg(float partialTicks, int mouseX, int mouseY) {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI_TEXTURE);
-        this.blit(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+        this.minecraft.getTextureManager().bind(GUI_TEXTURE);
+        this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         this.chart.render(mouseX, mouseY, partialTicks);
         Color color = this.getColor();
         if (color == null) {
@@ -224,7 +224,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
              this.picker.xPosition + this.picker.width,
              this.picker.yPosition + this.picker.height,
              color.getRGB());
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
     }
     
     protected void sendColor(Color color) {
@@ -232,27 +232,27 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     }
     
     protected Color getColor() {
-        return this.container.getColor();
+        return this.menu.getColor();
     }
     
     protected void updateText(ItemStack stack) {
         boolean empty = stack.isEmpty();
-        Color color = this.container.getColor();
+        Color color = this.menu.getColor();
         if (color == null) {
             color = new Color(0);
         }
-        int rgb = ColorUtils.getAlphaless(this.container.getColor());
-        this.textHex.setEnabled(!empty);
+        int rgb = ColorUtils.getAlphaless(this.menu.getColor());
+        this.textHex.setEditable(!empty);
         if (empty || !this.textHex.isFocused()) {
             this.textHex.setRGB(rgb);
-            this.textHex.setFocused2(false);
+            this.textHex.setFocus(false);
         }
         for (int i = 0; i < this.textColor.length; ++i) {
             GuiOneColorField textOne = this.textColor[i];
-            textOne.setEnabled(!empty);
+            textOne.setEditable(!empty);
             if (empty || !textOne.isFocused()) {
-                textOne.setText(Integer.toString((rgb >> i * 8) & 0xFF));
-                textOne.setFocused2(false);
+                textOne.setValue(Integer.toString((rgb >> i * 8) & 0xFF));
+                textOne.setFocus(false);
             }
         }
         if (empty && Stream.concat(Stream.of(this.textHex), Stream.of(this.textColor))
@@ -263,12 +263,12 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     }
     
     @Override
-    public void sendAllContents(Container container, NonNullList<ItemStack> list) {
-        this.sendSlotContents(container, 0, list.get(0));
+    public void refreshContainer(Container container, NonNullList<ItemStack> list) {
+        this.slotChanged(container, 0, list.get(0));
     }
     
     @Override
-    public void sendSlotContents(Container container, int slot, ItemStack stack) {
+    public void slotChanged(Container container, int slot, ItemStack stack) {
         if (slot != 0) {
             return;
         }
@@ -276,7 +276,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     }
     
     @Override
-    public void sendWindowProperty(Container container, int id, int level) {}
+    public void setContainerData(Container container, int id, int level) {}
     
     protected class GuiColorPicker extends AbstractGui implements IGuiEventListener {
         
@@ -305,7 +305,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
                 return false;
             }
-            ItemStack stack = GuiPalette.this.container.inventoryPlayer.getItemStack();
+            ItemStack stack = GuiPalette.this.menu.inventoryPlayer.getCarried();
             IColorizeable colorizeable = IColorizeable.getColorizeable(stack);
             if (colorizeable == null) {
                 return false;
@@ -361,7 +361,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             if (!this.visible) {
                 return;
             }
-            this.chart.bindTexture();
+            this.chart.bind();
             this.blit(this.xPosition, this.yPosition, 0, 0, this.width, this.height);
         }
     }

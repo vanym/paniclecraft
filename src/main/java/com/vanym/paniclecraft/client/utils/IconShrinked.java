@@ -13,17 +13,17 @@ public class IconShrinked extends TextureAtlasSprite {
                 icon.getName().getNamespace(),
                 icon.getName().getPath() + "_shrinked"),
               icon.getWidth(), icon.getHeight());
-        this.minU = icon.getMinU();
-        this.maxU = icon.getMaxU();
-        this.minV = icon.getMinV();
-        this.maxV = icon.getMaxV();
-        float totalWidth = this.width / (this.maxU - this.minU);
-        float totalHeight = this.height / (this.maxV - this.minV);
+        this.u0 = icon.getU0();
+        this.u1 = icon.getU1();
+        this.v0 = icon.getV0();
+        this.v1 = icon.getV1();
+        float totalWidth = this.width / (this.u1 - this.u0);
+        float totalHeight = this.height / (this.v1 - this.v0);
         float offsetU = (float)(0.01D / totalWidth);
         float offsetV = (float)(0.01D / totalHeight);
-        this.minU += offsetU;
-        this.maxU -= offsetU;
-        this.minV += offsetV;
-        this.maxV -= offsetV;
+        this.u0 += offsetU;
+        this.u1 -= offsetU;
+        this.v0 += offsetV;
+        this.v1 -= offsetV;
     }
 }

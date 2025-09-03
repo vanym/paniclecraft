@@ -15,11 +15,11 @@ public class ItemUtils {
     public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
     
     public static <T extends LivingEntity> Consumer<T> onBroken(EquipmentSlotType slotType) {
-        return e->e.sendBreakAnimation(slotType);
+        return e->e.broadcastBreakEvent(slotType);
     }
     
     public static <T extends LivingEntity> Consumer<T> onBroken(Hand hand) {
-        return e->e.sendBreakAnimation(hand);
+        return e->e.broadcastBreakEvent(hand);
     }
     
     public static <T extends LivingEntity> Consumer<T> onBroken(ItemStack stack) {
@@ -27,9 +27,9 @@ public class ItemUtils {
             return e-> {};
         }
         return e->Arrays.stream(EquipmentSlotType.values())
-                        .filter(slot->stack == e.getItemStackFromSlot(slot))
+                        .filter(slot->stack == e.getItemBySlot(slot))
                         .findAny()
-                        .ifPresent(e::sendBreakAnimation);
+                        .ifPresent(e::broadcastBreakEvent);
     }
     
     public static Optional<CompoundNBT> getTag(ItemStack stack) {
@@ -47,11 +47,11 @@ public class ItemUtils {
     }
     
     public static Optional<CompoundNBT> getBlockEntityTag(ItemStack stack) {
-        return Optional.ofNullable(stack.getChildTag(BLOCK_ENTITY_TAG));
+        return Optional.ofNullable(stack.getTagElement(BLOCK_ENTITY_TAG));
     }
     
     public static CompoundNBT getOrCreateBlockEntityTag(ItemStack stack) {
-        return stack.getOrCreateChildTag(BLOCK_ENTITY_TAG);
+        return stack.getOrCreateTagElement(BLOCK_ENTITY_TAG);
     }
     
     public static void cleanBlockEntityTag(ItemStack stack) {

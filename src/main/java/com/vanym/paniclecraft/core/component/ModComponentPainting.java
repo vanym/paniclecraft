@@ -283,15 +283,15 @@ public class ModComponentPainting extends ModComponent {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
-        ScreenManager.registerFactory(this.containerPalette, GuiPalette::new);
-        ScreenManager.registerFactory(this.containerPaintingView, GuiPaintingEditView::create);
+        ScreenManager.register(this.containerPalette, GuiPalette::new);
+        ScreenManager.register(this.containerPaintingView, GuiPaintingEditView::create);
         
         MinecraftForge.EVENT_BUS.register(this.textureCache);
         
         this.paintingTileRenderer = new TileEntityPaintingRenderer();
-        this.paintingTileRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+        this.paintingTileRenderer.init(TileEntityRendererDispatcher.instance);
         this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
-        this.paintingFrameTileRenderer.setRendererDispatcher(TileEntityRendererDispatcher.instance);
+        this.paintingFrameTileRenderer.init(TileEntityRendererDispatcher.instance);
         
         RenderingRegistry.registerEntityRenderingHandler(EntityPaintOnBlock.class,
                                                          EntityPaintOnBlockRenderer::new);

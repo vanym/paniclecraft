@@ -58,17 +58,17 @@ import net.minecraftforge.fml.network.NetworkDirection;
 public class GuiPaintingEditView extends GuiPaintingView {
     
     protected final Button buttonImport = JUtils.make(()-> {
-        String text = I18n.format(String.format("gui.%s.paintingview.import", DEF.MOD_ID));
+        String text = I18n.get(String.format("gui.%s.paintingview.import", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingImport());
     });
     
     protected final Button buttonImportSave = JUtils.make(()-> {
-        String text = I18n.format(String.format("gui.%s.paintingview.importsave", DEF.MOD_ID));
+        String text = I18n.get(String.format("gui.%s.paintingview.importsave", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingImportSave());
     });
     
     protected final Button buttonImportCancel = JUtils.make(()-> {
-        String text = I18n.format(String.format("gui.%s.paintingview.importcancel", DEF.MOD_ID));
+        String text = I18n.get(String.format("gui.%s.paintingview.importcancel", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingImportCancel());
     });
     
@@ -98,15 +98,15 @@ public class GuiPaintingEditView extends GuiPaintingView {
         this.addButton(this.buttonImportSave);
         this.addButton(this.buttonImportCancel);
         this.addButton(this.textImport);
-        this.minecraft.keyboardListener.enableRepeatEvents(true);
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.updateButtons();
     }
     
     @Override
     public void init(Minecraft mc, int width, int height) {
         if (this.textImport == null) {
-            this.textImport = new TextFieldWidget(mc.fontRenderer, 0, 0, 60, 20, "image location");
-            this.textImport.setMaxStringLength(65536);
+            this.textImport = new TextFieldWidget(mc.font, 0, 0, 60, 20, "image location");
+            this.textImport.setMaxLength(65536);
         }
         super.init(mc, width, height);
         this.buttonImport.x = this.buttonExport.x - 5 - this.buttonImport.getWidth();
@@ -126,7 +126,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         this.buttonImport.visible = !importing;
         this.textImport.setVisible(!importing);
         if (importing) {
-            this.textImport.setFocused2(false);
+            this.textImport.setFocus(false);
             if (this.getFocused() == this.textImport) {
                 this.setFocused(null);
             }
@@ -172,7 +172,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
                                  GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.bindTexture(this.importTexture.getGlTextureId());
+        GlStateManager.bindTexture(this.importTexture.getId());
         int pictureWidth = this.view.pictureSize.getWidth();
         int pictureHeight = this.view.pictureSize.getHeight();
         int importTextureEndX = this.getImportTextureEndX();
@@ -232,21 +232,21 @@ public class GuiPaintingEditView extends GuiPaintingView {
                                                        this.importTextureHeight));
                 // based on drawTexturedModelRect
                 Tessellator tessellator = Tessellator.getInstance();
-                BufferBuilder buf = tessellator.getBuffer();
+                BufferBuilder buf = tessellator.getBuilder();
                 buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-                buf.pos(canvasX, canvasEndY, (double)this.blitOffset)
-                   .tex(icon.getMinU(), icon.getMaxV())
+                buf.vertex(canvasX, canvasEndY, (double)this.blitOffset)
+                   .uv(icon.getU0(), icon.getV1())
                    .endVertex();
-                buf.pos(canvasEndX, canvasEndY, (double)this.blitOffset)
-                   .tex(icon.getMaxU(), icon.getMaxV())
+                buf.vertex(canvasEndX, canvasEndY, (double)this.blitOffset)
+                   .uv(icon.getU1(), icon.getV1())
                    .endVertex();
-                buf.pos(canvasEndX, canvasY, (double)this.blitOffset)
-                   .tex(icon.getMaxU(), icon.getMinV())
+                buf.vertex(canvasEndX, canvasY, (double)this.blitOffset)
+                   .uv(icon.getU1(), icon.getV0())
                    .endVertex();
-                buf.pos(canvasX, canvasY, (double)this.blitOffset)
-                   .tex(icon.getMinU(), icon.getMinV())
+                buf.vertex(canvasX, canvasY, (double)this.blitOffset)
+                   .uv(icon.getU0(), icon.getV0())
                    .endVertex();
-                tessellator.draw();
+                tessellator.end();
             }
         }
         GlStateManager.disableBlend();
@@ -256,8 +256,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
     protected void drawHelp() {
         boolean importing = (this.importImage != null);
         if (importing) {
-            String line = I18n.format(String.format("gui.%s.paintingview.help.show", DEF.MOD_ID));
-            int lineWidth = this.font.getStringWidth(line);
+            String line = I18n.get(String.format("gui.%s.paintingview.help.show", DEF.MOD_ID));
+            int lineWidth = this.font.width(line);
             int x, y;
             if (this.controlsX + 1 <= this.buttonImportCancel.x - lineWidth - 2) {
                 x = Math.max(this.controlsX + 1, this.buttonImportCancel.x - lineWidth - 4);
@@ -266,14 +266,14 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 x = this.width - lineWidth - 2;
                 y = 2;
             }
-            this.font.drawString(line, x, y, 0x7f7f7f);
+            this.font.draw(line, x, y, 0x7f7f7f);
         }
         if (this.textImport.isFocused() || !GuiUtils.isKeyDown(GLFW.GLFW_KEY_H)) {
             return;
         }
         String translationKey = String.format("gui.%s.paintingview.help.%s", DEF.MOD_ID,
                                               importing ? "importing" : "import");
-        this.drawHelp(Arrays.asList(I18n.format(translationKey).split(System.lineSeparator())));
+        this.drawHelp(Arrays.asList(I18n.get(translationKey).split(System.lineSeparator())));
     }
     
     @Override
@@ -327,23 +327,23 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     protected int getViewMouseX() {
-        int real = (int)this.minecraft.mouseHelper.getMouseX();
-        int displayWidth = this.minecraft.mainWindow.getWidth();
+        int real = (int)this.minecraft.mouseHandler.xpos();
+        int displayWidth = this.minecraft.window.getScreenWidth();
         int realViewX = this.viewX * displayWidth / this.width;
         int realViewWidth = this.getViewWidth() * displayWidth / this.width;
         return (real - realViewX) * this.view.getWidth() / realViewWidth;
     }
     
     protected int getViewMouseY() {
-        int real = (int)this.minecraft.mouseHelper.getMouseY();
-        int displayHeight = this.minecraft.mainWindow.getHeight();
+        int real = (int)this.minecraft.mouseHandler.ypos();
+        int displayHeight = this.minecraft.window.getScreenHeight();
         int realViewY = this.viewY * displayHeight / this.height;
         int realViewHeight = this.getViewHeight() * displayHeight / this.height;
         return (real - realViewY) * this.view.getHeight() / realViewHeight;
     }
     
     protected void paintingImport() {
-        String text = this.textImport.getText();
+        String text = this.textImport.getValue();
         BufferedImage img;
         try {
             try {
@@ -355,10 +355,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
             ITextComponent message = new TranslationTextComponent(
                     String.format("chat.%s.painting.import.failure", DEF.MOD_ID),
                     e.getMessage());
-            this.minecraft.ingameGUI.getChatGUI().printChatMessage(message);
+            this.minecraft.gui.getChat().addMessage(message);
             return;
         }
-        this.textImport.setSelectionPos(0);
+        this.textImport.setHighlightPos(0);
         this.switchImportImage(img);
     }
     
@@ -378,12 +378,12 @@ public class GuiPaintingEditView extends GuiPaintingView {
                     Core.instance.network.toVanillaPacket(message, NetworkDirection.PLAY_TO_SERVER);
             picture.unload();
             PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-            packet.writePacketData(buf);
+            packet.write(buf);
             if (buf.capacity() >= 32767) {
                 // See CCustomPayloadPacket
                 throw new IllegalArgumentException();
             }
-            this.minecraft.getConnection().sendPacket(packet);
+            this.minecraft.getConnection().send(packet);
         } catch (IllegalArgumentException | IOException e) {
             final int step = 80; // split to pass 32k payload limit
             for (int y = 0; y < this.importImage.getHeight(); y += step) {
@@ -454,7 +454,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
             if (this.loadClipboardImage()) {
                 return true;
             }
-            this.textImport.setFocused2(true);
+            this.textImport.setFocus(true);
             this.setFocused(this.textImport);
         }
         if (super.keyPressed(key, scanCode, modifiers)) {
@@ -463,7 +463,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
         switch (key) {
             case GLFW.GLFW_KEY_ENTER:
             case GLFW.GLFW_KEY_KP_ENTER:
-                if (this.textImport.isFocused() && !this.textImport.getText().isEmpty()) {
+                if (this.textImport.isFocused() && !this.textImport.getValue().isEmpty()) {
                     this.paintingImport();
                     return true;
                 }
@@ -549,7 +549,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     @Override
     public void onClose() {
-        this.minecraft.keyboardListener.enableRepeatEvents(false);
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
         this.clearImportImage();
         super.onClose();
     }
