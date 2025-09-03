@@ -11,10 +11,10 @@ repositories {
 }
 
 dependencies {
-    // cc-tweaked-1.14.4-1.89.2.jar fdd91cac6e58aa92e6fc39498a9cc255
+    // cc-tweaked-1.15.2-1.97.1.jar 05314ae5b3a3b1a377761886742b7b91
     compileOnly fg.deobf("org.squiddev:cc-tweaked-${minecraft_version}:${cc_tweaked_version}")
     runtimeOnly fg.deobf("org.squiddev:cc-tweaked-${minecraft_version}:${cc_tweaked_version}")
-    // jei-1.14.4-6.0.1.30.jar 7035ad97dbc39942bce45ec02bf882d5
+    // jei-1.15.2-6.0.3.16.jar 99d2b8592713c369fe4b7311755356b7
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
 }
