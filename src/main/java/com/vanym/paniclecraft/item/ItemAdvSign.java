@@ -152,8 +152,7 @@ public class ItemAdvSign extends Item {
         Block block = Core.instance.advSign.blockAdvSign;
         PlayerEntity player = context.getPlayer();
         if (!player.mayUseItemAt(pos, facing, stack)
-            || !world.setBlock(pos,
-                               block.getStateForPlacement(new BlockItemUseContext(context)),
+            || !world.setBlock(pos, block.getStateForPlacement(new BlockItemUseContext(context)),
                                11)) {
             return ActionResultType.FAIL;
         }

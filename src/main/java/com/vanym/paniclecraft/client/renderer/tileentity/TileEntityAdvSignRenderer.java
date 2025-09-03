@@ -50,10 +50,11 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
         if (!statik) {
             float rotation = 0.0F;
             float yaxis = 1.0F;
-            switch (tileAS.hasLevel() ? tileAS.getBlockState()
-                                              .getValue(BlockAdvSign.FACING)
-                                              .get3DDataValue()
-                                      : 1) {
+            int facing = 1;
+            if (tileAS.hasLevel()) {
+                facing = tileAS.getBlockState().getValue(BlockAdvSign.FACING).get3DDataValue();
+            }
+            switch (facing) {
                 case 0:
                     GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
                     GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
@@ -144,9 +145,8 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             if (input == null) {
                 continue;
             }
-            int cursorOffset =
-                    font.width(FormattingUtils.substring(line, 0, input.getCursorPos())
-                                              .getColoredString());
+            int cursorOffset = font.width(FormattingUtils.substring(line, 0, input.getCursorPos())
+                                                         .getColoredString());
             int cursorX = x + cursorOffset;
             if (gui.isBlink()) {
                 if (input.getCursorPos() < line.getString().length()) {
@@ -159,9 +159,8 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             if (!input.isSelected()) {
                 continue;
             }
-            int selOffset =
-                    font.width(FormattingUtils.substring(line, 0, input.getSelectionPos())
-                                              .getColoredString());
+            int selOffset = font.width(FormattingUtils.substring(line, 0, input.getSelectionPos())
+                                                      .getColoredString());
             int selectionX = x + selOffset;
             GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.lineHeight);
         }

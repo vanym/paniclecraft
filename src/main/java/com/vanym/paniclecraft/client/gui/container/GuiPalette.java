@@ -59,13 +59,12 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             chartTexture = new ColorChartTexture(CHART_TEXTURE);
             this.minecraft.getTextureManager().register(CHART_TEXTURE, chartTexture);
         }
-        this.chart =
-                new GuiColorChart(
-                        chartTexture,
-                        this.leftPos,
-                        this.topPos,
-                        this.imageWidth,
-                        this.imageHeight);
+        this.chart = new GuiColorChart(
+                chartTexture,
+                this.leftPos,
+                this.topPos,
+                this.imageWidth,
+                this.imageHeight);
         this.children.add(this.chart);
         this.picker = new GuiColorPicker(this.leftPos + 8, this.topPos + 38, 16, 16);
         this.children.add(this.picker);

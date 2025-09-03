@@ -76,7 +76,8 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     @Override
     public String toString() {
         return String.format("Painting[x=%d, y=%d, z=%d, facing=%s]",
-                             this.getBlockPos().getX(), this.getBlockPos().getY(),
+                             this.getBlockPos().getX(),
+                             this.getBlockPos().getY(),
                              this.getBlockPos().getZ(),
                              this.getBlockState().getValue(BlockPainting.FACING));
     }

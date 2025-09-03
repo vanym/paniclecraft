@@ -57,12 +57,11 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     @Override
     public void init() {
         super.init();
-        this.sliderDir =
-                new GuiCircularSlider(
-                        this.leftPos + this.imageWidth - 72,
-                        this.topPos + 12,
-                        60,
-                        60);
+        this.sliderDir = new GuiCircularSlider(
+                this.leftPos + this.imageWidth - 72,
+                this.topPos + 12,
+                60,
+                60);
         this.sliderDir.setGetter(()->this.container.cannon.getDirection() / 360.0D);
         this.sliderDir.setSetter(v-> {
             v *= 32.0D;

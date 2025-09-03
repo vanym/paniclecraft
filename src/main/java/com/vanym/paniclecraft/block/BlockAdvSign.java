@@ -134,8 +134,8 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
         Optional<TileEntityAdvSign> oSign =
                 WorldUtils.getTileEntity(world, pos, TileEntityAdvSign.class);
         AdvSignSide pside = AdvSignSide.getSide(state.getValue(FACING).get3DDataValue());
-        AdvSignForm form =
-                oSign.map(TileEntityAdvSign::getForm).orElseGet(()->state.getValue(FORM));
+        AdvSignForm form = oSign.map(TileEntityAdvSign::getForm)
+                                .orElseGet(()->state.getValue(FORM));
         AxisAlignedBB box;
         if (form == AdvSignForm.WALL) {
             double direction = oSign.map(TileEntityAdvSign::getDirection)

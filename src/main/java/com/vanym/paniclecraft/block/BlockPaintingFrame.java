@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -26,6 +27,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
@@ -176,9 +178,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             int rot = getRotate(entity, Direction.UP, true);
             SideUtils.runSync(!world.isClientSide, tilePF, ()-> {
                 for (Direction pside : Direction.values()) {
-                    ItemPaintingFrame.getPictureTag(stack, pside)
-                                     .ifPresent(tag->tilePF.createPicture(pside.get3DDataValue(),
-                                                                          tag));
+                    Optional<CompoundNBT> oTag = ItemPaintingFrame.getPictureTag(stack, pside);
+                    oTag.ifPresent(tag->tilePF.createPicture(pside.get3DDataValue(), tag));
                 }
                 tilePF.rotateY(rot);
             });

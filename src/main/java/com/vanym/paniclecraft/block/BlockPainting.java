@@ -133,8 +133,8 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             IBlockReader world,
             BlockPos pos,
             ISelectionContext context) {
-        return VoxelShapes.create(this.getBlockBoundsBasedOnState(state.getValue(FACING)
-                                                                       .get3DDataValue()));
+        int facing = state.getValue(FACING).get3DDataValue();
+        return VoxelShapes.create(this.getBlockBoundsBasedOnState(facing));
     }
     
     @Override
