@@ -9,8 +9,6 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
-import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
-
 public class ItemPaintRemover extends ItemPaintingTool {
     
     public static enum Type {

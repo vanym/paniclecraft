@@ -55,8 +55,8 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
                               .noDrops());
         this.setRegistryName("painting");
         this.registerDefaultState(this.stateDefinition.any()
-                                                .setValue(FACING, Direction.NORTH)
-                                                .setValue(WATERLOGGED, false));
+                                                      .setValue(FACING, Direction.NORTH)
+                                                      .setValue(WATERLOGGED, false));
     }
     
     @Override
@@ -91,7 +91,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     @SuppressWarnings("deprecation")
     public IFluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
-                                      : super.getFluidState(state);
+                                           : super.getFluidState(state);
     }
     
     @Override
@@ -108,7 +108,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
                  .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
         return super.updateShape(state, facing, facingState, world, currentPos,
-                                         facingPos);
+                                 facingPos);
     }
     
     @Override
@@ -133,7 +133,8 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             IBlockReader world,
             BlockPos pos,
             ISelectionContext context) {
-        return VoxelShapes.create(this.getBlockBoundsBasedOnState(state.getValue(FACING).get3DDataValue()));
+        return VoxelShapes.create(this.getBlockBoundsBasedOnState(state.getValue(FACING)
+                                                                       .get3DDataValue()));
     }
     
     @Override
@@ -197,7 +198,11 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
-    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+    public void playerWillDestroy(
+            World world,
+            BlockPos pos,
+            BlockState state,
+            PlayerEntity player) {
         TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof TileEntityPainting) {
             TileEntityPainting tileP = (TileEntityPainting)tile;

@@ -58,7 +58,11 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     public void init() {
         super.init();
         this.sliderDir =
-                new GuiCircularSlider(this.leftPos + this.imageWidth - 72, this.topPos + 12, 60, 60);
+                new GuiCircularSlider(
+                        this.leftPos + this.imageWidth - 72,
+                        this.topPos + 12,
+                        60,
+                        60);
         this.sliderDir.setGetter(()->this.container.cannon.getDirection() / 360.0D);
         this.sliderDir.setSetter(v-> {
             v *= 32.0D;
@@ -108,7 +112,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
         RenderHelper.turnOff();
         this.font.draw(this.title.getColoredString(), 8, 6, 0x404040);
         this.font.draw(this.inventory.getDisplayName().getColoredString(),
-                             8, this.imageHeight - 96 + 2, 0x404040);
+                       8, this.imageHeight - 96 + 2, 0x404040);
         String directionString = I18n.get(String.format("gui.%s.cannon.direction", DEF.MOD_ID));
         this.font.draw(directionString, 62, 8, 0x404040);
         double dir = this.container.cannon.getDirection();

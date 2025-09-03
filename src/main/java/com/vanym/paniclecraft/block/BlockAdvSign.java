@@ -62,10 +62,10 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
                               .noDrops());
         this.setRegistryName("advanced_sign");
         this.registerDefaultState(this.stateDefinition.any()
-                                                .setValue(FACING, Direction.UP)
-                                                .setValue(FORM, AdvSignForm.WALL)
-                                                .setValue(ROTATION, 0)
-                                                .setValue(WATERLOGGED, false));
+                                                      .setValue(FACING, Direction.UP)
+                                                      .setValue(FORM, AdvSignForm.WALL)
+                                                      .setValue(ROTATION, 0)
+                                                      .setValue(WATERLOGGED, false));
     }
     
     @Override
@@ -105,7 +105,7 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
     @SuppressWarnings("deprecation")
     public IFluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
-                                      : super.getFluidState(state);
+                                           : super.getFluidState(state);
     }
     
     @Override
@@ -122,7 +122,7 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
                  .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
         return super.updateShape(state, facing, facingState, world, currentPos,
-                                         facingPos);
+                                 facingPos);
     }
     
     @Override
@@ -134,7 +134,8 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
         Optional<TileEntityAdvSign> oSign =
                 WorldUtils.getTileEntity(world, pos, TileEntityAdvSign.class);
         AdvSignSide pside = AdvSignSide.getSide(state.getValue(FACING).get3DDataValue());
-        AdvSignForm form = oSign.map(TileEntityAdvSign::getForm).orElseGet(()->state.getValue(FORM));
+        AdvSignForm form =
+                oSign.map(TileEntityAdvSign::getForm).orElseGet(()->state.getValue(FORM));
         AxisAlignedBB box;
         if (form == AdvSignForm.WALL) {
             double direction = oSign.map(TileEntityAdvSign::getDirection)
@@ -172,7 +173,11 @@ public class BlockAdvSign extends DirectionalBlock implements IWaterLoggable {
     }
     
     @Override
-    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+    public void playerWillDestroy(
+            World world,
+            BlockPos pos,
+            BlockState state,
+            PlayerEntity player) {
         TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getBlockEntity(pos);
         popResource(world, pos, ItemAdvSign.getSavedSign(tileAS));
         super.playerWillDestroy(world, pos, state, player);

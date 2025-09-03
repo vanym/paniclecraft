@@ -61,7 +61,9 @@ public class GuiChess extends Screen {
     }
     
     protected void sendMove(ChessGame.Move move) {
-        Core.instance.network.sendToServer(new MessageChessMove(this.chessdesk.getBlockPos(), move));
+        Core.instance.network.sendToServer(new MessageChessMove(
+                this.chessdesk.getBlockPos(),
+                move));
     }
     
     protected void updateButtons() {

@@ -87,7 +87,8 @@ public class MessagePaintingToolUse {
             picture = null;
         }
         if (picture == null
-            || !player.mayUseItemAt(message.pos, Direction.from3DDataValue(message.side), heldItem)) {
+            || !player.mayUseItemAt(message.pos, Direction.from3DDataValue(message.side),
+                                    heldItem)) {
             return;
         }
         picture.usePaintingTool(heldItem, message.px, message.py);

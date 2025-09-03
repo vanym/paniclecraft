@@ -267,8 +267,8 @@ public class GuiEditAdvSign extends Screen {
         this.drawSign();
         int lines = this.getState().getText().getLines().size();
         String linesText = I18n.get(String.format("gui.%s.advanced_sign.lines", DEF.MOD_ID),
-                                       lines, String.format("%2d", lines),
-                                       String.format("%02d", lines));
+                                    lines, String.format("%2d", lines),
+                                    String.format("%02d", lines));
         int linesTextWidth = this.font.width(linesText);
         this.drawString(this.font, linesText,
                         this.buttonAddLine.x - 2 - linesTextWidth,

@@ -41,9 +41,9 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
             Direction first) {
         super(id, "", new ItemStack(Core.instance.painting.itemPainting),
               NonNullList.of(Ingredient.EMPTY,
-                               Optional.of(ItemPaintingFrame.getItemWithEmptyPictures(first))
-                                       .map(Ingredient::of)
-                                       .get()));
+                             Optional.of(ItemPaintingFrame.getItemWithEmptyPictures(first))
+                                     .map(Ingredient::of)
+                                     .get()));
         this.removeOrder = Arrays.copyOf(removeOrder, removeOrder.length);
     }
     
@@ -121,7 +121,9 @@ public class RecipePaintingFrameRemovePainting extends ShapelessRecipe {
                 IRecipeSerializer<RecipePaintingFrameRemovePainting> {
         
         @Override
-        public RecipePaintingFrameRemovePainting fromJson(ResourceLocation recipeId, JsonObject json) {
+        public RecipePaintingFrameRemovePainting fromJson(
+                ResourceLocation recipeId,
+                JsonObject json) {
             JsonArray order = JSONUtils.getAsJsonArray(json, "order");
             Direction[] removeOrder = IntStream.range(0, order.size())
                                                .limit(18)

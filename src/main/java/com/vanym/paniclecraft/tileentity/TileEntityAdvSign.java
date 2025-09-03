@@ -94,7 +94,8 @@ public class TileEntityAdvSign extends TileEntityBase {
             if (state.getBlock() instanceof BlockAdvSign) {
                 actual = state.setValue(BlockAdvSign.FORM, this.form)
                               .setValue(BlockAdvSign.ROTATION,
-                                    Math.abs((int)Math.round(this.getDirection() / 22.5D)) % 16);
+                                        Math.abs((int)Math.round(this.getDirection() / 22.5D)) %
+                                                               16);
             }
             if (state != actual) {
                 this.level.setBlockAndUpdate(this.worldPosition, actual);

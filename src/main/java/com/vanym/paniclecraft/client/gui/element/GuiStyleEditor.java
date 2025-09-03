@@ -54,7 +54,7 @@ public class GuiStyleEditor extends AbstractButton {
         Minecraft mc = Minecraft.getInstance();
         if (this.iconType.isFormat()) {
             mc.font.draw(this.iconType + this.iconType.name.substring(0, 1),
-                                       this.x, this.y, Color.WHITE.getRGB());
+                         this.x, this.y, Color.WHITE.getRGB());
         } else if (this.iconType == TextFormatting.RESET) {
             mc.font.draw("✕", this.x, this.y, Color.WHITE.getRGB());
         } else /* colors */ {

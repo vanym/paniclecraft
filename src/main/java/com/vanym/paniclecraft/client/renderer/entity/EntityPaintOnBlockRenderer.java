@@ -148,8 +148,8 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 IBakedModel pictureModel =
                         new TileEntityPaintingRenderer.BakedModelPicture(model, side, sprite);
                 buf.offset(x - entityPOB.x + pside.getStepX() * expandX,
-                                   y - entityPOB.y + pside.getStepY() * expandY,
-                                   z - entityPOB.z + pside.getStepZ() * expandZ);
+                           y - entityPOB.y + pside.getStepY() * expandY,
+                           z - entityPOB.z + pside.getStepZ() * expandZ);
                 buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
                 if (this.renderPictureTypeSup.get() > 0) {
                     render.renderModelSmooth(world, pictureModel, state, pos,

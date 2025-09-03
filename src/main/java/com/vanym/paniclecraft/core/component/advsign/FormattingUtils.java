@@ -113,11 +113,11 @@ public class FormattingUtils {
         Style copy1 = style.copy().inheritFrom(null);
         Style copy2 = style.copy()
                            .inheritFrom(new Style().setColor(TextFormatting.BLACK)
-                                                      .setObfuscated(true)
-                                                      .setBold(true)
-                                                      .setStrikethrough(true)
-                                                      .setUnderlined(true)
-                                                      .setItalic(true));
+                                                   .setObfuscated(true)
+                                                   .setBold(true)
+                                                   .setStrikethrough(true)
+                                                   .setUnderlined(true)
+                                                   .setItalic(true));
         TextFormatting patchColor = patch.getColor();
         if (copy1.getColor() == copy2.getColor()
             && patchColor != null

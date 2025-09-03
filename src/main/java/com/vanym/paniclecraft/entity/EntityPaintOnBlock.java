@@ -524,7 +524,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     
     public static EntityType<EntityPaintOnBlock> createType() {
         return EntityType.Builder.<EntityPaintOnBlock>of(EntityPaintOnBlock::new,
-                                                             EntityClassification.MISC)
+                                                         EntityClassification.MISC)
                                  .noSummon()
                                  .fireImmune()
                                  .sized(1.0F, 1.0F)

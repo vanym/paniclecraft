@@ -122,7 +122,9 @@ public class RecipePaintingFrameAddPainting extends ShapedRecipe {
         }
         
         @Override
-        public RecipePaintingFrameAddPainting fromNetwork(ResourceLocation recipeId, PacketBuffer buf) {
+        public RecipePaintingFrameAddPainting fromNetwork(
+                ResourceLocation recipeId,
+                PacketBuffer buf) {
             Direction side = Direction.from3DDataValue(buf.readVarInt());
             ShapedRecipe recipe = super.fromNetwork(recipeId, buf);
             return new RecipePaintingFrameAddPainting(recipe, side);

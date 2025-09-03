@@ -60,7 +60,12 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             this.minecraft.getTextureManager().register(CHART_TEXTURE, chartTexture);
         }
         this.chart =
-                new GuiColorChart(chartTexture, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
+                new GuiColorChart(
+                        chartTexture,
+                        this.leftPos,
+                        this.topPos,
+                        this.imageWidth,
+                        this.imageHeight);
         this.children.add(this.chart);
         this.picker = new GuiColorPicker(this.leftPos + 8, this.topPos + 38, 16, 16);
         this.children.add(this.picker);
@@ -187,7 +192,7 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     protected void drawInventoriesNames() {
         this.font.draw(this.title.getColoredString(), 8, 6, 0x404040);
         this.font.draw(this.inventory.getDisplayName().getColoredString(),
-                             8, this.imageHeight - 96 + 2, 0x404040);
+                       8, this.imageHeight - 96 + 2, 0x404040);
     }
     
     protected void drawRGBLabels() {
@@ -196,9 +201,9 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
             GuiOneColorField field = this.textColor[i];
             int yoffset = (field.getInnerWidth() - field.getWidth()) / -4;
             this.font.draw(letters.charAt(i) + ": ",
-                                 -this.leftPos + field.x - 11,
-                                 -this.topPos + field.y + yoffset,
-                                 0x404040);
+                           -this.leftPos + field.x - 11,
+                           -this.topPos + field.y + yoffset,
+                           0x404040);
         }
     }
     

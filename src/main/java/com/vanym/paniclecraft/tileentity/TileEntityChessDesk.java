@@ -150,7 +150,8 @@ public class TileEntityChessDesk extends TileEntityBase {
     @Override
     @OnlyIn(Dist.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
-        return GeometryUtils.setMaxY(GeometryUtils.getFullBlockBox(), 0.5D).move(this.worldPosition);
+        return GeometryUtils.setMaxY(GeometryUtils.getFullBlockBox(), 0.5D)
+                            .move(this.worldPosition);
     }
     
     @Override

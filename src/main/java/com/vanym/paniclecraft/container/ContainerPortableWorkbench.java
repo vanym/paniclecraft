@@ -20,7 +20,7 @@ public class ContainerPortableWorkbench extends WorkbenchContainer {
     
     public ContainerPortableWorkbench(int id, PlayerInventory inventory) {
         super(id, inventory, IWorldPosCallable.create(inventory.player.level,
-                                                  inventory.player.getCommandSenderBlockPosition()));
+                                                      inventory.player.getCommandSenderBlockPosition()));
         Slot original = (Slot)this.slots.get(0);
         SlotPortableCrafting slot = new SlotPortableCrafting(
                 inventory.player,

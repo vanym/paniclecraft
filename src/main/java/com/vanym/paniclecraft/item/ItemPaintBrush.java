@@ -30,8 +30,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
-
 public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
     
     public static final String TAG_COLOR = "Color";

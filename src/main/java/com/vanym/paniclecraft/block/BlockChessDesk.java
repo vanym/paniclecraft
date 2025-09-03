@@ -57,8 +57,8 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
                               .noDrops());
         this.setRegistryName("chess_desk");
         this.registerDefaultState(this.stateDefinition.any()
-                                                .setValue(FACING, Direction.NORTH)
-                                                .setValue(WATERLOGGED, false));
+                                                      .setValue(FACING, Direction.NORTH)
+                                                      .setValue(WATERLOGGED, false));
     }
     
     @Override
@@ -80,7 +80,7 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     @SuppressWarnings("deprecation")
     public IFluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
-                                      : super.getFluidState(state);
+                                           : super.getFluidState(state);
     }
     
     @Override
@@ -105,7 +105,7 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
                  .scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
         return super.updateShape(state, facing, facingState, world, currentPos,
-                                         facingPos);
+                                 facingPos);
     }
     
     @Override
@@ -149,7 +149,11 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     }
     
     @Override
-    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+    public void playerWillDestroy(
+            World world,
+            BlockPos pos,
+            BlockState state,
+            PlayerEntity player) {
         TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getBlockEntity(pos);
         popResource(world, pos, ItemChessDesk.getSavedDesk(tileCD));
         super.playerWillDestroy(world, pos, state, player);

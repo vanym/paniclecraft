@@ -144,7 +144,11 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
     }
     
     @Override
-    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+    public void playerWillDestroy(
+            World world,
+            BlockPos pos,
+            BlockState state,
+            PlayerEntity player) {
         TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof TileEntityPaintingFrame) {
             TileEntityPaintingFrame timePF = (TileEntityPaintingFrame)tile;
@@ -173,7 +177,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             SideUtils.runSync(!world.isClientSide, tilePF, ()-> {
                 for (Direction pside : Direction.values()) {
                     ItemPaintingFrame.getPictureTag(stack, pside)
-                                     .ifPresent(tag->tilePF.createPicture(pside.get3DDataValue(), tag));
+                                     .ifPresent(tag->tilePF.createPicture(pside.get3DDataValue(),
+                                                                          tag));
                 }
                 tilePF.rotateY(rot);
             });
