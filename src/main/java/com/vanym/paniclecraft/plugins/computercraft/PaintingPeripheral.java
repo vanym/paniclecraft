@@ -9,6 +9,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class PaintingPeripheral extends PicturePeripheral {
     
@@ -37,10 +38,12 @@ public class PaintingPeripheral extends PicturePeripheral {
         return this.picture;
     }
     
-    public static IPeripheral getPeripheral(World world, BlockPos pos, Direction side) {
+    public static LazyOptional<
+        IPeripheral> getPeripheral(World world, BlockPos pos, Direction side) {
         int pside = side.getOpposite().get3DDataValue();
         return Optional.ofNullable(WorldPictureProvider.PAINTING.getPicture(world, pos, pside))
-                       .map(PaintingPeripheral::new)
-                       .orElse(null);
+                       .map(picture->LazyOptional.of(()->new PaintingPeripheral(picture)))
+                       .orElse(LazyOptional.empty())
+                       .cast();
     }
 }
