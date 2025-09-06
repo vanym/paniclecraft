@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.client.renderer.model;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -20,7 +19,7 @@ public class ModelCannonBody2 extends Model {
     ModelRenderer Shape8;
     
     public ModelCannonBody2() {
-        super(RenderType::entitySolid);
+        super(ModelCannonBody.RENDER_TYPE);
         texWidth = 128;
         texHeight = 64;
         

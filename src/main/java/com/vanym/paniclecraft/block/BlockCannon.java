@@ -19,7 +19,7 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -28,8 +28,6 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class BlockCannon extends ContainerBlock {
@@ -40,12 +38,13 @@ public class BlockCannon extends ContainerBlock {
     public BlockCannon() {
         super(Block.Properties.of(Material.HEAVY_METAL)
                               .sound(SoundType.STONE)
+                              .noOcclusion()
                               .strength(1.5F));
         this.setRegistryName("cannon");
     }
     
     @Override
-    public boolean use(
+    public ActionResultType use(
             BlockState state,
             World world,
             BlockPos pos,
@@ -58,7 +57,7 @@ public class BlockCannon extends ContainerBlock {
                 NetworkHooks.openGui((ServerPlayerEntity)player, container, pos);
             }
         }
-        return true;
+        return ActionResultType.SUCCESS;
     }
     
     @Override
@@ -67,19 +66,8 @@ public class BlockCannon extends ContainerBlock {
     }
     
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean hasCustomBreakingProgress(BlockState state) {
-        return true;
-    }
-    
-    @Override
     public BlockRenderType getRenderShape(BlockState state) {
         return BlockRenderType.ENTITYBLOCK_ANIMATED;
-    }
-    
-    @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT;
     }
     
     @Override
