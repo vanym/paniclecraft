@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.client.renderer.model;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,7 +23,7 @@ public class ModelChessRook extends Model {
     ModelRenderer pike8;
     
     public ModelChessRook() {
-        super(RenderType::entityCutoutNoCull);
+        super(ModelChessDesk.RENDER_TYPE);
         texWidth = 32;
         texHeight = 16;
         

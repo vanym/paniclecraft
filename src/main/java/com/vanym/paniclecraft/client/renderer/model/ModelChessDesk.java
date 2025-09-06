@@ -1,20 +1,25 @@
 package com.vanym.paniclecraft.client.renderer.model;
 
+import java.util.function.Function;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ModelChessDesk extends Model {
+    public static final Function<ResourceLocation, RenderType> RENDER_TYPE = RenderType::entityCutout;
+    
     ModelRenderer Shape1;
     
     public ModelChessDesk() {
-        super(RenderType::entitySolid);
+        super(RENDER_TYPE);
         texWidth = 64;
         texHeight = 32;
         

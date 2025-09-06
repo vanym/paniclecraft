@@ -3,7 +3,6 @@ package com.vanym.paniclecraft.client.renderer.model;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -17,7 +16,7 @@ public class ModelChessPawn extends Model {
     ModelRenderer body4;
     
     public ModelChessPawn() {
-        super(RenderType::entityCutoutNoCull);
+        super(ModelChessDesk.RENDER_TYPE);
         texWidth = 64;
         texHeight = 32;
         
