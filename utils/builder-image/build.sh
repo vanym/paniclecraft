@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
-TAG="2.14-0"
+TAG="2.15-0"
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
 ROOT="$DIR"/../..
