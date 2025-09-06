@@ -92,11 +92,11 @@ public class ModComponentAdvSign extends ModComponent {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
-        this.tileAdvSignRenderer = new TileEntityAdvSignRenderer();
-        this.tileAdvSignRenderer.init(TileEntityRendererDispatcher.instance);
+        this.tileAdvSignRenderer =
+                new TileEntityAdvSignRenderer(TileEntityRendererDispatcher.instance);
         if (this.renderTileAdvSign.get()) {
-            ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAdvSign.class,
-                                                         this.tileAdvSignRenderer);
+            ClientRegistry.bindTileEntityRenderer(this.tileEntityAdvSign,
+                                                  (dispatcher)->this.tileAdvSignRenderer);
         }
     }
     

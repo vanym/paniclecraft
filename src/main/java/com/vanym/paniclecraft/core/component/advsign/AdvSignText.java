@@ -116,7 +116,7 @@ public class AdvSignText implements INBTSerializable<CompoundNBT> {
         ListNBT linesTag = new ListNBT();
         this.lines.stream()
                   .map(ITextComponent.Serializer::toJson)
-                  .map(StringNBT::new)
+                  .map(StringNBT::valueOf)
                   .forEachOrdered(linesTag::add);
         nbtTag.put(TAG_LINES, linesTag);
         nbtTag.putInt(TAG_TEXTCOLOR, this.textColor.getRGB());

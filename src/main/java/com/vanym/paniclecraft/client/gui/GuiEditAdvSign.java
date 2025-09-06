@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -29,6 +29,9 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.text.ITextComponent;
@@ -287,16 +290,20 @@ public class GuiEditAdvSign extends Screen {
     }
     
     protected void drawSign() {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(this.width / 2, 0.0F, 50.0F);
+        IRenderTypeBuffer.Impl buffer = this.minecraft.renderBuffers().bufferSource();
+        MatrixStack ms = new MatrixStack();
+        ms.pushPose();
+        ms.translate(this.width / 2, 0.0F, 50.0F);
         float scale = 93.75F;
-        GlStateManager.scalef(-scale, -scale, -scale);
-        GlStateManager.rotatef(this.front ? 180.0F : 0.0F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.translatef(0.0F, -1.0625F, 0.0F);
-        Core.instance.advSign.tileAdvSignRenderer.render(this.sign, -0.5D, -0.75D,
-                                                         -0.5D, 0.0F, -1, true, false,
-                                                         this);
-        GlStateManager.popMatrix();
+        ms.scale(-scale, -scale, -scale);
+        ms.mulPose(Vector3f.YP.rotationDegrees(this.front ? 180.0F : 0.0F));
+        ms.translate(0.0F, -1.0625F, 0.0F);
+        ms.translate(-0.5D, -0.75D, -0.5D);
+        Core.instance.advSign.tileAdvSignRenderer.render(this.sign, 0.0F, ms, buffer, 0xf000f0,
+                                                         OverlayTexture.NO_OVERLAY,
+                                                         true, false, this);
+        ms.popPose();
+        buffer.endBatch();
     }
     
     public boolean isBlink() {
