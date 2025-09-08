@@ -25,7 +25,7 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
@@ -40,8 +40,6 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class BlockPainting extends BlockPaintingContainer implements IWaterLoggable {
     
@@ -112,19 +110,8 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean hasCustomBreakingProgress(BlockState state) {
-        return true;
-    }
-    
-    @Override
     public BlockRenderType getRenderShape(BlockState state) {
         return BlockRenderType.ENTITYBLOCK_ANIMATED;
-    }
-    
-    @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT;
     }
     
     @Override
@@ -140,7 +127,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     @Override
     @SuppressWarnings("deprecation")
     public boolean canBeReplaced(BlockState state, BlockItemUseContext context) {
-        if (context.isSneaking()) {
+        if (context.isSecondaryUseActive()) {
             return super.canBeReplaced(state, context);
         }
         return context.getItemInHand().getItem() == this.asItem()
@@ -153,27 +140,29 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
-    public boolean use(
+    public ActionResultType use(
             BlockState state,
             World world,
             BlockPos pos,
             PlayerEntity player,
             Hand hand,
             BlockRayTraceResult hit) {
-        if (super.use(state, world, pos, player, hand, hit)) {
-            return true;
+        if (super.use(state, world, pos, player, hand, hit) == ActionResultType.SUCCESS) {
+            return ActionResultType.SUCCESS;
         }
-        if (!player.isSneaking()) {
-            return false;
+        if (!player.isSecondaryUseActive()) {
+            return ActionResultType.PASS;
         }
         TileEntity tile = world.getBlockEntity(pos);
         if (tile == null || !(tile instanceof TileEntityPainting)) {
-            return false;
+            return ActionResultType.FAIL;
         }
         if (world.isClientSide) {
-            return true;
+            return ActionResultType.SUCCESS;
         }
-        return this.removedByPlayer(state, world, pos, player, false, world.getFluidState(pos));
+        return this.removedByPlayer(state, world, pos, player, false,
+                                    world.getFluidState(pos)) ? ActionResultType.SUCCESS
+                                                              : ActionResultType.FAIL;
     }
     
     @Override

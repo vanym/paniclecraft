@@ -37,7 +37,7 @@ public class ItemChessDesk extends BlockItem {
     protected static final String TAG_MOVES = TileEntityChessDesk.TAG_MOVES;
     
     public ItemChessDesk(Block block) {
-        super(block, Props.create().setTEISR(()->ItemRendererChessDesk::new));
+        super(block, Props.create().setISTER(()->ItemRendererChessDesk::new));
         this.setRegistryName(block.getRegistryName());
     }
     

@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
@@ -7,6 +8,7 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
@@ -24,12 +26,17 @@ public class ItemRendererPainting extends ItemStackTileEntityRenderer {
     
     public ItemRendererPainting(PictureTextureCache textureCache) {
         this.textureCache = textureCache;
-        this.paintingTileRenderer = new TileEntityPaintingRenderer();
-        this.paintingTileRenderer.init(TileEntityRendererDispatcher.instance);
+        this.paintingTileRenderer =
+                new TileEntityPaintingRenderer(TileEntityRendererDispatcher.instance);
     }
     
     @Override
-    public void renderByItem(ItemStack item) {
+    public void renderByItem(
+            ItemStack item,
+            MatrixStack ms,
+            IRenderTypeBuffer buffers,
+            int light,
+            int overlay) {
         TileEntityPainting tilePainting = new TileEntityPainting();
         Picture picture = tilePainting.getPicture();
         CompoundNBT nbtPictureTag = ItemPainting.getPictureTag(item).orElse(null);
@@ -44,7 +51,9 @@ public class ItemRendererPainting extends ItemStackTileEntityRenderer {
         } else if (nbtPictureTag != null) {
             picture.deserializeNBT(nbtPictureTag);
         }
-        this.paintingTileRenderer.renderAtItem(tilePainting);
+        this.paintingTileRenderer.renderByItem(tilePainting, ms, buffers, light, overlay);
+        // explicitly obtaining texture id
+        TileEntityPaintingRenderer.bindTexture(picture); // TODO: remove it
         if (obtainedTexture < 0) {
             this.textureCache.putTexture(nbtImageTag, picture.texture);
         }

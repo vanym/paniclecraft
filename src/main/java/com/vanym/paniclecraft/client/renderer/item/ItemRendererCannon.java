@@ -1,16 +1,19 @@
 package com.vanym.paniclecraft.client.renderer.item;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -21,10 +24,16 @@ public class ItemRendererCannon extends ItemStackTileEntityRenderer {
     protected boolean oneshot = false;
     
     @Override
-    public void renderByItem(ItemStack stack) {
+    public void renderByItem(
+            ItemStack stack,
+            MatrixStack ms,
+            IRenderTypeBuffer buffers,
+            int light,
+            int overlay) {
         TileEntityCannon tileCannon = new TileEntityCannon();
         tileCannon.setHeight(this.height);
-        Core.instance.cannon.tileCannonRenderer.render(tileCannon, 0.0F, 0.0F, 0.0F, 1.0F, -1);
+        TileEntityRendererDispatcher.instance.renderItem(tileCannon, ms, buffers,
+                                                         light, overlay);
         if (this.oneshot) {
             this.height = 0.0D;
             this.oneshot = false;
@@ -46,7 +55,7 @@ public class ItemRendererCannon extends ItemStackTileEntityRenderer {
     }
     
     @SubscribeEvent
-    public void handRender(RenderSpecificHandEvent event) {
+    public void handRender(RenderHandEvent event) {
         if (event.getItemStack().getItem() == Core.instance.cannon.itemCannon) {
             this.setHeight(event.getInterpolatedPitch());
             this.oneshot = true;

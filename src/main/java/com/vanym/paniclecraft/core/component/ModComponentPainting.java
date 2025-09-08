@@ -259,7 +259,7 @@ public class ModComponentPainting extends ModComponent {
     }
     
     // Subscribes in setup
-    protected void configChanged(ModConfig.ConfigReloading event) {
+    protected void configChanged(ModConfig.Reloading event) {
         if (event.getConfig().getType() != ModConfig.Type.SERVER
             || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
             return;
@@ -288,12 +288,12 @@ public class ModComponentPainting extends ModComponent {
         
         MinecraftForge.EVENT_BUS.register(this.textureCache);
         
-        this.paintingTileRenderer = new TileEntityPaintingRenderer();
-        this.paintingTileRenderer.init(TileEntityRendererDispatcher.instance);
-        this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
-        this.paintingFrameTileRenderer.init(TileEntityRendererDispatcher.instance);
+        this.paintingTileRenderer =
+                new TileEntityPaintingRenderer(TileEntityRendererDispatcher.instance);
+        this.paintingFrameTileRenderer =
+                new TileEntityPaintingFrameRenderer(TileEntityRendererDispatcher.instance);
         
-        RenderingRegistry.registerEntityRenderingHandler(EntityPaintOnBlock.class,
+        RenderingRegistry.registerEntityRenderingHandler(this.entityTypePaintOnBlock,
                                                          EntityPaintOnBlockRenderer::new);
         
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -303,7 +303,7 @@ public class ModComponentPainting extends ModComponent {
     
     // Subscribes in setupClient
     @OnlyIn(Dist.CLIENT)
-    protected void configChangedClient(ModConfig.ConfigReloading event) {
+    protected void configChangedClient(ModConfig.Reloading event) {
         if (event.getConfig().getType() != ModConfig.Type.CLIENT
             || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
             return;
@@ -324,12 +324,12 @@ public class ModComponentPainting extends ModComponent {
         this.paintingTileRenderer.renderPictureType =
                 this.clientConfig.renderPaintingTilePartPictureType;
         if (this.clientConfig.renderPaintingTile) {
-            ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPainting.class,
-                                                         this.paintingTileRenderer);
+            ClientRegistry.bindTileEntityRenderer(this.tileEntityPainting,
+                                                  (dispatcher)->this.paintingTileRenderer);
         } else {
             TileEntityRendererDispatcher dispatcher = TileEntityRendererDispatcher.instance;
             synchronized (dispatcher) {
-                dispatcher.renderers.remove(TileEntityPainting.class,
+                dispatcher.renderers.remove(this.tileEntityPainting,
                                             this.paintingTileRenderer);
             }
         }
@@ -339,12 +339,12 @@ public class ModComponentPainting extends ModComponent {
         this.paintingFrameTileRenderer.renderPictureType =
                 this.clientConfig.renderPaintingFrameTilePartPictureType;
         if (this.clientConfig.renderPaintingFrameTile) {
-            ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPaintingFrame.class,
-                                                         this.paintingFrameTileRenderer);
+            ClientRegistry.bindTileEntityRenderer(this.tileEntityPaintingFrame,
+                                                  (dispatcher)->this.paintingFrameTileRenderer);
         } else {
             TileEntityRendererDispatcher dispatcher = TileEntityRendererDispatcher.instance;
             synchronized (dispatcher) {
-                dispatcher.renderers.remove(TileEntityPaintingFrame.class,
+                dispatcher.renderers.remove(this.tileEntityPaintingFrame,
                                             this.paintingFrameTileRenderer);
             }
         }

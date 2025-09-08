@@ -17,12 +17,15 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.MethodResult;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.peripheral.IDynamicPeripheral;
+import dan200.computercraft.core.asm.TaskCallback;
 
-public abstract class PeripheralBase implements IPeripheral {
+public abstract class PeripheralBase implements IDynamicPeripheral {
     
     protected final Method[] methods;
     
@@ -48,11 +51,11 @@ public abstract class PeripheralBase implements IPeripheral {
     }
     
     @Override
-    public final Object[] callMethod(
+    public final MethodResult callMethod(
             IComputerAccess computer,
             ILuaContext context,
             int methodIndex,
-            Object[] arguments) throws LuaException, InterruptedException {
+            IArguments arguments) throws LuaException {
         try {
             Method method = this.methods[methodIndex];
             PeripheralMethod annotation = method.getAnnotation(PeripheralMethod.class);
@@ -73,15 +76,15 @@ public abstract class PeripheralBase implements IPeripheral {
                     ++paramIndex;
                     methodArgs.add(context);
                 }
-                if ((params.length - paramIndex) > arguments.length) {
+                if ((params.length - paramIndex) > arguments.count()) {
                     throw new LuaException("too few arguments");
                 }
-                if ((params.length - paramIndex) < arguments.length) {
+                if ((params.length - paramIndex) < arguments.count()) {
                     throw new LuaException("too many arguments");
                 }
-                for (int i = 0; i < arguments.length; ++i, ++paramIndex) {
+                for (int i = 0; i < arguments.count(); ++i, ++paramIndex) {
                     Parameter param = params[paramIndex];
-                    Object arg = arguments[i];
+                    Object arg = arguments.get(i);
                     Class<?> clazz = param.getType();
                     
                     try {
@@ -124,19 +127,13 @@ public abstract class PeripheralBase implements IPeripheral {
                 }
             }
             if (annotation.mainThread()) {
-                Object[] rets = context.executeMainThreadTask(()-> {
-                    try {
-                        return this.execute(method, methodArgs.toArray());
-                    } catch (InterruptedException e) {
-                        return new Object[]{e};
-                    }
+                // TODO: Do not use non-api class TaskCallback
+                MethodResult rets = TaskCallback.make(context, ()-> {
+                    return this.execute(method, methodArgs.toArray());
                 });
-                if (rets != null && rets.length == 1 && rets[0] instanceof InterruptedException) {
-                    throw (InterruptedException)rets[0];
-                }
                 return rets;
             } else {
-                return this.execute(method, methodArgs.toArray());
+                return MethodResult.of(this.execute(method, methodArgs.toArray()));
             }
         } catch (IllegalArgumentException | ClassCastException e) {
             throw new LuaException(e.getMessage());
@@ -153,8 +150,7 @@ public abstract class PeripheralBase implements IPeripheral {
         boolean mainThread() default false;
     }
     
-    private Object[] execute(Method method, Object[] args)
-            throws LuaException, InterruptedException {
+    private Object[] execute(Method method, Object[] args) throws LuaException {
         try {
             Object ret = method.invoke(this, args);
             if (method.getReturnType() == Void.TYPE) {
@@ -182,8 +178,6 @@ public abstract class PeripheralBase implements IPeripheral {
             Throwable cause = e.getCause();
             if (cause instanceof LuaException) {
                 throw (LuaException)cause;
-            } else if (cause instanceof InterruptedException) {
-                throw (InterruptedException)cause;
             } else {
                 throw new LuaException(e.getMessage());
             }

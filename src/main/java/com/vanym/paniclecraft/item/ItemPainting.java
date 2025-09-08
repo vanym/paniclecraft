@@ -49,14 +49,14 @@ public class ItemPainting extends BlockItem {
     protected static final String TAG_PICTURE = TileEntityPainting.TAG_PICTURE;
     
     public ItemPainting(Block block) {
-        super(block, Props.create().setTEISR(()->ItemRendererPainting::create));
+        super(block, Props.create().setISTER(()->ItemRendererPainting::create));
         this.setRegistryName("painting");
     }
     
     @Override
     public ActionResultType useOn(ItemUseContext context) {
         PlayerEntity player = context.getPlayer();
-        if (player != null && !player.isSneaking()) {
+        if (player != null && !player.isSecondaryUseActive()) {
             World world = context.getLevel();
             BlockPos pos = context.getClickedPos();
             TileEntity tile = world.getBlockEntity(pos);
@@ -75,11 +75,11 @@ public class ItemPainting extends BlockItem {
     @Nullable
     public BlockItemUseContext updatePlacementContext(BlockItemUseContext context) {
         PlayerEntity player = context.getPlayer();
-        if (player == null || player.isSneaking()) {
+        if (player == null || player.isSecondaryUseActive()) {
             return context;
         }
         World world = context.getLevel();
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(context.getClickedPos());
+        BlockPos.Mutable pos = new BlockPos.Mutable(context.getClickedPos());
         Direction side = context.getClickedFace();
         Block self = this.getBlock();
         for (int i = 0; i < Core.instance.painting.config.paintingPlaceStack; i++) {
@@ -172,7 +172,7 @@ public class ItemPainting extends BlockItem {
         GameSettings settings = mc.options;
         GuiUtils.showFloatingTooltip(new TranslationTextComponent(
                 this.getDescriptionId() + ".remove_tooltip",
-                settings.keySneak.getTranslatedKeyMessage(),
+                settings.keyShift.getTranslatedKeyMessage(),
                 settings.keyUse.getTranslatedKeyMessage()));
     }
     

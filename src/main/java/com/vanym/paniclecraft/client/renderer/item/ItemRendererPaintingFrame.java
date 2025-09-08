@@ -2,14 +2,17 @@ package com.vanym.paniclecraft.client.renderer.item;
 
 import java.util.stream.IntStream;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingFrameRenderer;
+import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
@@ -27,12 +30,17 @@ public class ItemRendererPaintingFrame extends ItemStackTileEntityRenderer {
     
     public ItemRendererPaintingFrame(PictureTextureCache textureCache) {
         this.textureCache = textureCache;
-        this.paintingFrameTileRenderer = new TileEntityPaintingFrameRenderer();
-        this.paintingFrameTileRenderer.init(TileEntityRendererDispatcher.instance);
+        this.paintingFrameTileRenderer =
+                new TileEntityPaintingFrameRenderer(TileEntityRendererDispatcher.instance);
     }
     
     @Override
-    public void renderByItem(ItemStack stack) {
+    public void renderByItem(
+            ItemStack stack,
+            MatrixStack ms,
+            IRenderTypeBuffer buffers,
+            int light,
+            int overlay) {
         TileEntityPaintingFrame tilePF = new TileEntityPaintingFrame();
         int[] obtainedTextures = new int[ISidePictureProvider.N];
         CompoundNBT[] tags = IntStream.range(0, ISidePictureProvider.N)
@@ -55,12 +63,14 @@ public class ItemRendererPaintingFrame extends ItemStackTileEntityRenderer {
                 picture.deserializeNBT(pictureTag);
             }
         }
-        this.paintingFrameTileRenderer.renderAtItem(tilePF);
+        this.paintingFrameTileRenderer.renderByItem(tilePF, ms, buffers, light, overlay);
         for (int i = 0; i < ISidePictureProvider.N; i++) {
             Picture picture = tilePF.getPicture(i);
             if (picture == null || obtainedTextures[i] >= 0) {
                 continue;
             }
+            // explicitly obtaining texture id
+            TileEntityPaintingRenderer.bindTexture(picture); // TODO: remove it
             CompoundNBT pictureTag = tags[i];
             INBT imageTag = pictureTag.get(Picture.TAG_IMAGE);
             this.textureCache.putTexture(imageTag, picture.texture);

@@ -15,7 +15,6 @@ import com.vanym.paniclecraft.network.message.MessageCannonSet;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
 import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -50,9 +49,6 @@ public class ModComponentCannon extends ModComponent {
     public Supplier<Integer> shootTimeout;
     
     @OnlyIn(Dist.CLIENT)
-    public TileEntityCannonRenderer tileCannonRenderer;
-    
-    @OnlyIn(Dist.CLIENT)
     protected Supplier<Boolean> renderTileCannon;
     
     @Override
@@ -63,7 +59,7 @@ public class ModComponentCannon extends ModComponent {
         this.itemCannon = new BlockItem(
                 this.blockCannon,
                 new Item.Properties().tab(Core.instance.tab)
-                                     .setTEISR(()->ItemRendererCannon::createRegistered));
+                                     .setISTER(()->ItemRendererCannon::createRegistered));
         this.itemCannon.setRegistryName(this.blockCannon.getRegistryName());
         this.tileEntityCannon = new TileEntityType<>(
                 TileEntityCannon::new,
@@ -102,11 +98,9 @@ public class ModComponentCannon extends ModComponent {
     @OnlyIn(Dist.CLIENT)
     protected void setupClient(FMLClientSetupEvent event) {
         ScreenManager.register(this.containerCannon, GuiCannon::new);
-        this.tileCannonRenderer = new TileEntityCannonRenderer();
-        this.tileCannonRenderer.init(TileEntityRendererDispatcher.instance);
         if (this.renderTileCannon.get()) {
-            ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCannon.class,
-                                                         this.tileCannonRenderer);
+            ClientRegistry.bindTileEntityRenderer(this.tileEntityCannon,
+                                                  TileEntityCannonRenderer::new);
         }
     }
     

@@ -47,7 +47,7 @@ import net.minecraftforge.fml.common.thread.EffectiveSide;
 public class ItemAdvSign extends Item {
     
     public ItemAdvSign() {
-        super(Props.create().stacksTo(16).setTEISR(()->ItemRendererAdvSign::new));
+        super(Props.create().stacksTo(16).setISTER(()->ItemRendererAdvSign::new));
         this.setRegistryName("advanced_sign");
     }
     
@@ -95,7 +95,7 @@ public class ItemAdvSign extends Item {
             PlayerEntity player,
             Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (getSign(stack).isPresent() && player.isSneaking()) {
+        if (getSign(stack).isPresent() && player.isSteppingCarefully()) {
             removeSign(stack);
             return new ActionResult<>(ActionResultType.SUCCESS, stack);
         } else {
@@ -105,7 +105,7 @@ public class ItemAdvSign extends Item {
     
     @Override
     public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
-        if (context.isSneaking()) {
+        if (context.isSecondaryUseActive()) {
             return ActionResultType.PASS;
         }
         World world = context.getLevel();

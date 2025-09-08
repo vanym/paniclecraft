@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.client.renderer;
 
 import java.util.HashMap;
 
-import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.nbt.INBT;
 import net.minecraftforge.api.distmarker.Dist;
@@ -44,7 +44,7 @@ public class PictureTextureCache {
     }
     
     protected void clearTexture(int texture) {
-        TextureUtil.releaseTextureId(texture);
+        RenderSystem.deleteTexture(texture);
     }
     
     @SubscribeEvent

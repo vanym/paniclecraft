@@ -4,9 +4,8 @@ import java.awt.Color;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
-import org.lwjgl.opengl.GL11;
-
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool;
 import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -14,9 +13,8 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -29,7 +27,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent.HighlightBlock;
+import net.minecraftforge.client.event.DrawHighlightEvent.HighlightBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @OnlyIn(Dist.CLIENT)
@@ -160,42 +158,37 @@ public class PaintingSpecialSelectionBox {
         Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.axes.fromSideCoords(b)
                                                                          .move(pos)
                                                                          .move(view.reverse()));
-        this.drawLines(frameLines);
+        this.drawLines(frameLines, event.getMatrix(),
+                       event.getBuffers().getBuffer(RenderType.lines()));
     }
     
-    protected void drawLines(Stream<AxisAlignedBB> lines) {
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-                                         GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                                         GlStateManager.SourceFactor.ONE,
-                                         GlStateManager.DestFactor.ZERO);
-        GlStateManager.lineWidth(2.0F);
-        GlStateManager.disableTexture();
-        GlStateManager.depthMask(false);
-        lines.forEach(box->this.drawLine(box));
-        GlStateManager.depthMask(true);
-        GlStateManager.enableTexture();
-        GlStateManager.disableBlend();
+    protected void drawLines(
+            Stream<AxisAlignedBB> lines,
+            MatrixStack ms,
+            IVertexBuilder vertexer) {
+        lines.forEach(box->this.drawLine(box, ms, vertexer));
     }
     
-    protected void drawLine(AxisAlignedBB box) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buf = tessellator.getBuilder();
-        buf.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+    protected void drawLine(
+            AxisAlignedBB box,
+            MatrixStack ms,
+            IVertexBuilder vx) {
+        Matrix4f pose = ms.last().pose();
         Color color = this.getColor();
         int r = color.getRed(), g = color.getGreen(), b = color.getBlue(), a = color.getAlpha();
-        if (box.minX != box.maxX) {
-            buf.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-            buf.vertex(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex();
+        float minX = (float)box.minX, minY = (float)box.minY, minZ = (float)box.minZ,
+                maxX = (float)box.maxX, maxY = (float)box.maxY, maxZ = (float)box.maxZ;
+        if (minX != maxX) {
+            vx.vertex(pose, minX, minY, minZ).color(r, g, b, a).endVertex();
+            vx.vertex(pose, maxX, minY, minZ).color(r, g, b, a).endVertex();
         }
-        if (box.minY != box.maxY) {
-            buf.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-            buf.vertex(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex();
+        if (minY != maxY) {
+            vx.vertex(pose, minX, minY, minZ).color(r, g, b, a).endVertex();
+            vx.vertex(pose, minX, maxY, minZ).color(r, g, b, a).endVertex();
         }
-        if (box.minZ != box.maxZ) {
-            buf.vertex(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex();
-            buf.vertex(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex();
+        if (minZ != maxZ) {
+            vx.vertex(pose, minX, minY, minZ).color(r, g, b, a).endVertex();
+            vx.vertex(pose, minX, minY, maxZ).color(r, g, b, a).endVertex();
         }
-        tessellator.end();
     }
 }

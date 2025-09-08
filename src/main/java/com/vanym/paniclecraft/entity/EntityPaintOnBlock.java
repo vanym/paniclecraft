@@ -1,6 +1,5 @@
 package com.vanym.paniclecraft.entity;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +46,6 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -442,14 +440,6 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
                 list.add(pictureEntry.copy());
             }
             return list;
-        }
-        
-        @Override
-        public void packAll(PacketBuffer buf) throws IOException {
-            super.packAll(buf);
-            // removing '255' end byte
-            buf.writerIndex(buf.writerIndex() - 1);
-            pack(Arrays.asList(this.pictureEntries), buf);
         }
         
         @Override

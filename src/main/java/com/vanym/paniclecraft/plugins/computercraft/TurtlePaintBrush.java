@@ -1,19 +1,16 @@
 package com.vanym.paniclecraft.plugins.computercraft;
 
-import javax.vecmath.Matrix4f;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 
+import dan200.computercraft.api.client.TransformedModel;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import dan200.computercraft.api.turtle.ITurtleUpgrade;
 import dan200.computercraft.api.turtle.TurtleSide;
 import dan200.computercraft.api.turtle.TurtleUpgradeType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.TransformationMatrix;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,7 +34,7 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     
     @Override
     public TurtleUpgradeType getType() {
-        return TurtleUpgradeType.Peripheral;
+        return TurtleUpgradeType.PERIPHERAL;
     }
     
     @Override
@@ -52,20 +49,16 @@ public class TurtlePaintBrush implements ITurtleUpgrade {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public Pair<IBakedModel, Matrix4f> getModel(ITurtleAccess turtle, TurtleSide side) {
-        float xOffset = side == TurtleSide.Left ? -0.40625f : 0.40625f;
+    public TransformedModel getModel(ITurtleAccess turtle, TurtleSide side) {
+        float xOffset = side == TurtleSide.LEFT ? -0.40625f : 0.40625f;
         // @formatter:off
-        Matrix4f transform = new Matrix4f(
+        Matrix4f transform = new Matrix4f( new float[] {
             0.0f, 0.0f, -1.0f, 1.0f + xOffset,
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, -1.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
+            0.0f, 0.0f, 0.0f, 1.0f,
+        } );
         // @formatter:on
-        Minecraft mc = Minecraft.getInstance();
-        return Pair.of(mc.getItemRenderer()
-                         .getItemModelShaper()
-                         .getItemModel(this.getCraftingItem()),
-                       transform);
+        return TransformedModel.of(this.getCraftingItem(), new TransformationMatrix(transform));
     }
 }

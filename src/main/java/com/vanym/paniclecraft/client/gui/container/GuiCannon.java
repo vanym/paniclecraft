@@ -2,7 +2,7 @@ package com.vanym.paniclecraft.client.gui.container;
 
 import java.util.stream.Stream;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -130,7 +130,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
             this.drawCenteredString(this.font, I18n.get(String.format(tooltipKey, DEF.MOD_ID)),
                                     this.imageWidth / 2, this.imageHeight + 6, 0xd0d0d0);
         }
-        RenderHelper.turnOnGui();
+        RenderHelper.turnBackOn();
     }
     
     protected boolean isRotating() {
@@ -175,7 +175,7 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     
     @Override
     public void renderBg(float f, int i, int j) {
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bind(GUI_TEXTURE);
         this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }

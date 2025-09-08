@@ -1,15 +1,17 @@
 package com.vanym.paniclecraft.client.renderer.tileentity;
 
-import org.lwjgl.opengl.GL11;
-
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.model.ModelCannonBody;
 import com.vanym.paniclecraft.client.renderer.model.ModelCannonBody2;
 import com.vanym.paniclecraft.client.renderer.model.ModelCannonBody3;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
 
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -24,40 +26,33 @@ public class TileEntityCannonRenderer extends TileEntityRenderer<TileEntityCanno
     protected final ModelCannonBody2 body2 = new ModelCannonBody2();
     protected final ModelCannonBody3 body3 = new ModelCannonBody3();
     
+    public TileEntityCannonRenderer(TileEntityRendererDispatcher dispatcher) {
+        super(dispatcher);
+    }
+    
     @Override
     public void render(
             TileEntityCannon tileCannon,
-            double x,
-            double y,
-            double z,
             float partialTicks,
-            int destroyStage) {
-        GlStateManager.pushMatrix();
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.translatef((float)x + 0.5F, (float)y + 0.5F, (float)z + 0.5F);
-        GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.translatef(0.0F, 0.5F, 0.0F);
-        if (destroyStage >= 0) {
-            this.bindTexture(BREAKING_LOCATIONS[destroyStage]);
-            GlStateManager.matrixMode(GL11.GL_TEXTURE);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(8.0F, 4.0F, 1.0F);
-            GlStateManager.translatef(0.0625F, 0.0625F, 0.0625F);
-            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
-        } else {
-            this.bindTexture(TEXTURE);
-        }
-        this.body.render(0.0625F);
-        GlStateManager.rotatef((float)tileCannon.getDirection(), 0.0F, 1.0F, 0.0F);
-        this.body2.render(0.075F);
-        GlStateManager.translatef(0.0F, -0.4F, 0.0F);
-        GlStateManager.rotatef(90.0F - (float)tileCannon.getHeight(), 1.0F, 0.0F, 0.0F);
-        this.body3.render(0.075F);
-        GlStateManager.popMatrix();
-        if (destroyStage >= 0) {
-            GlStateManager.matrixMode(GL11.GL_TEXTURE);
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
-        }
+            MatrixStack ms,
+            IRenderTypeBuffer buffer,
+            int combinedLight,
+            int combinedOverlay) {
+        ms.pushPose();
+        ms.translate(0.5F, 0.5F, 0.5F);
+        ms.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+        ms.translate(0.0F, 0.5F, 0.0F);
+        IVertexBuilder vertexer = buffer.getBuffer(this.body.renderType(TEXTURE));
+        this.body.renderToBuffer(ms, vertexer, combinedLight, combinedOverlay,
+                                 1.0F, 1.0F, 1.0F, 1.0F);
+        ms.scale(1.2F, 1.2F, 1.2F);
+        ms.mulPose(Vector3f.YP.rotationDegrees((float)tileCannon.getDirection()));
+        this.body2.renderToBuffer(ms, vertexer, combinedLight, combinedOverlay,
+                                  1.0F, 1.0F, 1.0F, 1.0F);
+        ms.translate(0.0F, -0.4F, 0.0F);
+        ms.mulPose(Vector3f.XP.rotationDegrees(90.0F - (float)tileCannon.getHeight()));
+        this.body3.renderToBuffer(ms, vertexer, combinedLight, combinedOverlay,
+                                  1.0F, 1.0F, 1.0F, 1.0F);
+        ms.popPose();
     }
 }

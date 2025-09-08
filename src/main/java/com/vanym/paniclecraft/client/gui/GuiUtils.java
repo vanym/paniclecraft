@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -24,14 +25,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class GuiUtils {
     
     public static void drawLine(double x1, double y1, double x2, double y2, Color color) {
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-                                         GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                                         GlStateManager.SourceFactor.ONE,
-                                         GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                                       GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                       GlStateManager.SourceFactor.ONE,
+                                       GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableTexture();
         float[] f = color.getRGBComponents(null);
-        GlStateManager.color4f(f[0], f[1], f[2], f[3]);
+        RenderSystem.color4f(f[0], f[1], f[2], f[3]);
         Tessellator tessellator = Tessellator.getInstance();
         double dx = x2 - x1, dy = y2 - y1, steps = Math.max(Math.abs(dx), Math.abs(dy));
         double x = x1, y = y1, mx = (double)dx / steps, my = (double)dy / steps;
@@ -44,8 +45,8 @@ public class GuiUtils {
             buf.vertex(x + 1, y + 1, 0.0D).endVertex();
         }
         tessellator.end();
-        GlStateManager.enableTexture();
-        GlStateManager.disableBlend();
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
     }
     
     public static void drawHighlight(int x1, int y1, int x2, int y2) {
@@ -85,10 +86,10 @@ public class GuiUtils {
                 if (px == 0 && py == 0) {
                     continue;
                 }
-                GlStateManager.pushMatrix();
-                GlStateManager.translatef(px * min, py * min, 0.0F);
+                RenderSystem.pushMatrix();
+                RenderSystem.translatef(px * min, py * min, 0.0F);
                 font.draw(line, x, y, outlineColor);
-                GlStateManager.popMatrix();
+                RenderSystem.popMatrix();
             }
         }
         font.draw(line, x, y, textColor);
@@ -96,7 +97,7 @@ public class GuiUtils {
     
     public static boolean isKeyDown(int key) {
         Minecraft minecraft = Minecraft.getInstance();
-        return InputMappings.isKeyDown(minecraft.window.getWindow(), key);
+        return InputMappings.isKeyDown(minecraft.getWindow().getWindow(), key);
     }
     
     public static void setClipboardString(String string) {

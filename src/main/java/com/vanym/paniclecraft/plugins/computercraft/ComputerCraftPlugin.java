@@ -20,6 +20,7 @@ import dan200.computercraft.shared.TurtleUpgrades;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -83,7 +84,7 @@ public class ComputerCraftPlugin implements IModComponent {
     }
     
     // Subscribes in setup
-    protected void configChanged(ModConfig.ConfigReloading event) {
+    protected void configChanged(ModConfig.Reloading event) {
         if (event.getConfig().getType() != ModConfig.Type.SERVER
             || !event.getConfig().getModId().equals(DEF.MOD_ID)) {
             return;
@@ -117,16 +118,17 @@ public class ComputerCraftPlugin implements IModComponent {
     }
     
     protected static <T extends TileEntity> IPeripheralProvider makeProvider(
-            Class<T> tile,
+            Class<T> tileClass,
             Function<T, IPeripheral> creator) {
-        return (world, pos, side)->WorldUtils.getTileEntity(world, pos, tile)
-                                             .map(creator)
-                                             .orElse(null);
+        return (world, pos, side)->WorldUtils.getTileEntity(world, pos, tileClass)
+                                             .map(tile->LazyOptional.of(()->creator.apply(tile)))
+                                             .orElse(LazyOptional.empty());
     }
     
     protected static IPeripheralProvider makeConditionalProvider(
             Supplier<Boolean> condition,
             IPeripheralProvider provider) {
-        return (wrld, pos, side)->!condition.get() ? null : provider.getPeripheral(wrld, pos, side);
+        return (wrld, pos, side)->!condition.get() ? LazyOptional.empty()
+                                                   : provider.getPeripheral(wrld, pos, side);
     }
 }

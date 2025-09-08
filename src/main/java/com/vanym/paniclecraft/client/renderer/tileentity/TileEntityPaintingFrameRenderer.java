@@ -8,14 +8,15 @@ import com.vanym.paniclecraft.tileentity.TileEntityPaintingContainer;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class TileEntityPaintingFrameRenderer extends TileEntityPaintingRenderer {
     
-    public TileEntityPaintingFrameRenderer() {
-        super();
+    public TileEntityPaintingFrameRenderer(TileEntityRendererDispatcher dispatcher) {
+        super(dispatcher);
         this.renderFrameType = 0;
     }
     

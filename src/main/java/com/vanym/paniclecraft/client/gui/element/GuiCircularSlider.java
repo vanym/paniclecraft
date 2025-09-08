@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 
@@ -70,14 +71,14 @@ public class GuiCircularSlider extends Widget {
     
     @Override
     public void renderButton(int mouseX, int mouseY, float partialTicks) {
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-                                         GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                                         GlStateManager.SourceFactor.ONE,
-                                         GlStateManager.DestFactor.ZERO);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+                                       GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                       GlStateManager.SourceFactor.ONE,
+                                       GlStateManager.DestFactor.ZERO);
         Minecraft mc = Minecraft.getInstance();
         mc.getTextureManager().bind(BUTTON_TEXTURES);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buf = tessellator.getBuilder();
         buf.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION_TEX);
@@ -93,11 +94,11 @@ public class GuiCircularSlider extends Widget {
             final double vy = ycenter + oy;
             final double tx = (txc + ox) / 256.0D;
             final double ty = (tyc + oy) / 256.0D;
-            buf.vertex(vx, vy, this.blitOffset).uv(tx, ty).endVertex();
+            buf.vertex(vx, vy, this.getBlitOffset()).uv((float)tx, (float)ty).endVertex();
         }
-        buf.vertex(xcenter, ycenter, this.blitOffset).uv(txc, tyc).endVertex();
+        buf.vertex(xcenter, ycenter, this.getBlitOffset()).uv(txc, tyc).endVertex();
         tessellator.end();
-        GlStateManager.disableBlend();
+        RenderSystem.disableBlend();
         if (this.getter == null) {
             return;
         }

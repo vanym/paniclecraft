@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import com.google.gson.JsonSyntaxException;
-import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
@@ -618,7 +618,8 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     @OnlyIn(Dist.CLIENT)
     protected void unloadClient() {
         if (this.texture != null) {
-            TextureUtil.releaseTextureId(this.texture);
+            // TODO: do deletion in render thread and back-port it
+            GlStateManager._deleteTexture(this.texture);
             this.texture = null;
         }
     }

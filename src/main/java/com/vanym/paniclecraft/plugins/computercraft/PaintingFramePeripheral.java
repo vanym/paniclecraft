@@ -15,6 +15,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class PaintingFramePeripheral extends PicturePeripheral {
     
@@ -87,10 +88,12 @@ public class PaintingFramePeripheral extends PicturePeripheral {
         return this.sideProvider;
     }
     
-    public static IPeripheral getPeripheral(World world, BlockPos pos, Direction side) {
+    public static LazyOptional<
+        IPeripheral> getPeripheral(World world, BlockPos pos, Direction side) {
         Direction pside = side.getOpposite();
         return WorldUtils.getTileEntity(world, pos, TileEntityPaintingFrame.class)
-                         .map(tile->new PaintingFramePeripheral(tile, pside))
-                         .orElse(null);
+                         .map(tile->LazyOptional.of(()->new PaintingFramePeripheral(tile, pside)))
+                         .orElse(LazyOptional.empty())
+                         .cast();
     }
 }
