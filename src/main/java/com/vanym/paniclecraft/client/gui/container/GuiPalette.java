@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.ColorChartTexture;
@@ -211,12 +211,12 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         RenderHelper.turnOff();
         this.drawInventoriesNames();
         this.drawRGBLabels();
-        RenderHelper.turnOnGui();
+        RenderHelper.turnBackOn();
     }
     
     @Override
     public void renderBg(float partialTicks, int mouseX, int mouseY) {
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bind(GUI_TEXTURE);
         this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         this.chart.render(mouseX, mouseY, partialTicks);

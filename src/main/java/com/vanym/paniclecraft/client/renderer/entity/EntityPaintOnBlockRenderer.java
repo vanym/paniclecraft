@@ -13,11 +13,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.lwjgl.opengl.GL11;
-
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer.PictureRenderType;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -33,8 +34,8 @@ import net.minecraft.block.WallBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -47,18 +48,20 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemOverrideList;
 import net.minecraft.client.renderer.model.ModelRotation;
 import net.minecraft.client.renderer.model.SimpleBakedModel;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 
 @OnlyIn(Dist.CLIENT)
@@ -87,26 +90,24 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     @Override
     public void render(
             EntityPaintOnBlock entity,
-            double x,
-            double y,
-            double z,
             float entityYaw,
-            float partialTicks) {
+            float partialTicks,
+            MatrixStack ms,
+            IRenderTypeBuffer buffer,
+            int packedLight) {
         if (this.blockRenderer == null) {
             this.blockRenderer = Minecraft.getInstance().getBlockRenderer();
         }
-        TileEntityPaintingRenderer.renderInWorldEnable();
-        this.doRenderPaint(entity, x, y, z, entityYaw, partialTicks);
-        TileEntityPaintingRenderer.renderInWorldDisable();
+        this.doRenderPaint(entity, entityYaw, partialTicks, ms, buffer, packedLight);
     }
     
     protected void doRenderPaint(
             EntityPaintOnBlock entityPOB,
-            double x,
-            double y,
-            double z,
             float entityYaw,
-            float partialTicks) {
+            float partialTicks,
+            MatrixStack ms,
+            IRenderTypeBuffer buffer,
+            int packedLight) {
         World world = this.entityRenderDispatcher.level;
         BlockPos pos = entityPOB.getBlockPos();
         IProfiler theProfiler = null;
@@ -116,17 +117,12 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         if (theProfiler != null) {
             theProfiler.push(DEF.MOD_ID + ":" + EntityPaintOnBlock.IN_MOD_ID);
         }
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buf = tessellator.getBuilder();
         if (this.renderPictureTypeSup.get() >= 0) {
             if (theProfiler != null) {
                 theProfiler.push("picture");
             }
             final double expandBase = 0.0005D;
             final double expandAdjust = 0.0001D;
-            final double expandX = expandBase + Math.pow(x / 4, 2) * expandAdjust;
-            final double expandY = expandBase + Math.pow(y / 4, 2) * expandAdjust;
-            final double expandZ = expandBase + Math.pow(z / 4, 2) * expandAdjust;
             BlockModelRenderer render = this.blockRenderer.getModelRenderer();
             BlockState state = world.getBlockState(pos);
             long rand = MathHelper.getSeed(pos);
@@ -136,31 +132,31 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 if (picture == null) {
                     continue;
                 }
-                if (theProfiler != null) {
-                    theProfiler.push(picture.getWidth() + "x" + picture.getHeight());
-                    theProfiler.push("bind");
-                }
-                TextureAtlasSprite sprite = TileEntityPaintingRenderer.bindTexture(picture);
-                if (theProfiler != null) {
-                    theProfiler.pop(); // bind
-                }
                 Direction pside = Direction.from3DDataValue(side);
                 IBakedModel pictureModel =
-                        new TileEntityPaintingRenderer.BakedModelPicture(model, side, sprite);
-                buf.offset(x - entityPOB.x + pside.getStepX() * expandX,
-                           y - entityPOB.y + pside.getStepY() * expandY,
-                           z - entityPOB.z + pside.getStepZ() * expandZ);
-                buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+                        new TileEntityPaintingRenderer.BakedModelPicture(
+                                model,
+                                side,
+                                IconUtils.full(picture.getWidth(), picture.getHeight()));
+                RenderType type = new PictureRenderType(picture);
+                IVertexBuilder vertexer = buffer.getBuffer(type);
+                ms.pushPose();
+                Vec3d vec3d = state.getOffset(world, pos);
+                ms.translate(vec3d.x, vec3d.y, vec3d.z);
+                ForgeHooksClient.setRenderLayer(type);
                 if (this.renderPictureTypeSup.get() > 0) {
-                    render.renderModelSmooth(world, pictureModel, state, pos,
-                                             buf, true, new Random(rand), rand,
+                    render.renderModelSmooth(world, pictureModel, state, pos, ms, vertexer,
+                                             true, new Random(rand), rand,
+                                             OverlayTexture.NO_OVERLAY,
                                              EmptyModelData.INSTANCE);
                 } else {
-                    render.renderModelFlat(world, pictureModel, state, pos,
-                                           buf, true, new Random(rand), rand,
+                    render.renderModelFlat(world, pictureModel, state, pos, ms, vertexer,
+                                           true, new Random(rand), rand,
+                                           OverlayTexture.NO_OVERLAY,
                                            EmptyModelData.INSTANCE);
                 }
-                tessellator.end();
+                ForgeHooksClient.setRenderLayer(null);
+                ms.popPose();
                 if (theProfiler != null) {
                     theProfiler.pop(); // WxH
                 }
@@ -169,7 +165,6 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 theProfiler.pop(); // picture
             }
         }
-        buf.offset(0.0D, 0.0D, 0.0D);
         if (theProfiler != null) {
             theProfiler.pop(); // root
         }
@@ -177,7 +172,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     }
     
     @Override
-    protected ResourceLocation getTextureLocation(EntityPaintOnBlock entity) {
+    public ResourceLocation getTextureLocation(EntityPaintOnBlock entity) {
         return null;
     }
     
@@ -223,7 +218,6 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         return this.makeModel(boxes);
     }
     
-    @SuppressWarnings("deprecation")
     protected IBakedModel makeModel(Collection<AxisAlignedBB> boxes) {
         List<BlockPart> parts = boxes.stream()
                                      .map(EntityPaintOnBlockRenderer::makeBlockPart)
@@ -234,15 +228,17 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             quadsMap.put(side, new ArrayList<>());
         }
         for (BlockPart part : parts) {
+            TileEntityPaintingRenderer.renderInWorldEnable();
             for (Entry<Direction, BlockPartFace> e : part.faces.entrySet()) {
                 Direction side = e.getKey();
                 BlockPartFace face = e.getValue();
                 // use small sprite here to decrease ratio of the shrink done in makeBakedQuad
-                BakedQuad quad = this.faceBakery.makeBakedQuad(part.from, part.to,
-                                                               face, SMALL_SPRITE, side,
-                                                               ModelRotation.X0_Y0,
-                                                               part.rotation,
-                                                               part.shade);
+                BakedQuad quad = this.faceBakery.bakeQuad(part.from, part.to,
+                                                          face, SMALL_SPRITE, side,
+                                                          ModelRotation.X0_Y0,
+                                                          part.rotation,
+                                                          part.shade,
+                                                          SMALL_SPRITE.getName());
                 quadsMap.getOrDefault(face.cullForDirection, quads).add(quad);
             }
         }
@@ -250,6 +246,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 quads,
                 quadsMap,
                 true,
+                false,
                 false,
                 FULL_SPRITE,
                 net.minecraft.client.renderer.model.ItemCameraTransforms.NO_TRANSFORMS,

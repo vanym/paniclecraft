@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
@@ -169,10 +170,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
         if (this.importTexture == null) {
             return;
         }
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
-                                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.bindTexture(this.importTexture.getId());
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
+                               GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.bindTexture(this.importTexture.getId());
         int pictureWidth = this.view.pictureSize.getWidth();
         int pictureHeight = this.view.pictureSize.getHeight();
         int importTextureEndX = this.getImportTextureEndX();
@@ -202,10 +203,10 @@ public class GuiPaintingEditView extends GuiPaintingView {
             for (int x = Math.max(0, this.importTextureX / pictureWidth); x < w; ++x) {
                 Picture picture = this.view.getPicture(x, y);
                 if (picture != null && picture.isEditable()) {
-                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 } else {
                     final float c = 32.0F / 255.0F;
-                    GlStateManager.color4f(c, c, c, 0.75F);
+                    RenderSystem.color4f(c, c, c, 0.75F);
                 }
                 int paintingX = x * pictureWidth;
                 int paintingEndX = paintingX + pictureWidth;
@@ -234,22 +235,22 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buf = tessellator.getBuilder();
                 buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-                buf.vertex(canvasX, canvasEndY, (double)this.blitOffset)
+                buf.vertex(canvasX, canvasEndY, (double)this.getBlitOffset())
                    .uv(icon.getU0(), icon.getV1())
                    .endVertex();
-                buf.vertex(canvasEndX, canvasEndY, (double)this.blitOffset)
+                buf.vertex(canvasEndX, canvasEndY, (double)this.getBlitOffset())
                    .uv(icon.getU1(), icon.getV1())
                    .endVertex();
-                buf.vertex(canvasEndX, canvasY, (double)this.blitOffset)
+                buf.vertex(canvasEndX, canvasY, (double)this.getBlitOffset())
                    .uv(icon.getU1(), icon.getV0())
                    .endVertex();
-                buf.vertex(canvasX, canvasY, (double)this.blitOffset)
+                buf.vertex(canvasX, canvasY, (double)this.getBlitOffset())
                    .uv(icon.getU0(), icon.getV0())
                    .endVertex();
                 tessellator.end();
             }
         }
-        GlStateManager.disableBlend();
+        RenderSystem.disableBlend();
     }
     
     @Override
@@ -328,7 +329,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     protected int getViewMouseX() {
         int real = (int)this.minecraft.mouseHandler.xpos();
-        int displayWidth = this.minecraft.window.getScreenWidth();
+        int displayWidth = this.minecraft.getWindow().getScreenWidth();
         int realViewX = this.viewX * displayWidth / this.width;
         int realViewWidth = this.getViewWidth() * displayWidth / this.width;
         return (real - realViewX) * this.view.getWidth() / realViewWidth;
@@ -336,7 +337,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
     
     protected int getViewMouseY() {
         int real = (int)this.minecraft.mouseHandler.ypos();
-        int displayHeight = this.minecraft.window.getScreenHeight();
+        int displayHeight = this.minecraft.getWindow().getScreenHeight();
         int realViewY = this.viewY * displayHeight / this.height;
         int realViewHeight = this.getViewHeight() * displayHeight / this.height;
         return (real - realViewY) * this.view.getHeight() / realViewHeight;

@@ -58,7 +58,7 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
     protected ItemPaintingTool(Item.Properties properties) {
         super(properties);
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, ()->()->this.brushUseMessages =
+        DistExecutor.runWhenOn(Dist.CLIENT, ()->()->this.brushUseMessages =
                 Core.instance.painting.paintingToolUseSet);
     }
     

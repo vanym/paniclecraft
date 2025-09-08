@@ -8,8 +8,14 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.utils.BakedModelStatedWrapper;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -20,19 +26,20 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.Matrix3f;
+import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.BakedQuadRetextured;
 import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
-import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -53,6 +60,10 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
     protected ItemRenderer itemRenderer;
     protected ItemStack renderStack;
     
+    public TileEntityPaintingRenderer(TileEntityRendererDispatcher dispatcher) {
+        super(dispatcher);
+    }
+    
     protected void initRenderers() {
         if (this.blockRenderer == null) {
             this.blockRenderer = Minecraft.getInstance().getBlockRenderer();
@@ -68,62 +79,30 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
     @Override
     public void render(
             TileEntityPaintingContainer te,
-            double x,
-            double y,
-            double z,
             float partialTicks,
-            int destroyStage) {
-        this.renderInWorld(te, x, y, z, partialTicks, destroyStage);
+            MatrixStack ms,
+            IRenderTypeBuffer buffer,
+            int combinedLight,
+            int combinedOverlay) {
+        this.renderPainting(te, partialTicks, ms, buffer, combinedLight, combinedOverlay);
     }
     
-    public static void renderInWorldEnable() {
-        RenderHelper.turnOff();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
-                                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.enableBlend();
-        GlStateManager.disableCull();
-        
-        if (Minecraft.useAmbientOcclusion()) {
-            GlStateManager.shadeModel(GL11.GL_SMOOTH);
-        } else {
-            GlStateManager.shadeModel(GL11.GL_FLAT);
-        }
-    }
-    
-    public static void renderInWorldDisable() {
-        RenderHelper.turnOn();
-    }
-    
-    public void renderInWorld(
+    public void renderByItem(
             TileEntityPaintingContainer te,
-            double x,
-            double y,
-            double z,
-            float partialTicks,
-            int destroyStage) {
-        // based on TileEntityRendererPiston
-        if (destroyStage < 0) {
-            renderInWorldEnable();
-        } else {
-            RenderHelper.turnOff();
-        }
-        this.renderPainting(te, x, y, z, destroyStage);
-        renderInWorldDisable();
-    }
-    
-    public void renderAtItem(TileEntityPaintingContainer te) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.5F, 0.5F, 0.5F);
-        this.renderPainting(te, 0.0D, 0.0D, 0.0D, -1);
-        GlStateManager.popMatrix();
+            MatrixStack ms,
+            IRenderTypeBuffer buffer,
+            int combinedLight,
+            int combinedOverlay) {
+        this.renderPainting(te, 0.0F, ms, buffer, combinedLight, combinedOverlay);
     }
     
     protected void renderPainting(
             TileEntityPaintingContainer tile,
-            double x,
-            double y,
-            double z,
-            int destroyStage) {
+            float partialTicks,
+            MatrixStack ms,
+            IRenderTypeBuffer buffer,
+            int combinedLight,
+            int combinedOverlay) {
         this.initRenderers();
         World world = tile.getLevel();
         BlockPos pos = tile.getBlockPos();
@@ -134,91 +113,79 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
             model = new BakedModelStatedWrapper<>(model, state);
         }
         BlockModelRenderer render = this.blockRenderer.getModelRenderer();
-        IProfiler theProfiler = null;
-        if (world != null && Core.instance.painting.clientConfig.renderProfiling) {
-            theProfiler = world.getProfiler();
-        }
-        if (theProfiler != null) {
-            theProfiler.push(tile.getType().getRegistryName().toString());
-        }
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buf = tessellator.getBuilder();
-        buf.offset(x - (double)pos.getX(), y - (double)pos.getY(), z - (double)pos.getZ());
         if (this.renderFrameType >= 0) {
-            if (theProfiler != null) {
-                theProfiler.push("frame");
-            }
-            this.bindTexture(AtlasTexture.LOCATION_BLOCKS);
             IBakedModel frameModel = new BakedModelFrame(model);
+            RenderType type = RenderType.cutoutMipped();
+            IVertexBuilder vertexer = buffer.getBuffer(type);
             if (tile.hasLevel()) {
-                buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-                if (destroyStage >= 0) {
-                    AtlasTexture tex = Minecraft.getInstance().getTextureAtlas();
-                    TextureAtlasSprite sprite =
-                            tex.getTexture("minecraft:block/destroy_stage_" + destroyStage);
-                    frameModel =
-                            ForgeHooksClient.getDamageModel(model, sprite, state, world, pos, rand);
-                    buf.noColor();
-                }
+                ForgeHooksClient.setRenderLayer(type);
                 if (this.renderFrameType > 0) {
-                    render.renderModelSmooth(world, frameModel, state, pos,
-                                             buf, true, new Random(rand), rand,
+                    render.renderModelSmooth(world, frameModel, state, pos, ms, vertexer,
+                                             true, new Random(rand), rand, combinedOverlay,
                                              EmptyModelData.INSTANCE);
                 } else {
-                    render.renderModelFlat(world, frameModel, state, pos,
-                                           buf, true, new Random(rand), rand,
+                    render.renderModelFlat(world, frameModel, state, pos, ms, vertexer,
+                                           true, new Random(rand), rand, combinedOverlay,
                                            EmptyModelData.INSTANCE);
                 }
-                tessellator.end();
+                ForgeHooksClient.setRenderLayer(null);
             } else {
-                this.itemRenderer.render(this.renderStack, frameModel);
-            }
-            if (theProfiler != null) {
-                theProfiler.pop(); // frame
+                this.itemRenderer.renderModelLists(frameModel, this.renderStack,
+                                                   combinedLight, combinedOverlay,
+                                                   ms, vertexer);
             }
         }
-        if (this.renderPictureType >= 0 && destroyStage < 0) {
+        if (this.renderPictureType >= 0) {
+            IRenderTypeBuffer wrappedBuffer = wrapBuffer(ms, buffer);
             int size = this.getSize(tile);
             for (int side = 0; side < size; ++side) {
                 Picture picture = this.getPicture(tile, side);
                 if (picture == null) {
                     continue;
                 }
-                if (theProfiler != null) {
-                    theProfiler.push("picture");
-                    theProfiler.push(picture.getWidth() + "x" + picture.getHeight());
-                    theProfiler.push("bind");
-                }
-                TextureAtlasSprite sprite = bindTexture(picture);
-                if (theProfiler != null) {
-                    theProfiler.pop(); // bind
-                }
-                IBakedModel pictureModel = new BakedModelPicture(model, side, sprite);
+                IBakedModel pictureModel = new BakedModelPicture(
+                        model,
+                        side,
+                        IconUtils.full(picture.getWidth(), picture.getHeight()));
+                RenderType type = new PictureRenderType(picture);
+                IVertexBuilder vertexer = wrappedBuffer.getBuffer(type);
                 if (tile.hasLevel()) {
-                    buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+                    ForgeHooksClient.setRenderLayer(type);
                     if (this.renderPictureType > 0) {
-                        render.renderModelSmooth(world, pictureModel, state, pos,
-                                                 buf, true, new Random(rand), rand,
+                        render.renderModelSmooth(world, pictureModel, state, pos, ms, vertexer,
+                                                 true, new Random(rand), rand, combinedOverlay,
                                                  EmptyModelData.INSTANCE);
                     } else {
-                        render.renderModelFlat(world, pictureModel, state, pos,
-                                               buf, true, new Random(rand), rand,
+                        render.renderModelFlat(world, pictureModel, state, pos, ms, vertexer,
+                                               true, new Random(rand), rand, combinedOverlay,
                                                EmptyModelData.INSTANCE);
                     }
-                    tessellator.end();
+                    ForgeHooksClient.setRenderLayer(null);
                 } else {
-                    this.itemRenderer.render(this.renderStack, pictureModel);
-                }
-                if (theProfiler != null) {
-                    theProfiler.pop(); // WxH
-                    theProfiler.pop(); // picture
+                    this.itemRenderer.renderModelLists(pictureModel, this.renderStack,
+                                                       combinedLight, combinedOverlay,
+                                                       ms, vertexer);
                 }
             }
         }
-        buf.offset(0.0D, 0.0D, 0.0D);
-        if (theProfiler != null) {
-            theProfiler.pop(); // root
+    }
+    
+    public static void renderInWorldEnable() {
+        RenderHelper.turnOff();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
+                               GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.enableBlend();
+        RenderSystem.disableCull();
+        
+        if (Minecraft.useAmbientOcclusion()) {
+            RenderSystem.shadeModel(GL11.GL_SMOOTH);
+        } else {
+            RenderSystem.shadeModel(GL11.GL_FLAT);
         }
+    }
+    
+    public static void renderInWorldDisable() {
+        RenderHelper.turnBackOn();
     }
     
     protected BlockState getActualState(TileEntityPaintingContainer tile) {
@@ -241,10 +208,10 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
     public static TextureAtlasSprite bindTexture(Picture picture) {
         boolean newtexture = false;
         if (picture.texture == null) {
-            picture.texture = GlStateManager.genTexture();
+            picture.texture = GlStateManager._genTexture();
             newtexture = true;
         }
-        GlStateManager.bindTexture(picture.texture);
+        GlStateManager._bindTexture(picture.texture);
         if (newtexture || !picture.imageChangeProcessed) {
             ByteBuffer textureBuffer = picture.getImageAsDirectByteBuffer();
             if (textureBuffer != null) {
@@ -268,6 +235,22 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
             picture.imageChangeProcessed = true;
         }
         return IconUtils.full(picture.getWidth(), picture.getHeight());
+    }
+    
+    protected static IRenderTypeBuffer wrapBuffer(
+            MatrixStack ms,
+            IRenderTypeBuffer buffer) {
+        ms.pushPose();
+        MatrixStack.Entry entry = ms.last();
+        ms.popPose();
+        entry.pose().multiply(Matrix4f.createScaleMatrix(-1.0F, 1.0F, -1.0F));
+        entry.normal().mul(Matrix3f.createScaleMatrix(1.0F, 1.0F, -1.0F));
+        return new IRenderTypeBuffer() {
+            @Override
+            public IVertexBuilder getBuffer(RenderType type) {
+                return new MatrixApplyingVertexBuilder(buffer.getBuffer(type), entry);
+            }
+        };
     }
     
     protected static class BakedModelFrame extends BakedModelQuadsWrapper {
@@ -299,25 +282,18 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         protected List<BakedQuad> wrapQuads(List<BakedQuad> quads) {
             return quads.stream()
                         .filter(q->q.getTintIndex() == this.index)
-                        .map(q->new BakedQuadRetexturedTintless(q, this.sprite))
+                        .map(q->new BakedQuad(
+                                q.getVertices(),
+                                -1,
+                                q.getDirection(),
+                                q.getSprite(),
+                                q.shouldApplyDiffuseLighting()))
                         .collect(Collectors.toList());
         }
         
         @Override
         public TextureAtlasSprite getParticleIcon() {
             return this.sprite;
-        }
-        
-        protected static class BakedQuadRetexturedTintless extends BakedQuadRetextured {
-            
-            public BakedQuadRetexturedTintless(BakedQuad quad, TextureAtlasSprite textureIn) {
-                super(quad, textureIn);
-            }
-            
-            @Override
-            public boolean isTinted() {
-                return false;
-            }
         }
     }
     
@@ -342,5 +318,29 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         }
         
         protected abstract List<BakedQuad> wrapQuads(List<BakedQuad> quads);
+    }
+    
+    public static class PictureRenderType extends RenderType {
+        
+        protected static final ImmutableList<RenderState> STATES =
+                ImmutableList.of(NO_TRANSPARENCY, DIFFUSE_LIGHTING, SMOOTH_SHADE, MIDWAY_ALPHA,
+                                 LEQUAL_DEPTH_TEST, CULL, LIGHTMAP, NO_OVERLAY, FOG, NO_LAYERING,
+                                 MAIN_TARGET, DEFAULT_TEXTURING, COLOR_DEPTH_WRITE, DEFAULT_LINE);
+        
+        public PictureRenderType(Picture picture) {
+            super(DEF.MOD_ID + ":picture",
+                  DefaultVertexFormats.BLOCK,
+                  RenderType.cutoutMipped().mode(),
+                  RenderType.cutoutMipped().bufferSize(),
+                  false,
+                  false,
+                  ()-> {
+                      STATES.forEach(RenderState::setupRenderState);
+                      bindTexture(picture);
+                  },
+                  ()-> {
+                      STATES.forEach(RenderState::clearRenderState);
+                  });
+        }
     }
 }

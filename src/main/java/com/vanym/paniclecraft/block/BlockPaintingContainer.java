@@ -15,6 +15,7 @@ import net.minecraft.block.ContainerBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +39,7 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
     }
     
     @Override
-    public boolean use(
+    public ActionResultType use(
             BlockState state,
             World world,
             BlockPos pos,
@@ -46,11 +47,11 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
             Hand hand,
             BlockRayTraceResult hit) {
         if (!Core.instance.painting.config.openViewByClick
-            || player.isSneaking()
+            || player.isSecondaryUseActive()
             || Stream.of(Hand.MAIN_HAND, Hand.OFF_HAND)
                      .map(player::getItemInHand)
                      .anyMatch(stack->!stack.isEmpty())) {
-            return false;
+            return ActionResultType.PASS;
         }
         WorldPicturePoint point =
                 new WorldPicturePoint(
@@ -59,18 +60,18 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
                         pos,
                         hit.getDirection().get3DDataValue());
         if (world.isClientSide) {
-            return point.getPicture() != null;
+            return point.getPicture() != null ? ActionResultType.SUCCESS : ActionResultType.PASS;
         }
         ContainerPaintingViewServer.Provider view =
                 ContainerPaintingViewServer.makeFullView(point, 128);
         if (view == null) {
-            return false;
+            return ActionResultType.PASS;
         }
         if (player instanceof ServerPlayerEntity) {
             view.setEditable(player.abilities.instabuild && player.hasPermissions(2));
             NetworkHooks.openGui((ServerPlayerEntity)player, view, view);
         }
-        return true;
+        return ActionResultType.SUCCESS;
     }
     
     public static int getRotate(Entity player, Direction side, boolean place) {

@@ -15,6 +15,7 @@ import java.util.List;
 import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
@@ -127,9 +128,9 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     }
     
     protected void drawPainting() {
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
-                                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
+                               GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         for (int y = 0; y < this.view.sizeY; ++y) {
             for (int x = 0; x < this.view.sizeX; ++x) {
                 Picture picture = this.view.getPicture(x, y);
@@ -140,12 +141,12 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                         IconUtils.shrink(TileEntityPaintingRenderer.bindTexture(picture));
                 blit(this.viewX + x * this.viewStep,
                      this.viewY + y * this.viewStep,
-                     this.blitOffset,
+                     this.getBlitOffset(),
                      this.viewStep, this.viewStep,
                      icon);
             }
         }
-        GlStateManager.disableBlend();
+        RenderSystem.disableBlend();
     }
     
     protected void drawHelp() {
