@@ -121,6 +121,8 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             if (theProfiler != null) {
                 theProfiler.push("picture");
             }
+            ms.pushPose();
+            ms.translate(-0.5F, 0.0F, -0.5F);
             final double expandBase = 0.0005D;
             final double expandAdjust = 0.0001D;
             BlockModelRenderer render = this.blockRenderer.getModelRenderer();
@@ -161,6 +163,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                     theProfiler.pop(); // WxH
                 }
             }
+            ms.popPose();
             if (theProfiler != null) {
                 theProfiler.pop(); // picture
             }
