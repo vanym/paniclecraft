@@ -16,8 +16,10 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.utils.BakedModelQuadsWrapper;
 import com.vanym.paniclecraft.client.utils.BakedModelStatedWrapper;
 import com.vanym.paniclecraft.client.utils.IconUtils;
+import com.vanym.paniclecraft.client.utils.ModelUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingContainer;
@@ -40,15 +42,12 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
 
 @OnlyIn(Dist.CLIENT)
 public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPaintingContainer> {
@@ -282,12 +281,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         protected List<BakedQuad> wrapQuads(List<BakedQuad> quads) {
             return quads.stream()
                         .filter(q->q.getTintIndex() == this.index)
-                        .map(q->new BakedQuad(
-                                q.getVertices(),
-                                -1,
-                                q.getDirection(),
-                                q.getSprite(),
-                                q.shouldApplyDiffuseLighting()))
+                        .map(ModelUtils::tintless)
                         .collect(Collectors.toList());
         }
         
@@ -295,29 +289,6 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         public TextureAtlasSprite getParticleIcon() {
             return this.sprite;
         }
-    }
-    
-    protected static abstract class BakedModelQuadsWrapper extends BakedModelWrapper<IBakedModel> {
-        
-        public BakedModelQuadsWrapper(IBakedModel originalModel) {
-            super(originalModel);
-        }
-        
-        @Override
-        public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
-            return this.wrapQuads(super.getQuads(state, side, rand));
-        }
-        
-        @Override
-        public List<BakedQuad> getQuads(
-                BlockState state,
-                Direction side,
-                Random rand,
-                IModelData extraData) {
-            return this.wrapQuads(super.getQuads(state, side, rand, extraData));
-        }
-        
-        protected abstract List<BakedQuad> wrapQuads(List<BakedQuad> quads);
     }
     
     public static class PictureRenderType extends RenderType {
