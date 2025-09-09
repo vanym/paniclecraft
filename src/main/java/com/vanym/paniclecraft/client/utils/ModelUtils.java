@@ -1,0 +1,22 @@
+package com.vanym.paniclecraft.client.utils;
+
+import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.model.BakedQuadRetextured;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+
+public class ModelUtils {
+    
+    public static BakedQuad tintless(BakedQuad quad) {
+        return new BakedQuad(
+                quad.getVertices(),
+                -1,
+                quad.getDirection(),
+                quad.getSprite(),
+                quad.shouldApplyDiffuseLighting(),
+                quad.getFormat());
+    }
+    
+    public static BakedQuad retexture(BakedQuad quad, TextureAtlasSprite texture) {
+        return new BakedQuadRetextured(quad, texture);
+    }
+}

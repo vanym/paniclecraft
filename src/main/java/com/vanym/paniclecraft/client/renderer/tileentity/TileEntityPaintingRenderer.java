@@ -10,8 +10,10 @@ import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.utils.BakedModelQuadsWrapper;
 import com.vanym.paniclecraft.client.utils.BakedModelStatedWrapper;
 import com.vanym.paniclecraft.client.utils.IconUtils;
+import com.vanym.paniclecraft.client.utils.ModelUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingContainer;
@@ -25,7 +27,6 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.BakedQuadRetextured;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -33,15 +34,12 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.profiler.IProfiler;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
 
 @OnlyIn(Dist.CLIENT)
 public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPaintingContainer> {
@@ -299,7 +297,8 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         protected List<BakedQuad> wrapQuads(List<BakedQuad> quads) {
             return quads.stream()
                         .filter(q->q.getTintIndex() == this.index)
-                        .map(q->new BakedQuadRetexturedTintless(q, this.sprite))
+                        .map(ModelUtils::tintless)
+                        .map(q->ModelUtils.retexture(q, this.sprite))
                         .collect(Collectors.toList());
         }
         
@@ -307,40 +306,5 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         public TextureAtlasSprite getParticleIcon() {
             return this.sprite;
         }
-        
-        protected static class BakedQuadRetexturedTintless extends BakedQuadRetextured {
-            
-            public BakedQuadRetexturedTintless(BakedQuad quad, TextureAtlasSprite textureIn) {
-                super(quad, textureIn);
-            }
-            
-            @Override
-            public boolean isTinted() {
-                return false;
-            }
-        }
-    }
-    
-    protected static abstract class BakedModelQuadsWrapper extends BakedModelWrapper<IBakedModel> {
-        
-        public BakedModelQuadsWrapper(IBakedModel originalModel) {
-            super(originalModel);
-        }
-        
-        @Override
-        public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
-            return this.wrapQuads(super.getQuads(state, side, rand));
-        }
-        
-        @Override
-        public List<BakedQuad> getQuads(
-                BlockState state,
-                Direction side,
-                Random rand,
-                IModelData extraData) {
-            return this.wrapQuads(super.getQuads(state, side, rand, extraData));
-        }
-        
-        protected abstract List<BakedQuad> wrapQuads(List<BakedQuad> quads);
     }
 }
