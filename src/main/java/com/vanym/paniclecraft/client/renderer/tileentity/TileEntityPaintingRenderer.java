@@ -279,6 +279,8 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                                  LEQUAL_DEPTH_TEST, CULL, LIGHTMAP, NO_OVERLAY, FOG, NO_LAYERING,
                                  MAIN_TARGET, DEFAULT_TEXTURING, COLOR_DEPTH_WRITE, DEFAULT_LINE);
         
+        protected final Picture picture;
+        
         public PictureRenderType(Picture picture) {
             super(DEF.MOD_ID + ":picture",
                   DefaultVertexFormats.BLOCK,
@@ -293,6 +295,16 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                   ()-> {
                       STATES.forEach(RenderState::clearRenderState);
                   });
+            this.picture = picture;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof PictureRenderType && this.equals((PictureRenderType)obj);
+        }
+        
+        public boolean equals(PictureRenderType obj) {
+            return this.picture.equals(obj.picture);
         }
     }
 }
