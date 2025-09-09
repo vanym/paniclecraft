@@ -13,7 +13,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.utils.BakedModelQuadsWrapper;
@@ -30,8 +29,6 @@ import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.Matrix3f;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
@@ -135,7 +132,6 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
             }
         }
         if (this.renderPictureType >= 0) {
-            IRenderTypeBuffer wrappedBuffer = wrapBuffer(ms, buffer);
             int size = this.getSize(tile);
             for (int side = 0; side < size; ++side) {
                 Picture picture = this.getPicture(tile, side);
@@ -147,7 +143,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                         side,
                         IconUtils.full(picture.getWidth(), picture.getHeight()));
                 RenderType type = new PictureRenderType(picture);
-                IVertexBuilder vertexer = wrappedBuffer.getBuffer(type);
+                IVertexBuilder vertexer = buffer.getBuffer(type);
                 if (tile.hasLevel()) {
                     ForgeHooksClient.setRenderLayer(type);
                     if (this.renderPictureType > 0) {
@@ -236,22 +232,6 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         return IconUtils.full(picture.getWidth(), picture.getHeight());
     }
     
-    protected static IRenderTypeBuffer wrapBuffer(
-            MatrixStack ms,
-            IRenderTypeBuffer buffer) {
-        ms.pushPose();
-        MatrixStack.Entry entry = ms.last();
-        ms.popPose();
-        entry.pose().multiply(Matrix4f.createScaleMatrix(-1.0F, 1.0F, -1.0F));
-        entry.normal().mul(Matrix3f.createScaleMatrix(1.0F, 1.0F, -1.0F));
-        return new IRenderTypeBuffer() {
-            @Override
-            public IVertexBuilder getBuffer(RenderType type) {
-                return new MatrixApplyingVertexBuilder(buffer.getBuffer(type), entry);
-            }
-        };
-    }
-    
     protected static class BakedModelFrame extends BakedModelQuadsWrapper {
         
         public BakedModelFrame(IBakedModel originalModel) {
@@ -282,6 +262,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
             return quads.stream()
                         .filter(q->q.getTintIndex() == this.index)
                         .map(ModelUtils::tintless)
+                        .map(q->ModelUtils.retexture(q, this.sprite, DefaultVertexFormats.BLOCK))
                         .collect(Collectors.toList());
         }
         
