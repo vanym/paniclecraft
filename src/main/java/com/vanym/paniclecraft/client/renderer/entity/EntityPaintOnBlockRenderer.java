@@ -121,14 +121,21 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             if (theProfiler != null) {
                 theProfiler.push("picture");
             }
-            ms.pushPose();
-            ms.translate(-0.5F, 0.0F, -0.5F);
+            Vec3d cam = this.entityRenderDispatcher.camera.getPosition();
+            Vec3d offset = new Vec3d(pos).add(0.5D, 0.5D, 0.5D).subtract(cam);
             final double expandBase = 0.0005D;
             final double expandAdjust = 0.0001D;
+            final double expandX = expandBase + Math.pow(offset.x / 4, 2) * expandAdjust;
+            final double expandY = expandBase + Math.pow(offset.y / 4, 2) * expandAdjust;
+            final double expandZ = expandBase + Math.pow(offset.z / 4, 2) * expandAdjust;
             BlockModelRenderer render = this.blockRenderer.getModelRenderer();
             BlockState state = world.getBlockState(pos);
             long rand = MathHelper.getSeed(pos);
             IBakedModel model = this.getModel(state, world, pos);
+            ms.pushPose();
+            ms.translate(pos.getX() - entityPOB.getX(),
+                         pos.getY() - entityPOB.getY(),
+                         pos.getZ() - entityPOB.getZ());
             for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = entityPOB.getPicture(side);
                 if (picture == null) {
@@ -143,8 +150,9 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 RenderType type = new PictureRenderType(picture);
                 IVertexBuilder vertexer = buffer.getBuffer(type);
                 ms.pushPose();
-                Vec3d vec3d = state.getOffset(world, pos);
-                ms.translate(vec3d.x, vec3d.y, vec3d.z);
+                ms.translate(pside.getStepX() * expandX,
+                             pside.getStepY() * expandY,
+                             pside.getStepZ() * expandZ);
                 ForgeHooksClient.setRenderLayer(type);
                 if (this.renderPictureTypeSup.get() > 0) {
                     render.renderModelSmooth(world, pictureModel, state, pos, ms, vertexer,
