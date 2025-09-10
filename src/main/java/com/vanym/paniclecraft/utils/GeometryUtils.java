@@ -1,5 +1,7 @@
 package com.vanym.paniclecraft.utils;
 
+import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.AxisDirection;
@@ -7,11 +9,13 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.shapes.VoxelShapes;
 
 public class GeometryUtils {
     
     protected static final AxisAlignedBB FULL_BLOCK = VoxelShapes.block().bounds();
+    protected static final Vec3d CENTER_VEC3D = new Vec3d(0.5D, 0.5D, 0.5D);
     
     public static AxisAlignedBB getFullBlockBox() {
         return FULL_BLOCK;
@@ -68,6 +72,49 @@ public class GeometryUtils {
     
     public static Vec3d getInBlockVec(BlockRayTraceResult target) {
         return target.getLocation().subtract(new Vec3d(target.getBlockPos()));
+    }
+    
+    public static Vec3d getCenterVec3d() {
+        return CENTER_VEC3D;
+    }
+    
+    public static Vec3d createVec3d(Entity entity) {
+        return new Vec3d(entity.getX(), entity.getY(), entity.getZ());
+    }
+    
+    public static Vec3i mul(Vec3i vec1, Vec3i vec2) {
+        return new Vec3i(
+                vec1.getX() * vec2.getX(),
+                vec1.getY() * vec2.getY(),
+                vec1.getZ() * vec2.getZ());
+    }
+    
+    public static Vec3d mul(Vec3i vec1, Vec3d vec2) {
+        return mul(vec2, vec1);
+    }
+    
+    public static Vec3d mul(Vec3d vec1, Vec3i vec2) {
+        return mul(vec1, new Vec3d(vec2));
+    }
+    
+    public static Vec3d mul(Vec3d vec1, Vec3d vec2) {
+        return vec1.multiply(vec2);
+    }
+    
+    public static void acceptVec3d(Vec3d vec, Vec3dConsumer consumer) {
+        consumer.accept(vec.x, vec.y, vec.z);
+    }
+    
+    public static void acceptVec3f(Vec3d vec, Vec3fConsumer consumer) {
+        consumer.accept((float)vec.x, (float)vec.y, (float)vec.z);
+    }
+    
+    public static void acceptVec3d(Vector3f vec, Vec3dConsumer consumer) {
+        consumer.accept(vec.x(), vec.y(), vec.z());
+    }
+    
+    public static void acceptVec3f(Vector3f vec, Vec3fConsumer consumer) {
+        consumer.accept(vec.x(), vec.y(), vec.z());
     }
     
     public static AxisAlignedBB rotateXYInnerEdge(AxisAlignedBB box, double radians) {
@@ -203,5 +250,15 @@ public class GeometryUtils {
     protected static TileOnSide getZTileOnSide(Direction zdir) {
         Direction xdir = Direction.from3DDataValue((zdir.get3DDataValue() + 2) % 6);
         return new TileOnSide(xdir, zdir);
+    }
+    
+    @FunctionalInterface
+    public static abstract interface Vec3dConsumer {
+        public abstract void accept(double x, double y, double z);
+    }
+    
+    @FunctionalInterface
+    public static abstract interface Vec3fConsumer {
+        public abstract void accept(float x, float y, float z);
     }
 }

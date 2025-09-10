@@ -122,20 +122,15 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 theProfiler.push("picture");
             }
             Vec3d cam = this.entityRenderDispatcher.camera.getPosition();
-            Vec3d offset = new Vec3d(pos).add(0.5D, 0.5D, 0.5D).subtract(cam);
-            final double expandBase = 0.0005D;
-            final double expandAdjust = 0.0001D;
-            final double expandX = expandBase + Math.pow(offset.x / 4, 2) * expandAdjust;
-            final double expandY = expandBase + Math.pow(offset.y / 4, 2) * expandAdjust;
-            final double expandZ = expandBase + Math.pow(offset.z / 4, 2) * expandAdjust;
+            Vec3d expand =
+                    calcExpand(new Vec3d(pos).add(GeometryUtils.getCenterVec3d()).subtract(cam));
             BlockModelRenderer render = this.blockRenderer.getModelRenderer();
             BlockState state = world.getBlockState(pos);
             long rand = MathHelper.getSeed(pos);
             IBakedModel model = this.getModel(state, world, pos);
             ms.pushPose();
-            ms.translate(pos.getX() - entityPOB.getX(),
-                         pos.getY() - entityPOB.getY(),
-                         pos.getZ() - entityPOB.getZ());
+            GeometryUtils.acceptVec3d(new Vec3d(pos).subtract(GeometryUtils.createVec3d(entityPOB)),
+                                      ms::translate);
             for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = entityPOB.getPicture(side);
                 if (picture == null) {
@@ -150,9 +145,8 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 RenderType type = new PictureRenderType(picture);
                 IVertexBuilder vertexer = buffer.getBuffer(type);
                 ms.pushPose();
-                ms.translate(pside.getStepX() * expandX,
-                             pside.getStepY() * expandY,
-                             pside.getStepZ() * expandZ);
+                GeometryUtils.acceptVec3d(expand.multiply(new Vec3d(pside.getNormal())),
+                                          ms::translate);
                 ForgeHooksClient.setRenderLayer(type);
                 if (this.renderPictureTypeSup.get() > 0) {
                     render.renderModelSmooth(world, pictureModel, state, pos, ms, vertexer,
@@ -185,6 +179,16 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     @Override
     public ResourceLocation getTextureLocation(EntityPaintOnBlock entity) {
         return null;
+    }
+    
+    protected static double calcExpand(double coord) {
+        final double expandBase = 0.0005D;
+        final double expandAdjust = 0.0001D;
+        return expandBase + Math.pow(coord / 4, 2) * expandAdjust;
+    }
+    
+    protected static Vec3d calcExpand(Vec3d coords) {
+        return new Vec3d(calcExpand(coords.x), calcExpand(coords.y), calcExpand(coords.z));
     }
     
     protected IBakedModel getModel(BlockState state, World world, BlockPos pos) {
