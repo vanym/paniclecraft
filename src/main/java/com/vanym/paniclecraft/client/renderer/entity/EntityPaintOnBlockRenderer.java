@@ -74,13 +74,13 @@ public class EntityPaintOnBlockRenderer extends Render {
             wrapBlock.setRendererPhase(BlockPaintingContainer.SpecialRendererPhase.PICTURE);
             Block realBlock = world.getBlock(xCoord, yCoord, zCoord);
             realBlock.setBlockBoundsBasedOnState(world, xCoord, yCoord, zCoord);
-            final double expandBase = 0.0005D;
-            final double expandAdjust = 0.0001D;
-            final double expandX = expandBase + Math.pow(x / 4, 2) * expandAdjust;
-            final double expandY = expandBase + Math.pow(y / 4, 2) * expandAdjust;
-            final double expandZ = expandBase + Math.pow(z / 4, 2) * expandAdjust;
-            RenderPaintOnBlocks render =
-                    new RenderPaintOnBlocks(world, expandX, expandY, expandZ, wrapBlock, realBlock);
+            RenderPaintOnBlocks render = new RenderPaintOnBlocks(
+                    world,
+                    calcExpand(x),
+                    calcExpand(y + 0.5D),
+                    calcExpand(z),
+                    wrapBlock,
+                    realBlock);
             render.setRenderAllFaces(false);
             render.setMaxAmbientOcclusion(this.renderPictureType);
             for (int side = 0; side < ISidePictureProvider.N; ++side) {
@@ -126,6 +126,12 @@ public class EntityPaintOnBlockRenderer extends Render {
     @Override
     protected ResourceLocation getEntityTexture(Entity entity) {
         return null;
+    }
+    
+    protected static double calcExpand(double coord) {
+        final double expandBase = 0.0005D;
+        final double expandAdjust = 0.0001D;
+        return expandBase + Math.pow(coord / 4, 2) * expandAdjust;
     }
     
     protected static class RenderPaintOnBlocks extends RenderBlocksPainting {
