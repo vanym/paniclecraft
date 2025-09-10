@@ -55,6 +55,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -122,11 +123,9 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             if (theProfiler != null) {
                 theProfiler.startSection("picture");
             }
-            final double expandBase = 0.0005D;
-            final double expandAdjust = 0.0001D;
-            final double expandX = expandBase + Math.pow(x / 4, 2) * expandAdjust;
-            final double expandY = expandBase + Math.pow(y / 4, 2) * expandAdjust;
-            final double expandZ = expandBase + Math.pow(z / 4, 2) * expandAdjust;
+            final double expandX = calcExpand(x);
+            final double expandY = calcExpand(y + 0.5D);
+            final double expandZ = calcExpand(z);
             BlockModelRenderer render = this.blockRenderer.getBlockModelRenderer();
             BlockState state = world.getBlockState(pos);
             long rand = MathHelper.getPositionRandom(pos);
@@ -179,6 +178,16 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     @Override
     protected ResourceLocation getEntityTexture(EntityPaintOnBlock entity) {
         return null;
+    }
+    
+    protected static double calcExpand(double coord) {
+        final double expandBase = 0.0005D;
+        final double expandAdjust = 0.0001D;
+        return expandBase + Math.pow(coord / 4, 2) * expandAdjust;
+    }
+    
+    protected static Vec3d calcExpand(Vec3d coords) {
+        return new Vec3d(calcExpand(coords.x), calcExpand(coords.y), calcExpand(coords.z));
     }
     
     protected IBakedModel getModel(BlockState state, World world, BlockPos pos) {
