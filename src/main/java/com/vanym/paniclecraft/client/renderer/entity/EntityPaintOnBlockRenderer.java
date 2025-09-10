@@ -243,7 +243,6 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             quadsMap.put(side, new ArrayList<>());
         }
         for (BlockPart part : parts) {
-            TileEntityPaintingRenderer.renderInWorldEnable();
             for (Entry<Direction, BlockPartFace> e : part.faces.entrySet()) {
                 Direction side = e.getKey();
                 BlockPartFace face = e.getValue();
