@@ -54,7 +54,7 @@ import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
-import com.vanym.paniclecraft.utils.SideUtils;
+import com.vanym.paniclecraft.utils.DistUtils;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -134,7 +134,7 @@ public class ModComponentPainting extends ModComponent {
         }
         this.enabled = true;
         
-        SideUtils.runOnDist(Side.CLIENT, ()->this.paintingToolUseSet = new HashSet<>());
+        DistUtils.crun(()->()->this.paintingToolUseSet = new HashSet<>());
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPaintRemover = new ItemPaintRemover();
         this.itemPalette = new ItemPalette();

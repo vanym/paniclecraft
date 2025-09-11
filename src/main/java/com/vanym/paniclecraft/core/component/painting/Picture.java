@@ -15,7 +15,6 @@ import com.vanym.paniclecraft.utils.ColorUtils;
 import com.vanym.paniclecraft.utils.INBTSerializable;
 import com.vanym.paniclecraft.utils.SideUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -604,9 +603,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     }
     
     public void unload() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.unloadClient();
-        }
+        SideUtils.crun(()->this::unloadClient);
     }
     
     @SideOnly(Side.CLIENT)

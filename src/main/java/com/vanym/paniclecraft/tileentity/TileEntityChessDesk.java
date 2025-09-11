@@ -14,7 +14,6 @@ import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.utils.INBTSerializable;
 import com.vanym.paniclecraft.utils.SideUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -95,9 +94,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     @Override
     public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
         super.onDataPacket(manager, packet);
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.updateScreen();
-        }
+        SideUtils.crun(()->this::updateScreen);
     }
     
     @SideOnly(Side.CLIENT)

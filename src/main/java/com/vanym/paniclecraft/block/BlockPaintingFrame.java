@@ -12,10 +12,10 @@ import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.item.ItemPaintingFrame;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.DistUtils;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -50,9 +50,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         this.setHardness(0.6F);
         this.frameOutlineSize = (1.0D / 16D) * 2.0D;
         this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameOutlineSize));
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            this.specialRendererSide = -1;
-        }
+        DistUtils.crun(()->()->this.specialRendererSide = -1);
     }
     
     @Override

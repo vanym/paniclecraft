@@ -14,9 +14,10 @@ import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
+import com.vanym.paniclecraft.utils.DistUtils;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -43,16 +44,12 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     protected Set<MessagePaintingToolUse> brushUseMessages;
     
     protected ItemPaintingTool() {
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            this.brushUseMessages = Core.instance.painting.paintingToolUseSet;
-        }
+        DistUtils.crun(()->()->this.brushUseMessages = Core.instance.painting.paintingToolUseSet);
     }
     
     @Override
     public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.onUsingTickClient(stack, player, count);
-        }
+        SideUtils.crun(()->()->this.onUsingTickClient(stack, player, count));
     }
     
     @SideOnly(Side.CLIENT)
@@ -70,9 +67,11 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     
     @Override
     public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient() && ClientUtils.isMe(player)) {
-            this.flashBrushUseMessages();
-        }
+        SideUtils.crun(()->()-> {
+            if (ClientUtils.isMe(player)) {
+                this.flashBrushUseMessages();
+            }
+        });
     }
     
     @SideOnly(Side.CLIENT)
@@ -140,10 +139,11 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
                 && (EntityPaintOnBlock.getExistingPicture(world, x, y, z, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)))) {
             entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
-            if (FMLCommonHandler.instance().getEffectiveSide().isClient()
-                && ClientUtils.isMe(entityPlayer)) {
-                this.brushUseMessages.clear();
-            }
+            SideUtils.crun(()->()-> {
+                if (ClientUtils.isMe(entityPlayer)) {
+                    this.brushUseMessages.clear();
+                }
+            });
         }
         return false;
     }
