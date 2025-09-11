@@ -18,8 +18,9 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
-import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer.PictureRenderType;
 import com.vanym.paniclecraft.client.utils.IconUtils;
+import com.vanym.paniclecraft.client.utils.RenderTypeImpl;
+import com.vanym.paniclecraft.client.utils.RenderTypeImpl.RS;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
@@ -35,6 +36,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -50,6 +52,7 @@ import net.minecraft.client.renderer.model.ModelRotation;
 import net.minecraft.client.renderer.model.SimpleBakedModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -142,7 +145,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                                 model,
                                 side,
                                 IconUtils.full(picture.getWidth(), picture.getHeight()));
-                RenderType type = new PictureRenderType(picture);
+                RenderType type = createRenderType(picture);
                 IVertexBuilder vertexer = buffer.getBuffer(type);
                 ms.pushPose();
                 GeometryUtils.acceptVec3d(expand.multiply(new Vec3d(pside.getNormal())),
@@ -296,5 +299,25 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                   }
               });
         return part;
+    }
+    
+    protected static RenderType createRenderType(Picture picture) {
+        // based on RenderType.solid() with DEFAULT_ALPHA, NO_CULL added
+        RenderState.TextureState texture =
+                new TileEntityPaintingRenderer.PictureTextureState(picture);
+        return new RenderTypeImpl(
+                DEF.MOD_ID + ":picture_entity",
+                DefaultVertexFormats.BLOCK,
+                7,
+                2097152,
+                true,
+                false,
+                RenderType.State.builder()
+                                .setTextureState(texture)
+                                .setShadeModelState(RS.SMOOTH_SHADE)
+                                .setLightmapState(RS.LIGHTMAP)
+                                .setAlphaState(RS.DEFAULT_ALPHA)
+                                .setCullState(RS.NO_CULL)
+                                .createCompositeState(true));
     }
 }

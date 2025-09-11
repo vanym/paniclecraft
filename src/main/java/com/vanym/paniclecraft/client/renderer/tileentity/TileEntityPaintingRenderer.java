@@ -3,15 +3,14 @@ package com.vanym.paniclecraft.client.renderer.tileentity;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -19,17 +18,19 @@ import com.vanym.paniclecraft.client.utils.BakedModelQuadsWrapper;
 import com.vanym.paniclecraft.client.utils.BakedModelStatedWrapper;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ModelUtils;
+import com.vanym.paniclecraft.client.utils.RenderTypeImpl;
+import com.vanym.paniclecraft.client.utils.RenderTypeImpl.RS;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingContainer;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -111,9 +112,9 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         BlockModelRenderer render = this.blockRenderer.getModelRenderer();
         if (this.renderFrameType >= 0) {
             IBakedModel frameModel = new BakedModelFrame(model);
-            RenderType type = RenderType.cutoutMipped();
-            IVertexBuilder vertexer = buffer.getBuffer(type);
             if (tile.hasLevel()) {
+                RenderType type = RenderType.solid();
+                IVertexBuilder vertexer = buffer.getBuffer(type);
                 ForgeHooksClient.setRenderLayer(type);
                 if (this.renderFrameType > 0) {
                     render.renderModelSmooth(world, frameModel, state, pos, ms, vertexer,
@@ -126,6 +127,8 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                 }
                 ForgeHooksClient.setRenderLayer(null);
             } else {
+                RenderType type = Atlases.cutoutBlockSheet();
+                IVertexBuilder vertexer = buffer.getBuffer(type);
                 this.itemRenderer.renderModelLists(frameModel, this.renderStack,
                                                    combinedLight, combinedOverlay,
                                                    ms, vertexer);
@@ -142,9 +145,9 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                         model,
                         side,
                         IconUtils.full(picture.getWidth(), picture.getHeight()));
-                RenderType type = new PictureRenderType(picture);
-                IVertexBuilder vertexer = buffer.getBuffer(type);
                 if (tile.hasLevel()) {
+                    RenderType type = createRenderType(picture);
+                    IVertexBuilder vertexer = buffer.getBuffer(type);
                     ForgeHooksClient.setRenderLayer(type);
                     if (this.renderPictureType > 0) {
                         render.renderModelSmooth(world, pictureModel, state, pos, ms, vertexer,
@@ -157,30 +160,14 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                     }
                     ForgeHooksClient.setRenderLayer(null);
                 } else {
+                    RenderType type = createItemRenderType(picture);
+                    IVertexBuilder vertexer = buffer.getBuffer(type);
                     this.itemRenderer.renderModelLists(pictureModel, this.renderStack,
                                                        combinedLight, combinedOverlay,
                                                        ms, vertexer);
                 }
             }
         }
-    }
-    
-    public static void renderInWorldEnable() {
-        RenderHelper.turnOff();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
-                               GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.enableBlend();
-        RenderSystem.disableCull();
-        
-        if (Minecraft.useAmbientOcclusion()) {
-            RenderSystem.shadeModel(GL11.GL_SMOOTH);
-        } else {
-            RenderSystem.shadeModel(GL11.GL_FLAT);
-        }
-    }
-    
-    public static void renderInWorldDisable() {
-        RenderHelper.turnBackOn();
     }
     
     protected BlockState getActualState(TileEntityPaintingContainer tile) {
@@ -272,38 +259,60 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         }
     }
     
-    public static class PictureRenderType extends RenderType {
-        
-        protected static final ImmutableList<RenderState> STATES =
-                ImmutableList.of(NO_TRANSPARENCY, DIFFUSE_LIGHTING, SMOOTH_SHADE, MIDWAY_ALPHA,
-                                 LEQUAL_DEPTH_TEST, CULL, LIGHTMAP, NO_OVERLAY, FOG, NO_LAYERING,
-                                 MAIN_TARGET, DEFAULT_TEXTURING, COLOR_DEPTH_WRITE, DEFAULT_LINE);
+    protected static RenderType createRenderType(Picture picture) {
+        // based on RenderType.solid()
+        return new RenderTypeImpl(
+                DEF.MOD_ID + ":picture_solid",
+                DefaultVertexFormats.BLOCK,
+                7,
+                2097152,
+                true,
+                false,
+                RenderType.State.builder()
+                                .setTextureState(new PictureTextureState(picture))
+                                .setShadeModelState(RS.SMOOTH_SHADE)
+                                .setLightmapState(RS.LIGHTMAP)
+                                .createCompositeState(true));
+    }
+    
+    protected static RenderType createItemRenderType(Picture picture) {
+        // based on Atlases.cutoutBlockSheet()
+        return new RenderTypeImpl(
+                DEF.MOD_ID + ":picture_item",
+                DefaultVertexFormats.NEW_ENTITY,
+                7,
+                256,
+                true,
+                false,
+                RenderType.State.builder()
+                                .setTextureState(new PictureTextureState(picture))
+                                .setTransparencyState(RS.NO_TRANSPARENCY)
+                                .setDiffuseLightingState(RS.DIFFUSE_LIGHTING)
+                                .setAlphaState(RS.DEFAULT_ALPHA)
+                                .setLightmapState(RS.LIGHTMAP)
+                                .setOverlayState(RS.OVERLAY)
+                                .createCompositeState(true));
+    }
+    
+    public static class PictureTextureState extends RenderState.TextureState {
         
         protected final Picture picture;
         
-        public PictureRenderType(Picture picture) {
-            super(DEF.MOD_ID + ":picture",
-                  DefaultVertexFormats.BLOCK,
-                  RenderType.cutoutMipped().mode(),
-                  RenderType.cutoutMipped().bufferSize(),
-                  false,
-                  false,
-                  ()-> {
-                      STATES.forEach(RenderState::setupRenderState);
-                      bindTexture(picture);
-                  },
-                  ()-> {
-                      STATES.forEach(RenderState::clearRenderState);
-                  });
-            this.picture = picture;
+        public PictureTextureState(Picture picture) {
+            super();
+            this.setupState = ()-> {
+                bindTexture(picture);
+            };
+            this.clearState = ()-> {};
+            this.picture = Objects.requireNonNull(picture);
         }
         
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof PictureRenderType && this.equals((PictureRenderType)obj);
+            return obj instanceof PictureTextureState && this.equals((PictureTextureState)obj);
         }
         
-        public boolean equals(PictureRenderType obj) {
+        public boolean equals(PictureTextureState obj) {
             return this.picture.equals(obj.picture);
         }
     }
