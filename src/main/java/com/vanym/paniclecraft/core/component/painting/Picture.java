@@ -7,9 +7,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.renderer.TextureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
 import com.vanym.paniclecraft.utils.INBTSerializable;
@@ -17,7 +19,6 @@ import com.vanym.paniclecraft.utils.SideUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -40,7 +41,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     protected int packedHeight;
     
     @SideOnly(Side.CLIENT)
-    public Integer texture;
+    protected TextureHolder texture;
     // unused on server side
     public boolean imageChangeProcessed = false;
     
@@ -68,6 +69,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
         this.holder = holder;
         this.hasAlpha = hasAlpha;
         this.setSize(size);
+        SideUtils.crun(()->()->this.texture = new TextureHolder());
     }
     
     public Picture(Image image) {
@@ -78,6 +80,7 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
         this.holder = holder;
         this.hasAlpha = image.hasAlpha();
         this.image = image;
+        SideUtils.crun(()->()->this.texture = new TextureHolder());
     }
     
     // synchronized inside
@@ -608,10 +611,20 @@ public class Picture implements IPictureSize, INBTSerializable<NBTTagCompound> {
     
     @SideOnly(Side.CLIENT)
     protected void unloadClient() {
-        if (this.texture != null) {
-            TextureUtil.deleteTexture(this.texture);
-            this.texture = null;
+        this.texture.clear();
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public void setTexture(TextureHolder texture) {
+        if (!this.texture.isEmpty()) {
+            throw new IllegalStateException("Current texture is not empty");
         }
+        this.texture = Objects.requireNonNull(texture);
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public TextureHolder getTexture() {
+        return this.texture;
     }
     
     public static Picture mergeH(Picture... subs) {

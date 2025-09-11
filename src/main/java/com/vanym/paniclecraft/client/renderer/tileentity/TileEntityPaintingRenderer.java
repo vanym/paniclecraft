@@ -10,6 +10,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
+import com.vanym.paniclecraft.client.renderer.TextureHolder;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
@@ -157,12 +158,13 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
     }
     
     public static IIcon bindTexture(Picture picture, int side) {
+        TextureHolder texture = picture.getTexture();
         boolean newtexture = false;
-        if (picture.texture == null) {
-            picture.texture = GL11.glGenTextures();
+        if (texture.isEmpty()) {
+            texture.set(GL11.glGenTextures());
             newtexture = true;
         }
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, picture.texture);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.get());
         if (newtexture || !picture.imageChangeProcessed) {
             ByteBuffer textureBuffer = picture.getImageAsDirectByteBuffer();
             if (textureBuffer != null) {
