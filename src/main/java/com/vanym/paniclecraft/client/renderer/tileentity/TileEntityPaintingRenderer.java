@@ -1,8 +1,5 @@
 package com.vanym.paniclecraft.client.renderer.tileentity;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
@@ -10,8 +7,7 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.block.BlockPainting;
 import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
-import com.vanym.paniclecraft.client.renderer.TextureHolder;
-import com.vanym.paniclecraft.client.utils.IconUtils;
+import com.vanym.paniclecraft.client.utils.PictureRender;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 
@@ -133,7 +129,7 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
                 theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
                 theProfiler.startSection("bind");
             }
-            IIcon icon = bindTexture(picture, meta);
+            IIcon icon = PictureRender.bindTexture(picture, meta);
             if (theProfiler != null) {
                 theProfiler.endSection(); // bind
             }
@@ -155,45 +151,6 @@ public class TileEntityPaintingRenderer extends TileEntitySpecialRenderer {
         if (theProfiler != null) {
             theProfiler.endSection(); // root
         }
-    }
-    
-    public static IIcon bindTexture(Picture picture, int side) {
-        TextureHolder texture = picture.getTexture();
-        boolean newtexture = false;
-        if (texture.isEmpty()) {
-            texture.set(GL11.glGenTextures());
-            newtexture = true;
-        }
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.get());
-        if (newtexture || !picture.imageChangeProcessed) {
-            ByteBuffer textureBuffer = picture.getImageAsDirectByteBuffer();
-            if (textureBuffer != null) {
-                final int width = picture.getWidth();
-                final int height = picture.getHeight();
-                final int format = picture.hasAlpha() ? GL11.GL_RGBA : GL11.GL_RGB;
-                textureBuffer.order(ByteOrder.nativeOrder());
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
-                                     GL11.GL_NEAREST);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
-                                     GL11.GL_NEAREST);
-                GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, format,
-                                  width, height, 0, format,
-                                  GL11.GL_UNSIGNED_BYTE,
-                                  textureBuffer);
-            }
-            picture.imageChangeProcessed = true;
-        }
-        IIcon icon = IconUtils.full(picture.getWidth(), picture.getHeight());
-        switch (side) {
-            case 0:
-                icon = IconUtils.flip(icon, true, false);
-            break;
-            case 1:
-                icon = IconUtils.flip(icon, true, true);
-            break;
-        }
-        return icon;
     }
     
     protected static class RenderBlocksWorldless extends RenderBlocksPainting {

@@ -6,6 +6,7 @@ import com.vanym.paniclecraft.block.BlockPaintingContainer;
 import com.vanym.paniclecraft.block.BlockPaintingFrame;
 import com.vanym.paniclecraft.client.renderer.RenderBlocksPainting;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
+import com.vanym.paniclecraft.client.utils.PictureRender;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
@@ -97,7 +98,7 @@ public class EntityPaintOnBlockRenderer extends Render {
                     theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
                     theProfiler.startSection("bind");
                 }
-                IIcon icon = TileEntityPaintingRenderer.bindTexture(picture, side);
+                IIcon icon = PictureRender.bindTexture(picture, side);
                 if (theProfiler != null) {
                     theProfiler.endSection(); // bind
                 }

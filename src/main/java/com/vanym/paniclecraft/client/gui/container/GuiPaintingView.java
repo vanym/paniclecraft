@@ -19,8 +19,8 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.gui.element.AbstractButton;
 import com.vanym.paniclecraft.client.gui.element.Button;
-import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
+import com.vanym.paniclecraft.client.utils.PictureRender;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.utils.JUtils;
@@ -37,7 +37,6 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IIcon;
-import net.minecraftforge.common.util.ForgeDirection;
 
 @SideOnly(Side.CLIENT)
 public class GuiPaintingView extends GuiScreen {
@@ -130,8 +129,7 @@ public class GuiPaintingView extends GuiScreen {
                 if (picture == null) {
                     continue;
                 }
-                int side = ForgeDirection.SOUTH.ordinal();
-                IIcon icon = TileEntityPaintingRenderer.bindTexture(picture, side);
+                IIcon icon = PictureRender.bindTexture(picture);
                 this.drawTexturedModelRectFromIcon(this.viewX + x * this.viewStep,
                                                    this.viewY + y * this.viewStep,
                                                    icon, this.viewStep, this.viewStep);
