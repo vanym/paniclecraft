@@ -18,6 +18,7 @@ public class RenderTypeImpl extends RenderType.Type {
             boolean sortOnUpload,
             RenderType.State state) {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, state);
+        this.hashCode = Objects.hash(this.hashCode, this.outline(), this.isOutline());
     }
     
     @Override
