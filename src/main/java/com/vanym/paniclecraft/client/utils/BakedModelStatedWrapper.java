@@ -11,9 +11,12 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILightReader;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.IModelData;
 
+@OnlyIn(Dist.CLIENT)
 public class BakedModelStatedWrapper<T extends IBakedModel> extends BakedModelWrapper<T> {
     
     protected final BlockState state;

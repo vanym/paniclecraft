@@ -18,9 +18,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
-import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
+import com.vanym.paniclecraft.client.utils.PictureRender;
 import com.vanym.paniclecraft.container.ContainerPaintingViewBase;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -137,8 +137,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                 if (picture == null) {
                     continue;
                 }
-                TextureAtlasSprite icon =
-                        IconUtils.shrink(TileEntityPaintingRenderer.bindTexture(picture));
+                TextureAtlasSprite icon = IconUtils.shrink(PictureRender.bindTexture(picture));
                 blit(this.viewX + x * this.viewStep,
                      this.viewY + y * this.viewStep,
                      this.getBlitOffset(),

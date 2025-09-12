@@ -7,11 +7,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.google.gson.JsonSyntaxException;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.renderer.TextureHolder;
 import com.vanym.paniclecraft.core.component.painting.IPaintingTool.PaintingToolType;
 import com.vanym.paniclecraft.utils.ColorUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
@@ -26,7 +27,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     
@@ -43,7 +43,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     protected int packedHeight;
     
     @OnlyIn(Dist.CLIENT)
-    public Integer texture;
+    protected TextureHolder texture;
     // unused on server side
     public boolean imageChangeProcessed = false;
     
@@ -71,6 +71,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         this.holder = holder;
         this.hasAlpha = hasAlpha;
         this.setSize(size);
+        SideUtils.crun(()->()->this.texture = new TextureHolder());
     }
     
     public Picture(Image image) {
@@ -81,6 +82,7 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         this.holder = holder;
         this.hasAlpha = image.hasAlpha();
         this.image = image;
+        SideUtils.crun(()->()->this.texture = new TextureHolder());
     }
     
     // synchronized inside
@@ -610,18 +612,25 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     }
     
     public void unload() {
-        if (EffectiveSide.get().isClient()) {
-            this.unloadClient();
-        }
+        SideUtils.crun(()->this::unloadClient);
     }
     
     @OnlyIn(Dist.CLIENT)
     protected void unloadClient() {
-        if (this.texture != null) {
-            // TODO: do deletion in render thread and back-port it
-            GlStateManager._deleteTexture(this.texture);
-            this.texture = null;
+        this.texture.clear();
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    public void setTexture(TextureHolder texture) {
+        if (!this.texture.isEmpty()) {
+            throw new IllegalStateException("Current texture is not empty");
         }
+        this.texture = Objects.requireNonNull(texture);
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    public TextureHolder getTexture() {
+        return this.texture;
     }
     
     public static Picture mergeH(Picture... subs) {

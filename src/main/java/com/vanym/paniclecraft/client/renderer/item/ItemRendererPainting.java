@@ -3,6 +3,7 @@ package com.vanym.paniclecraft.client.renderer.item;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.renderer.PictureTextureCache;
+import com.vanym.paniclecraft.client.renderer.TextureHolder;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.item.ItemPainting;
@@ -44,19 +45,15 @@ public class ItemRendererPainting extends ItemStackTileEntityRenderer {
         if (nbtPictureTag != null && !nbtPictureTag.isEmpty()) {
             nbtImageTag = nbtPictureTag.get(Picture.TAG_IMAGE);
         }
-        int obtainedTexture = this.textureCache.obtainTexture(nbtImageTag);
-        if (obtainedTexture >= 0) {
-            picture.texture = obtainedTexture;
+        TextureHolder obtainedTexture = this.textureCache.obtain(nbtImageTag);
+        if (obtainedTexture != null) {
+            picture.setTexture(obtainedTexture);
             picture.imageChangeProcessed = true;
         } else if (nbtPictureTag != null) {
+            this.textureCache.put(nbtImageTag, picture.getTexture());
             picture.deserializeNBT(nbtPictureTag);
         }
         this.paintingTileRenderer.renderByItem(tilePainting, ms, buffers, light, overlay);
-        // explicitly obtaining texture id
-        TileEntityPaintingRenderer.bindTexture(picture); // TODO: remove it
-        if (obtainedTexture < 0) {
-            this.textureCache.putTexture(nbtImageTag, picture.texture);
-        }
     }
     
     public static ItemRendererPainting create() {

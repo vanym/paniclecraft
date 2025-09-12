@@ -1,16 +1,11 @@
 package com.vanym.paniclecraft.client.renderer.tileentity;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.lwjgl.opengl.GL11;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -18,6 +13,7 @@ import com.vanym.paniclecraft.client.utils.BakedModelQuadsWrapper;
 import com.vanym.paniclecraft.client.utils.BakedModelStatedWrapper;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ModelUtils;
+import com.vanym.paniclecraft.client.utils.PictureRender;
 import com.vanym.paniclecraft.client.utils.RenderTypeImpl;
 import com.vanym.paniclecraft.client.utils.RenderTypeImpl.RS;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -187,38 +183,6 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         return 1;
     }
     
-    public static TextureAtlasSprite bindTexture(Picture picture) {
-        boolean newtexture = false;
-        if (picture.texture == null) {
-            picture.texture = GlStateManager._genTexture();
-            newtexture = true;
-        }
-        GlStateManager._bindTexture(picture.texture);
-        if (newtexture || !picture.imageChangeProcessed) {
-            ByteBuffer textureBuffer = picture.getImageAsDirectByteBuffer();
-            if (textureBuffer != null) {
-                final int width = picture.getWidth();
-                final int height = picture.getHeight();
-                final int format = picture.hasAlpha() ? GL11.GL_RGBA : GL11.GL_RGB;
-                textureBuffer.order(ByteOrder.nativeOrder());
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
-                                     GL11.GL_NEAREST);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
-                                     GL11.GL_NEAREST);
-                GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-                GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
-                GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
-                GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, format,
-                                  width, height, 0, format,
-                                  GL11.GL_UNSIGNED_BYTE,
-                                  textureBuffer);
-            }
-            picture.imageChangeProcessed = true;
-        }
-        return IconUtils.full(picture.getWidth(), picture.getHeight());
-    }
-    
     protected static class BakedModelFrame extends BakedModelQuadsWrapper {
         
         public BakedModelFrame(IBakedModel originalModel) {
@@ -301,7 +265,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         public PictureTextureState(Picture picture) {
             super();
             this.setupState = ()-> {
-                bindTexture(picture);
+                PictureRender.bindTexture(picture);
             };
             this.clearState = ()-> {};
             this.picture = Objects.requireNonNull(picture);
