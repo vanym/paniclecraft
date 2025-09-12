@@ -55,4 +55,15 @@ public class JUtils {
             action.run();
         }
     }
+    
+    public static <T> T callIf(boolean doCall, Callable<T> action) {
+        if (doCall) {
+            try {
+                return action.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
 }

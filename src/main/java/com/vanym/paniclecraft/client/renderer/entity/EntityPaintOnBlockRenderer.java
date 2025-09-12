@@ -18,6 +18,7 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.IconUtils;
+import com.vanym.paniclecraft.client.utils.PictureRender;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
@@ -132,7 +133,7 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
                     theProfiler.startSection(picture.getWidth() + "x" + picture.getHeight());
                     theProfiler.startSection("bind");
                 }
-                TextureAtlasSprite sprite = TileEntityPaintingRenderer.bindTexture(picture);
+                TextureAtlasSprite sprite = PictureRender.bindTexture(picture);
                 if (theProfiler != null) {
                     theProfiler.endSection(); // bind
                 }

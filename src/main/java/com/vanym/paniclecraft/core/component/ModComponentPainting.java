@@ -60,7 +60,7 @@ import com.vanym.paniclecraft.recipe.RecipeRegister.ShapedOreRecipe;
 import com.vanym.paniclecraft.recipe.RecipeRegister.ShapelessOreRecipe;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
-import com.vanym.paniclecraft.utils.SideUtils;
+import com.vanym.paniclecraft.utils.DistUtils;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -140,7 +140,7 @@ public class ModComponentPainting extends ModComponent {
         this.enabled = true;
         MinecraftForge.EVENT_BUS.register(this);
         
-        SideUtils.runOnDist(Side.CLIENT, ()->this.paintingToolUseSet = new HashSet<>());
+        DistUtils.crun(()->()->this.paintingToolUseSet = new HashSet<>());
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPaintRemover = new ItemPaintRemover();
         this.itemPalette = new ItemPalette();

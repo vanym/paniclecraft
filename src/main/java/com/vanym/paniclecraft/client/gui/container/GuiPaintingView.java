@@ -18,9 +18,9 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.gui.element.AbstractButton;
 import com.vanym.paniclecraft.client.gui.element.Button;
-import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ImageSelection;
+import com.vanym.paniclecraft.client.utils.PictureRender;
 import com.vanym.paniclecraft.container.ContainerPaintingViewClient;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.utils.JUtils;
@@ -130,8 +130,7 @@ public class GuiPaintingView extends GuiScreen {
                 if (picture == null) {
                     continue;
                 }
-                TextureAtlasSprite icon =
-                        IconUtils.shrink(TileEntityPaintingRenderer.bindTexture(picture));
+                TextureAtlasSprite icon = IconUtils.shrink(PictureRender.bindTexture(picture));
                 this.drawTexturedModalRect(this.viewX + x * this.viewStep,
                                            this.viewY + y * this.viewStep,
                                            icon, this.viewStep, this.viewStep);

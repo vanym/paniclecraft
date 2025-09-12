@@ -16,7 +16,9 @@ import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
+import com.vanym.paniclecraft.utils.DistUtils;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -34,7 +36,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -51,16 +52,12 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     protected Set<MessagePaintingToolUse> brushUseMessages;
     
     protected ItemPaintingTool() {
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            this.brushUseMessages = Core.instance.painting.paintingToolUseSet;
-        }
+        DistUtils.crun(()->()->this.brushUseMessages = Core.instance.painting.paintingToolUseSet);
     }
     
     @Override
     public void onUsingTick(ItemStack stack, EntityLivingBase player, int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.onUsingTickClient(stack, player, count);
-        }
+        SideUtils.crun(()->()->this.onUsingTickClient(stack, player, count));
     }
     
     @SideOnly(Side.CLIENT)
@@ -82,9 +79,11 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
             World world,
             EntityLivingBase player,
             int count) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient() && ClientUtils.isMe(player)) {
-            this.flashBrushUseMessages();
-        }
+        SideUtils.crun(()->()-> {
+            if (ClientUtils.isMe(player)) {
+                this.flashBrushUseMessages();
+            }
+        });
     }
     
     @SideOnly(Side.CLIENT)
@@ -164,10 +163,11 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.setActiveHand(hand);
-            if (FMLCommonHandler.instance().getEffectiveSide().isClient()
-                && ClientUtils.isMe(entityPlayer)) {
-                this.brushUseMessages.clear();
-            }
+            SideUtils.crun(()->()-> {
+                if (ClientUtils.isMe(entityPlayer)) {
+                    this.brushUseMessages.clear();
+                }
+            });
             return EnumActionResult.SUCCESS;
         }
         return EnumActionResult.FAIL;

@@ -23,7 +23,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -97,9 +96,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     @Override
     public void onDataPacket(NetworkManager manager, SPacketUpdateTileEntity packet) {
         super.onDataPacket(manager, packet);
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            this.updateScreen();
-        }
+        SideUtils.crun(()->this::updateScreen);
     }
     
     @SideOnly(Side.CLIENT)
