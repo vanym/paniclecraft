@@ -7,9 +7,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.util.Direction;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.IModelData;
 
+@OnlyIn(Dist.CLIENT)
 public abstract class BakedModelQuadsWrapper extends BakedModelWrapper<IBakedModel> {
     
     public BakedModelQuadsWrapper(IBakedModel originalModel) {

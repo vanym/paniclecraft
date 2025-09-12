@@ -18,6 +18,7 @@ import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
 import com.vanym.paniclecraft.utils.GeometryUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
@@ -43,7 +44,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
@@ -64,9 +64,7 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        if (EffectiveSide.get().isClient()) {
-            this.onUsingTickClient(stack, player, count);
-        }
+        SideUtils.crun(()->()->this.onUsingTickClient(stack, player, count));
     }
     
     @OnlyIn(Dist.CLIENT)
@@ -88,9 +86,11 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
             World world,
             LivingEntity player,
             int count) {
-        if (EffectiveSide.get().isClient() && ClientUtils.isMe(player)) {
-            this.flashBrushUseMessages();
-        }
+        SideUtils.crun(()->()-> {
+            if (ClientUtils.isMe(player)) {
+                this.flashBrushUseMessages();
+            }
+        });
     }
     
     @OnlyIn(Dist.CLIENT)
@@ -168,9 +168,11 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.startUsingItem(hand);
-            if (EffectiveSide.get().isClient() && ClientUtils.isMe(entityPlayer)) {
-                this.brushUseMessages.clear();
-            }
+            SideUtils.crun(()->()-> {
+                if (ClientUtils.isMe(entityPlayer)) {
+                    this.brushUseMessages.clear();
+                }
+            });
             return ActionResultType.SUCCESS;
         }
         return ActionResultType.FAIL;
