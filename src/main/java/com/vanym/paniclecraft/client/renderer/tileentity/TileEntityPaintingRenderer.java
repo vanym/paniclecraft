@@ -1,7 +1,6 @@
 package com.vanym.paniclecraft.client.renderer.tileentity;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -11,9 +10,9 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.utils.BakedModelQuadsWrapper;
 import com.vanym.paniclecraft.client.utils.BakedModelStatedWrapper;
-import com.vanym.paniclecraft.client.utils.IconUtils;
 import com.vanym.paniclecraft.client.utils.ModelUtils;
 import com.vanym.paniclecraft.client.utils.PictureRender;
+import com.vanym.paniclecraft.client.utils.PictureRender.PictureTextureState;
 import com.vanym.paniclecraft.client.utils.RenderTypeImpl;
 import com.vanym.paniclecraft.client.utils.RenderTypeImpl.RS;
 import com.vanym.paniclecraft.core.component.painting.Picture;
@@ -27,7 +26,6 @@ import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -140,7 +138,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
                 IBakedModel pictureModel = new BakedModelPicture(
                         model,
                         side,
-                        IconUtils.full(picture.getWidth(), picture.getHeight()));
+                        PictureRender.getIcon(picture));
                 if (tile.hasLevel()) {
                     RenderType type = createRenderType(picture);
                     IVertexBuilder vertexer = buffer.getBuffer(type);
@@ -183,6 +181,41 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         return 1;
     }
     
+    protected static RenderType createRenderType(Picture picture) {
+        // based on RenderType.solid()
+        return new RenderTypeImpl(
+                DEF.MOD_ID + ":picture_solid",
+                DefaultVertexFormats.BLOCK,
+                7,
+                2097152,
+                true,
+                false,
+                RenderType.State.builder()
+                                .setTextureState(new PictureTextureState(picture))
+                                .setShadeModelState(RS.SMOOTH_SHADE)
+                                .setLightmapState(RS.LIGHTMAP)
+                                .createCompositeState(true));
+    }
+    
+    protected static RenderType createItemRenderType(Picture picture) {
+        // based on Atlases.cutoutBlockSheet()
+        return new RenderTypeImpl(
+                DEF.MOD_ID + ":picture_item",
+                DefaultVertexFormats.NEW_ENTITY,
+                7,
+                256,
+                true,
+                false,
+                RenderType.State.builder()
+                                .setTextureState(new PictureTextureState(picture))
+                                .setTransparencyState(RS.NO_TRANSPARENCY)
+                                .setDiffuseLightingState(RS.DIFFUSE_LIGHTING)
+                                .setAlphaState(RS.DEFAULT_ALPHA)
+                                .setLightmapState(RS.LIGHTMAP)
+                                .setOverlayState(RS.OVERLAY)
+                                .createCompositeState(true));
+    }
+    
     protected static class BakedModelFrame extends BakedModelQuadsWrapper {
         
         public BakedModelFrame(IBakedModel originalModel) {
@@ -220,64 +253,6 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         @Override
         public TextureAtlasSprite getParticleIcon() {
             return this.sprite;
-        }
-    }
-    
-    protected static RenderType createRenderType(Picture picture) {
-        // based on RenderType.solid()
-        return new RenderTypeImpl(
-                DEF.MOD_ID + ":picture_solid",
-                DefaultVertexFormats.BLOCK,
-                7,
-                2097152,
-                true,
-                false,
-                RenderType.State.builder()
-                                .setTextureState(new PictureTextureState(picture))
-                                .setShadeModelState(RS.SMOOTH_SHADE)
-                                .setLightmapState(RS.LIGHTMAP)
-                                .createCompositeState(true));
-    }
-    
-    protected static RenderType createItemRenderType(Picture picture) {
-        // based on Atlases.cutoutBlockSheet()
-        return new RenderTypeImpl(
-                DEF.MOD_ID + ":picture_item",
-                DefaultVertexFormats.NEW_ENTITY,
-                7,
-                256,
-                true,
-                false,
-                RenderType.State.builder()
-                                .setTextureState(new PictureTextureState(picture))
-                                .setTransparencyState(RS.NO_TRANSPARENCY)
-                                .setDiffuseLightingState(RS.DIFFUSE_LIGHTING)
-                                .setAlphaState(RS.DEFAULT_ALPHA)
-                                .setLightmapState(RS.LIGHTMAP)
-                                .setOverlayState(RS.OVERLAY)
-                                .createCompositeState(true));
-    }
-    
-    public static class PictureTextureState extends RenderState.TextureState {
-        
-        protected final Picture picture;
-        
-        public PictureTextureState(Picture picture) {
-            super();
-            this.setupState = ()-> {
-                PictureRender.bindTexture(picture);
-            };
-            this.clearState = ()-> {};
-            this.picture = Objects.requireNonNull(picture);
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof PictureTextureState && this.equals((PictureTextureState)obj);
-        }
-        
-        public boolean equals(PictureTextureState obj) {
-            return this.picture.equals(obj.picture);
         }
     }
 }

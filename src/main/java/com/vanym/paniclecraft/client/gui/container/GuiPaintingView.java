@@ -137,7 +137,8 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                 if (picture == null) {
                     continue;
                 }
-                TextureAtlasSprite icon = IconUtils.shrink(PictureRender.bindTexture(picture));
+                PictureRender.bindTexture(picture);
+                TextureAtlasSprite icon = IconUtils.shrink(PictureRender.getIcon(picture));
                 blit(this.viewX + x * this.viewStep,
                      this.viewY + y * this.viewStep,
                      this.getBlitOffset(),

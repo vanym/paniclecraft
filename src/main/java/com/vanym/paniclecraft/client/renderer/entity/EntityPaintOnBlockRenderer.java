@@ -19,6 +19,8 @@ import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.renderer.tileentity.TileEntityPaintingRenderer;
 import com.vanym.paniclecraft.client.utils.IconUtils;
+import com.vanym.paniclecraft.client.utils.PictureRender;
+import com.vanym.paniclecraft.client.utils.PictureRender.PictureTextureState;
 import com.vanym.paniclecraft.client.utils.RenderTypeImpl;
 import com.vanym.paniclecraft.client.utils.RenderTypeImpl.RS;
 import com.vanym.paniclecraft.core.component.painting.ISidePictureProvider;
@@ -144,7 +146,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                         new TileEntityPaintingRenderer.BakedModelPicture(
                                 model,
                                 side,
-                                IconUtils.full(picture.getWidth(), picture.getHeight()));
+                                PictureRender.getIcon(picture));
                 RenderType type = createRenderType(picture);
                 IVertexBuilder vertexer = buffer.getBuffer(type);
                 ms.pushPose();
@@ -303,8 +305,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
     
     protected static RenderType createRenderType(Picture picture) {
         // based on RenderType.solid() with DEFAULT_ALPHA, NO_CULL added
-        RenderState.TextureState texture =
-                new TileEntityPaintingRenderer.PictureTextureState(picture);
+        RenderState.TextureState texture = new PictureTextureState(picture);
         return new RenderTypeImpl(
                 DEF.MOD_ID + ":picture_entity",
                 DefaultVertexFormats.BLOCK,

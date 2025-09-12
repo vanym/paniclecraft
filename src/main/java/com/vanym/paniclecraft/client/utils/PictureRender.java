@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.client.utils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 
 import org.lwjgl.opengl.GL11;
 
@@ -9,6 +10,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.client.renderer.TextureHolder;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 
+import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -16,7 +18,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class PictureRender {
     
-    public static TextureAtlasSprite bindTexture(Picture picture) {
+    public static void bindTexture(Picture picture) {
         TextureHolder texture = picture.getTexture();
         boolean newtexture = false;
         if (texture.isEmpty()) {
@@ -46,10 +48,32 @@ public class PictureRender {
             }
             picture.imageChangeProcessed = true;
         }
-        return getIcon(picture);
     }
     
-    protected static TextureAtlasSprite getIcon(Picture picture) {
+    public static TextureAtlasSprite getIcon(Picture picture) {
         return IconUtils.full(picture.getWidth(), picture.getHeight());
+    }
+    
+    public static class PictureTextureState extends RenderState.TextureState {
+        
+        protected final Picture picture;
+        
+        public PictureTextureState(Picture picture) {
+            super();
+            this.setupState = ()-> {
+                bindTexture(picture);
+            };
+            this.clearState = ()-> {};
+            this.picture = Objects.requireNonNull(picture);
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof PictureTextureState && this.equals((PictureTextureState)obj);
+        }
+        
+        public boolean equals(PictureTextureState obj) {
+            return this.picture.equals(obj.picture);
+        }
     }
 }
