@@ -3,8 +3,11 @@ package com.vanym.paniclecraft.client.renderer;
 import java.util.HashMap;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
+@SideOnly(Side.CLIENT)
 public abstract class RenderKVCache<K, V> {
     
     private long entryTimeout = 60 * 60;
