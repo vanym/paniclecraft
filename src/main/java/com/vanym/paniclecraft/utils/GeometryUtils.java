@@ -77,6 +77,10 @@ public class GeometryUtils {
         return CENTER_VEC3D;
     }
     
+    public static Vec3d getCenter(Vec3i vec) {
+        return new Vec3d(vec).add(CENTER_VEC3D);
+    }
+    
     public static Vec3d createVec3d(Entity entity) {
         return new Vec3d(entity.posX, entity.posY, entity.posZ);
     }

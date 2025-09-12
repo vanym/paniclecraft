@@ -26,7 +26,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class TileEntityChessDesk extends TileEntityBase {
     
@@ -102,9 +101,7 @@ public class TileEntityChessDesk extends TileEntityBase {
     @Override
     public void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
         super.onDataPacket(manager, packet);
-        if (EffectiveSide.get().isClient()) {
-            this.updateScreen();
-        }
+        SideUtils.crun(()->this::updateScreen);
     }
     
     @OnlyIn(Dist.CLIENT)
