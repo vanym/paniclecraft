@@ -18,6 +18,7 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
@@ -223,7 +224,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 // based on drawTexturedModelRect
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buf = tessellator.getBuffer();
-                buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+                buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
                 buf.pos(canvasX, canvasEndY, (double)this.zLevel)
                    .tex(icon.getMinU(), icon.getMaxV())
                    .endVertex();
