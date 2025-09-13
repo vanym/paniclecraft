@@ -13,6 +13,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.lwjgl.opengl.GL11;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.Core;
@@ -309,7 +311,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         return new RenderTypeImpl(
                 DEF.MOD_ID + ":picture_entity",
                 DefaultVertexFormats.BLOCK,
-                7,
+                GL11.GL_QUADS,
                 2097152,
                 true,
                 false,

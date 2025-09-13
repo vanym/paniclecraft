@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.lwjgl.opengl.GL11;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.Core;
@@ -186,7 +188,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         return new RenderTypeImpl(
                 DEF.MOD_ID + ":picture_solid",
                 DefaultVertexFormats.BLOCK,
-                7,
+                GL11.GL_QUADS,
                 2097152,
                 true,
                 false,
@@ -202,7 +204,7 @@ public class TileEntityPaintingRenderer extends TileEntityRenderer<TileEntityPai
         return new RenderTypeImpl(
                 DEF.MOD_ID + ":picture_item",
                 DefaultVertexFormats.NEW_ENTITY,
-                7,
+                GL11.GL_QUADS,
                 256,
                 true,
                 false,
