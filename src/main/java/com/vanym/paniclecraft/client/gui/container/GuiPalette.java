@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.ColorChartTexture;
@@ -23,7 +22,6 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.IRenderable;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
@@ -208,15 +206,12 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     
     @Override
     public void renderLabels(int x, int y) {
-        RenderHelper.turnOff();
         this.drawInventoriesNames();
         this.drawRGBLabels();
-        RenderHelper.turnBackOn();
     }
     
     @Override
     public void renderBg(float partialTicks, int mouseX, int mouseY) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bind(GUI_TEXTURE);
         this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         this.chart.render(mouseX, mouseY, partialTicks);
@@ -228,7 +223,6 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
              this.picker.xPosition + this.picker.width,
              this.picker.yPosition + this.picker.height,
              color.getRGB());
-        RenderHelper.turnOff();
     }
     
     protected void sendColor(Color color) {

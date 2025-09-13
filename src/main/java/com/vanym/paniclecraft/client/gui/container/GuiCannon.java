@@ -2,7 +2,6 @@ package com.vanym.paniclecraft.client.gui.container;
 
 import java.util.stream.Stream;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -11,7 +10,6 @@ import com.vanym.paniclecraft.network.message.MessageCannonSet;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
@@ -108,7 +106,6 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     
     @Override
     public void renderLabels(int x, int y) {
-        RenderHelper.turnOff();
         this.font.draw(this.title.getColoredString(), 8, 6, 0x404040);
         this.font.draw(this.inventory.getDisplayName().getColoredString(),
                        8, this.imageHeight - 96 + 2, 0x404040);
@@ -130,7 +127,6 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
             this.drawCenteredString(this.font, I18n.get(String.format(tooltipKey, DEF.MOD_ID)),
                                     this.imageWidth / 2, this.imageHeight + 6, 0xd0d0d0);
         }
-        RenderHelper.turnBackOn();
     }
     
     protected boolean isRotating() {
@@ -175,7 +171,6 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     
     @Override
     public void renderBg(float f, int i, int j) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bind(GUI_TEXTURE);
         this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
