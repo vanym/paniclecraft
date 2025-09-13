@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import com.vanym.paniclecraft.block.IMod3Block;
 import com.vanym.paniclecraft.command.CommandMod3;
@@ -95,7 +96,11 @@ public class Core implements IGuiHandler {
     
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
-    public final String networkProtocolVersion = "2";
+    protected final String networkProtocolVersion = "2";
+    protected final Predicate<String> clientAcceptedVersions =
+            this.networkProtocolVersion::equals;
+    protected final Predicate<String> serverAcceptedVersions =
+            this.networkProtocolVersion::equals;
     
     public final SyncTileEntityUpdater syncTileEntityUpdater = new SyncTileEntityUpdater();
     
@@ -298,11 +303,15 @@ public class Core implements IGuiHandler {
     public boolean checkRemoteModVersion(Map<String, String> remoteVersions, Side remoteSide) {
         String remoteVersion = remoteVersions.get(DEF.MOD_ID);
         if (remoteVersion == null) {
-            return remoteSide == Side.SERVER;
+            return remoteSide.isServer();
         } else if (remoteVersion.equals(Version.getVersion())) {
             return true;
         }
         String remoteProtocolVersion = ProtocolVersion.getSupposedVersion(remoteVersion);
-        return this.networkProtocolVersion.equals(remoteProtocolVersion);
+        if (remoteSide.isServer()) {
+            return this.clientAcceptedVersions.test(remoteProtocolVersion);
+        } else {
+            return this.serverAcceptedVersions.test(remoteProtocolVersion);
+        }
     }
 }
