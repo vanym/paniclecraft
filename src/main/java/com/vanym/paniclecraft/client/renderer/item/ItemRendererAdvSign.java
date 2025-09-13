@@ -26,6 +26,6 @@ public class ItemRendererAdvSign extends ItemStackTileEntityRenderer {
         tileAS.setForm(AdvSignForm.STICK_DOWN);
         ItemAdvSign.getSign(item).ifPresent(signTag->tileAS.read(signTag, true));
         Core.instance.advSign.tileAdvSignRenderer.render(tileAS, 0.0F, ms, buffers, light, overlay,
-                                                         true, false, null);
+                                                         true, null);
     }
 }

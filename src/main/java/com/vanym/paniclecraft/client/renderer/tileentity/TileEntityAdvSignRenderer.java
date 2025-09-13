@@ -8,6 +8,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.vanym.paniclecraft.block.BlockAdvSign;
 import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
+import com.vanym.paniclecraft.client.gui.GuiUtils;
 import com.vanym.paniclecraft.client.utils.AdvTextInput;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignForm;
 import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
@@ -18,6 +19,7 @@ import net.minecraft.block.WoodType;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.tileentity.SignTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
@@ -44,7 +46,6 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             int combinedLight,
             int combinedOverlay,
             boolean statik,
-            boolean inWorld,
             GuiEditAdvSign gui) {
         ms.pushPose();
         ms.translate(0.5F, 0.5F, 0.5F);
@@ -82,9 +83,6 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
         }
         IVertexBuilder vertexer =
                 Atlases.signTexture(WoodType.OAK).buffer(buffer, this.modelSign::renderType);
-        if (inWorld) {
-            // TODO: remove this if nothing needed here
-        }
         float scale = 0.6666667F;
         ms.pushPose();
         ms.scale(scale, -scale, -scale);
@@ -136,9 +134,14 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             int cursorX = x + cursorOffset;
             if (gui.isBlink()) {
                 if (input.getCursorPos() < line.getString().length()) {
-                    // TODO: draw in batch mode
-                    // AbstractGui.fill(cursorX, y - 1, cursorX + 1, y + font.lineHeight,
-                    // 0xff000000 | textColor.getRGB());
+                    Matrix4f mx = ms.last().pose().copy();
+                    mx.translate(new Vector3f(0.0F, 0.0F, 0.002F));
+                    GuiUtils.drawFillInBatch(mx, buffer,
+                                             cursorX, y - 1,
+                                             cursorX + 1, y + font.lineHeight,
+                                             textColor.getRed(),
+                                             textColor.getGreen(),
+                                             textColor.getBlue());
                 } else {
                     font.drawInBatch("_", cursorX, y, textColor.getRGB(),
                                      false, ms.last().pose(), buffer, false, 0, combinedLight);
@@ -150,8 +153,12 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             int selOffset = font.width(FormattingUtils.substring(line, 0, input.getSelectionPos())
                                                       .getColoredString());
             int selectionX = x + selOffset;
-            // TODO: draw in batch mode
-            // GuiUtils.drawHighlight(cursorX, y - 1, selectionX, y + font.lineHeight);
+            Matrix4f mx = ms.last().pose().copy();
+            mx.translate(new Vector3f(0.0F, 0.0F, 0.003F));
+            // TODO: fix that inversion ignores sign model
+            GuiUtils.drawHighlightInBatch(mx, buffer,
+                                          cursorX, y - 1,
+                                          selectionX, y + font.lineHeight);
         }
         ms.popPose();
     }
@@ -164,7 +171,6 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             IRenderTypeBuffer buffer,
             int combinedLight,
             int combinedOverlay) {
-        this.render(tileAS, partialTicks, ms, buffer, combinedLight, combinedOverlay, false, true,
-                    null);
+        this.render(tileAS, partialTicks, ms, buffer, combinedLight, combinedOverlay, false, null);
     }
 }

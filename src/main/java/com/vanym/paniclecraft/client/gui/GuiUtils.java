@@ -8,12 +8,19 @@ import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.client.utils.RenderTypeImpl.RS;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.InputMappings;
@@ -23,6 +30,38 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class GuiUtils {
+    
+    protected static final RenderType RENDER_TYPE_FILL =
+            RenderType.create(DEF.MOD_ID + ":fill",
+                              DefaultVertexFormats.POSITION_COLOR,
+                              GL11.GL_QUADS, 256,
+                              false, true,
+                              RenderType.State.builder()
+                                              .setAlphaState(RS.DEFAULT_ALPHA)
+                                              .setTransparencyState(RS.TRANSLUCENT_TRANSPARENCY)
+                                              .createCompositeState(false));
+    
+    protected static final RenderState.TexturingState RENDER_TEXTURING_STATE_HIGHLIGHT =
+            new RenderState.TexturingState(
+                    "highlight_texturing",
+                    ()-> {
+                        RenderSystem.enableColorLogicOp();
+                        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+                    },
+                    ()-> {
+                        RenderSystem.disableColorLogicOp();
+                    });
+    
+    protected static final RenderType RENDER_TYPE_HIGHLIGHT =
+            RenderType.create(DEF.MOD_ID + ":highlight",
+                              DefaultVertexFormats.POSITION_COLOR,
+                              GL11.GL_QUADS, 256,
+                              true, false,
+                              RenderType.State.builder()
+                                              .setTexturingState(RENDER_TEXTURING_STATE_HIGHLIGHT)
+                                              .setAlphaState(RS.DEFAULT_ALPHA)
+                                              .setTransparencyState(RS.TRANSLUCENT_TRANSPARENCY)
+                                              .createCompositeState(false));
     
     public static void drawLine(double x1, double y1, double x2, double y2, Color color) {
         RenderSystem.enableBlend();
@@ -93,6 +132,57 @@ public class GuiUtils {
             }
         }
         font.draw(line, x, y, textColor);
+    }
+    
+    public static void drawFillInBatch(
+            Matrix4f mx,
+            IRenderTypeBuffer buffer,
+            float x1,
+            float y1,
+            float x2,
+            float y2,
+            int red,
+            int green,
+            int blue) {
+        if (x1 > x2) {
+            float xt = x2;
+            x2 = x1;
+            x1 = xt;
+        }
+        if (y1 > y2) {
+            float yt = y2;
+            y2 = y1;
+            y1 = yt;
+        }
+        IVertexBuilder vx = buffer.getBuffer(RENDER_TYPE_FILL);
+        vx.vertex(mx, x1, y2, 0.0F).color(red, green, blue, 255).endVertex();
+        vx.vertex(mx, x2, y2, 0.0F).color(red, green, blue, 255).endVertex();
+        vx.vertex(mx, x2, y1, 0.0F).color(red, green, blue, 255).endVertex();
+        vx.vertex(mx, x1, y1, 0.0F).color(red, green, blue, 255).endVertex();
+    }
+    
+    public static void drawHighlightInBatch(
+            Matrix4f mx,
+            IRenderTypeBuffer buffer,
+            float x1,
+            float y1,
+            float x2,
+            float y2) {
+        if (x1 > x2) {
+            float xt = x2;
+            x2 = x1;
+            x1 = xt;
+        }
+        if (y1 > y2) {
+            float yt = y2;
+            y2 = y1;
+            y1 = yt;
+        }
+        IVertexBuilder vx = buffer.getBuffer(RENDER_TYPE_HIGHLIGHT);
+        vx.vertex(mx, x1, y2, 0.0F).color(0, 0, 255, 255).endVertex();
+        vx.vertex(mx, x2, y2, 0.0F).color(0, 0, 255, 255).endVertex();
+        vx.vertex(mx, x2, y1, 0.0F).color(0, 0, 255, 255).endVertex();
+        vx.vertex(mx, x1, y1, 0.0F).color(0, 0, 255, 255).endVertex();
     }
     
     public static boolean isKeyDown(int key) {

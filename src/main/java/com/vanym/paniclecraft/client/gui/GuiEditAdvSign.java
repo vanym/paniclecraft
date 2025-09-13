@@ -301,7 +301,7 @@ public class GuiEditAdvSign extends Screen {
         ms.translate(-0.5D, -0.75D, -0.5D);
         Core.instance.advSign.tileAdvSignRenderer.render(this.sign, 0.0F, ms, buffer, 0xf000f0,
                                                          OverlayTexture.NO_OVERLAY,
-                                                         true, false, this);
+                                                         true, this);
         ms.popPose();
         buffer.endBatch();
     }
