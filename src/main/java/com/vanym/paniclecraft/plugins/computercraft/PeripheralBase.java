@@ -18,12 +18,12 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import dan200.computercraft.api.lua.IArguments;
+import dan200.computercraft.api.lua.ILuaCallback;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.MethodResult;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IDynamicPeripheral;
-import dan200.computercraft.core.asm.TaskCallback;
 
 public abstract class PeripheralBase implements IDynamicPeripheral {
     
@@ -127,11 +127,30 @@ public abstract class PeripheralBase implements IDynamicPeripheral {
                 }
             }
             if (annotation.mainThread()) {
-                // TODO: Do not use non-api class TaskCallback
-                MethodResult rets = TaskCallback.make(context, ()-> {
+                long task = context.issueMainThreadTask(()-> {
                     return this.execute(method, methodArgs.toArray());
                 });
-                return rets;
+                // Copied TaskCallback here to avoid use of non-api classes
+                return new ILuaCallback() {
+                    protected final MethodResult pull =
+                            MethodResult.pullEvent("task_complete", this);
+                    
+                    @Override
+                    public MethodResult resume(Object[] args) throws LuaException {
+                        if (args.length < 3 || !(args[1] instanceof Number)
+                            || !(args[2] instanceof Boolean)
+                            || ((Number)args[1]).longValue() != task) {
+                            return this.pull;
+                        }
+                        if ((Boolean)args[2]) {
+                            return MethodResult.of(Arrays.copyOfRange(args, 3, args.length));
+                        } else if (args.length >= 4 && args[3] instanceof String) {
+                            throw new LuaException((String)args[3]);
+                        } else {
+                            throw new LuaException("error");
+                        }
+                    }
+                }.pull;
             } else {
                 return MethodResult.of(this.execute(method, methodArgs.toArray()));
             }
