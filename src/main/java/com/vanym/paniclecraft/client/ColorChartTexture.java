@@ -10,6 +10,7 @@ import com.vanym.paniclecraft.utils.ColorUtils;
 
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.data.TextureMetadataSection;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -33,6 +34,13 @@ public class ColorChartTexture extends SimpleTexture implements Closeable {
         } catch (IOException e) {
         }
         return TextureDataUncloseable.wrap(data);
+    }
+    
+    @Override
+    protected void doLoad(NativeImage image, boolean blur, boolean clamp) {
+        // the only difference to super.doLoad is false autoClose flag
+        TextureUtil.prepareImage(this.getId(), 0, image.getWidth(), image.getHeight());
+        image.upload(0, 0, 0, 0, 0, image.getWidth(), image.getHeight(), blur, clamp, false, false);
     }
     
     public Color getColor(int x, int y) {
