@@ -16,6 +16,7 @@ import com.vanym.paniclecraft.core.component.advsign.AdvSignText;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ItemUtils;
+import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -42,7 +43,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class ItemAdvSign extends Item {
     
@@ -172,10 +172,13 @@ public class ItemAdvSign extends Item {
             tileAS.setEditor(player.getUUID());
         }
         stack.shrink(1);
-        if (EffectiveSide.get().isClient()) {
-            TileEntityAdvSign tileAS = (TileEntityAdvSign)world.getBlockEntity(pos);
-            Minecraft.getInstance().setScreen(new GuiEditAdvSign(tileAS));
-        }
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+                Minecraft.getInstance().setScreen(new GuiEditAdvSign(tileAS));
+            }
+        });
         return ActionResultType.SUCCESS;
     }
     

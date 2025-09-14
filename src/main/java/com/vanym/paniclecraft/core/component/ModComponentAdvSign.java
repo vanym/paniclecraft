@@ -14,6 +14,7 @@ import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.network.message.MessageAdvSignOpenGui;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
+import com.vanym.paniclecraft.utils.DistUtils;
 
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.tileentity.TileEntityType;
@@ -21,7 +22,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -62,11 +62,15 @@ public class ModComponentAdvSign extends ModComponent {
         
         Core.instance.command.addSubCommand(new CommandAdvSign());
         
-        DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
-            ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
-            clientBuilder.push(CLIENT_RENDER);
-            this.renderTileAdvSign = clientBuilder.define("advSignTile", true)::get;
-            clientBuilder.pop();
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
+                clientBuilder.push(CLIENT_RENDER);
+                ModComponentAdvSign.this.renderTileAdvSign =
+                        clientBuilder.define("advSignTile", true)::get;
+                clientBuilder.pop();
+            }
         });
     }
     
