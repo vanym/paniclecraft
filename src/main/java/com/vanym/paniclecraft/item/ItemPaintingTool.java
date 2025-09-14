@@ -17,6 +17,7 @@ import com.vanym.paniclecraft.core.component.painting.PaintingSide;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.entity.EntityPaintOnBlock;
 import com.vanym.paniclecraft.network.message.MessagePaintingToolUse;
+import com.vanym.paniclecraft.utils.DistUtils;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
@@ -43,7 +44,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 
 public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
@@ -58,13 +58,22 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
     
     protected ItemPaintingTool(Item.Properties properties) {
         super(properties);
-        DistExecutor.runWhenOn(Dist.CLIENT, ()->()->this.brushUseMessages =
-                Core.instance.painting.paintingToolUseSet);
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ItemPaintingTool.this.brushUseMessages = Core.instance.painting.paintingToolUseSet;
+            }
+        });
     }
     
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        SideUtils.crun(()->()->this.onUsingTickClient(stack, player, count));
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ItemPaintingTool.this.onUsingTickClient(stack, player, count);
+            }
+        });
     }
     
     @OnlyIn(Dist.CLIENT)
@@ -86,9 +95,12 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
             World world,
             LivingEntity player,
             int count) {
-        SideUtils.crun(()->()-> {
-            if (ClientUtils.isMe(player)) {
-                this.flashBrushUseMessages();
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                if (ClientUtils.isMe(player)) {
+                    ItemPaintingTool.this.flashBrushUseMessages();
+                }
             }
         });
     }
@@ -168,9 +180,12 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
                 && (EntityPaintOnBlock.getExistingPicture(world, pos, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, pos, side)))) {
             entityPlayer.setActiveHand(hand);
-            SideUtils.crun(()->()-> {
-                if (ClientUtils.isMe(entityPlayer)) {
-                    this.brushUseMessages.clear();
+            SideUtils.crun(()->new Runnable() {
+                @Override
+                public void run() {
+                    if (ClientUtils.isMe(entityPlayer)) {
+                        ItemPaintingTool.this.brushUseMessages.clear();
+                    }
                 }
             });
             return ActionResultType.SUCCESS;

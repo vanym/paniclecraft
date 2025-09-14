@@ -17,6 +17,7 @@ import java.util.Arrays;
 import javax.imageio.ImageIO;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.vanym.paniclecraft.Core;
@@ -233,7 +234,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 // based on drawTexturedModelRect
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buf = tessellator.getBuffer();
-                buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+                buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
                 buf.pos(canvasX, canvasEndY, (double)this.blitOffset)
                    .tex(icon.getMinU(), icon.getMaxV())
                    .endVertex();

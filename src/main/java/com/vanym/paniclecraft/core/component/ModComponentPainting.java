@@ -55,6 +55,7 @@ import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.DistUtils;
 import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.client.gui.ScreenManager;
@@ -74,7 +75,6 @@ import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.config.ModConfig;
@@ -167,13 +167,16 @@ public class ModComponentPainting extends ModComponent {
         this.server = new ServerConfig(serverBuilder);
         this.initRecipesConfig(serverBuilder);
         
-        DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
-            this.paintingToolUseSet = new HashSet<>();
-            this.perFrameUse = new ItemPaintingTool.PerFrameEventHandler();
-            this.textureCache = new PictureTextureCache();
-            this.paintingSpecialSelectionBox = null;
-            ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
-            this.clientConfig = new ClientConfig(clientBuilder);
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ModComponentPainting.this.paintingToolUseSet = new HashSet<>();
+                ModComponentPainting.this.perFrameUse = new ItemPaintingTool.PerFrameEventHandler();
+                ModComponentPainting.this.textureCache = new PictureTextureCache();
+                ModComponentPainting.this.paintingSpecialSelectionBox = null;
+                ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
+                ModComponentPainting.this.clientConfig = new ClientConfig(clientBuilder);
+            }
         });
         
         Arrays.asList(new CommandPainting(), new CommandPaintOnBlock())

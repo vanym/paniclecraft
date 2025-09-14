@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.client.gui.GuiEditAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
+import com.vanym.paniclecraft.utils.DistUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
@@ -28,13 +29,19 @@ public class MessageAdvSignOpenGui {
     }
     
     public static void handleInWorld(MessageAdvSignOpenGui message, NetworkEvent.Context ctx) {
-        if (ctx.getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
-            Minecraft minecraft = Minecraft.getInstance();
-            TileEntity tile = minecraft.world.getTileEntity(message.pos);
-            if (tile instanceof TileEntityAdvSign) {
-                TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
-                Minecraft.getInstance().displayGuiScreen(new GuiEditAdvSign(tileAS));
-            }
+        if (ctx.getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
+            return;
         }
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                Minecraft minecraft = Minecraft.getInstance();
+                TileEntity tile = minecraft.world.getTileEntity(message.pos);
+                if (tile instanceof TileEntityAdvSign) {
+                    TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
+                    Minecraft.getInstance().displayGuiScreen(new GuiEditAdvSign(tileAS));
+                }
+            }
+        });
     }
 }

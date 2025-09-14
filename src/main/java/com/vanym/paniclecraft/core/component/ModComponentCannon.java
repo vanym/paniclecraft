@@ -13,6 +13,7 @@ import com.vanym.paniclecraft.container.ContainerCannon;
 import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageCannonSet;
 import com.vanym.paniclecraft.tileentity.TileEntityCannon;
+import com.vanym.paniclecraft.utils.DistUtils;
 
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -25,7 +26,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -82,11 +82,15 @@ public class ModComponentCannon extends ModComponent {
                                          .defineInRange("shootTimeout", 2, 0, Short.MAX_VALUE)::get;
         serverBuilder.pop();
         
-        DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
-            ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
-            clientBuilder.push(CLIENT_RENDER);
-            this.renderTileCannon = clientBuilder.define("cannonTile", true)::get;
-            clientBuilder.pop();
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
+                clientBuilder.push(CLIENT_RENDER);
+                ModComponentCannon.this.renderTileCannon =
+                        clientBuilder.define("cannonTile", true)::get;
+                clientBuilder.pop();
+            }
         });
     }
     
