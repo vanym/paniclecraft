@@ -86,7 +86,7 @@ public class Core {
     
     public Core() {
         instance = this;
-        proxy = DistExecutor.runForDist(()->ClientProxy::new, ()->ServerProxy::new);
+        proxy = DistExecutor.unsafeRunForDist(()->ClientProxy::new, ()->ServerProxy::new);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         ModLoadingContext context = ModLoadingContext.get();
         bus.addListener(this::setup);

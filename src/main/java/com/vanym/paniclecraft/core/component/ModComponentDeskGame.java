@@ -11,13 +11,13 @@ import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageChessMove;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.DistUtils;
 
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -49,11 +49,15 @@ public class ModComponentDeskGame extends ModComponent {
                 null);
         this.tileEntityChessDesk.setRegistryName(TileEntityChessDesk.ID);
         
-        DistExecutor.runWhenOn(Dist.CLIENT, ()->()-> {
-            ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
-            clientBuilder.push(CLIENT_RENDER);
-            this.renderTileChessDesk = clientBuilder.define("chessDeskTile", true)::get;
-            clientBuilder.pop();
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ForgeConfigSpec.Builder clientBuilder = configBuilders.get(ModConfig.Type.CLIENT);
+                clientBuilder.push(CLIENT_RENDER);
+                ModComponentDeskGame.this.renderTileChessDesk =
+                        clientBuilder.define("chessDeskTile", true)::get;
+                clientBuilder.pop();
+            }
         });
     }
     

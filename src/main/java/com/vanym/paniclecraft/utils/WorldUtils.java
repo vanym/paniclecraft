@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.utils;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -11,7 +12,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class WorldUtils {
     
@@ -25,13 +25,19 @@ public class WorldUtils {
     }
     
     public static Stream<Entity> getEntities(World world) {
-        if (EffectiveSide.get().isClient() && world instanceof ClientWorld) {
-            ClientWorld clientWorld = (ClientWorld)world;
-            return StreamSupport.stream(clientWorld.entitiesForRendering().spliterator(), false);
-        } else if (world instanceof ServerWorld) {
+        if (world instanceof ServerWorld) {
             return ((ServerWorld)world).getEntities();
-        } else {
-            return Stream.empty();
         }
+        return Optional.ofNullable(SideUtils.ccall(()->new Callable<Stream<Entity>>() {
+            @Override
+            public Stream<Entity> call() throws Exception {
+                if (!(world instanceof ClientWorld)) {
+                    return null;
+                }
+                ClientWorld clientWorld = (ClientWorld)world;
+                return StreamSupport.stream(clientWorld.entitiesForRendering().spliterator(),
+                                            false);
+            }
+        })).orElseGet(Stream::empty);
     }
 }

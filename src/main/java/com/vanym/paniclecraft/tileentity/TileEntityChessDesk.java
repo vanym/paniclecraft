@@ -101,7 +101,12 @@ public class TileEntityChessDesk extends TileEntityBase {
     @Override
     public void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
         super.onDataPacket(manager, packet);
-        SideUtils.crun(()->this::updateScreen);
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                TileEntityChessDesk.this.updateScreen();
+            }
+        });
     }
     
     @OnlyIn(Dist.CLIENT)
