@@ -7,6 +7,7 @@ import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,6 +19,7 @@ public class ItemRendererAdvSign extends ItemStackTileEntityRenderer {
     @Override
     public void renderByItem(
             ItemStack item,
+            ItemCameraTransforms.TransformType type,
             MatrixStack ms,
             IRenderTypeBuffer buffers,
             int light,
