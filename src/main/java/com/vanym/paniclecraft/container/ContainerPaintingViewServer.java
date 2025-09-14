@@ -7,13 +7,13 @@ import com.vanym.paniclecraft.core.component.painting.IPictureSize;
 import com.vanym.paniclecraft.core.component.painting.Picture;
 import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
     
@@ -127,6 +127,8 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
     
     public static class Provider implements INamedContainerProvider, Consumer<PacketBuffer> {
         
+        protected static final ITextComponent TITLE = new StringTextComponent("");
+        
         protected final WorldPicturePoint point;
         protected final IPictureSize pictureSize;
         protected final int sizeX, sizeY;
@@ -160,7 +162,7 @@ public class ContainerPaintingViewServer extends ContainerPaintingViewBase {
         
         @Override
         public ITextComponent getDisplayName() {
-            return NarratorChatListener.field_216868_a;
+            return TITLE;
         }
         
         @Override
