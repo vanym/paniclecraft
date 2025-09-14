@@ -44,12 +44,22 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     protected Set<MessagePaintingToolUse> brushUseMessages;
     
     protected ItemPaintingTool() {
-        DistUtils.crun(()->()->this.brushUseMessages = Core.instance.painting.paintingToolUseSet);
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ItemPaintingTool.this.brushUseMessages = Core.instance.painting.paintingToolUseSet;
+            }
+        });
     }
     
     @Override
     public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-        SideUtils.crun(()->()->this.onUsingTickClient(stack, player, count));
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ItemPaintingTool.this.onUsingTickClient(stack, player, count);
+            }
+        });
     }
     
     @SideOnly(Side.CLIENT)
@@ -67,9 +77,12 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
     
     @Override
     public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int count) {
-        SideUtils.crun(()->()-> {
-            if (ClientUtils.isMe(player)) {
-                this.flashBrushUseMessages();
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                if (ClientUtils.isMe(player)) {
+                    ItemPaintingTool.this.flashBrushUseMessages();
+                }
             }
         });
     }
@@ -139,9 +152,12 @@ public abstract class ItemPaintingTool extends ItemMod3 implements IPaintingTool
                 && (EntityPaintOnBlock.getExistingPicture(world, x, y, z, side) != null
                     || EntityPaintOnBlock.isValidBlockSide(world, x, y, z, side)))) {
             entityPlayer.setItemInUse(itemStack, this.getMaxItemUseDuration(itemStack));
-            SideUtils.crun(()->()-> {
-                if (ClientUtils.isMe(entityPlayer)) {
-                    this.brushUseMessages.clear();
+            SideUtils.crun(()->new Runnable() {
+                @Override
+                public void run() {
+                    if (ClientUtils.isMe(entityPlayer)) {
+                        ItemPaintingTool.this.brushUseMessages.clear();
+                    }
                 }
             });
         }

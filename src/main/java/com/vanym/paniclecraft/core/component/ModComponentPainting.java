@@ -134,7 +134,12 @@ public class ModComponentPainting extends ModComponent {
         }
         this.enabled = true;
         
-        DistUtils.crun(()->()->this.paintingToolUseSet = new HashSet<>());
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ModComponentPainting.this.paintingToolUseSet = new HashSet<>();
+            }
+        });
         this.itemPaintBrush = new ItemPaintBrush();
         this.itemPaintRemover = new ItemPaintRemover();
         this.itemPalette = new ItemPalette();

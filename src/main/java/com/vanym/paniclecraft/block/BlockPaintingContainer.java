@@ -44,7 +44,12 @@ public abstract class BlockPaintingContainer extends BlockContainerMod3 {
     public BlockPaintingContainer(Material material) {
         super(material);
         this.paintingOutlineSize = (1.0D / 16D);
-        DistUtils.crun(()->()->this.setRendererPhase(SpecialRendererPhase.NONE));
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                BlockPaintingContainer.this.setRendererPhase(SpecialRendererPhase.NONE);
+            }
+        });
     }
     
     public double getPaintingOutlineSize() {

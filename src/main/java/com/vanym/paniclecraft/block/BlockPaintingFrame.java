@@ -50,7 +50,12 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
         this.setHardness(0.6F);
         this.frameOutlineSize = (1.0D / 16D) * 2.0D;
         this.frameBoxes = Collections.unmodifiableList(getFrameBoxes(this.frameOutlineSize));
-        DistUtils.crun(()->()->this.specialRendererSide = -1);
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                BlockPaintingFrame.this.specialRendererSide = -1;
+            }
+        });
     }
     
     @Override
