@@ -27,7 +27,7 @@ public class MessageChessMove {
     
     public static MessageChessMove decode(PacketBuffer buf) {
         BlockPos pos = buf.readBlockPos();
-        ChessGame.Move move = new ChessGame.Move(buf.readUtf());
+        ChessGame.Move move = new ChessGame.Move(buf.readUtf(32));
         return new MessageChessMove(pos, move);
     }
     
