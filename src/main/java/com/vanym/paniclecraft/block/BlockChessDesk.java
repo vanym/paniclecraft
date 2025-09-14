@@ -18,8 +18,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
@@ -76,14 +76,14 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     
     @Override
     @SuppressWarnings("deprecation")
-    public IFluidState getFluidState(BlockState state) {
+    public FluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
                                            : super.getFluidState(state);
     }
     
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        IFluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
+        FluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
         return this.defaultBlockState()
                    .setValue(FACING, context.getHorizontalDirection())
                    .setValue(WATERLOGGED, fluidstate.getType() == Fluids.WATER);

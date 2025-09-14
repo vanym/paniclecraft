@@ -25,7 +25,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.BooleanProperty;
@@ -132,7 +132,7 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             BlockPos pos,
             PlayerEntity player,
             boolean willHarvest,
-            IFluidState fluid) {
+            FluidState fluid) {
         if (player != null) {
             TileEntity tile = world.getBlockEntity(pos);
             if (tile instanceof TileEntityPaintingFrame) {
