@@ -21,7 +21,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -52,7 +52,7 @@ public class TileEntityCannon extends TileEntityBase
     
     protected ItemStack stack = ItemStack.EMPTY;
     
-    protected Vec3d vector;
+    protected Vector3d vector;
     
     protected LazyOptional<IItemHandler> itemHandler = LazyOptional.of(()->new InvWrapper(this));
     
@@ -179,7 +179,7 @@ public class TileEntityCannon extends TileEntityBase
         return this.strength;
     }
     
-    protected synchronized Vec3d getVector() {
+    protected synchronized Vector3d getVector() {
         // expected to be called only on server side,
         // so do synchronized unconditionally
         if (this.vector == null) {
@@ -189,7 +189,7 @@ public class TileEntityCannon extends TileEntityBase
             double dirRadians = Math.toRadians(this.direction);
             double dirSin = Math.sin(dirRadians);
             double dirCos = Math.cos(dirRadians);
-            this.vector = new Vec3d(-dirSin * hCos, hSin, dirCos * hCos).scale(this.strength);
+            this.vector = new Vector3d(-dirSin * hCos, hSin, dirCos * hCos).scale(this.strength);
         }
         return this.vector;
     }
@@ -202,7 +202,7 @@ public class TileEntityCannon extends TileEntityBase
                 this.worldPosition.getZ() + 0.5D,
                 stack);
         entityItem.setPickUpDelay(Core.instance.cannon.pickupDelay.get());
-        Vec3d motion = this.getVector();
+        Vector3d motion = this.getVector();
         entityItem.setDeltaMovement(motion);
         this.level.addFreshEntity(entityItem);
     }
@@ -269,7 +269,7 @@ public class TileEntityCannon extends TileEntityBase
     @Override
     public boolean stillValid(PlayerEntity player) {
         return this == player.level.getBlockEntity(this.worldPosition)
-            && player.distanceToSqr(new Vec3d(this.worldPosition).add(0.5D, 0.5D, 0.5D)) <= 64.0D;
+            && player.distanceToSqr(Vector3d.atCenterOf(this.worldPosition)) <= 64.0D;
     }
     
     @Override

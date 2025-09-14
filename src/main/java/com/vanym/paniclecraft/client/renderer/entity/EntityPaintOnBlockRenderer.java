@@ -42,7 +42,6 @@ import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -63,8 +62,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -128,15 +128,18 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
             if (theProfiler != null) {
                 theProfiler.push("picture");
             }
-            Vec3d cam = this.entityRenderDispatcher.camera.getPosition();
-            Vec3d expand =
-                    calcExpand(new Vec3d(pos).add(GeometryUtils.getCenterVec3d()).subtract(cam));
+            Vector3d cam = this.entityRenderDispatcher.camera.getPosition();
+            Vector3d expand =
+                    calcExpand(Vector3d.atLowerCornerOf(pos)
+                                       .add(GeometryUtils.getCenterVec3d())
+                                       .subtract(cam));
             BlockModelRenderer render = this.blockRenderer.getModelRenderer();
             BlockState state = world.getBlockState(pos);
             long rand = MathHelper.getSeed(pos);
             IBakedModel model = this.getModel(state, world, pos);
             ms.pushPose();
-            GeometryUtils.acceptVec3d(new Vec3d(pos).subtract(GeometryUtils.createVec3d(entityPOB)),
+            GeometryUtils.acceptVec3d(Vector3d.atLowerCornerOf(pos)
+                                              .subtract(GeometryUtils.createVec3d(entityPOB)),
                                       ms::translate);
             for (int side = 0; side < ISidePictureProvider.N; ++side) {
                 Picture picture = entityPOB.getPicture(side);
@@ -152,7 +155,7 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
                 RenderType type = createRenderType(picture);
                 IVertexBuilder vertexer = buffer.getBuffer(type);
                 ms.pushPose();
-                GeometryUtils.acceptVec3d(expand.multiply(new Vec3d(pside.getNormal())),
+                GeometryUtils.acceptVec3d(expand.multiply(Vector3d.atLowerCornerOf(pside.getNormal())),
                                           ms::translate);
                 ForgeHooksClient.setRenderLayer(type);
                 if (this.renderPictureTypeSup.get() > 0) {
@@ -194,8 +197,8 @@ public class EntityPaintOnBlockRenderer extends EntityRenderer<EntityPaintOnBloc
         return expandBase + Math.pow(coord / 4, 2) * expandAdjust;
     }
     
-    protected static Vec3d calcExpand(Vec3d coords) {
-        return new Vec3d(calcExpand(coords.x), calcExpand(coords.y), calcExpand(coords.z));
+    protected static Vector3d calcExpand(Vector3d coords) {
+        return new Vector3d(calcExpand(coords.x), calcExpand(coords.y), calcExpand(coords.z));
     }
     
     protected IBakedModel getModel(BlockState state, World world, BlockPos pos) {

@@ -19,6 +19,7 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.block.AbstractButtonBlock;
 import net.minecraft.block.AbstractPressurePlateBlock;
@@ -59,10 +60,10 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.api.distmarker.Dist;
@@ -122,7 +123,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     public BlockPos getBlockPos() {
-        return new BlockPos(this);
+        return new BlockPos(GeometryUtils.createVec3d(this));
     }
     
     public void setBlockPos(BlockPos pos) {
@@ -238,7 +239,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public void move(MoverType type, Vec3d pos) {}
+    public void move(MoverType type, Vector3d pos) {}
     
     @Override
     public boolean isInvulnerableTo(DamageSource source) {

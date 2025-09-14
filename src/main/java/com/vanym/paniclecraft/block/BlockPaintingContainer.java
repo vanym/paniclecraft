@@ -21,7 +21,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -96,11 +96,11 @@ public abstract class BlockPaintingContainer extends ContainerBlock {
     
     public static Direction getStackDirection(PlayerEntity player, Direction side) {
         Direction dir = side.getOpposite();
-        Vec3d dirvec = new Vec3d(dir.getNormal());
-        Vec3d lookvec = new Vec3d(Direction.SOUTH.getNormal());
+        Vector3d dirvec = Vector3d.atLowerCornerOf(dir.getNormal());
+        Vector3d lookvec = Vector3d.atLowerCornerOf(Direction.SOUTH.getNormal());
         lookvec = lookvec.xRot(-(player.xRot * 0.999F) * (float)Math.PI / 180.0F);
         lookvec = lookvec.yRot(-player.yRot * (float)Math.PI / 180.0F);
-        Vec3d stackvec = lookvec.subtract(dirvec);
+        Vector3d stackvec = lookvec.subtract(dirvec);
         Direction stackdir = GeometryUtils.getDirectionByVec(stackvec);
         if (stackdir == dir || stackdir == side) {
             return null;

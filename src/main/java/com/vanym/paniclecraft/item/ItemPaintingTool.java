@@ -35,7 +35,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -139,8 +139,8 @@ public abstract class ItemPaintingTool extends Item implements IPaintingTool {
             return null;
         }
         PaintingSide pside = PaintingSide.getSide(side);
-        Vec3d inBlock = GeometryUtils.getInBlockVec(target);
-        Vec3d inPainting = pside.axes.toSideCoords(inBlock);
+        Vector3d inBlock = GeometryUtils.getInBlockVec(target);
+        Vector3d inPainting = pside.axes.toSideCoords(inBlock);
         int px = (int)(inPainting.x * picture.getWidth());
         int py = (int)(inPainting.y * picture.getHeight());
         MessagePaintingToolUse message =

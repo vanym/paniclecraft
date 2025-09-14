@@ -19,7 +19,7 @@ import net.minecraft.command.arguments.BlockPosArgument;
 import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -74,7 +74,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         public int execute(CommandContext<CommandSource> context) throws CommandSyntaxException {
             CommandSource source = context.getSource();
             double radius = DoubleArgumentType.getDouble(context, "radius");
-            Vec3d coords;
+            Vector3d coords;
             try {
                 coords = Vec3Argument.getCoordinates(context, "location").getPosition(source);
             } catch (IllegalArgumentException e) {

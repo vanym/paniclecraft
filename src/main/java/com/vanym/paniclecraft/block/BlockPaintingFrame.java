@@ -38,10 +38,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
@@ -116,8 +116,8 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             tilePF.clearPicture(side.get3DDataValue());
             return ItemPainting.getPictureAsItem(picture);
         });
-        Vec3d ePos = new Vec3d(pos).add(0.5, 0.5, 0.5)
-                                   .add(new Vec3d(side.getNormal()).scale(0.6D));
+        Vector3d ePos = Vector3d.atCenterOf(pos)
+                                .add(Vector3d.atLowerCornerOf(side.getNormal()).scale(0.6D));
         ItemEntity entityItem = new ItemEntity(world, ePos.x, ePos.y, ePos.z, stack);
         entityItem.setPickUpDelay(3);
         world.addFreshEntity(entityItem);

@@ -16,7 +16,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -131,8 +131,7 @@ public class GuiChess extends Screen {
     public void tick() {
         if ((this.chessdesk.getLevel()
                            .getBlockEntity(this.chessdesk.getBlockPos()) == null)
-            || this.minecraft.player.distanceToSqr(new Vec3d(
-                    this.chessdesk.getBlockPos()).add(0.5D, 0.5D, 0.5D)) > 64.0D) {
+            || this.minecraft.player.distanceToSqr(Vector3d.atCenterOf(this.chessdesk.getBlockPos())) > 64.0D) {
             this.onClose();
         }
     }
