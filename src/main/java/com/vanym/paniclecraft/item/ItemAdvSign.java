@@ -148,13 +148,15 @@ public class ItemAdvSign extends Item {
             return ActionResultType.FAIL;
         }
         ItemStack stack = context.getItem();
-        pos = pos.offset(facing);
-        Block block = Core.instance.advSign.blockAdvSign;
+        Block advSignBlock = Core.instance.advSign.blockAdvSign;
         PlayerEntity player = context.getPlayer();
+        // TODO: Get rid of this mess by upgrading ItemAdvSign to use BlockItem
+        BlockItemUseContext blockContext = new BlockItemUseContext(context);
+        pos = blockContext.getPos();
         if (!player.canPlayerEdit(pos, facing, stack)
-            || !world.setBlockState(pos,
-                                    block.getStateForPlacement(new BlockItemUseContext(context)),
-                                    11)) {
+            || blockContext.replacingClickedOnBlock()
+            || !blockContext.canPlace()
+            || !world.setBlockState(pos, advSignBlock.getStateForPlacement(blockContext), 11)) {
             return ActionResultType.FAIL;
         }
         TileEntity tile = world.getTileEntity(pos);
