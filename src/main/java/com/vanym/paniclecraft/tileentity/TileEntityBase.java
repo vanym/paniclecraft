@@ -1,7 +1,10 @@
 package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.network.message.MessageExtendedTileEntityUpdate;
 
+import cpw.mods.fml.common.network.FMLEmbeddedChannel;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -45,7 +48,12 @@ public abstract class TileEntityBase extends TileEntity {
     public Packet getDescriptionPacket() {
         NBTTagCompound dataTag = new NBTTagCompound();
         this.writeToNBT(dataTag);
-        return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 1, dataTag);
+        FMLEmbeddedChannel channel = Core.instance.getChannel(Side.SERVER);
+        return channel.generatePacketFrom(new MessageExtendedTileEntityUpdate(
+                this.xCoord,
+                this.yCoord,
+                this.zCoord,
+                dataTag));
     }
     
     @Override

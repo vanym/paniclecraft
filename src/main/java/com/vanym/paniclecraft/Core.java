@@ -28,6 +28,7 @@ import com.vanym.paniclecraft.core.component.ModComponentPortableWorkbench;
 import com.vanym.paniclecraft.item.IMod3Item;
 import com.vanym.paniclecraft.network.ProtocolVersion;
 import com.vanym.paniclecraft.network.message.MessageComponentConfig;
+import com.vanym.paniclecraft.network.message.MessageExtendedTileEntityUpdate;
 import com.vanym.paniclecraft.recipe.RecipeDummy;
 
 import cpw.mods.fml.client.event.ConfigChangedEvent;
@@ -96,9 +97,9 @@ public class Core implements IGuiHandler {
     
     public final SimpleNetworkWrapper network =
             NetworkRegistry.INSTANCE.newSimpleChannel(DEF.MOD_ID);
-    protected final String networkProtocolVersion = "2";
+    protected final String networkProtocolVersion = "3";
     protected final Predicate<String> clientAcceptedVersions =
-            this.networkProtocolVersion::equals;
+            Arrays.asList("2", this.networkProtocolVersion)::contains;
     protected final Predicate<String> serverAcceptedVersions =
             this.networkProtocolVersion::equals;
     
@@ -165,6 +166,9 @@ public class Core implements IGuiHandler {
                               "after:forge:shapedore after:forge:shapelessore");
         Core.instance.network.registerMessage(MessageComponentConfig.Handler.class,
                                               MessageComponentConfig.class, 5, Side.CLIENT);
+        Core.instance.network.registerMessage(MessageExtendedTileEntityUpdate.Handler.class,
+                                              MessageExtendedTileEntityUpdate.class, 6,
+                                              Side.CLIENT);
         FMLCommonHandler.instance().bus().register(this.syncTileEntityUpdater);
     }
     
