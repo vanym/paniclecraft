@@ -27,7 +27,7 @@ public class RecipeDummy {
             new ShapelessRecipe.Serializer();
     
     static {
-        REGISTER = new DeferredRegister<>(ForgeRegistries.RECIPE_SERIALIZERS, DEF.MOD_ID);
+        REGISTER = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, DEF.MOD_ID);
         REGISTER.register("dummy_shaped", ()->DUMMY_SHAPED_SERIALIZER);
         REGISTER.register("dummy_shapeless", ()->DUMMY_SHAPELESS_SERIALIZER);
     }

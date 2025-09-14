@@ -71,7 +71,12 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         this.holder = holder;
         this.hasAlpha = hasAlpha;
         this.setSize(size);
-        SideUtils.crun(()->()->this.texture = new TextureHolder());
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                Picture.this.texture = new TextureHolder();
+            }
+        });
     }
     
     public Picture(Image image) {
@@ -82,7 +87,12 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
         this.holder = holder;
         this.hasAlpha = image.hasAlpha();
         this.image = image;
-        SideUtils.crun(()->()->this.texture = new TextureHolder());
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                Picture.this.texture = new TextureHolder();
+            }
+        });
     }
     
     // synchronized inside
@@ -612,7 +622,12 @@ public class Picture implements IPictureSize, INBTSerializable<CompoundNBT> {
     }
     
     public void unload() {
-        SideUtils.crun(()->this::unloadClient);
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                Picture.this.unloadClient();
+            }
+        });
     }
     
     @OnlyIn(Dist.CLIENT)

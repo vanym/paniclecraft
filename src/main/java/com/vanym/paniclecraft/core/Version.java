@@ -200,7 +200,7 @@ public class Version {
         params.accept("paniclecraft", getVersion());
         params.accept("forge", ForgeVersion.getVersion());
         params.accept("minecraft", MCPVersion.getMCVersion());
-        String side = DistExecutor.runForDist(()->()->"client", ()->()->"server");
+        String side = DistExecutor.unsafeRunForDist(()->()->"client", ()->()->"server");
         params.accept("side", side);
         String name = FMLLoader.launcherHandlerName();
         if (name.toLowerCase().contains("dev")) {

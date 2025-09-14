@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.vanym.paniclecraft.client.gui.GuiChess;
 import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
+import com.vanym.paniclecraft.utils.SideUtils;
 import com.vanym.paniclecraft.utils.WorldUtils;
 
 import net.minecraft.block.Block;
@@ -38,7 +39,6 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
     
@@ -128,10 +128,13 @@ public class BlockChessDesk extends HorizontalBlock implements IWaterLoggable {
             PlayerEntity player,
             Hand hand,
             BlockRayTraceResult hit) {
-        if (EffectiveSide.get().isClient()) {
-            TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getBlockEntity(pos);
-            Minecraft.getInstance().setScreen(new GuiChess(tileCD));
-        }
+        SideUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                TileEntityChessDesk tileCD = (TileEntityChessDesk)world.getBlockEntity(pos);
+                Minecraft.getInstance().setScreen(new GuiChess(tileCD));
+            }
+        });
         return ActionResultType.SUCCESS;
     }
     
