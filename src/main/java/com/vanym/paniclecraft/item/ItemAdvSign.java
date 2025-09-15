@@ -19,6 +19,7 @@ import com.vanym.paniclecraft.utils.ItemUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
@@ -151,16 +152,16 @@ public class ItemAdvSign extends Item {
         pos = pos.relative(facing);
         Block block = Core.instance.advSign.blockAdvSign;
         PlayerEntity player = context.getPlayer();
+        BlockState state = block.getStateForPlacement(new BlockItemUseContext(context));
         if (!player.mayUseItemAt(pos, facing, stack)
-            || !world.setBlock(pos, block.getStateForPlacement(new BlockItemUseContext(context)),
-                               11)) {
+            || !world.setBlock(pos, state, 11)) {
             return ActionResultType.FAIL;
         }
         TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
             getSign(stack).filter(TileEntityAdvSign::isValidTag)
-                          .ifPresent(signTag->tileAS.read(signTag, true));
+                          .ifPresent(signTag->tileAS.read(state, signTag, true));
             if (facing == Direction.UP) {
                 tileAS.setForm(AdvSignForm.STICK_DOWN);
                 double direction = Math.round(180.0D + player.yRot);

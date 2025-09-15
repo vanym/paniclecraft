@@ -65,11 +65,11 @@ public class TileEntityAdvSign extends TileEntityBase {
     }
     
     @Override
-    public void load(CompoundNBT nbtTag) {
-        this.read(nbtTag, false);
+    public void load(BlockState state, CompoundNBT nbtTag) {
+        this.read(state, nbtTag, false);
     }
     
-    public void read(CompoundNBT nbtTag, boolean fromStack) {
+    public void read(BlockState state, CompoundNBT nbtTag, boolean fromStack) {
         if (nbtTag.contains(TAG_FRONTTEXT, 10)) {
             this.frontText.deserializeNBT(nbtTag.getCompound(TAG_FRONTTEXT));
         }
@@ -80,7 +80,7 @@ public class TileEntityAdvSign extends TileEntityBase {
         if (fromStack) {
             return;
         }
-        super.load(nbtTag);
+        super.load(state, nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.setForm(AdvSignForm.byIndex(nbtTag.getInt(TAG_FORM)));
     }

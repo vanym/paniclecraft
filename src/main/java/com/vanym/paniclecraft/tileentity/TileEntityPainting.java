@@ -8,6 +8,7 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.SideUtils;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -39,13 +40,13 @@ public class TileEntityPainting extends TileEntityPaintingContainer {
     }
     
     @Override
-    public void load(CompoundNBT nbtTag) {
+    public void load(BlockState state, CompoundNBT nbtTag) {
         SideUtils.runSync(this.level != null && !this.level.isClientSide,
-                          this, ()->this.readAsync(nbtTag));
+                          this, ()->this.readAsync(state, nbtTag));
     }
     
-    protected void readAsync(CompoundNBT nbtTag) {
-        super.load(nbtTag);
+    protected void readAsync(BlockState state, CompoundNBT nbtTag) {
+        super.load(state, nbtTag);
         if (nbtTag.contains(TAG_PICTURE)) {
             this.getPicture().deserializeNBT(nbtTag.getCompound(TAG_PICTURE));
         }

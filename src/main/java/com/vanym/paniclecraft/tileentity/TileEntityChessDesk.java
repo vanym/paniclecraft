@@ -15,6 +15,7 @@ import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -61,8 +62,8 @@ public class TileEntityChessDesk extends TileEntityBase {
     }
     
     @Override
-    public void load(CompoundNBT nbtTag) {
-        super.load(nbtTag);
+    public void load(BlockState state, CompoundNBT nbtTag) {
+        super.load(state, nbtTag);
         ListNBT list = nbtTag.getList(TAG_MOVES, 10);
         this.readMoves(list);
     }

@@ -8,6 +8,7 @@ import com.vanym.paniclecraft.container.ContainerCannon;
 import com.vanym.paniclecraft.utils.NumberUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -96,13 +97,13 @@ public class TileEntityCannon extends TileEntityBase
     }
     
     @Override
-    public void load(CompoundNBT nbtTag) {
+    public void load(BlockState state, CompoundNBT nbtTag) {
         SideUtils.runSync(this.level != null && !this.level.isClientSide,
-                          this, ()->this.readAsync(nbtTag));
+                          this, ()->this.readAsync(state, nbtTag));
     }
     
-    public void readAsync(CompoundNBT nbtTag) {
-        super.load(nbtTag);
+    public void readAsync(BlockState state, CompoundNBT nbtTag) {
+        super.load(state, nbtTag);
         this.setDirection(nbtTag.getDouble(TAG_DIRECTION));
         this.height = NumberUtils.finite(nbtTag.getDouble(TAG_HEIGHT));
         this.strength = NumberUtils.finite(nbtTag.getDouble(TAG_STRENGTH));
