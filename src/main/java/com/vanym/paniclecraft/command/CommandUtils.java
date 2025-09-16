@@ -16,7 +16,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 
@@ -44,7 +43,7 @@ public class CommandUtils {
     public static HoverEvent makeItemHover(ItemStack stack) {
         return new HoverEvent(
                 HoverEvent.Action.SHOW_ITEM,
-                new StringTextComponent(stack.serializeNBT().toString()));
+                new HoverEvent.ItemHover(stack));
     }
     
     public static BlockRayTraceResult rayTraceBlocks(PlayerEntity player)

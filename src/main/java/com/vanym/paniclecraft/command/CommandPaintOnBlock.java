@@ -22,9 +22,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.Dimension;
-import net.minecraft.world.dimension.DimensionType;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
     
@@ -87,9 +86,8 @@ public class CommandPaintOnBlock extends TreeCommandBase {
                                              .inflate(radius);
             int count = EntityPaintOnBlock.clearArea(world, box);
             String name = Optional.of(world)
-                                  .map(World::getDimension)
-                                  .map(Dimension::getType)
-                                  .map(DimensionType::getName)
+                                  .map(World::dimensionType)
+                                  .map(DimensionType::effectsLocation)
                                   .map(d->"minecraft".equals(d.getNamespace()) ? d.getPath()
                                                                                : d.toString())
                                   .orElse("world");

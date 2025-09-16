@@ -16,9 +16,9 @@ import com.vanym.paniclecraft.item.ItemPainting;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
 import net.minecraft.util.text.event.ClickEvent;
 
 public class CommandPainting extends TreeCommandBase {
@@ -91,7 +91,7 @@ public class CommandPainting extends TreeCommandBase {
         }
         
         protected ITextComponent createLine(Iterable<IPictureSize> sizes) {
-            ITextComponent message = new StringTextComponent("");
+            IFormattableTextComponent message = new StringTextComponent("");
             boolean f = true;
             for (IPictureSize size : sizes) {
                 if (!f) {
@@ -105,17 +105,15 @@ public class CommandPainting extends TreeCommandBase {
         }
         
         protected ITextComponent createTemplate(IPictureSize size) {
-            ITextComponent template =
+            IFormattableTextComponent template =
                     new StringTextComponent(
                             String.format("%d×%d", size.getWidth(), size.getHeight()));
             ItemStack stack = ItemPainting.getSizedItem(size);
             stack.setCount(stack.getMaxStackSize());
-            Style style = template.getStyle();
-            style.setClickEvent(new ClickEvent(
+            return template.withStyle(style->style.withClickEvent(new ClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
-                    CommandUtils.makeGiveCommand("@p", stack)));
-            style.setHoverEvent(CommandUtils.makeItemHover(stack));
-            return template;
+                    CommandUtils.makeGiveCommand("@p", stack)))
+                                                  .withHoverEvent(CommandUtils.makeItemHover(stack)));
         }
         
         @Override

@@ -128,7 +128,7 @@ public class Core {
     }
     
     protected void serverStarting(FMLServerStartingEvent event) {
-        event.getCommandDispatcher().register(this.command.register());
+        event.getServer().getCommands().getDispatcher().register(this.command.register());
     }
     
     @SubscribeEvent
