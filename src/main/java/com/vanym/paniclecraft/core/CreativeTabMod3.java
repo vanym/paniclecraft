@@ -10,19 +10,24 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class CreativeTabMod3 extends ItemGroup {
     
+    protected final String tabid;
+    
     public CreativeTabMod3(String tabid) {
         super(tabid);
+        this.tabid = tabid;
     }
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public String getName() {
-        return "itemgroup." + this.getLangId();
+    public ITextComponent getDisplayName() {
+        return new TranslationTextComponent("itemgroup." + this.tabid);
     }
     
     @Override
