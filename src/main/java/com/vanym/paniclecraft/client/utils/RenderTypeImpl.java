@@ -74,12 +74,17 @@ public class RenderTypeImpl extends RenderType.Type {
         public static final LayerState NO_LAYERING = RenderState.NO_LAYERING;
         public static final LayerState POLYGON_OFFSET_LAYERING =
                 RenderState.POLYGON_OFFSET_LAYERING;
-        public static final LayerState PROJECTION_LAYERING = RenderState.PROJECTION_LAYERING;
+        public static final LayerState VIEW_OFFSET_Z_LAYERING = RenderState.VIEW_OFFSET_Z_LAYERING;
         public static final FogState NO_FOG = RenderState.NO_FOG;
         public static final FogState FOG = RenderState.FOG;
         public static final FogState BLACK_FOG = RenderState.BLACK_FOG;
         public static final TargetState MAIN_TARGET = RenderState.MAIN_TARGET;
         public static final TargetState OUTLINE_TARGET = RenderState.OUTLINE_TARGET;
+        public static final TargetState TRANSLUCENT_TARGET = RenderState.TRANSLUCENT_TARGET;
+        public static final TargetState PARTICLES_TARGET = RenderState.PARTICLES_TARGET;
+        public static final TargetState WEATHER_TARGET = RenderState.WEATHER_TARGET;
+        public static final TargetState CLOUDS_TARGET = RenderState.CLOUDS_TARGET;
+        public static final TargetState ITEM_ENTITY_TARGET = RenderState.ITEM_ENTITY_TARGET;
         public static final LineState DEFAULT_LINE = RenderState.DEFAULT_LINE;
     }
 }

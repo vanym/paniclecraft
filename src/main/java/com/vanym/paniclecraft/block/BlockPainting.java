@@ -87,9 +87,10 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
+    @SuppressWarnings("deprecation")
     public FluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
-                                           : state.getFluidState();
+                                           : super.getFluidState(state);
     }
     
     @Override

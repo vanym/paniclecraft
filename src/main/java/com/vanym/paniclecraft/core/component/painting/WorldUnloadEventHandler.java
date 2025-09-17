@@ -11,7 +11,10 @@ public class WorldUnloadEventHandler {
     
     @SubscribeEvent
     public void worldUnload(WorldEvent.Unload event) {
-        World world = event.getWorld().getLevel();
+        if (!World.class.isInstance(event.getWorld())) {
+            return;
+        }
+        World world = (World)event.getWorld();
         for (TileEntity tile : world.blockEntityList) {
             if (tile instanceof TileEntityPaintingContainer) {
                 TileEntityPaintingContainer tilePC = (TileEntityPaintingContainer)tile;

@@ -53,7 +53,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.RailShape;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
@@ -82,10 +82,10 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             new ResourceLocation(DEF.MOD_ID, "paintonblock_allow");
     public static final ResourceLocation TAG_PAINTONBLOCK_DENY_ID =
             new ResourceLocation(DEF.MOD_ID, "paintonblock_deny");
-    public static final Tag<Block> TAG_PAINTONBLOCK_ALLOW =
-            new BlockTags.Wrapper(TAG_PAINTONBLOCK_ALLOW_ID);
-    public static final Tag<Block> TAG_PAINTONBLOCK_DENY =
-            new BlockTags.Wrapper(TAG_PAINTONBLOCK_DENY_ID);
+    public static final ITag<Block> TAG_PAINTONBLOCK_ALLOW =
+            BlockTags.createOptional(TAG_PAINTONBLOCK_ALLOW_ID);
+    public static final ITag<Block> TAG_PAINTONBLOCK_DENY =
+            BlockTags.createOptional(TAG_PAINTONBLOCK_DENY_ID);
     
     protected static final int PICTURE_PARAMETER_OFFSET = 16;
     protected static final PictureParameter[] PICTURE_PARAMETERS;
@@ -257,7 +257,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public boolean isPushedByWater() {
+    public boolean isPushedByFluid() {
         return false;
     }
     
@@ -597,7 +597,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             valid = !neighborState.isSolidRender(world, neighborPos);
         } else if (TAG_PAINTONBLOCK_ALLOW.contains(block)) {
             valid = true;
-        } else if (Block.isFaceSturdy(state, world, pos, pside)) {
+        } else if (Block.isFaceFull(state.getCollisionShape(world, pos), pside)) {
             valid = true;
         } else if (Stream.of(StairsBlock.class, FenceBlock.class, WallBlock.class, PaneBlock.class,
                              FenceGateBlock.class, BrewingStandBlock.class,

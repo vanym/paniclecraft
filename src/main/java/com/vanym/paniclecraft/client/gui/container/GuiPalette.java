@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.ColorChartTexture;
@@ -180,24 +181,24 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float renderPartialTicks) {
-        this.renderBackground();
-        super.render(mouseX, mouseY, renderPartialTicks);
-        this.renderTooltip(mouseX, mouseY);
+    public void render(MatrixStack ms, int mouseX, int mouseY, float renderPartialTicks) {
+        this.renderBackground(ms);
+        super.render(ms, mouseX, mouseY, renderPartialTicks);
+        this.renderTooltip(ms, mouseX, mouseY);
     }
     
-    protected void drawInventoriesNames() {
-        this.font.draw(this.title.getColoredString(), 8, 6, 0x404040);
-        this.font.draw(this.inventory.getDisplayName().getColoredString(),
+    protected void drawInventoriesNames(MatrixStack ms) {
+        this.font.draw(ms, this.title, 8, 6, 0x404040);
+        this.font.draw(ms, this.inventory.getDisplayName(),
                        8, this.imageHeight - 96 + 2, 0x404040);
     }
     
-    protected void drawRGBLabels() {
+    protected void drawRGBLabels(MatrixStack ms) {
         final String letters = "BGR";
         for (int i = 0; i < this.textColor.length; ++i) {
             GuiOneColorField field = this.textColor[i];
             int yoffset = (field.getInnerWidth() - field.getWidth()) / -4;
-            this.font.draw(letters.charAt(i) + ": ",
+            this.font.draw(ms, letters.charAt(i) + ": ",
                            -this.leftPos + field.x - 11,
                            -this.topPos + field.y + yoffset,
                            0x404040);
@@ -205,21 +206,21 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
     }
     
     @Override
-    public void renderLabels(int x, int y) {
-        this.drawInventoriesNames();
-        this.drawRGBLabels();
+    public void renderLabels(MatrixStack ms, int x, int y) {
+        this.drawInventoriesNames(ms);
+        this.drawRGBLabels(ms);
     }
     
     @Override
-    public void renderBg(float partialTicks, int mouseX, int mouseY) {
+    public void renderBg(MatrixStack ms, float partialTicks, int mouseX, int mouseY) {
         this.minecraft.getTextureManager().bind(GUI_TEXTURE);
-        this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        this.chart.render(mouseX, mouseY, partialTicks);
+        this.blit(ms, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        this.chart.render(ms, mouseX, mouseY, partialTicks);
         Color color = this.getColor();
         if (color == null) {
             color = new Color(0);
         }
-        fill(this.picker.xPosition, this.picker.yPosition,
+        fill(ms, this.picker.xPosition, this.picker.yPosition,
              this.picker.xPosition + this.picker.width,
              this.picker.yPosition + this.picker.height,
              color.getRGB());
@@ -355,12 +356,12 @@ public class GuiPalette extends ContainerScreen<ContainerPalette> implements ICo
         }
         
         @Override
-        public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
+        public void render(MatrixStack ms, int pMouseX, int pMouseY, float pPartialTicks) {
             if (!this.visible) {
                 return;
             }
             this.chart.bind();
-            this.blit(this.xPosition, this.yPosition, 0, 0, this.width, this.height);
+            this.blit(ms, this.xPosition, this.yPosition, 0, 0, this.width, this.height);
         }
     }
 }

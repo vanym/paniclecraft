@@ -24,7 +24,10 @@ public class PaintOnBlockEventHandler {
     
     @SubscribeEvent
     public void worldUnload(WorldEvent.Unload event) {
-        World world = event.getWorld().getLevel();
+        if (!World.class.isInstance(event.getWorld())) {
+            return;
+        }
+        World world = (World)event.getWorld();
         WorldUtils.getEntities(world)
                   .filter(EntityPaintOnBlock.class::isInstance)
                   .map(EntityPaintOnBlock.class::cast)
@@ -38,7 +41,10 @@ public class PaintOnBlockEventHandler {
     }
     
     protected void blockChange(BlockEvent event) {
-        World world = event.getWorld().getLevel();
+        if (!World.class.isInstance(event.getWorld())) {
+            return;
+        }
+        World world = (World)event.getWorld();
         if (world.isClientSide) {
             return;
         }

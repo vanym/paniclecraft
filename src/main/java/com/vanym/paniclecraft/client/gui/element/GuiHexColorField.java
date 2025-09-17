@@ -5,8 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -32,7 +35,7 @@ public class GuiHexColorField extends TextFieldWidget {
     }
     
     public GuiHexColorField(FontRenderer font, int x, int y, int width, int height) {
-        super(font, x, y, width, height, "");
+        super(font, x, y, width, height, StringTextComponent.EMPTY);
         this.setMaxLength(7);
         this.fixate();
     }
@@ -182,7 +185,7 @@ public class GuiHexColorField extends TextFieldWidget {
     }
     
     @Override
-    public void renderButton(int x, int y, float partialTicks) {
+    public void renderButton(MatrixStack ms, int x, int y, float partialTicks) {
         if (!this.isVisible()) {
             return;
         }
@@ -206,7 +209,7 @@ public class GuiHexColorField extends TextFieldWidget {
         this.setValue(sb.toString());
         this.moveCursorTo(convertPos(pos));
         this.setHighlightPos(convertPos(sel));
-        super.renderButton(x, y, partialTicks);
+        super.renderButton(ms, x, y, partialTicks);
         this.setValue(text);
         this.setMaxLength(7);
         this.moveCursorTo(pos);
