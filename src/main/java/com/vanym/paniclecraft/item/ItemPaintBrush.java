@@ -80,7 +80,7 @@ public class ItemPaintBrush extends ItemPaintingTool implements IColorizeable {
                                              ColorUtils.getAlphaless(color));
             Stream.of(formatted.split("\n"))
                   .map(FormattingUtils::parseLine)
-                  .peek(line->line.withStyle(TextFormatting.GRAY))
+                  .peek(line->line.copy().withStyle(TextFormatting.GRAY))
                   .forEachOrdered(list::add);
         }
     }
