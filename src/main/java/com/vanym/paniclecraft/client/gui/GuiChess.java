@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.core.component.deskgame.ChessGame;
@@ -18,6 +19,7 @@ import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -101,9 +103,9 @@ public class GuiChess extends Screen {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float renderPartialTicks) {
-        this.renderBackground();
-        super.render(mouseX, mouseY, renderPartialTicks);
+    public void render(MatrixStack ms, int mouseX, int mouseY, float renderPartialTicks) {
+        this.renderBackground(ms);
+        super.render(ms, mouseX, mouseY, renderPartialTicks);
     }
     
     @Override
@@ -273,7 +275,7 @@ public class GuiChess extends Screen {
     protected static abstract class ChessButton extends AbstractButton {
         
         public ChessButton(int x, int y) {
-            super(x, y, 20, 20, "");
+            super(x, y, 20, 20, StringTextComponent.EMPTY);
         }
         
         protected abstract byte getPiece();
@@ -289,14 +291,14 @@ public class GuiChess extends Screen {
         }
         
         @Override
-        public void renderButton(int mouseX, int mouseY, float partialTicks) {
+        public void renderButton(MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
             if (!this.visible) {
                 return;
             }
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.getTextureManager().bind(BUTTONS_TEXTURE);
             int mode = this.getYImage(this.isHovered());
-            this.blit(this.x, this.y,
+            this.blit(ms, this.x, this.y,
                       mode * this.width, 0,
                       this.width, this.height);
             byte piece = this.getPiece();
@@ -306,7 +308,7 @@ public class GuiChess extends Screen {
                 if (pieceA > 6) {
                     pieceA -= 3;
                 }
-                this.blit(this.x, this.y, pieceA * this.width,
+                this.blit(ms, this.x, this.y, pieceA * this.width,
                           (pieceW ? this.height : this.height * 2),
                           this.width, this.height);
             }
