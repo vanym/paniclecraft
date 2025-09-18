@@ -25,6 +25,7 @@ import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.ColorUtils;
 import com.vanym.paniclecraft.utils.JUtils;
 
+import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
@@ -36,11 +37,16 @@ import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class GuiEditAdvSign extends Screen {
+    
+    protected static final ITextComponent EMPTY = StringTextComponent.EMPTY;
+    protected static final ITextComponent PLUS = new StringTextComponent("+");
+    protected static final ITextComponent MINUS = new StringTextComponent("-");
     
     protected final TileEntityAdvSign sign;
     
@@ -85,21 +91,16 @@ public class GuiEditAdvSign extends Screen {
                 this.height / 4 + 120,
                 200,
                 20,
-                I18n.get("gui.done"),
+                DialogTexts.GUI_DONE,
                 b->this.minecraft.setScreen(null));
-        this.buttonAddLine = new Button(xCenter + 59, this.height / 4 + 68, 20, 20, "+", b-> {
+        this.buttonAddLine = new Button(xCenter + 59, this.height / 4 + 68, 20, 20, PLUS, b-> {
             AdvSignText text = this.getState().getText();
             text.getLines().add(new StringTextComponent(""));
             text.fixSize();
             this.updateElements();
         });
-        this.buttonRemoveLine = new Button(
-                this.buttonAddLine.x + 21,
-                this.buttonAddLine.y,
-                20,
-                20,
-                "-",
-                b-> {
+        this.buttonRemoveLine =
+                new Button(this.buttonAddLine.x + 21, this.buttonAddLine.y, 20, 20, MINUS, b-> {
                     AdvSignText text = this.getState().getText();
                     text.removeLast();
                     text.fixSize();
@@ -108,26 +109,29 @@ public class GuiEditAdvSign extends Screen {
                                                text.getLines().size() - 1));
                     this.updateElements();
                 });
-        String textCopy = I18n.get(String.format("gui.%s.advanced_sign.copy", DEF.MOD_ID));
+        ITextComponent textCopy = new TranslationTextComponent(
+                String.format("gui.%s.advanced_sign.copy", DEF.MOD_ID));
         this.buttonCopy = new Button(xCenter - 100, this.height / 4 + 99, 40, 20, textCopy, b-> {
             GuiUtils.setClipboardString(this.getState()
                                             .getText()
                                             .getLines()
                                             .stream()
-                                            .map(ITextComponent::getColoredString)
-                                            .map(FormattingUtils::trimReset)
+                                            // TODO: Here we are losing style info
+                                            .map(ITextComponent::getString)
                                             .collect(Collectors.joining(System.lineSeparator())));
         });
-        String textPaste = I18n.get(String.format("gui.%s.advanced_sign.paste", DEF.MOD_ID));
+        ITextComponent textPaste = new TranslationTextComponent(
+                String.format("gui.%s.advanced_sign.paste", DEF.MOD_ID));
         this.buttonPaste = new Button(xCenter - 59, this.height / 4 + 99, 40, 20, textPaste, b-> {
             this.getState().pasteFull(GuiUtils.getClipboardString());
             this.updateElements();
         });
-        this.buttonToggleStick = new Button(xCenter - 100, this.height / 4 + 57, 55, 20, "", b-> {
-            this.sign.setForm(AdvSignForm.byIndex(this.sign.getForm().getIndex() + 1));
-            this.updateElements();
-        });
-        this.buttonFlip = new Button(xCenter - 100, this.height / 4 + 78, 60, 20, "", b-> {
+        this.buttonToggleStick =
+                new Button(xCenter - 100, this.height / 4 + 57, 55, 20, EMPTY, b-> {
+                    this.sign.setForm(AdvSignForm.byIndex(this.sign.getForm().getIndex() + 1));
+                    this.updateElements();
+                });
+        this.buttonFlip = new Button(xCenter - 100, this.height / 4 + 78, 60, 20, EMPTY, b-> {
             this.front = !this.front;
             this.updateElements();
         });
@@ -253,18 +257,18 @@ public class GuiEditAdvSign extends Screen {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float renderPartialTicks) {
+    public void render(MatrixStack ms, int mouseX, int mouseY, float renderPartialTicks) {
         if (!this.isRotating()) {
-            this.renderBackground();
+            this.renderBackground(ms);
         }
-        this.drawCenteredString(this.font, I18n.get("sign.edit"), this.width / 2, 40, 0xffffff);
+        drawCenteredString(ms, this.font, I18n.get("sign.edit"), this.width / 2, 40, 0xffffff);
         if (this.isRotating()) {
-            this.sliderDir.render(mouseX, mouseY, renderPartialTicks);
+            this.sliderDir.render(ms, mouseX, mouseY, renderPartialTicks);
             String tooltipKey =
                     Screen.hasShiftDown() ? "gui.%s.advanced_sign.slider_unshift_tooltip"
                                           : "gui.%s.advanced_sign.slider_shift_tooltip";
-            this.drawCenteredString(this.font, I18n.get(String.format(tooltipKey, DEF.MOD_ID)),
-                                    this.width / 2, this.height - 75, 0xffffff);
+            drawCenteredString(ms, this.font, I18n.get(String.format(tooltipKey, DEF.MOD_ID)),
+                               this.width / 2, this.height - 75, 0xffffff);
             return;
         }
         this.drawSign();
@@ -273,20 +277,20 @@ public class GuiEditAdvSign extends Screen {
                                     lines, String.format("%2d", lines),
                                     String.format("%02d", lines));
         int linesTextWidth = this.font.width(linesText);
-        this.drawString(this.font, linesText,
-                        this.buttonAddLine.x - 2 - linesTextWidth,
-                        this.buttonAddLine.y + 10, 0xffffff);
+        drawString(ms, this.font, linesText,
+                   this.buttonAddLine.x - 2 - linesTextWidth,
+                   this.buttonAddLine.y + 10, 0xffffff);
         String stndTxt = I18n.get(String.format("gui.%s.advanced_sign.color.stand", DEF.MOD_ID));
         int standTextWidth = this.font.width(stndTxt);
-        this.drawString(this.font, stndTxt,
-                        this.standColorHex.x - 2 - standTextWidth,
-                        this.standColorHex.y + 3, 0xffffff);
+        drawString(ms, this.font, stndTxt,
+                   this.standColorHex.x - 2 - standTextWidth,
+                   this.standColorHex.y + 3, 0xffffff);
         String textText = I18n.get(String.format("gui.%s.advanced_sign.color.text", DEF.MOD_ID));
         int textTextWidth = this.font.width(textText);
-        this.drawString(this.font, textText,
-                        this.textColorHex.x - 2 - textTextWidth,
-                        this.textColorHex.y + 3, 0xffffff);
-        super.render(mouseX, mouseY, renderPartialTicks);
+        drawString(ms, this.font, textText,
+                   this.textColorHex.x - 2 - textTextWidth,
+                   this.textColorHex.y + 3, 0xffffff);
+        super.render(ms, mouseX, mouseY, renderPartialTicks);
     }
     
     protected void drawSign() {
@@ -327,11 +331,11 @@ public class GuiEditAdvSign extends Screen {
         this.buttonRemoveLine.active = !this.getState().getText().isMin();
         this.standColorHex.setRGB(ColorUtils.getAlphaless(this.sign.getStandColor()));
         this.textColorHex.setRGB(ColorUtils.getAlphaless(this.getState().getText().getTextColor()));
-        this.buttonToggleStick.setMessage(I18n.get(JUtils.make(()-> {
+        this.buttonToggleStick.setMessage(new TranslationTextComponent(JUtils.make(()-> {
             return String.format("gui.%s.advanced_sign.stick.%s", DEF.MOD_ID,
                                  this.sign.getForm() == AdvSignForm.STICK_DOWN ? "on" : "off");
         })));
-        this.buttonFlip.setMessage(I18n.get(JUtils.make(()-> {
+        this.buttonFlip.setMessage(new TranslationTextComponent(JUtils.make(()-> {
             return String.format("gui.%s.advanced_sign.side.%s", DEF.MOD_ID,
                                  this.front ? "front" : "back");
         })));
@@ -376,14 +380,14 @@ public class GuiEditAdvSign extends Screen {
         }
         
         protected void trim() {
-            while (!this.lineFits(this.input.getComponent().getColoredString())
+            while (!this.lineFits(this.input.getComponent())
                 && (this.input.removeBack() || this.input.removeLast())) {
             }
         }
         
-        protected boolean lineFits(CharSequence line) {
+        protected boolean lineFits(ITextComponent line) {
             int max = this.getMaxLineFontWidth();
-            return GuiEditAdvSign.this.font.width(line.toString()) <= max;
+            return GuiEditAdvSign.this.font.width(line) <= max;
         }
         
         public void updateLine() {

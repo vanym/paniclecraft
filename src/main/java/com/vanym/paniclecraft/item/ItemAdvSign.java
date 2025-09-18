@@ -1,9 +1,9 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -119,10 +119,10 @@ public class ItemAdvSign extends Item {
             AdvSignText text = new AdvSignText();
             List<ITextComponent> lines = text.getLines();
             lines.clear();
-            Arrays.stream(tileS.messages)
-                  .map(ITextComponent::getColoredString)
-                  .map(FormattingUtils::parseLine)
-                  .forEachOrdered(lines::add);
+            IntStream.range(0, 4)
+                     .mapToObj(tileS::getMessage)
+                     .map(FormattingUtils::normalize)
+                     .forEachOrdered(lines::add);
             signTag.put(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
             signTag.put(TileEntityAdvSign.TAG_BACKTEXT, new AdvSignText(4).serializeNBT());
             signTag.putInt(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());

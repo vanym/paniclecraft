@@ -26,12 +26,15 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class GuiUtils {
+    
+    protected static final ITextComponent EMPTY = StringTextComponent.EMPTY;
     
     protected static final RenderType RENDER_TYPE_FILL =
             RenderType.create(DEF.MOD_ID + ":fill",
@@ -91,7 +94,7 @@ public class GuiUtils {
     }
     
     public static void drawHighlight(int x1, int y1, int x2, int y2) {
-        new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, "").renderHighlight(x1, y1, x2, y2);
+        new TextFieldWidget(null, 0, 0, ~0, 0, EMPTY).renderHighlight(x1, y1, x2, y2);
     }
     
     public static void drawString8xOutline(
@@ -205,7 +208,7 @@ public class GuiUtils {
     }
     
     public static int getWordPosition(String str, int n, int cursor, boolean skipSpaces) {
-        TextFieldWidget field = new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, "");
+        TextFieldWidget field = new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, EMPTY);
         field.setMaxLength(Integer.MAX_VALUE);
         field.setValue(str);
         return field.getWordPosition(n, cursor, skipSpaces);

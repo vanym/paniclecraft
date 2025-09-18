@@ -66,4 +66,12 @@ public class JUtils {
         }
         return null;
     }
+    
+    public static <T> T orElse(T value, T def) {
+        return value != null ? value : def;
+    }
+    
+    public static <T> T orElseGet(T value, Supplier<T> getter) {
+        return value != null ? value : getter.get();
+    }
 }

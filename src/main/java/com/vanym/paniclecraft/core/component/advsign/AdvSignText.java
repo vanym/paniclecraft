@@ -145,7 +145,6 @@ public class AdvSignText implements INBTSerializable<CompoundNBT> {
                        .filter(style->style.getHoverEvent() == null)
                        .filter(style->style.getClickEvent() == null)
                        .filter(style->style.getInsertion() == null)
-                       .filter(style->style.getColor() == null || style.getColor().isColor())
                        .isPresent();
     }
 }

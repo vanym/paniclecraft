@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.client.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -16,8 +17,8 @@ import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -27,7 +28,7 @@ public class AdvTextInput {
     protected final Supplier<String> getClip = GuiUtils::getClipboardString;
     
     protected final List<Element> text = new ArrayList<>();
-    protected Style style = new Style();
+    protected Style style = Style.EMPTY;
     protected int cursorPos;
     protected int selectionPos;
     
@@ -199,14 +200,13 @@ public class AdvTextInput {
     }
     
     public void applyStyle(Style style) {
-        this.style = style.copy().inheritFrom(this.style).flatCopy();
+        this.style = style;
         if (this.isSelected()) {
             int min = Math.min(this.cursorPos, this.selectionPos);
             int max = Math.max(this.cursorPos, this.selectionPos);
             this.text.subList(min, max)
                      .stream()
-                     .forEach(e->e.setStyle(style.copy()
-                                                 .inheritFrom(e.copyStyle())));
+                     .forEach(e->e.setStyle(style.applyTo(e.copyStyle())));
         }
     }
     
@@ -240,9 +240,9 @@ public class AdvTextInput {
     }
     
     public void read(ITextComponent line) {
-        line = FormattingUtils.parseLine(line.getColoredString());
+        line = FormattingUtils.normalize(line);
         this.clear();
-        line.stream().forEachOrdered(sub-> {
+        FormattingUtils.stream(line).forEachOrdered(sub-> {
             this.style = sub.getStyle();
             this.insertText(sub.getContents());
         });
@@ -274,8 +274,10 @@ public class AdvTextInput {
     }
     
     protected static ITextComponent makeComponent(Stream<Element> stream) {
-        String line = stream.map(String::valueOf).collect(Collectors.joining());
-        return FormattingUtils.parseLine(line);
+        return Optional.of(stream.map(Element::getComponent).collect(Collectors.toList()))
+                       .map(FormattingUtils::toComponent)
+                       .map(FormattingUtils::normalize)
+                       .get();
     }
     
     protected static class Element {
@@ -289,16 +291,20 @@ public class AdvTextInput {
         }
         
         public void setStyle(Style style) {
-            this.style = style.flatCopy();
+            this.style = style;
         }
         
         public Style copyStyle() {
-            return this.style.flatCopy();
+            return this.style;
+        }
+        
+        public ITextComponent getComponent() {
+            return new StringTextComponent(this.toString()).setStyle(this.style);
         }
         
         @Override
         public String toString() {
-            return TextFormatting.RESET + this.style.getLegacyFormatCodes() + this.symbol;
+            return String.valueOf(this.symbol);
         }
     }
 }

@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Streams;
+import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -46,7 +47,7 @@ public class FormattingUtils {
     
     public static ITextComponent toComponent(List<ITextComponent> list) {
         if (list.isEmpty()) {
-            return new StringTextComponent("");
+            return StringTextComponent.EMPTY;
         } else if (list.size() == 1) {
             return list.get(0);
         } else {
@@ -76,14 +77,13 @@ public class FormattingUtils {
     }
     
     public static Style invertBy(Style style, Style patch) {
-        Style copy1 = Style.EMPTY.applyTo(style);
-        Style copy2 = Style.EMPTY.withColor(TextFormatting.BLACK)
-                                 .setObfuscated(true)
-                                 .withBold(true)
-                                 .setStrikethrough(true)
-                                 .setUnderlined(true)
-                                 .withItalic(true)
-                                 .applyTo(style);
+        Style copy1 = style.applyTo(Style.EMPTY);
+        Style copy2 = style.applyTo(Style.EMPTY.withColor(TextFormatting.BLACK)
+                                               .setObfuscated(true)
+                                               .withBold(true)
+                                               .setStrikethrough(true)
+                                               .setUnderlined(true)
+                                               .withItalic(true));
         Color patchColor = patch.getColor();
         if (copy2.getColor().equals(copy1.getColor())
             && patchColor != null) {
@@ -141,5 +141,27 @@ public class FormattingUtils {
     public static ITextComponent substring(ITextComponent line, int beginIndex, int endIndex) {
         List<ITextComponent> list = fragmentate(line).collect(Collectors.toList());
         return toComponent(list.subList(beginIndex, endIndex));
+    }
+    
+    public static ITextComponent normalize(ITextComponent component) {
+        List<ITextComponent> list = new ArrayList<>();
+        Style style = Style.EMPTY;
+        StringBuilder sb = new StringBuilder();
+        for (ITextComponent sub : (Iterable<ITextComponent>)stream(component)::iterator) {
+            Style substyle = sub.getStyle();
+            if (style.equals(substyle)) {
+                sb.append(sub.getContents());
+                continue;
+            }
+            if (sb.length() > 0) {
+                list.add(new StringTextComponent(sb.toString()).setStyle(style));
+            }
+            style = JUtils.orElse(substyle, Style.EMPTY);
+            sb = new StringBuilder(sub.getContents());
+        }
+        if (sb.length() > 0) {
+            list.add(new StringTextComponent(sb.toString()).setStyle(style));
+        }
+        return toComponent(list);
     }
 }
