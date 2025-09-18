@@ -179,4 +179,8 @@ public class FormattingUtils {
         List<IChatComponent> list = fragmentate(line).collect(Collectors.toList());
         return toComponent(list.subList(beginIndex, endIndex));
     }
+    
+    public static IChatComponent normalize(IChatComponent component) {
+        return parseLine(component.getFormattedText());
+    }
 }

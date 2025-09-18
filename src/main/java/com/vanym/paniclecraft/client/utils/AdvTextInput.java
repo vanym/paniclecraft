@@ -243,7 +243,7 @@ public class AdvTextInput {
     
     @SuppressWarnings("unchecked")
     public void read(IChatComponent line) {
-        line = FormattingUtils.parseLine(line.getFormattedText());
+        line = FormattingUtils.normalize(line);
         this.clear();
         for (IChatComponent sub : (Iterable<IChatComponent>)line) {
             this.style = sub.getChatStyle();
