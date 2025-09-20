@@ -1,12 +1,13 @@
 package com.vanym.paniclecraft.client.gui.element;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Consumer;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -15,13 +16,17 @@ public class GuiHexColorField extends TextFieldWidget {
     
     protected static final String NUM_CHARS = "0123456789ABCDEFabcdef";
     
-    protected static final List<String> COLORS_ENABLED = Arrays.asList("\u00a79", "\u00a79",
-                                                                       "\u00a7a", "\u00a7a",
-                                                                       "\u00a7c", "\u00a7c");
+    protected static final List<TextFormatting> COLORS_ENABLED =
+            Arrays.asList(TextFormatting.RESET,
+                          TextFormatting.RED, TextFormatting.RED,
+                          TextFormatting.GREEN, TextFormatting.GREEN,
+                          TextFormatting.BLUE, TextFormatting.BLUE);
     
-    protected static final List<String> COLORS_DISABLED = Arrays.asList("\u00a71", "\u00a71",
-                                                                        "\u00a72", "\u00a72",
-                                                                        "\u00a74", "\u00a74");
+    protected static final List<TextFormatting> COLORS_DISABLED =
+            Arrays.asList(TextFormatting.RESET,
+                          TextFormatting.DARK_RED, TextFormatting.DARK_RED,
+                          TextFormatting.DARK_GREEN, TextFormatting.DARK_GREEN,
+                          TextFormatting.DARK_BLUE, TextFormatting.DARK_BLUE);
     
     protected boolean isEnabled = true;
     
@@ -34,6 +39,7 @@ public class GuiHexColorField extends TextFieldWidget {
     public GuiHexColorField(FontRenderer font, int x, int y, int width, int height) {
         super(font, x, y, width, height, "");
         this.setMaxLength(7);
+        this.setFormatter(this::format);
         this.fixate();
     }
     
@@ -52,7 +58,7 @@ public class GuiHexColorField extends TextFieldWidget {
     protected void fixate() {
         int rgb;
         try {
-            rgb = Integer.decode(this.getValue());
+            rgb = decodeColor(this.getValue());
         } catch (NumberFormatException e) {
             rgb = 0;
         }
@@ -152,13 +158,13 @@ public class GuiHexColorField extends TextFieldWidget {
         }
         Integer previousColor;
         try {
-            previousColor = Integer.decode(previousText);
+            previousColor = decodeColor(previousText);
         } catch (NumberFormatException e) {
             previousColor = null;
         }
         int color;
         try {
-            color = Integer.decode(text);
+            color = decodeColor(text);
         } catch (NumberFormatException e) {
             color = 0;
         }
@@ -181,39 +187,22 @@ public class GuiHexColorField extends TextFieldWidget {
         return true;
     }
     
-    @Override
-    public void renderButton(int x, int y, float partialTicks) {
-        if (!this.isVisible()) {
-            return;
+    protected String format(String text, int pos) {
+        List<TextFormatting> colorsList = this.getFormatColors();
+        int end = Math.min(text.length() + pos, colorsList.size());
+        ListIterator<TextFormatting> it = colorsList.listIterator(end);
+        StringBuilder sb = new StringBuilder(text);
+        for (int i = end - 1 - pos; i >= 0; --i) {
+            sb.insert(i, it.previous());
         }
-        int pos = this.getCursorPosition();
-        int sel = this.getSelectionEnd();
-        String text = this.getValue();
-        String textNum = this.getValue();
-        Iterator<String> it;
-        if (this.isEnabled) {
-            it = COLORS_ENABLED.iterator();
-        } else {
-            it = COLORS_DISABLED.iterator();
-        }
-        StringBuilder sb = new StringBuilder(textNum);
-        int length = sb.length();
-        for (int i = length - 1; i >= 1; --i) {
-            String colorCode = it.hasNext() ? it.next() : "\u00a7f";
-            sb.insert(i, colorCode);
-        }
-        this.setMaxLength(7 + Math.max(0, length - 1) * 2);
-        this.setValue(sb.toString());
-        this.moveCursorTo(convertPos(pos));
-        this.setHighlightPos(convertPos(sel));
-        super.renderButton(x, y, partialTicks);
-        this.setValue(text);
-        this.setMaxLength(7);
-        this.moveCursorTo(pos);
-        this.setHighlightPos(sel);
+        return sb.toString();
     }
     
-    protected static int convertPos(int pos) {
-        return pos + Math.max(0, pos - 1) * 2;
+    protected List<TextFormatting> getFormatColors() {
+        return this.isEnabled ? COLORS_ENABLED : COLORS_DISABLED;
+    }
+    
+    protected static int decodeColor(String text) {
+        return Integer.decode(text + "0000000".substring(Math.min(text.length(), 7)));
     }
 }

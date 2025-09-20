@@ -119,8 +119,7 @@ public class ItemAdvSign extends Item {
             List<ITextComponent> lines = text.getLines();
             lines.clear();
             Arrays.stream(tileS.messages)
-                  .map(ITextComponent::getColoredString)
-                  .map(FormattingUtils::parseLine)
+                  .map(FormattingUtils::normalize)
                   .forEachOrdered(lines::add);
             signTag.put(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
             signTag.put(TileEntityAdvSign.TAG_BACKTEXT, new AdvSignText(4).serializeNBT());
