@@ -193,10 +193,8 @@ public class GuiHexColorField extends TextFieldWidget {
     
     protected IReorderingProcessor format(String text, int pos) {
         List<TextFormatting> colorsList = this.getFormatColors();
-        List<TextFormatting> colorsSubList =
-                colorsList.subList(Math.min(pos, colorsList.size()), colorsList.size());
         return (consumer)-> {
-            Iterator<TextFormatting> it = colorsSubList.iterator();
+            Iterator<TextFormatting> it = colorsList.listIterator(Math.min(pos, colorsList.size()));
             int i;
             for (i = 0; i < text.length() && it.hasNext(); ++i) {
                 Style style = Style.EMPTY.withColor(it.next());
