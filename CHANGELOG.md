@@ -4,6 +4,9 @@
 ### Added
  - Custom version compatibility checker
 
+### Changed
+ - Hex color field behavior
+
 ### Fixed
  - Client imitate painting tool use, after other players
 

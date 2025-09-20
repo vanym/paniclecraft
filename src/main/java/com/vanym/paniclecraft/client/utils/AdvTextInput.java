@@ -242,7 +242,7 @@ public class AdvTextInput {
     }
     
     public void read(ITextComponent line) {
-        line = FormattingUtils.parseLine(line.getFormattedText());
+        line = FormattingUtils.normalize(line);
         this.clear();
         for (ITextComponent sub : line) {
             this.style = sub.getStyle();

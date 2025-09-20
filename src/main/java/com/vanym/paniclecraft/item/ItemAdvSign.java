@@ -106,8 +106,7 @@ public class ItemAdvSign extends ItemMod3 {
             List<ITextComponent> lines = text.getLines();
             lines.clear();
             Arrays.stream(tileS.signText)
-                  .map(ITextComponent::getFormattedText)
-                  .map(FormattingUtils::parseLine)
+                  .map(FormattingUtils::normalize)
                   .forEachOrdered(lines::add);
             signTag.setTag(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
             signTag.setTag(TileEntityAdvSign.TAG_BACKTEXT,
