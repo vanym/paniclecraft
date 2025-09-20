@@ -176,4 +176,8 @@ public class FormattingUtils {
         List<ITextComponent> list = fragmentate(line).collect(Collectors.toList());
         return toComponent(list.subList(beginIndex, endIndex));
     }
+    
+    public static ITextComponent normalize(ITextComponent component) {
+        return parseLine(component.getFormattedText());
+    }
 }

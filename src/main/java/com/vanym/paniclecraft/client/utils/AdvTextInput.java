@@ -240,7 +240,7 @@ public class AdvTextInput {
     }
     
     public void read(ITextComponent line) {
-        line = FormattingUtils.parseLine(line.getFormattedText());
+        line = FormattingUtils.normalize(line);
         this.clear();
         line.stream().forEachOrdered(sub-> {
             this.style = sub.getStyle();
