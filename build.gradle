@@ -102,6 +102,13 @@ tasks.withType(AbstractArchiveTask) {
 }
 
 processResources {
+    doFirst {
+        delete(
+            files("${buildDir}/resources/main/META-INF/mods.toml",
+                  "${buildDir}/resources/main/pack.mcmeta")
+        )
+    }
+
     exclude '.cache'
 
     filesMatching("META-INF/mods.toml") {
