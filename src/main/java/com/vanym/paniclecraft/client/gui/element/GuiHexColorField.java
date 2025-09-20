@@ -1,27 +1,32 @@
 package com.vanym.paniclecraft.client.gui.element;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Consumer;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.util.EnumChatFormatting;
 
 @SideOnly(Side.CLIENT)
 public class GuiHexColorField extends GuiTextField {
     
     protected static final String NUM_CHARS = "0123456789ABCDEFabcdef";
     
-    protected static final List<String> COLORS_ENABLED = Arrays.asList("\u00a79", "\u00a79",
-                                                                       "\u00a7a", "\u00a7a",
-                                                                       "\u00a7c", "\u00a7c");
+    protected static final List<EnumChatFormatting> COLORS_ENABLED =
+            Arrays.asList(EnumChatFormatting.RESET,
+                          EnumChatFormatting.RED, EnumChatFormatting.RED,
+                          EnumChatFormatting.GREEN, EnumChatFormatting.GREEN,
+                          EnumChatFormatting.BLUE, EnumChatFormatting.BLUE);
     
-    protected static final List<String> COLORS_DISABLED = Arrays.asList("\u00a71", "\u00a71",
-                                                                        "\u00a72", "\u00a72",
-                                                                        "\u00a74", "\u00a74");
+    protected static final List<EnumChatFormatting> COLORS_DISABLED =
+            Arrays.asList(EnumChatFormatting.RESET,
+                          EnumChatFormatting.DARK_RED, EnumChatFormatting.DARK_RED,
+                          EnumChatFormatting.DARK_GREEN, EnumChatFormatting.DARK_GREEN,
+                          EnumChatFormatting.DARK_BLUE, EnumChatFormatting.DARK_BLUE);
     
     protected boolean isEnabled = true;
     
@@ -52,7 +57,7 @@ public class GuiHexColorField extends GuiTextField {
     protected void fixate() {
         int rgb;
         try {
-            rgb = Integer.decode(this.getText());
+            rgb = decodeColor(this.getText());
         } catch (NumberFormatException e) {
             rgb = 0;
         }
@@ -133,13 +138,13 @@ public class GuiHexColorField extends GuiTextField {
         }
         Integer previousColor;
         try {
-            previousColor = Integer.decode(previousText);
+            previousColor = decodeColor(previousText);
         } catch (NumberFormatException e) {
             previousColor = null;
         }
         int color;
         try {
-            color = Integer.decode(text);
+            color = decodeColor(text);
         } catch (NumberFormatException e) {
             color = 0;
         }
@@ -171,31 +176,38 @@ public class GuiHexColorField extends GuiTextField {
         int pos = this.getCursorPosition();
         int sel = this.getSelectionEnd();
         String text = this.getText();
-        String textNum = this.getText();
-        Iterator<String> it;
-        if (this.isEnabled) {
-            it = COLORS_ENABLED.iterator();
-        } else {
-            it = COLORS_DISABLED.iterator();
-        }
-        StringBuilder sb = new StringBuilder(textNum);
-        int length = sb.length();
-        for (int i = length - 1; i >= 1; --i) {
-            String colorCode = it.hasNext() ? it.next() : "\u00a7f";
-            sb.insert(i, colorCode);
-        }
-        this.setMaxStringLength(7 + Math.max(0, length - 1) * 2);
-        this.setText(sb.toString());
-        this.setCursorPosition(convertPos(pos));
-        this.setSelectionPos(convertPos(sel));
+        int max = this.getMaxStringLength();
+        this.setMaxStringLength(this.convertPos(max));
+        this.setText(this.format(text, 0));
+        this.setCursorPosition(this.convertPos(pos));
+        this.setSelectionPos(this.convertPos(sel));
         super.drawTextBox();
         this.setText(text);
-        this.setMaxStringLength(7);
+        this.setMaxStringLength(max);
         this.setCursorPosition(pos);
         this.setSelectionPos(sel);
     }
     
-    protected static int convertPos(int pos) {
-        return pos + Math.max(0, pos - 1) * 2;
+    protected String format(String text, int pos) {
+        List<EnumChatFormatting> colorsList = this.getFormatColors();
+        int end = Math.min(text.length() + pos, colorsList.size());
+        ListIterator<EnumChatFormatting> it = colorsList.listIterator(end);
+        StringBuilder sb = new StringBuilder(text);
+        for (int i = end - 1 - pos; i >= 0; --i) {
+            sb.insert(i, it.previous());
+        }
+        return sb.toString();
+    }
+    
+    protected List<EnumChatFormatting> getFormatColors() {
+        return this.isEnabled ? COLORS_ENABLED : COLORS_DISABLED;
+    }
+    
+    protected int convertPos(int pos) {
+        return pos + Math.min(pos, this.getFormatColors().size()) * 2;
+    }
+    
+    protected static int decodeColor(String text) {
+        return Integer.decode(text + "0000000".substring(Math.min(text.length(), 7)));
     }
 }
