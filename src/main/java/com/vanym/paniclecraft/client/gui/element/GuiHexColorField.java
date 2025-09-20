@@ -39,6 +39,7 @@ public class GuiHexColorField extends TextFieldWidget {
     public GuiHexColorField(FontRenderer font, int x, int y, int width, int height) {
         super(font, x, y, width, height, "");
         this.setMaxStringLength(7);
+        this.setTextFormatter(this::format);
         this.fixate();
     }
     
@@ -186,26 +187,6 @@ public class GuiHexColorField extends TextFieldWidget {
         return true;
     }
     
-    @Override
-    public void renderButton(int x, int y, float partialTicks) {
-        if (!this.getVisible()) {
-            return;
-        }
-        int pos = this.getCursorPosition();
-        int sel = this.getSelectionEnd();
-        String text = this.getText();
-        int max = this.getMaxStringLength();
-        this.setMaxStringLength(this.convertPos(max));
-        this.setText(this.format(text, 0));
-        this.setCursorPosition(this.convertPos(pos));
-        this.setSelectionPos(this.convertPos(sel));
-        super.renderButton(x, y, partialTicks);
-        this.setText(text);
-        this.setMaxStringLength(max);
-        this.setCursorPosition(pos);
-        this.setSelectionPos(sel);
-    }
-    
     protected String format(String text, int pos) {
         List<TextFormatting> colorsList = this.getFormatColors();
         int end = Math.min(text.length() + pos, colorsList.size());
@@ -219,10 +200,6 @@ public class GuiHexColorField extends TextFieldWidget {
     
     protected List<TextFormatting> getFormatColors() {
         return this.isEnabled ? COLORS_ENABLED : COLORS_DISABLED;
-    }
-    
-    protected int convertPos(int pos) {
-        return pos + Math.min(pos, this.getFormatColors().size()) * 2;
     }
     
     protected static int decodeColor(String text) {
