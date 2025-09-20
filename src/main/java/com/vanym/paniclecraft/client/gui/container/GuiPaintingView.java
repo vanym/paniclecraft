@@ -29,6 +29,7 @@ import com.vanym.paniclecraft.utils.JUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IHasContainer;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
@@ -213,6 +214,9 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     public boolean keyPressed(int key, int scanCode, int modifiers) {
         if (super.keyPressed(key, scanCode, modifiers)) {
             return true;
+        }
+        if (this.getFocused() instanceof TextFieldWidget) {
+            return false;
         }
         InputMappings.Input inputCode = InputMappings.getKey(key, scanCode);
         if (this.minecraft.options.keyInventory.isActiveAndMatches(inputCode)) {
