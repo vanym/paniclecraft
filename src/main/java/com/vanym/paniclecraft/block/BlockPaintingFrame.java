@@ -225,6 +225,9 @@ public class BlockPaintingFrame extends BlockPaintingContainer {
             IBlockReader worldIn,
             BlockPos pos,
             ISelectionContext context) {
+        if (!ISelectionContext.empty().equals(context)) {
+            return state.getCollisionShape(worldIn, pos);
+        }
         Builder<AxisAlignedBB> facades = Stream.builder();
         for (int i = 0; i < 6; ++i) {
             if (state.getValue(SIDES[i])) {

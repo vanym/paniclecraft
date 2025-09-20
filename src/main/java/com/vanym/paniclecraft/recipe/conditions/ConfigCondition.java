@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.recipe.conditions;
 
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.Optional;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.google.gson.JsonObject;
@@ -64,9 +65,12 @@ public class ConfigCondition implements ICondition {
                           ModContainer>getPrivateValue(ModContainer.class, mc, "configs")))
                       .map(configs->configs.get(this.type))
                       .map(config-> {
-                          ForgeConfigSpec spec = config.getSpec();
-                          CommentedConfig data = config.getConfigData();
-                          return data.getOrElse(this.path, ()->spec.get(this.path));
+                          Optional<ForgeConfigSpec> spec =
+                                  Optional.ofNullable(config.getSpec());
+                          Optional<CommentedConfig> data =
+                                  Optional.ofNullable(config.getConfigData());
+                          return data.map(d->d.get(this.path))
+                                     .orElseGet(()->spec.map(s->s.get(this.path)));
                       })
                       .map(String::valueOf)
                       .map(Boolean::valueOf)
