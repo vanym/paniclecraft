@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.DEF;
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -42,7 +44,7 @@ public class GuiCircularSlider extends Widget {
             int y,
             int width,
             int height) {
-        super(x, y, width, height, "");
+        super(x, y, width, height, StringTextComponent.EMPTY);
     }
     
     public void setGetter(Supplier<Double> getter) {
@@ -70,7 +72,7 @@ public class GuiCircularSlider extends Widget {
     }
     
     @Override
-    public void renderButton(int mouseX, int mouseY, float partialTicks) {
+    public void renderButton(MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
                                        GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,

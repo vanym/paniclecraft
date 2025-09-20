@@ -52,13 +52,13 @@ public class TileEntityPaintingFrame extends TileEntityPaintingContainer {
     }
     
     @Override
-    public void load(CompoundNBT nbtTag) {
+    public void load(BlockState state, CompoundNBT nbtTag) {
         SideUtils.runSync(this.level != null && !this.level.isClientSide,
-                          this, ()->this.readAsync(nbtTag));
+                          this, ()->this.readAsync(state, nbtTag));
     }
     
-    protected void readAsync(CompoundNBT nbtTag) {
-        super.load(nbtTag);
+    protected void readAsync(BlockState state, CompoundNBT nbtTag) {
+        super.load(state, nbtTag);
         for (int i = 0; i < this.holders.length; i++) {
             final String TAG_PICTURE_I = String.format(TAG_PICTURE_N, i);
             if (nbtTag.contains(TAG_PICTURE_I)) {

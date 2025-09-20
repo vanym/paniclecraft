@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.Core;
@@ -51,6 +52,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -60,17 +62,20 @@ import net.minecraftforge.fml.network.NetworkDirection;
 public class GuiPaintingEditView extends GuiPaintingView {
     
     protected final Button buttonImport = JUtils.make(()-> {
-        String text = I18n.get(String.format("gui.%s.paintingview.import", DEF.MOD_ID));
+        ITextComponent text = new TranslationTextComponent(
+                String.format("gui.%s.paintingview.import", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingImport());
     });
     
     protected final Button buttonImportSave = JUtils.make(()-> {
-        String text = I18n.get(String.format("gui.%s.paintingview.importsave", DEF.MOD_ID));
+        ITextComponent text = new TranslationTextComponent(
+                String.format("gui.%s.paintingview.importsave", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingImportSave());
     });
     
     protected final Button buttonImportCancel = JUtils.make(()-> {
-        String text = I18n.get(String.format("gui.%s.paintingview.importcancel", DEF.MOD_ID));
+        ITextComponent text = new TranslationTextComponent(
+                String.format("gui.%s.paintingview.importcancel", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingImportCancel());
     });
     
@@ -107,7 +112,8 @@ public class GuiPaintingEditView extends GuiPaintingView {
     @Override
     public void init(Minecraft mc, int width, int height) {
         if (this.textImport == null) {
-            this.textImport = new TextFieldWidget(mc.font, 0, 0, 60, 20, "image location");
+            ITextComponent text = new StringTextComponent("image location");
+            this.textImport = new TextFieldWidget(mc.font, 0, 0, 60, 20, text);
             this.textImport.setMaxLength(65536);
         }
         super.init(mc, width, height);
@@ -157,13 +163,13 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float renderPartialTicks) {
-        super.render(mouseX, mouseY, renderPartialTicks);
+    public void render(MatrixStack ms, int mouseX, int mouseY, float renderPartialTicks) {
+        super.render(ms, mouseX, mouseY, renderPartialTicks);
     }
     
     @Override
-    protected void drawPainting() {
-        super.drawPainting();
+    protected void drawPainting(MatrixStack ms) {
+        super.drawPainting(ms);
         this.drawImportImage();
     }
     
@@ -255,7 +261,7 @@ public class GuiPaintingEditView extends GuiPaintingView {
     }
     
     @Override
-    protected void drawHelp() {
+    protected void drawHelp(MatrixStack ms) {
         boolean importing = (this.importImage != null);
         if (importing) {
             String line = I18n.get(String.format("gui.%s.paintingview.help.show", DEF.MOD_ID));
@@ -268,14 +274,14 @@ public class GuiPaintingEditView extends GuiPaintingView {
                 x = this.width - lineWidth - 2;
                 y = 2;
             }
-            this.font.draw(line, x, y, 0x7f7f7f);
+            this.font.draw(ms, line, x, y, 0x7f7f7f);
         }
         if (this.textImport.isFocused() || !GuiUtils.isKeyDown(GLFW.GLFW_KEY_H)) {
             return;
         }
         String translationKey = String.format("gui.%s.paintingview.help.%s", DEF.MOD_ID,
                                               importing ? "importing" : "import");
-        this.drawHelp(Arrays.asList(I18n.get(translationKey).split(System.lineSeparator())));
+        this.drawHelp(ms, Arrays.asList(I18n.get(translationKey).split(System.lineSeparator())));
     }
     
     @Override

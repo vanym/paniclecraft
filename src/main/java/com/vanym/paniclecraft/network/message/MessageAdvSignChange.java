@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.network.message;
 
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
@@ -39,7 +40,9 @@ public class MessageAdvSignChange {
         if (!TileEntityAdvSign.isValidTag(message.tag)) {
             return;
         }
-        TileEntity tile = ctx.getSender().level.getBlockEntity(new BlockPos(x, y, z));
+        BlockPos pos = new BlockPos(x, y, z);
+        TileEntity tile = ctx.getSender().level.getBlockEntity(pos);
+        BlockState state = ctx.getSender().level.getBlockState(pos);
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
             if (tileAS.isEditor(ctx.getSender().getUUID())) {
@@ -47,7 +50,7 @@ public class MessageAdvSignChange {
             } else {
                 return;
             }
-            tileAS.load(message.tag);
+            tileAS.load(state, message.tag);
             tileAS.markForUpdate();
         }
     }

@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.client.gui.container;
 
 import java.util.stream.Stream;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.gui.element.GuiCircularSlider;
@@ -105,27 +106,27 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     }
     
     @Override
-    public void renderLabels(int x, int y) {
-        this.font.draw(this.title.getColoredString(), 8, 6, 0x404040);
-        this.font.draw(this.inventory.getDisplayName().getColoredString(),
+    public void renderLabels(MatrixStack ms, int x, int y) {
+        this.font.draw(ms, this.title, 8, 6, 0x404040);
+        this.font.draw(ms, this.inventory.getDisplayName(),
                        8, this.imageHeight - 96 + 2, 0x404040);
         String directionString = I18n.get(String.format("gui.%s.cannon.direction", DEF.MOD_ID));
-        this.font.draw(directionString, 62, 8, 0x404040);
+        this.font.draw(ms, directionString, 62, 8, 0x404040);
         double dir = this.container.cannon.getDirection();
-        this.font.draw(String.format("%.4f", dir), 62, 18, 0x404040);
+        this.font.draw(ms, String.format("%.4f", dir), 62, 18, 0x404040);
         String heightString = I18n.get(String.format("gui.%s.cannon.height", DEF.MOD_ID));
-        this.font.draw(heightString, 40, 48, 0x404040);
+        this.font.draw(ms, heightString, 40, 48, 0x404040);
         double height = this.container.cannon.getHeight();
-        this.font.draw(String.format("%.4f", height), 40, 58, 0x404040);
+        this.font.draw(ms, String.format("%.4f", height), 40, 58, 0x404040);
         String strengthString = I18n.get(String.format("gui.%s.cannon.strength", DEF.MOD_ID));
-        this.font.draw(strengthString, 30, 28, 0x404040);
+        this.font.draw(ms, strengthString, 30, 28, 0x404040);
         double strength = this.container.cannon.getStrength();
-        this.font.draw(String.format("%.4f", strength), 30, 38, 0x404040);
+        this.font.draw(ms, String.format("%.4f", strength), 30, 38, 0x404040);
         if (this.isRotating()) {
             String tooltipKey = Screen.hasShiftDown() ? "gui.%s.cannon.slider_unshift_tooltip"
                                                       : "gui.%s.cannon.slider_shift_tooltip";
-            this.drawCenteredString(this.font, I18n.get(String.format(tooltipKey, DEF.MOD_ID)),
-                                    this.imageWidth / 2, this.imageHeight + 6, 0xd0d0d0);
+            drawCenteredString(ms, this.font, I18n.get(String.format(tooltipKey, DEF.MOD_ID)),
+                               this.imageWidth / 2, this.imageHeight + 6, 0xd0d0d0);
         }
     }
     
@@ -139,10 +140,10 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float renderPartialTicks) {
-        this.renderBackground();
-        super.render(mouseX, mouseY, renderPartialTicks);
-        this.renderTooltip(mouseX, mouseY);
+    public void render(MatrixStack ms, int mouseX, int mouseY, float renderPartialTicks) {
+        this.renderBackground(ms);
+        super.render(ms, mouseX, mouseY, renderPartialTicks);
+        this.renderTooltip(ms, mouseX, mouseY);
     }
     
     @Override
@@ -170,8 +171,8 @@ public class GuiCannon extends ContainerScreen<ContainerCannon> {
     }
     
     @Override
-    public void renderBg(float f, int i, int j) {
+    public void renderBg(MatrixStack ms, float f, int i, int j) {
         this.minecraft.getTextureManager().bind(GUI_TEXTURE);
-        this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(ms, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
 }

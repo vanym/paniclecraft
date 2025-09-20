@@ -1,9 +1,9 @@
 package com.vanym.paniclecraft.item;
 
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -19,6 +19,7 @@ import com.vanym.paniclecraft.utils.ItemUtils;
 import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
@@ -118,10 +119,10 @@ public class ItemAdvSign extends Item {
             AdvSignText text = new AdvSignText();
             List<ITextComponent> lines = text.getLines();
             lines.clear();
-            Arrays.stream(tileS.messages)
-                  .map(ITextComponent::getColoredString)
-                  .map(FormattingUtils::parseLine)
-                  .forEachOrdered(lines::add);
+            IntStream.range(0, 4)
+                     .mapToObj(tileS::getMessage)
+                     .map(FormattingUtils::normalize)
+                     .forEachOrdered(lines::add);
             signTag.put(TileEntityAdvSign.TAG_FRONTTEXT, text.serializeNBT());
             signTag.put(TileEntityAdvSign.TAG_BACKTEXT, new AdvSignText(4).serializeNBT());
             signTag.putInt(TileEntityAdvSign.TAG_STANDCOLOR, Color.WHITE.getRGB());
@@ -152,6 +153,7 @@ public class ItemAdvSign extends Item {
         PlayerEntity player = context.getPlayer();
         // TODO: Get rid of this mess by upgrading ItemAdvSign to use BlockItem
         BlockItemUseContext blockContext = new BlockItemUseContext(context);
+        BlockState state = advSignBlock.getStateForPlacement(new BlockItemUseContext(context));
         pos = blockContext.getClickedPos();
         if (!player.mayUseItemAt(pos, facing, stack)
             || blockContext.replacingClickedOnBlock()
@@ -163,7 +165,7 @@ public class ItemAdvSign extends Item {
         if (tile instanceof TileEntityAdvSign) {
             TileEntityAdvSign tileAS = (TileEntityAdvSign)tile;
             getSign(stack).filter(TileEntityAdvSign::isValidTag)
-                          .ifPresent(signTag->tileAS.read(signTag, true));
+                          .ifPresent(signTag->tileAS.read(state, signTag, true));
             if (facing == Direction.UP) {
                 tileAS.setForm(AdvSignForm.STICK_DOWN);
                 double direction = Math.round(180.0D + player.yRot);

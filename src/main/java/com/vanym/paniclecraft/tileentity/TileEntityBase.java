@@ -1,8 +1,10 @@
 package com.vanym.paniclecraft.tileentity;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.utils.DistUtils;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -49,7 +51,14 @@ public abstract class TileEntityBase extends TileEntity {
     
     @Override
     public void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
-        CompoundNBT nbt = packet.getTag();
-        this.handleUpdateTag(nbt);
+        DistUtils.crun(()->new Runnable() {
+            @Override
+            public void run() {
+                ClientPlayNetHandler handler = (ClientPlayNetHandler)manager.getPacketListener();
+                BlockState state = handler.getLevel().getBlockState(packet.getPos());
+                CompoundNBT nbt = packet.getTag();
+                TileEntityBase.this.handleUpdateTag(state, nbt);
+            }
+        });
     }
 }

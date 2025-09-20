@@ -7,10 +7,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vanym.paniclecraft.core.component.advsign.FormattingUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
@@ -34,8 +36,8 @@ public class GuiStyleEditor extends AbstractButton {
             Supplier<Boolean> highlighted,
             Style style,
             TextFormatting iconType) {
-        super(x, y, width, height, "");
-        this.style = style.copy().inheritFrom(null);
+        super(x, y, width, height, StringTextComponent.EMPTY);
+        this.style = style;
         this.iconType = Objects.requireNonNull(iconType);
         this.updater = Objects.requireNonNull(updater);
         this.highlighted = Objects.requireNonNull(highlighted);
@@ -43,33 +45,33 @@ public class GuiStyleEditor extends AbstractButton {
     
     @Override
     public void onPress() {
-        this.updater.accept(this.style.copy());
+        this.updater.accept(this.style);
     }
     
     @Override
-    public void renderButton(int x, int y, float partialTicks) {
+    public void renderButton(MatrixStack ms, int x, int y, float partialTicks) {
         if (!this.visible) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
         if (this.iconType.isFormat()) {
-            mc.font.draw(this.iconType + this.iconType.name.substring(0, 1),
+            mc.font.draw(ms, this.iconType + this.iconType.name.substring(0, 1),
                          this.x, this.y, Color.WHITE.getRGB());
         } else if (this.iconType == TextFormatting.RESET) {
-            mc.font.draw("✕", this.x, this.y, Color.WHITE.getRGB());
+            mc.font.draw(ms, "✕", this.x, this.y, Color.WHITE.getRGB());
         } else /* colors */ {
-            fill(this.x, this.y, this.x + this.width, this.y + this.height,
+            fill(ms, this.x, this.y, this.x + this.width, this.y + this.height,
                  0xff000000 | this.iconType.getColor());
         }
         if (this.highlighted.get()) {
             Color color = Color.YELLOW.darker();
-            this.hLine(this.x - 1, this.x + this.width,
+            this.hLine(ms, this.x - 1, this.x + this.width,
                        this.y - 1, color.getRGB());
-            this.hLine(this.x - 1, this.x + this.width,
+            this.hLine(ms, this.x - 1, this.x + this.width,
                        this.y + this.height, color.getRGB());
-            this.vLine(this.x - 1,
+            this.vLine(ms, this.x - 1,
                        this.y - 1, this.y + this.height, color.getRGB());
-            this.vLine(this.x + this.width,
+            this.vLine(ms, this.x + this.width,
                        this.y - 1, this.y + this.height, color.getRGB());
         }
     }
@@ -91,7 +93,7 @@ public class GuiStyleEditor extends AbstractButton {
                 (update)->updater.accept(FormattingUtils.invertBy(update, getter.get())),
                 ()-> {
                     Style parent = getter.get();
-                    Style copy = style.copy().inheritFrom(parent);
+                    Style copy = style.applyTo(parent);
                     return !copy.isEmpty() && copy.equals(parent);
                 },
                 style,
@@ -124,7 +126,7 @@ public class GuiStyleEditor extends AbstractButton {
                 9,
                 updater,
                 ()->false,
-                new Style().setColor(TextFormatting.RESET).flatCopy(),
+                Style.EMPTY.withColor(TextFormatting.RESET),
                 TextFormatting.RESET));
         return list;
     }

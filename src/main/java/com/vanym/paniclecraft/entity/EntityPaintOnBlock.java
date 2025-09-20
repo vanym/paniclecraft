@@ -19,6 +19,7 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.item.ItemPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
+import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.block.AbstractButtonBlock;
 import net.minecraft.block.AbstractPressurePlateBlock;
@@ -52,17 +53,17 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.RailShape;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.api.distmarker.Dist;
@@ -81,10 +82,10 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             new ResourceLocation(DEF.MOD_ID, "paintonblock_allow");
     public static final ResourceLocation TAG_PAINTONBLOCK_DENY_ID =
             new ResourceLocation(DEF.MOD_ID, "paintonblock_deny");
-    public static final Tag<Block> TAG_PAINTONBLOCK_ALLOW =
-            new BlockTags.Wrapper(TAG_PAINTONBLOCK_ALLOW_ID);
-    public static final Tag<Block> TAG_PAINTONBLOCK_DENY =
-            new BlockTags.Wrapper(TAG_PAINTONBLOCK_DENY_ID);
+    public static final ITag<Block> TAG_PAINTONBLOCK_ALLOW =
+            BlockTags.createOptional(TAG_PAINTONBLOCK_ALLOW_ID);
+    public static final ITag<Block> TAG_PAINTONBLOCK_DENY =
+            BlockTags.createOptional(TAG_PAINTONBLOCK_DENY_ID);
     
     protected static final int PICTURE_PARAMETER_OFFSET = 16;
     protected static final PictureParameter[] PICTURE_PARAMETERS;
@@ -122,7 +123,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     public BlockPos getBlockPos() {
-        return new BlockPos(this);
+        return new BlockPos(GeometryUtils.createVec3d(this));
     }
     
     public void setBlockPos(BlockPos pos) {
@@ -238,7 +239,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public void move(MoverType type, Vec3d pos) {}
+    public void move(MoverType type, Vector3d pos) {}
     
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
@@ -256,7 +257,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
     }
     
     @Override
-    public boolean isPushedByWater() {
+    public boolean isPushedByFluid() {
         return false;
     }
     
@@ -596,7 +597,7 @@ public class EntityPaintOnBlock extends Entity implements ISidePictureProvider {
             valid = !neighborState.isSolidRender(world, neighborPos);
         } else if (TAG_PAINTONBLOCK_ALLOW.contains(block)) {
             valid = true;
-        } else if (Block.isFaceSturdy(state, world, pos, pside)) {
+        } else if (Block.isFaceFull(state.getCollisionShape(world, pos), pside)) {
             valid = true;
         } else if (Stream.of(StairsBlock.class, FenceBlock.class, WallBlock.class, PaneBlock.class,
                              FenceGateBlock.class, BrewingStandBlock.class,

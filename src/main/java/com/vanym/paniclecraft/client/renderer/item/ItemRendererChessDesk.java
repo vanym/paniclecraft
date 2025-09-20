@@ -5,6 +5,7 @@ import com.vanym.paniclecraft.item.ItemChessDesk;
 import com.vanym.paniclecraft.tileentity.TileEntityChessDesk;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
@@ -17,6 +18,7 @@ public class ItemRendererChessDesk extends ItemStackTileEntityRenderer {
     @Override
     public void renderByItem(
             ItemStack stack,
+            ItemCameraTransforms.TransformType type,
             MatrixStack ms,
             IRenderTypeBuffer buffers,
             int light,

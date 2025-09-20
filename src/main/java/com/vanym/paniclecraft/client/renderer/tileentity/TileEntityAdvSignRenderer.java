@@ -19,11 +19,11 @@ import net.minecraft.block.WoodType;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.tileentity.SignTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -120,17 +120,15 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
         for (int i = 0; i < size; ++i) {
             AdvTextInput input = gui != null ? gui.getInput(front, i) : null;
             ITextComponent line = input != null ? input.getComponent() : lines.get(i);
-            String colored = line.getColoredString();
-            int width = font.width(colored);
+            int width = font.width(line);
             int x = -width / 2;
             int y = i * 10 - size * 5;
-            font.drawInBatch(colored, x, y, textColor.getRGB(),
+            font.drawInBatch(line, x, y, textColor.getRGB(),
                              false, ms.last().pose(), buffer, false, 0, combinedLight);
             if (input == null) {
                 continue;
             }
-            int cursorOffset = font.width(FormattingUtils.substring(line, 0, input.getCursorPos())
-                                                         .getColoredString());
+            int cursorOffset = font.width(FormattingUtils.substring(line, 0, input.getCursorPos()));
             int cursorX = x + cursorOffset;
             if (gui.isBlink()) {
                 if (input.getCursorPos() < line.getString().length()) {
@@ -150,8 +148,7 @@ public class TileEntityAdvSignRenderer extends TileEntityRenderer<TileEntityAdvS
             if (!input.isSelected()) {
                 continue;
             }
-            int selOffset = font.width(FormattingUtils.substring(line, 0, input.getSelectionPos())
-                                                      .getColoredString());
+            int selOffset = font.width(FormattingUtils.substring(line, 0, input.getSelectionPos()));
             int selectionX = x + selOffset;
             Matrix4f mx = ms.last().pose().copy();
             mx.translate(new Vector3f(0.0F, 0.0F, 0.003F));

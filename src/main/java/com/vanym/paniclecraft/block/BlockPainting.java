@@ -15,8 +15,8 @@ import net.minecraft.block.IWaterLoggable;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -64,7 +64,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        IFluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
+        FluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
         return this.defaultBlockState()
                    .setValue(FACING, context.getClickedFace())
                    .setValue(WATERLOGGED, fluidstate.getType() == Fluids.WATER);
@@ -76,6 +76,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     }
     
     @Override
+    @SuppressWarnings("deprecation")
     public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
@@ -87,7 +88,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
     
     @Override
     @SuppressWarnings("deprecation")
-    public IFluidState getFluidState(BlockState state) {
+    public FluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false)
                                            : super.getFluidState(state);
     }
@@ -172,7 +173,7 @@ public class BlockPainting extends BlockPaintingContainer implements IWaterLogga
             BlockPos pos,
             PlayerEntity player,
             boolean willHarvest,
-            IFluidState fluid) {
+            FluidState fluid) {
         if (player != null) {
             TileEntity tile = world.getBlockEntity(pos);
             if (tile instanceof TileEntityPainting) {

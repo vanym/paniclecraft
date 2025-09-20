@@ -55,7 +55,7 @@ public class ColorChartTexture extends SimpleTexture implements Closeable {
     }
     
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (this.img != null) {
             this.img.close();
         }

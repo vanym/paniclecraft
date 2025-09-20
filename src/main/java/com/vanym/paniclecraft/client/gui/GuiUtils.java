@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -18,18 +19,22 @@ import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class GuiUtils {
+    
+    protected static final ITextComponent EMPTY = StringTextComponent.EMPTY;
     
     protected static final RenderType RENDER_TYPE_FILL =
             RenderType.create(DEF.MOD_ID + ":fill",
@@ -89,19 +94,21 @@ public class GuiUtils {
     }
     
     public static void drawHighlight(int x1, int y1, int x2, int y2) {
-        new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, "").renderHighlight(x1, y1, x2, y2);
+        new TextFieldWidget(null, 0, 0, ~0, 0, EMPTY).renderHighlight(x1, y1, x2, y2);
     }
     
     public static void drawString8xOutline(
+            MatrixStack ms,
             FontRenderer font,
             String line,
             int x,
             int y,
             int textColor) {
-        drawString8xOutline(font, line, x, y, textColor, ~textColor & 0xffffff);
+        drawString8xOutline(ms, font, line, x, y, textColor, ~textColor & 0xffffff);
     }
     
     public static void drawString8xOutline(
+            MatrixStack ms,
             FontRenderer font,
             String line,
             int x,
@@ -112,7 +119,7 @@ public class GuiUtils {
                 IntStream.range(0, line.length())
                          .mapToObj(line::charAt)
                          .filter(c->c != ' ')
-                         .map(font.fonts::getGlyphInfo)
+                         .map(font.fonts.apply(Style.DEFAULT_FONT)::getGlyphInfo)
                          .map(IGlyph::getShadowOffset);
         float max = 0.0F, min = Float.POSITIVE_INFINITY;
         for (float offset : (Iterable<Float>)offsets::iterator) {
@@ -125,13 +132,13 @@ public class GuiUtils {
                 if (px == 0 && py == 0) {
                     continue;
                 }
-                RenderSystem.pushMatrix();
-                RenderSystem.translatef(px * min, py * min, 0.0F);
-                font.draw(line, x, y, outlineColor);
-                RenderSystem.popMatrix();
+                ms.pushPose();
+                ms.translate(px * min, py * min, 0.0D);
+                font.draw(ms, line, x, y, outlineColor);
+                ms.popPose();
             }
         }
-        font.draw(line, x, y, textColor);
+        font.draw(ms, line, x, y, textColor);
     }
     
     public static void drawFillInBatch(
@@ -201,7 +208,7 @@ public class GuiUtils {
     }
     
     public static int getWordPosition(String str, int n, int cursor, boolean skipSpaces) {
-        TextFieldWidget field = new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, "");
+        TextFieldWidget field = new TextFieldWidget(null, 0, 0, Integer.MAX_VALUE, 0, EMPTY);
         field.setMaxLength(Integer.MAX_VALUE);
         field.setValue(str);
         return field.getWordPosition(n, cursor, skipSpaces);
@@ -209,6 +216,6 @@ public class GuiUtils {
     
     public static void showFloatingTooltip(ITextComponent line) {
         Minecraft mc = Minecraft.getInstance();
-        mc.gui.setOverlayMessage(line.getColoredString(), false);
+        mc.gui.setOverlayMessage(line, false);
     }
 }

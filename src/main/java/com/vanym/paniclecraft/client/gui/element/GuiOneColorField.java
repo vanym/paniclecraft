@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.text.StringTextComponent;
 
 public class GuiOneColorField extends TextFieldWidget {
     
@@ -12,7 +13,7 @@ public class GuiOneColorField extends TextFieldWidget {
     protected Consumer<Integer> setter;
     
     public GuiOneColorField(FontRenderer font, int x, int y, int width, int height) {
-        super(font, x, y, width, height, "");
+        super(font, x, y, width, height, StringTextComponent.EMPTY);
         this.setMaxLength(3);
         this.fixate();
     }

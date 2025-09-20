@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ILightReader;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.BakedModelWrapper;
@@ -50,7 +50,7 @@ public class BakedModelStatedWrapper<T extends IBakedModel> extends BakedModelWr
     
     @Override
     public IModelData getModelData(
-            ILightReader world,
+            IBlockDisplayReader world,
             BlockPos pos,
             BlockState state,
             IModelData tileData) {

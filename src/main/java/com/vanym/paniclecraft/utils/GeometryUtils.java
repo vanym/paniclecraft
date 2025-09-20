@@ -1,6 +1,5 @@
 package com.vanym.paniclecraft.utils;
 
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
@@ -8,14 +7,15 @@ import net.minecraft.util.Direction.AxisDirection;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector3i;
 
 public class GeometryUtils {
     
     protected static final AxisAlignedBB FULL_BLOCK = VoxelShapes.block().bounds();
-    protected static final Vec3d CENTER_VEC3D = new Vec3d(0.5D, 0.5D, 0.5D);
+    protected static final Vector3d CENTER_VEC3D = new Vector3d(0.5D, 0.5D, 0.5D);
     
     public static AxisAlignedBB getFullBlockBox() {
         return FULL_BLOCK;
@@ -49,7 +49,7 @@ public class GeometryUtils {
         return new AxisAlignedBB(x, y, z, x, y, z);
     }
     
-    public static AxisAlignedBB makeBox(Vec3d f, Vec3d s) {
+    public static AxisAlignedBB makeBox(Vector3d f, Vector3d s) {
         return new AxisAlignedBB(f.x, f.y, f.z, s.x, s.y, s.z);
     }
     
@@ -70,46 +70,46 @@ public class GeometryUtils {
         return sideBox.minZ <= 0.0D;
     }
     
-    public static Vec3d getInBlockVec(BlockRayTraceResult target) {
-        return target.getLocation().subtract(new Vec3d(target.getBlockPos()));
+    public static Vector3d getInBlockVec(BlockRayTraceResult target) {
+        return target.getLocation().subtract(Vector3d.atLowerCornerOf(target.getBlockPos()));
     }
     
-    public static Vec3d getCenterVec3d() {
+    public static Vector3d getCenterVec3d() {
         return CENTER_VEC3D;
     }
     
-    public static Vec3d getCenter(Vec3i vec) {
-        return new Vec3d(vec).add(CENTER_VEC3D);
+    public static Vector3d getCenter(Vector3i vec) {
+        return Vector3d.atCenterOf(vec);
     }
     
-    public static Vec3d createVec3d(Entity entity) {
-        return new Vec3d(entity.getX(), entity.getY(), entity.getZ());
+    public static Vector3d createVec3d(Entity entity) {
+        return new Vector3d(entity.getX(), entity.getY(), entity.getZ());
     }
     
-    public static Vec3i mul(Vec3i vec1, Vec3i vec2) {
-        return new Vec3i(
+    public static Vector3i mul(Vector3i vec1, Vector3i vec2) {
+        return new Vector3i(
                 vec1.getX() * vec2.getX(),
                 vec1.getY() * vec2.getY(),
                 vec1.getZ() * vec2.getZ());
     }
     
-    public static Vec3d mul(Vec3i vec1, Vec3d vec2) {
+    public static Vector3d mul(Vector3i vec1, Vector3d vec2) {
         return mul(vec2, vec1);
     }
     
-    public static Vec3d mul(Vec3d vec1, Vec3i vec2) {
-        return mul(vec1, new Vec3d(vec2));
+    public static Vector3d mul(Vector3d vec1, Vector3i vec2) {
+        return mul(vec1, Vector3d.atLowerCornerOf(vec2));
     }
     
-    public static Vec3d mul(Vec3d vec1, Vec3d vec2) {
+    public static Vector3d mul(Vector3d vec1, Vector3d vec2) {
         return vec1.multiply(vec2);
     }
     
-    public static void acceptVec3d(Vec3d vec, Vec3dConsumer consumer) {
+    public static void acceptVec3d(Vector3d vec, Vec3dConsumer consumer) {
         consumer.accept(vec.x, vec.y, vec.z);
     }
     
-    public static void acceptVec3f(Vec3d vec, Vec3fConsumer consumer) {
+    public static void acceptVec3f(Vector3d vec, Vec3fConsumer consumer) {
         consumer.accept((float)vec.x, (float)vec.y, (float)vec.z);
     }
     
@@ -166,14 +166,14 @@ public class GeometryUtils {
                 box.maxZ);
     }
     
-    public static Direction getDirectionByVec(Vec3d lookVec) {
+    public static Direction getDirectionByVec(Vector3d lookVec) {
         return Direction.getNearest((float)lookVec.x, (float)lookVec.y, (float)lookVec.z);
     }
     
     public static BlockRayTraceResult rayTraceBlocks(PlayerEntity player, double distance) {
-        Vec3d pos = player.getEyePosition(1.0F);
-        Vec3d look = player.getLookAngle();
-        Vec3d posTo = pos.add(look.scale(distance));
+        Vector3d pos = player.getEyePosition(1.0F);
+        Vector3d look = player.getLookAngle();
+        Vector3d posTo = pos.add(look.scale(distance));
         return player.level.clip(new RayTraceContext(
                 pos,
                 posTo,

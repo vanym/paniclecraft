@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
-TAG="2.15-0"
+TAG="2.16-0"
 
 DEST=$(eval echo ~"${SUDO_USER:-$USER}")
 GRADLE="$DEST"/.gradle

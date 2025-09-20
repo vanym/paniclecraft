@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.vanym.paniclecraft.DEF;
@@ -34,9 +35,10 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -62,7 +64,8 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     protected int controlsEndX;
     
     protected final Button buttonExport = JUtils.make(()-> {
-        String text = I18n.get(String.format("gui.%s.paintingview.export", DEF.MOD_ID));
+        ITextComponent text = new TranslationTextComponent(
+                String.format("gui.%s.paintingview.export", DEF.MOD_ID));
         return new Button(0, 0, 60, 20, text, b->this.paintingExport());
     });
     
@@ -114,21 +117,21 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float renderPartialTicks) {
-        this.renderBackground();
-        this.drawPainting();
+    public void render(MatrixStack ms, int mouseX, int mouseY, float renderPartialTicks) {
+        this.renderBackground(ms);
+        this.drawPainting(ms);
         {
             StringBuilder sb = new StringBuilder();
             sb.append(this.view.getWidth());
             sb.append("×");
             sb.append(this.view.getHeight());
-            this.font.draw(sb.toString(), 2, 2, 0x7f7f7f);
+            this.font.draw(ms, sb.toString(), 2, 2, 0x7f7f7f);
         }
-        super.render(mouseX, mouseY, renderPartialTicks);
-        this.drawHelp();
+        super.render(ms, mouseX, mouseY, renderPartialTicks);
+        this.drawHelp(ms);
     }
     
-    protected void drawPainting() {
+    protected void drawPainting(MatrixStack ms) {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
                                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -140,7 +143,7 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
                 }
                 PictureRender.bindTexture(picture);
                 TextureAtlasSprite icon = IconUtils.shrink(PictureRender.getIcon(picture));
-                blit(this.viewX + x * this.viewStep,
+                blit(ms, this.viewX + x * this.viewStep,
                      this.viewY + y * this.viewStep,
                      this.getBlitOffset(),
                      this.viewStep, this.viewStep,
@@ -150,20 +153,21 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
         RenderSystem.disableBlend();
     }
     
-    protected void drawHelp() {
+    protected void drawHelp(MatrixStack ms) {
         if (!GuiUtils.isKeyDown(GLFW.GLFW_KEY_H)) {
             return;
         }
         String translationKey = String.format("gui.%s.paintingview.help.export", DEF.MOD_ID);
-        this.drawHelp(Arrays.asList(I18n.get(translationKey).split(System.lineSeparator())));
+        this.drawHelp(ms, Arrays.asList(I18n.get(translationKey).split(System.lineSeparator())));
     }
     
-    protected void drawHelp(List<String> lines) {
+    protected void drawHelp(MatrixStack ms, List<String> lines) {
         int lineHeight = 14;
         int y = this.height / 2 - lines.size() * (lineHeight / 2);
         for (String line : lines) {
             int x = (this.width - this.font.width(line)) / 2;
-            GuiUtils.drawString8xOutline(this.font, line, x, y + (lineHeight - 10) / 2, 0xe0e0e0);
+            GuiUtils.drawString8xOutline(ms, this.font, line, x, y + (lineHeight - 10) / 2,
+                                         0xe0e0e0);
             y += lineHeight;
         }
     }
@@ -176,12 +180,11 @@ public class GuiPaintingView extends Screen implements IHasContainer<ContainerPa
         try {
             FileOutputStream output = new FileOutputStream(file);
             this.view.savePainting(output);
-            StringTextComponent link = new StringTextComponent(file.getName());
-            Style style = link.getStyle();
-            style.setClickEvent(new ClickEvent(
-                    ClickEvent.Action.OPEN_FILE,
-                    file.getAbsolutePath()));
-            style.setUnderlined(true);
+            IFormattableTextComponent link = new StringTextComponent(
+                    file.getName()).withStyle(style->style.withClickEvent(new ClickEvent(
+                            ClickEvent.Action.OPEN_FILE,
+                            file.getAbsolutePath())))
+                                   .withStyle(TextFormatting.UNDERLINE);
             message = new TranslationTextComponent(
                     String.format("chat.%s.painting.export.success", DEF.MOD_ID),
                     link);

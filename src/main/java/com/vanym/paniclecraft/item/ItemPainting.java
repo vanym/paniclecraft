@@ -36,6 +36,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -79,7 +80,7 @@ public class ItemPainting extends BlockItem {
             return context;
         }
         World world = context.getLevel();
-        BlockPos.Mutable pos = new BlockPos.Mutable(context.getClickedPos());
+        BlockPos.Mutable pos = new BlockPos.Mutable().set(context.getClickedPos());
         Direction side = context.getClickedFace();
         Block self = this.getBlock();
         for (int i = 0; i < Core.instance.painting.config.paintingPlaceStack; i++) {
@@ -154,7 +155,7 @@ public class ItemPainting extends BlockItem {
             List<ITextComponent> list,
             ITooltipFlag flag) {
         getPictureTag(itemStack).ifPresent(pictureTag-> {
-            Stream.Builder<ITextComponent> lines = Stream.builder();
+            Stream.Builder<IFormattableTextComponent> lines = Stream.builder();
             if (pictureTag.contains(Picture.TAG_EDITABLE) &&
                 !pictureTag.getBoolean(Picture.TAG_EDITABLE)) {
                 lines.add(new TranslationTextComponent(this.getDescriptionId() + ".uneditable"));

@@ -7,10 +7,11 @@ import com.vanym.paniclecraft.client.renderer.model.ModelPortableWorkbench;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -25,6 +26,7 @@ public class ItemRendererPortableWorkbench extends ItemStackTileEntityRenderer {
     @Override
     public void renderByItem(
             ItemStack stack,
+            ItemCameraTransforms.TransformType type,
             MatrixStack ms,
             IRenderTypeBuffer buffers,
             int light,

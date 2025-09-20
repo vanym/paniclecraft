@@ -2,8 +2,8 @@ package com.vanym.paniclecraft.utils;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 
 public final class TileOnSide {
     
@@ -21,43 +21,43 @@ public final class TileOnSide {
         this.zDir = zDir;
     }
     
-    public Vec3d toSideCoords(Vec3d vec) {
-        return new Vec3d(
+    public Vector3d toSideCoords(Vector3d vec) {
+        return new Vector3d(
                 getCoord(vec, this.xDir.getNormal()),
                 getCoord(vec, this.yDir.getNormal()),
                 getCoord(vec, this.zDir.getNormal()));
     }
     
     public AxisAlignedBB toSideCoords(AxisAlignedBB box) {
-        Vec3d min = new Vec3d(box.minX, box.minY, box.minZ);
-        Vec3d max = new Vec3d(box.maxX, box.maxY, box.maxZ);
-        Vec3d picmin = this.toSideCoords(min);
-        Vec3d picmax = this.toSideCoords(max);
+        Vector3d min = new Vector3d(box.minX, box.minY, box.minZ);
+        Vector3d max = new Vector3d(box.maxX, box.maxY, box.maxZ);
+        Vector3d picmin = this.toSideCoords(min);
+        Vector3d picmax = this.toSideCoords(max);
         return GeometryUtils.makeBox(picmin, picmax);
     }
     
-    public Vec3d fromSideCoords(Vec3d vec) {
-        return Vec3d.ZERO.add(makeCoordOffset(this.xDir.getNormal(), vec.x))
-                         .add(makeCoordOffset(this.yDir.getNormal(), vec.y))
-                         .add(makeCoordOffset(this.zDir.getNormal(), vec.z));
+    public Vector3d fromSideCoords(Vector3d vec) {
+        return Vector3d.ZERO.add(makeCoordOffset(this.xDir.getNormal(), vec.x))
+                            .add(makeCoordOffset(this.yDir.getNormal(), vec.y))
+                            .add(makeCoordOffset(this.zDir.getNormal(), vec.z));
     }
     
     public AxisAlignedBB fromSideCoords(AxisAlignedBB box) {
-        Vec3d picmin = new Vec3d(box.minX, box.minY, box.minZ);
-        Vec3d picmax = new Vec3d(box.maxX, box.maxY, box.maxZ);
-        Vec3d min = this.fromSideCoords(picmin);
-        Vec3d max = this.fromSideCoords(picmax);
+        Vector3d picmin = new Vector3d(box.minX, box.minY, box.minZ);
+        Vector3d picmax = new Vector3d(box.maxX, box.maxY, box.maxZ);
+        Vector3d min = this.fromSideCoords(picmin);
+        Vector3d max = this.fromSideCoords(picmax);
         return GeometryUtils.makeBox(min, max);
     }
     
-    protected static double getCoord(Vec3d vec, Vec3i dir) {
+    protected static double getCoord(Vector3d vec, Vector3i dir) {
         return (0.5D * Math.abs(dir.getX()) + (-0.5D + vec.x) * dir.getX()) +
                (0.5D * Math.abs(dir.getY()) + (-0.5D + vec.y) * dir.getY()) +
                (0.5D * Math.abs(dir.getZ()) + (-0.5D + vec.z) * dir.getZ());
     }
     
-    protected static Vec3d makeCoordOffset(Vec3i dir, double coord) {
-        return new Vec3d(
+    protected static Vector3d makeCoordOffset(Vector3i dir, double coord) {
+        return new Vector3d(
                 0.5D * Math.abs(dir.getX()) + (-0.5D + coord) * dir.getX(),
                 0.5D * Math.abs(dir.getY()) + (-0.5D + coord) * dir.getY(),
                 0.5D * Math.abs(dir.getZ()) + (-0.5D + coord) * dir.getZ());

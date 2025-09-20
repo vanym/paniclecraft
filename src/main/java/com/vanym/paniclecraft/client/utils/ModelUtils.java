@@ -19,7 +19,7 @@ public class ModelUtils {
                 -1,
                 quad.getDirection(),
                 quad.getSprite(),
-                quad.shouldApplyDiffuseLighting());
+                quad.isShade());
     }
     
     public static BakedQuad retexture(
@@ -44,7 +44,7 @@ public class ModelUtils {
                 quad.getTintIndex(),
                 quad.getDirection(),
                 texture,
-                quad.shouldApplyDiffuseLighting());
+                quad.isShade());
     }
     
     public static int getByteOffset(VertexFormat format, VertexFormatElement element) {

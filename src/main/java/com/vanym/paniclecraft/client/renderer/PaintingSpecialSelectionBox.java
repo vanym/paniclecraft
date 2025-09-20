@@ -13,7 +13,6 @@ import com.vanym.paniclecraft.core.component.painting.WorldPicturePoint;
 import com.vanym.paniclecraft.core.component.painting.WorldPictureProvider;
 import com.vanym.paniclecraft.utils.GeometryUtils;
 
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +23,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.DrawHighlightEvent.HighlightBlock;
@@ -107,8 +107,8 @@ public class PaintingSpecialSelectionBox {
         double radius = tool.getPaintingToolRadius(stack, picture);
         int width = picture.getWidth();
         int height = picture.getHeight();
-        Vec3d inBlockVec = GeometryUtils.getInBlockVec(target);
-        Vec3d inPictureVec = pside.axes.toSideCoords(inBlockVec);
+        Vector3d inBlockVec = GeometryUtils.getInBlockVec(target);
+        Vector3d inPictureVec = pside.axes.toSideCoords(inBlockVec);
         double outline = 0.002D;
         double zOutline = inPictureVec.z + outline;
         int px = (int)(inPictureVec.x * width);
@@ -154,7 +154,7 @@ public class PaintingSpecialSelectionBox {
             }
         }
         Stream<AxisAlignedBB> pictureLines = pictureLinesBuilder.build();
-        Vec3d view = event.getInfo().getPosition();
+        Vector3d view = event.getInfo().getPosition();
         Stream<AxisAlignedBB> frameLines = pictureLines.map(b->pside.axes.fromSideCoords(b)
                                                                          .move(pos)
                                                                          .move(view.reverse()));

@@ -1,13 +1,17 @@
 package com.vanym.paniclecraft.core.component.advsign;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Streams;
+import com.vanym.paniclecraft.utils.JUtils;
+
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
@@ -18,23 +22,22 @@ public class FormattingUtils {
     public static ITextComponent parseLine(String line) {
         Matcher matcher = TextFormatting.STRIP_FORMATTING_PATTERN.matcher(line);
         List<ITextComponent> list = new ArrayList<>();
-        Style style = new Style();
+        Style style = Style.EMPTY;
         for (int last = 0;;) {
             boolean find = matcher.find();
             String sub = find ? line.substring(last, matcher.start()) : line.substring(last);
             if (!sub.isEmpty()) {
-                Style copy = style.copy();
                 int index = list.size() - 1;
-                if (index >= 0 && list.get(index).getStyle().equals(copy)) {
+                if (index >= 0 && list.get(index).getStyle().equals(style)) {
                     String begin = list.get(index).getContents();
-                    list.set(index, new StringTextComponent(begin + sub).setStyle(copy));
+                    list.set(index, new StringTextComponent(begin + sub).setStyle(style));
                 } else {
-                    list.add(new StringTextComponent(sub).setStyle(copy));
+                    list.add(new StringTextComponent(sub).setStyle(style));
                 }
             }
             if (find) {
                 last = matcher.end();
-                applyToStyle(style, byCode(matcher.group().charAt(1)));
+                style = style.applyFormat(byCode(matcher.group().charAt(1)));
             } else {
                 break;
             }
@@ -44,58 +47,22 @@ public class FormattingUtils {
     
     public static ITextComponent toComponent(List<ITextComponent> list) {
         if (list.isEmpty()) {
-            return new StringTextComponent("");
+            return StringTextComponent.EMPTY;
         } else if (list.size() == 1) {
             return list.get(0);
         } else {
-            ITextComponent root = new StringTextComponent("");
+            IFormattableTextComponent root = new StringTextComponent("");
             list.forEach(root::append);
             return root;
         }
     }
     
     public static TextFormatting byCode(char code) {
-        char lower = Character.toLowerCase(code);
-        return Arrays.stream(TextFormatting.values())
-                     .filter(f->f.code == lower)
-                     .findAny()
-                     .orElse(null);
-    }
-    
-    public static Style applyToStyle(Style style, TextFormatting formatting) {
-        switch (formatting) {
-            case RESET:
-                style.setBold(null)
-                     .setItalic(null)
-                     .setObfuscated(null)
-                     .setStrikethrough(null)
-                     .setUnderlined(null)
-                     .setColor(null);
-            break;
-            case BOLD:
-                style.setBold(true);
-            break;
-            case ITALIC:
-                style.setItalic(true);
-            break;
-            case OBFUSCATED:
-                style.setObfuscated(true);
-            break;
-            case STRIKETHROUGH:
-                style.setStrikethrough(true);
-            break;
-            case UNDERLINE:
-                style.setUnderlined(true);
-            break;
-            default:
-                style.setColor(formatting);
-            break;
-        }
-        return style;
+        return TextFormatting.getByCode(code);
     }
     
     public static Style toStyle(TextFormatting formatting) {
-        return applyToStyle(new Style(), formatting);
+        return Style.EMPTY.applyFormat(formatting);
     }
     
     public static String trimReset(String str) {
@@ -110,57 +77,56 @@ public class FormattingUtils {
     }
     
     public static Style invertBy(Style style, Style patch) {
-        Style copy1 = style.copy().inheritFrom(null);
-        Style copy2 = style.copy()
-                           .inheritFrom(new Style().setColor(TextFormatting.BLACK)
-                                                   .setObfuscated(true)
-                                                   .setBold(true)
-                                                   .setStrikethrough(true)
-                                                   .setUnderlined(true)
-                                                   .setItalic(true));
-        TextFormatting patchColor = patch.getColor();
-        if (copy1.getColor() == copy2.getColor()
-            && patchColor != null
-            && patchColor != TextFormatting.RESET) {
-            TextFormatting color = style.getColor();
-            if (color == patchColor) {
-                style.setColor(TextFormatting.RESET);
-            } else if (color == null || color == TextFormatting.RESET) {
-                style.setColor(patchColor);
+        Style copy1 = style.applyTo(Style.EMPTY);
+        Style copy2 = style.applyTo(Style.EMPTY.withColor(TextFormatting.BLACK)
+                                               .setObfuscated(true)
+                                               .withBold(true)
+                                               .setStrikethrough(true)
+                                               .setUnderlined(true)
+                                               .withItalic(true));
+        Color patchColor = patch.getColor();
+        if (copy2.getColor().equals(copy1.getColor())
+            && patchColor != null) {
+            Color color = style.getColor();
+            if (patchColor.equals(color)) {
+                style = style.withColor((Color)null);
+            } else if (color == null) {
+                style = style.withColor(patchColor);
             }
         }
         if (copy1.isObfuscated() == copy2.isObfuscated() && patch.isObfuscated()) {
-            style.setObfuscated(!style.isObfuscated());
+            style = style.setObfuscated(!style.isObfuscated());
         }
         if (copy1.isBold() == copy2.isBold() && patch.isBold()) {
-            style.setBold(!style.isBold());
+            style = style.withBold(!style.isBold());
         }
         if (copy1.isStrikethrough() == copy2.isStrikethrough() && patch.isStrikethrough()) {
-            style.setStrikethrough(!style.isStrikethrough());
+            style = style.setStrikethrough(!style.isStrikethrough());
         }
         if (copy1.isUnderlined() == copy2.isUnderlined() && patch.isUnderlined()) {
-            style.setUnderlined(!style.isUnderlined());
+            style = style.setUnderlined(!style.isUnderlined());
         }
         if (copy1.isItalic() == copy2.isItalic() && patch.isItalic()) {
-            style.setItalic(!style.isItalic());
+            style = style.withItalic(!style.isItalic());
         }
         return style;
     }
     
     public static Style invert(Style style) {
-        return invertBy(style, new Style().setColor(TextFormatting.RED)
+        return invertBy(style, Style.EMPTY.withColor(TextFormatting.RED)
                                           .setObfuscated(true)
-                                          .setBold(true)
+                                          .withBold(true)
                                           .setStrikethrough(true)
                                           .setUnderlined(true)
-                                          .setItalic(true));
+                                          .withItalic(true));
     }
     
     public static Stream<ITextComponent> stream(ITextComponent component) {
-        return component.stream();
+        return Streams.concat(Stream.of(component),
+                              component.getSiblings().stream().flatMap(FormattingUtils::stream));
     }
     
-    public static Stream<ITextComponent> fragmentate(ITextComponent component) {
+    public static Stream<IFormattableTextComponent> fragmentate(ITextComponent component) {
         return stream(component).flatMap(sub-> {
             Style style = sub.getStyle();
             String str = sub.getContents();
@@ -168,12 +134,34 @@ public class FormattingUtils {
                             .mapToObj(str::charAt)
                             .map(String::valueOf)
                             .map(StringTextComponent::new)
-                            .peek(comp->comp.setStyle(style.flatCopy()));
+                            .peek(comp->comp.setStyle(style));
         });
     }
     
     public static ITextComponent substring(ITextComponent line, int beginIndex, int endIndex) {
         List<ITextComponent> list = fragmentate(line).collect(Collectors.toList());
         return toComponent(list.subList(beginIndex, endIndex));
+    }
+    
+    public static ITextComponent normalize(ITextComponent component) {
+        List<ITextComponent> list = new ArrayList<>();
+        Style style = Style.EMPTY;
+        StringBuilder sb = new StringBuilder();
+        for (ITextComponent sub : (Iterable<ITextComponent>)stream(component)::iterator) {
+            Style substyle = sub.getStyle();
+            if (style.equals(substyle)) {
+                sb.append(sub.getContents());
+                continue;
+            }
+            if (sb.length() > 0) {
+                list.add(new StringTextComponent(sb.toString()).setStyle(style));
+            }
+            style = JUtils.orElse(substyle, Style.EMPTY);
+            sb = new StringBuilder(sub.getContents());
+        }
+        if (sb.length() > 0) {
+            list.add(new StringTextComponent(sb.toString()).setStyle(style));
+        }
+        return toComponent(list);
     }
 }
