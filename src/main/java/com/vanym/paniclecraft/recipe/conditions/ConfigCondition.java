@@ -8,6 +8,7 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.google.gson.JsonObject;
 import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.recipe.RecipeUtils;
+import com.vanym.paniclecraft.utils.FileUtils;
 import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.util.JSONUtils;
@@ -78,7 +79,7 @@ public class ConfigCondition implements ICondition {
     
     protected Boolean getConfigValue(ModConfig config) {
         Optional<ForgeConfigSpec> spec = Optional.ofNullable(config.getSpec());
-        Optional<CommentedConfig> data = Optional.ofNullable(config.getConfigData());
+        Optional<CommentedConfig> data = FileUtils.earlyConfigLoad(config);
         return data.map(d->d.get(this.path))
                    .map(String::valueOf)
                    .map(Boolean::valueOf)
