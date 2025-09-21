@@ -7,11 +7,15 @@ import java.util.Optional;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.google.gson.JsonObject;
 import com.vanym.paniclecraft.DEF;
+import com.vanym.paniclecraft.recipe.RecipeUtils;
 import com.vanym.paniclecraft.utils.JUtils;
 
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.FalseCondition;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import net.minecraftforge.fml.ModContainer;
@@ -29,7 +33,9 @@ public class ConfigCondition implements ICondition {
     protected final ModConfig.Type type;
     protected final String path;
     
-    public ConfigCondition(String location) {
+    protected final ICondition defaultValue;
+    
+    public ConfigCondition(String location, ICondition defaultValue) {
         String path = location;
         int colon = path.indexOf(":");
         if (colon == -1) {
@@ -50,6 +56,7 @@ public class ConfigCondition implements ICondition {
             path = path.substring(slash + 1);
         }
         this.path = path;
+        this.defaultValue = defaultValue;
     }
     
     @Override
@@ -65,17 +72,21 @@ public class ConfigCondition implements ICondition {
                           EnumMap<ModConfig.Type, ModConfig>,
                           ModContainer>getPrivateValue(ModContainer.class, mc, "configs")))
                       .map(configs->configs.get(this.type))
-                      .map(config-> {
-                          Optional<ForgeConfigSpec> spec =
-                                  Optional.ofNullable(config.getSpec());
-                          Optional<CommentedConfig> data =
-                                  Optional.ofNullable(config.getConfigData());
-                          return data.map(d->d.get(this.path))
-                                     .orElseGet(()->spec.map(s->s.get(this.path)));
-                      })
-                      .map(String::valueOf)
-                      .map(Boolean::valueOf)
-                      .orElse(false);
+                      .map(this::getConfigValue)
+                      .orElseGet(this.defaultValue::test);
+    }
+    
+    protected Boolean getConfigValue(ModConfig config) {
+        Optional<ForgeConfigSpec> spec = Optional.ofNullable(config.getSpec());
+        Optional<CommentedConfig> data = Optional.ofNullable(config.getConfigData());
+        return data.map(d->d.get(this.path))
+                   .map(String::valueOf)
+                   .map(Boolean::valueOf)
+                   .orElseGet(()->spec.map(s->s.<ValueSpec>get(this.path))
+                                      .map(ValueSpec::getDefault)
+                                      .map(String::valueOf)
+                                      .map(Boolean::valueOf)
+                                      .orElse(null));
     }
     
     public String getLocation() {
@@ -99,11 +110,15 @@ public class ConfigCondition implements ICondition {
         @Override
         public void write(JsonObject json, ConfigCondition value) {
             json.addProperty("location", value.getLocation());
+            json.add("default", CraftingHelper.serialize(value.defaultValue));
         }
         
         @Override
         public ConfigCondition read(JsonObject json) {
-            return new ConfigCondition(JSONUtils.getAsString(json, "location"));
+            return new ConfigCondition(
+                    JSONUtils.getAsString(json, "location"),
+                    Optional.ofNullable(RecipeUtils.getCondition(json.get("default")))
+                            .orElse(FalseCondition.INSTANCE));
         }
         
         @Override
