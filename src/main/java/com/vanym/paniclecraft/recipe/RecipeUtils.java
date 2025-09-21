@@ -14,6 +14,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.FalseCondition;
+import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraftforge.common.crafting.conditions.TrueCondition;
 
 public class RecipeUtils {
     
@@ -47,5 +51,19 @@ public class RecipeUtils {
                            .orElseThrow(IllegalArgumentException::new)
                            .getSide();
         }
+    }
+    
+    public static ICondition getCondition(JsonElement elem) {
+        if (elem == null || elem.isJsonNull()) {
+            return null;
+        }
+        if (elem.isJsonPrimitive()) {
+            if (elem.getAsJsonPrimitive().getAsBoolean()) {
+                return TrueCondition.INSTANCE;
+            } else {
+                return FalseCondition.INSTANCE;
+            }
+        }
+        return CraftingHelper.getCondition(elem.getAsJsonObject());
     }
 }
