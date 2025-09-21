@@ -13,6 +13,7 @@ import com.vanym.paniclecraft.item.ItemAdvSign;
 import com.vanym.paniclecraft.network.NetworkUtils;
 import com.vanym.paniclecraft.network.message.MessageAdvSignChange;
 import com.vanym.paniclecraft.network.message.MessageAdvSignOpenGui;
+import com.vanym.paniclecraft.recipe.conditions.ConfigCondition;
 import com.vanym.paniclecraft.tileentity.TileEntityAdvSign;
 import com.vanym.paniclecraft.utils.DistUtils;
 
@@ -48,8 +49,7 @@ public class ModComponentAdvSign extends ModComponent {
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
         
-        ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
-        this.initRecipesConfig(serverBuilder);
+        this.initRecipesConfig(configBuilders.get(ConfigCondition.DEFAULT_TYPE));
         
         this.itemAdvSign = new ItemAdvSign();
         this.blockAdvSign = new BlockAdvSign();
@@ -74,11 +74,11 @@ public class ModComponentAdvSign extends ModComponent {
         });
     }
     
-    protected void initRecipesConfig(ForgeConfigSpec.Builder serverBuilder) {
-        serverBuilder.push(Arrays.asList(this.getName(), "recipe"));
-        serverBuilder.define("advancedSignEasy", true);
-        serverBuilder.define("advancedSignBook", false);
-        serverBuilder.pop(2);
+    protected void initRecipesConfig(ForgeConfigSpec.Builder builder) {
+        builder.push(Arrays.asList(this.getName(), "recipe"));
+        builder.define("advancedSignEasy", true);
+        builder.define("advancedSignBook", false);
+        builder.pop(2);
     }
     
     @SubscribeEvent

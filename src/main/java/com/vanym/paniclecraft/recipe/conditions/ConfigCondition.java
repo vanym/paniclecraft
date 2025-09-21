@@ -18,9 +18,10 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.Type;
 
 public class ConfigCondition implements ICondition {
+    
+    public static final ModConfig.Type DEFAULT_TYPE = ModConfig.Type.SERVER;
     
     protected static final ResourceLocation NAME = new ResourceLocation(DEF.MOD_ID, "config");
     
@@ -39,7 +40,7 @@ public class ConfigCondition implements ICondition {
         }
         int slash = path.indexOf('/');
         if (slash == -1) {
-            this.type = Type.SERVER;
+            this.type = DEFAULT_TYPE;
         } else {
             String str = path.substring(0, slash);
             this.type = Arrays.stream(ModConfig.Type.values())
