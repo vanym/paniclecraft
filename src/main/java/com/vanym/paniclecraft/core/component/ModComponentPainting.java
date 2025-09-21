@@ -53,6 +53,7 @@ import com.vanym.paniclecraft.recipe.RecipePaintingCombine;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrame;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameAddPainting;
 import com.vanym.paniclecraft.recipe.RecipePaintingFrameRemovePainting;
+import com.vanym.paniclecraft.recipe.conditions.ConfigCondition;
 import com.vanym.paniclecraft.tileentity.TileEntityPainting;
 import com.vanym.paniclecraft.tileentity.TileEntityPaintingFrame;
 import com.vanym.paniclecraft.utils.DistUtils;
@@ -165,7 +166,7 @@ public class ModComponentPainting extends ModComponent {
         ForgeConfigSpec.Builder serverBuilder = configBuilders.get(ModConfig.Type.SERVER);
         this.config = new Config(serverBuilder);
         this.server = new ServerConfig(serverBuilder);
-        this.initRecipesConfig(serverBuilder);
+        this.initRecipesConfig(configBuilders.get(ConfigCondition.DEFAULT_TYPE));
         
         DistUtils.crun(()->new Runnable() {
             @Override
@@ -229,14 +230,14 @@ public class ModComponentPainting extends ModComponent {
                 new RecipePaintingFrameRemovePainting.Serializer().setRegistryName("paintingframe_remove_painting");
     }
     
-    protected void initRecipesConfig(ForgeConfigSpec.Builder serverBuilder) {
-        serverBuilder.push(Arrays.asList(this.getName(), "recipe"));
-        serverBuilder.define("palette", false);
-        serverBuilder.define("paintingtoolRemover", false);
-        serverBuilder.define("paintingtoolRemoverFromBrush", false);
-        serverBuilder.define("paintingtoolRemoverSmall", false);
-        serverBuilder.define("paintingtoolRemoverSmallFromBrushSmall", false);
-        serverBuilder.pop(2);
+    protected void initRecipesConfig(ForgeConfigSpec.Builder builder) {
+        builder.push(Arrays.asList(this.getName(), "recipe"));
+        builder.define("palette", false);
+        builder.define("paintingtoolRemover", false);
+        builder.define("paintingtoolRemoverFromBrush", false);
+        builder.define("paintingtoolRemoverSmall", false);
+        builder.define("paintingtoolRemoverSmallFromBrushSmall", false);
+        builder.pop(2);
     }
     
     @SubscribeEvent
