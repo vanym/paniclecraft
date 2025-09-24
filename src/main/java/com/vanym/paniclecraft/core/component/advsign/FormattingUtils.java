@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import com.google.common.collect.Streams;
 import com.vanym.paniclecraft.utils.JUtils;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -59,6 +60,35 @@ public class FormattingUtils {
     
     public static TextFormatting byCode(char code) {
         return TextFormatting.getByCode(code);
+    }
+    
+    public static Style applyToStyle(Style style, Style patch) {
+        if (patch == Style.EMPTY) {
+            // It's reset patch
+            return Style.EMPTY;
+        }
+        Style copy1 = patch.applyTo(Style.EMPTY);
+        Style copy2 = patch.applyTo(Style.EMPTY.withColor(TextFormatting.BLACK)
+                                               .setObfuscated(true)
+                                               .withBold(true)
+                                               .setStrikethrough(true)
+                                               .setUnderlined(true)
+                                               .withItalic(true)
+                                               .withFont(new ResourceLocation("", "")));
+        Style patched = patch.applyTo(style);
+        if (copy1.isObfuscated() != copy2.isObfuscated()
+            && copy1.isBold() != copy2.isBold()
+            && copy1.isStrikethrough() != copy2.isStrikethrough()
+            && copy1.isUnderlined() != copy2.isUnderlined()
+            && copy1.isItalic() != copy2.isItalic()
+            && copy1.getFont() != copy2.getFont()
+            && patch.getClickEvent() == null
+            && patch.getHoverEvent() == null
+            && patch.getInsertion() == null) {
+            // It's color patch
+            return patched.withColor(patch.getColor());
+        }
+        return patched;
     }
     
     public static Style toStyle(TextFormatting formatting) {

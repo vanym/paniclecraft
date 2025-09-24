@@ -200,13 +200,13 @@ public class AdvTextInput {
     }
     
     public void applyStyle(Style style) {
-        this.style = style;
+        this.style = FormattingUtils.applyToStyle(this.style, style);
         if (this.isSelected()) {
             int min = Math.min(this.cursorPos, this.selectionPos);
             int max = Math.max(this.cursorPos, this.selectionPos);
             this.text.subList(min, max)
                      .stream()
-                     .forEach(e->e.setStyle(style.applyTo(e.copyStyle())));
+                     .forEach(e->e.setStyle(FormattingUtils.applyToStyle(e.copyStyle(), style)));
         }
     }
     

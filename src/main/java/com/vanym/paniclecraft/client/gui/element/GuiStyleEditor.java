@@ -126,7 +126,7 @@ public class GuiStyleEditor extends AbstractButton {
                 9,
                 updater,
                 ()->false,
-                Style.EMPTY.withColor(TextFormatting.RESET),
+                Style.EMPTY,
                 TextFormatting.RESET));
         return list;
     }
