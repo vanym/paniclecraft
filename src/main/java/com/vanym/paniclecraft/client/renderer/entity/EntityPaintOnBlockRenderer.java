@@ -117,8 +117,9 @@ public class EntityPaintOnBlockRenderer extends Render<EntityPaintOnBlock> {
             if (theProfiler != null) {
                 theProfiler.startSection("picture");
             }
+            final float eyeHeight = this.renderManager.renderViewEntity.getEyeHeight();
             final double expandX = calcExpand(x);
-            final double expandY = calcExpand(y + 0.5D);
+            final double expandY = calcExpand(y + 0.5D - eyeHeight);
             final double expandZ = calcExpand(z);
             BlockModelRenderer render = this.blockRenderer.getBlockModelRenderer();
             IBlockState state = world.getBlockState(pos);
