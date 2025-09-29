@@ -1,7 +1,8 @@
 package com.vanym.paniclecraft.server;
 
+import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.core.CommonProxy;
-import com.vanym.paniclecraft.core.ModConfig;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -10,15 +11,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ServerProxy extends CommonProxy {
     
     @Override
-    public void preInit(ModConfig config) {}
-    
-    @Override
-    public void init(ModConfig config) {}
-    
-    @Override
-    public void postInit(ModConfig config) {}
-    
-    @Override
-    public void configChanged(ModConfig config) {}
-    
+    public CommandMod3 getCommand() {
+        return Core.instance.command;
+    }
 }

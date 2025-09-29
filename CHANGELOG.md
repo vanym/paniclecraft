@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+### Added
+ - Client command `/paniclecraftclient`
+
 ### Changed
  - Hex color field behavior
 
