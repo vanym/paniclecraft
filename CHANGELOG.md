@@ -3,6 +3,7 @@
 ## Unreleased
 ### Added
  - Custom version compatibility checker
+ - Client command `/paniclecraftclient`
 
 ### Changed
  - Hex color field behavior
