@@ -3,6 +3,8 @@ package com.vanym.paniclecraft.client;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vanym.paniclecraft.client.command.ClientCommandMod3;
+import com.vanym.paniclecraft.client.utils.ChatScreenUtils;
+import com.vanym.paniclecraft.client.utils.ClientChatSuggester;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CommonProxy;
@@ -25,10 +27,14 @@ public class ClientProxy extends CommonProxy {
     
     protected final CommandDispatcher<CommandSource> commandDispatcher = new CommandDispatcher<>();
     
+    protected final ClientChatSuggester suggester =
+            new ClientChatSuggester(this.commandDispatcher, CommandMod3.NAME);
+    
     public ClientProxy() {
         this.command.addSubCommand(new CommandVersion());
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::setup);
+        MinecraftForge.EVENT_BUS.register(this.suggester);
         MinecraftForge.EVENT_BUS.register(this);
     }
     
@@ -47,9 +53,13 @@ public class ClientProxy extends CommonProxy {
             return;
         }
         try {
-            CommandSource source = Minecraft.getInstance().player.getCommandSource();
+            Minecraft mc = Minecraft.getInstance();
+            CommandSource source = mc.player.getCommandSource();
             this.commandDispatcher.execute(event.getOriginalMessage().substring(1), source);
             event.setCanceled(true);
+            if (ChatScreenUtils.needToLogMessage()) {
+                mc.ingameGUI.getChatGUI().addToSentMessages(event.getOriginalMessage());
+            }
         } catch (CommandSyntaxException e) {
         }
     }
