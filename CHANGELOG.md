@@ -7,6 +7,7 @@
 
 ### Changed
  - Hex color field behavior
+ - Server side version command accessibility
 
 ### Fixed
  - Client imitate painting tool use, after other players
