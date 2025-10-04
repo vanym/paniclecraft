@@ -21,6 +21,11 @@ public class CommandVersion extends CommandBase {
     }
     
     @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
+    }
+    
+    @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length > 0) {
             throw new WrongUsageException(this.getCommandUsage(sender));

@@ -6,6 +6,7 @@
 
 ### Changed
  - Hex color field behavior
+ - Server side version command accessibility
 
 ## 2.7.2.1 - 2025-08-31
 ### Added
