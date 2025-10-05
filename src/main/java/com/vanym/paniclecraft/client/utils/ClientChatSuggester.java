@@ -9,8 +9,13 @@ import org.lwjgl.glfw.GLFW;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.context.SuggestionContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -101,7 +106,22 @@ public class ClientChatSuggester {
         sr.skip();
         CommandSource source = Minecraft.getInstance().player.createCommandSourceStack();
         ParseResults<CommandSource> pr = dispatcher.parse(sr, source);
-        dispatcher.getCompletionSuggestions(pr).thenAccept((suggs)->addSuggestions(chat, suggs));
+        int cursor = pr.getReader().getTotalLength();
+        CommandContextBuilder<CommandSource> context = pr.getContext();
+        SuggestionContext<CommandSource> suggContext = context.findSuggestionContext(cursor);
+        CommandNode<CommandSource> parent = suggContext.parent;
+        int start = Math.min(suggContext.startPos, cursor);
+        String input = pr.getReader().getString().substring(0, cursor);
+        for (CommandNode<CommandSource> node : parent.getChildren()) {
+            if (!node.canUse(source)) {
+                continue;
+            }
+            try {
+                node.listSuggestions(context.build(input), new SuggestionsBuilder(input, start))
+                    .thenAccept((suggs)->addSuggestions(chat, suggs));
+            } catch (CommandSyntaxException e) {
+            }
+        }
     }
     
     protected static void addSuggestions(ChatScreen chat, Suggestions suggs) {
@@ -127,12 +147,19 @@ public class ClientChatSuggester {
                                              .filter(i->i > 0)
                                              .count();
         sugsList.suggestions.getList().add(index, sugg);
+        int width = chat.font.width(sugg.getText());
+        if (width > sugsList.rect.getWidth()) {
+            sugsList.rect = new Rectangle2d(
+                    sugsList.rect.getX(),
+                    sugsList.rect.getY(),
+                    width,
+                    sugsList.rect.getHeight());
+        }
         if (sugsList.suggestions.getList().size() <= 10) {
             sugsList.rect = new Rectangle2d(
                     sugsList.rect.getX(),
                     sugsList.rect.getY() - 12,
-                    Math.max(chat.font.width(sugg.getText()),
-                             sugsList.rect.getWidth()),
+                    sugsList.rect.getWidth(),
                     sugsList.rect.getHeight() + 12);
         }
         if (index <= sugsList.current) {
