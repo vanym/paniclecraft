@@ -11,6 +11,17 @@
  - Paint on blocks validness check
  - Items IDs
 
+## Unreleased
+### Added
+ - Client command `/paniclecraftclient`
+
+### Changed
+ - Hex color field behavior
+ - Server side version command accessibility
+
+### Fixed
+ - Client imitate painting tool use, after other players
+
 ## 2.12.2.0 - 2023-10-09
 ### Added
  - Advanced sign on back writing

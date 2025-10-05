@@ -1,8 +1,10 @@
 package com.vanym.paniclecraft.utils;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class JUtils {
@@ -43,7 +45,7 @@ public class JUtils {
         }
     }
     
-    public static boolean trap(Runnable action) {
+    public static boolean trap(ThrowableRunnable action) {
         return trap(()-> {
             action.run();
             return true;
@@ -73,5 +75,36 @@ public class JUtils {
     
     public static <T> T orElseGet(T value, Supplier<T> getter) {
         return value != null ? value : getter.get();
+    }
+    
+    @SafeVarargs
+    public static <T> T takeFirst(Supplier<T>... sups) {
+        for (Supplier<T> sup : sups) {
+            T value = sup.get();
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+    
+    @SafeVarargs
+    public static <T> Optional<T> takeFirstOptional(Supplier<Optional<T>>... sups) {
+        for (Supplier<Optional<T>> sup : sups) {
+            Optional<T> value = sup.get();
+            if (value.isPresent()) {
+                return value;
+            }
+        }
+        return Optional.empty();
+    }
+    
+    public static <T> Predicate<T> predicate(Supplier<Boolean> sup) {
+        return o->sup.get();
+    }
+    
+    @FunctionalInterface
+    public static interface ThrowableRunnable {
+        void run() throws Exception;
     }
 }
