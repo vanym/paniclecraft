@@ -112,6 +112,7 @@ public class Core {
         Map<ModConfig.Type, ForgeConfigSpec.Builder> initConfigBuilders =
                 Collections.unmodifiableMap(configBuilders);
         Core.instance.getComponents().forEach(comp->comp.init(initConfigBuilders));
+        Core.proxy.init(initConfigBuilders);
         EnumMap<ModConfig.Type, ForgeConfigSpec> specs = new EnumMap<>(ModConfig.Type.class);
         configBuilders.entrySet().stream().forEach(e->specs.put(e.getKey(), e.getValue().build()));
         specs.entrySet()
