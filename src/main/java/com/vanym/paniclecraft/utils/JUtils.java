@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class JUtils {
@@ -96,6 +97,10 @@ public class JUtils {
             }
         }
         return Optional.empty();
+    }
+    
+    public static <T> Predicate<T> predicate(Supplier<Boolean> sup) {
+        return o->sup.get();
     }
     
     @FunctionalInterface

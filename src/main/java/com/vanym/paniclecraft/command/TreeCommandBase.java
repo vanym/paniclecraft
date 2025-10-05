@@ -2,6 +2,8 @@ package com.vanym.paniclecraft.command;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
@@ -26,7 +28,12 @@ public abstract class TreeCommandBase extends CommandBase {
     @Override
     public LiteralArgumentBuilder<CommandSource> register() {
         LiteralArgumentBuilder<CommandSource> builder = Commands.literal(this.getName());
-        this.commandList.stream().map(ICommand::register).forEach(builder::then);
+        List<Predicate<CommandSource>> reqs = new ArrayList<>(this.commandList.size());
+        this.commandList.stream()
+                        .map(ICommand::register)
+                        .peek(sub->reqs.add(Objects.requireNonNull(sub.getRequirement())))
+                        .forEach(builder::then);
+        builder.requires(s->reqs.stream().anyMatch(r->r.test(s)));
         return builder;
     }
     

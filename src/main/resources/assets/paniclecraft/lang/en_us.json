@@ -98,5 +98,14 @@
   "commands.paniclecraft.version.outdated": "paniclecraft %s, outdated, recommended: %s",
   "commands.paniclecraft.version.ahead": "paniclecraft %s, ahead, recommended: %s",
   "commands.paniclecraft.version.beta": "paniclecraft %s, ahead beta, latest: %s",
-  "commands.paniclecraft.version.beta_outdated": "paniclecraft %s, outdated beta, latest: %s"
+  "commands.paniclecraft.version.beta_outdated": "paniclecraft %s, outdated beta, latest: %s",
+
+  "commands.paniclecraftclient.version.usage": "/paniclecraftclient version",
+  "commands.paniclecraftclient.version.pending": "paniclecraft %s client, version check not done",
+  "commands.paniclecraftclient.version.failed": "paniclecraft %s client, version check failed",
+  "commands.paniclecraftclient.version.up_to_date": "paniclecraft %s client, up to date",
+  "commands.paniclecraftclient.version.outdated": "paniclecraft %s client, outdated, recommended: %s",
+  "commands.paniclecraftclient.version.ahead": "paniclecraft %s client, ahead, recommended: %s",
+  "commands.paniclecraftclient.version.beta": "paniclecraft %s client, ahead beta, latest: %s",
+  "commands.paniclecraftclient.version.beta_outdated": "paniclecraft %s client, outdated beta, latest: %s"
 }

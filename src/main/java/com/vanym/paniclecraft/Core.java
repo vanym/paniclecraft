@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.vanym.paniclecraft.client.ClientProxy;
+import com.vanym.paniclecraft.command.CommandDev;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
@@ -66,6 +67,8 @@ public class Core {
     public final CreativeTabMod3 tab = new CreativeTabMod3(DEF.MOD_ID);
     
     public final CommandMod3 command = new CommandMod3();
+    public final CommandDev devCommand = new CommandDev();
+    public final Supplier<Boolean> devMode;
     
     public final SimpleChannel network =
             ChannelBuilder.named(new ResourceLocation(DEF.MOD_ID, "main_channel"))
@@ -97,6 +100,7 @@ public class Core {
         MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
         RecipeDummy.REGISTER.register(bus);
         this.command.addSubCommand(new CommandVersion());
+        this.command.addSubCommand(this.devCommand);
         if (ModList.get().isLoaded("computercraft")) {
             this.components.add(com.vanym.paniclecraft.plugins.computercraft.ComputerCraftPlugin.instance());
         }
@@ -107,6 +111,7 @@ public class Core {
                                                               e->new ForgeConfigSpec.Builder())));
         ForgeConfigSpec.Builder commonBuilder = configBuilders.get(ModConfig.Type.COMMON);
         this.versionCheck = commonBuilder.define("versionCheck", true)::get;
+        this.devMode = commonBuilder.define("devMode", false)::get;
         Map<ModConfig.Type, ForgeConfigSpec.Builder> initConfigBuilders =
                 Collections.unmodifiableMap(configBuilders);
         Core.instance.getComponents().forEach(comp->comp.init(initConfigBuilders));
