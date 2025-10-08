@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.command;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import com.vanym.paniclecraft.Core;
@@ -10,12 +11,10 @@ import com.vanym.paniclecraft.utils.GeometryUtils;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
 public class CommandPaintOnBlock extends TreeCommandBase {
@@ -95,27 +94,14 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         
         @Override
         public void processCommand(ICommandSender sender, String[] args) {
-            int x, y, z;
-            if (args.length == 0) {
-                EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
-                MovingObjectPosition target = CommandUtils.rayTraceBlocks(player);
-                x = target.blockX;
-                y = target.blockY;
-                z = target.blockZ;
-            } else if (args.length == 3) {
-                ChunkCoordinates coords = sender.getPlayerCoordinates();
-                x = MathHelper.floor_double(func_110666_a(sender, coords.posX, args[0]));
-                y = MathHelper.floor_double(func_110666_a(sender, coords.posY, args[1]));
-                z = MathHelper.floor_double(func_110666_a(sender, coords.posZ, args[2]));
-            } else {
-                throw new WrongUsageException(this.getCommandUsage(sender));
-            }
+            ChunkCoordinates pos = this.getBlockTarget(sender, Arrays.asList(args));
             EntityPaintOnBlock entityPOB =
-                    EntityPaintOnBlock.getEntity(sender.getEntityWorld(), x, y, z);
+                    EntityPaintOnBlock.getEntity(sender.getEntityWorld(),
+                                                 pos.posX, pos.posY, pos.posZ);
             if (entityPOB == null) {
                 throw new CommandException(
                         this.getTranslationPrefix() + ".nopaintonblock",
-                        new Object[]{x, y, z});
+                        new Object[]{pos.posX, pos.posY, pos.posZ});
             }
             String name = entityPOB.getClass().getSimpleName();
             int id = entityPOB.getEntityId();

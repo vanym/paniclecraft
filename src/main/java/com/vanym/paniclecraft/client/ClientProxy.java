@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.command.ClientCommandMod3;
+import com.vanym.paniclecraft.client.command.dev.ClientCommandBlockDamage;
 import com.vanym.paniclecraft.command.CommandDev;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
@@ -33,6 +34,7 @@ public class ClientProxy extends CommonProxy {
         for (IModComponent component : Core.instance.getComponents()) {
             component.preInitClient(config);
         }
+        this.devCommand.ifPresent(c->c.addSubCommand(new ClientCommandBlockDamage()));
     }
     
     @Override

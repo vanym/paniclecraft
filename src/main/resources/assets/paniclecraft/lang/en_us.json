@@ -107,5 +107,14 @@
   "commands.paniclecraftclient.version.outdated": "paniclecraft %s client, outdated, recommended: %s",
   "commands.paniclecraftclient.version.ahead": "paniclecraft %s client, ahead, recommended: %s",
   "commands.paniclecraftclient.version.beta": "paniclecraft %s client, ahead beta, latest: %s",
-  "commands.paniclecraftclient.version.beta_outdated": "paniclecraft %s client, outdated beta, latest: %s"
+  "commands.paniclecraftclient.version.beta_outdated": "paniclecraft %s client, outdated beta, latest: %s",
+
+  "commands.paniclecraftclient.dev.blockdamage.add.usage": "/paniclecraftclient dev blockdamage add [<damage>] [<pos>]",
+  "commands.paniclecraftclient.dev.blockdamage.add.added": "Damage %d added at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.add.updated": "Damage updated to %d at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.remove.usage": "/paniclecraftclient dev blockdamage remove [<pos>]",
+  "commands.paniclecraftclient.dev.blockdamage.remove.removed": "Damage removed at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.remove.none": "Nothing to remove at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.clear.usage": "/paniclecraftclient dev blockdamage clear",
+  "commands.paniclecraftclient.dev.blockdamage.clear.cleared": "Clear damage from %d blocks"
 }
