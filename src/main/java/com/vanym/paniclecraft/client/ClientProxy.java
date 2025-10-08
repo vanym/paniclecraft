@@ -75,9 +75,9 @@ public class ClientProxy extends CommonProxy {
             return;
         }
         if (this.enableSuggester.get()) {
-            MinecraftForge.EVENT_BUS.register(this.suggester);
+            this.suggester.register();
         } else {
-            MinecraftForge.EVENT_BUS.unregister(this.suggester);
+            this.suggester.unregister();
         }
     }
     
