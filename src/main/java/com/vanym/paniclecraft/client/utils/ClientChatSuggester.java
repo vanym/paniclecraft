@@ -1,6 +1,8 @@
 package com.vanym.paniclecraft.client.utils;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Predicate;
 
@@ -16,6 +18,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -25,7 +29,9 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,6 +43,18 @@ public class ClientChatSuggester {
     
     protected final CommandDispatcher<CommandSource> dispatcher;
     protected final Predicate<String> trigger;
+    
+    protected final Object subscriber = new Object() {
+        @SubscribeEvent(priority = EventPriority.LOW)
+        protected void chatKeyPressed(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
+            ClientChatSuggester.this.chatKeyPressed(event);
+        }
+        
+        @SubscribeEvent
+        protected void chatRenderTick(TickEvent.RenderTickEvent event) {
+            ClientChatSuggester.this.chatRenderTick(event);
+        }
+    };
     
     public ClientChatSuggester(CommandDispatcher<CommandSource> dispatcher) {
         this(dispatcher, t->true);
@@ -53,20 +71,45 @@ public class ClientChatSuggester {
         this.trigger = Objects.requireNonNull(trigger);
     }
     
-    @SubscribeEvent(priority = EventPriority.LOW)
+    public void register() {
+        MinecraftForge.EVENT_BUS.register(this);
+        if (Minecraft.getInstance().screen instanceof ChatScreen) {
+            MinecraftForge.EVENT_BUS.register(this.subscriber);
+        }
+    }
+    
+    public void unregister() {
+        MinecraftForge.EVENT_BUS.unregister(this);
+        MinecraftForge.EVENT_BUS.unregister(this.subscriber);
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+    protected void openScreen(GuiOpenEvent event) {
+        Screen screen;
+        if (event.isCanceled()) {
+            screen = Minecraft.getInstance().screen;
+        } else {
+            screen = event.getGui();
+        }
+        if (screen instanceof ChatScreen) {
+            MinecraftForge.EVENT_BUS.register(this.subscriber);
+        } else {
+            MinecraftForge.EVENT_BUS.unregister(this.subscriber);
+        }
+    }
+    
     protected void chatKeyPressed(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
         Screen screen = Minecraft.getInstance().screen;
         if (!(screen instanceof ChatScreen)) {
             return;
         }
         ChatScreen chat = (ChatScreen)screen;
-        if (chat.suggestions == null && event.getKeyCode() == GLFW.GLFW_KEY_TAB) {
+        if (event.getKeyCode() == GLFW.GLFW_KEY_TAB) {
             this.lastApplied.remove(chat);
         }
     }
     
-    @SubscribeEvent
-    protected void chatTick(TickEvent.ClientTickEvent event) {
+    protected void chatRenderTick(TickEvent.RenderTickEvent event) {
         if (event.phase != TickEvent.Phase.START) {
             return;
         }
@@ -97,7 +140,8 @@ public class ClientChatSuggester {
     protected static void applySuggestions(
             ChatScreen chat,
             CommandDispatcher<CommandSource> dispatcher) {
-        String text = chat.input.getValue();
+        String fullinput = chat.input.getValue();
+        String text = fullinput;
         if (chat.suggestions != null) {
             ChatScreen.SuggestionsList sugsList = chat.suggestions;
             text = text.substring(0, sugsList.suggestions.getRange().getEnd());
@@ -111,15 +155,41 @@ public class ClientChatSuggester {
         SuggestionContext<CommandSource> suggContext = context.findSuggestionContext(cursor);
         CommandNode<CommandSource> parent = suggContext.parent;
         int start = Math.min(suggContext.startPos, cursor);
-        String input = pr.getReader().getString().substring(0, cursor);
+        String input = fullinput.substring(0, cursor);
+        boolean fullmatch = false;
         for (CommandNode<CommandSource> node : parent.getChildren()) {
             if (!node.canUse(source)) {
                 continue;
             }
+            SuggestionsBuilder suggsb = new SuggestionsBuilder(input, start);
+            fullmatch = fullmatch ||
+                Optional.of(node)
+                        .filter(LiteralCommandNode.class::isInstance)
+                        .map(LiteralCommandNode.class::cast)
+                        .map(LiteralCommandNode::getLiteral)
+                        .filter(fullinput.substring(start)::equalsIgnoreCase)
+                        .isPresent();
             try {
-                node.listSuggestions(context.build(input), new SuggestionsBuilder(input, start))
+                node.listSuggestions(context.build(input), suggsb)
                     .thenAccept((suggs)->addSuggestions(chat, suggs));
             } catch (CommandSyntaxException e) {
+            }
+        }
+        if (fullmatch || !(parent instanceof RootCommandNode)) {
+            chat.currentParse = null;
+            chat.commandUsage.clear();
+            chat.commandUsageWidth = 0;
+            int screenX = chat.input.getScreenX(suggContext.startPos);
+            Map<CommandNode<CommandSource>, String> map = dispatcher.getSmartUsage(parent, source);
+            for (Map.Entry<CommandNode<CommandSource>, String> entry : map.entrySet()) {
+                if (entry.getKey() instanceof LiteralCommandNode) {
+                    continue;
+                }
+                chat.commandUsage.add(entry.getValue());
+                chat.commandUsageWidth = Math.max(chat.commandUsageWidth,
+                                                  chat.font.width(entry.getValue()));
+                chat.commandUsagePosition =
+                        MathHelper.clamp(screenX, 0, chat.width - chat.commandUsageWidth);
             }
         }
     }
