@@ -9,17 +9,17 @@ cd paniclecraft-1.7.10
 
 #### Building using gradle with java 8
 ```
-./gradlew jar
+./gradlew assemble
 ```
 
-Jar file can be found in `build/libs` directory
+Jar files can be found in `build/libs` directory
 
 #### Building using docker
 ```
 sudo ./build-docker.sh
 ```
 
-Jar file can be found in `out` directory
+Jar files can be found in `out` directory
 
 Docker builds intended to be deterministic/reproducible
 

@@ -7,7 +7,7 @@ Builder image contains all necessary dependencies for offline building
 sudo ./build.sh
 ```
 
-Jar file can be found in `out` directory in the project root
+Jar files can be found in `out` directory in the project root
 
 Docker builds intended to be deterministic/reproducible
 
@@ -16,4 +16,4 @@ Docker builds intended to be deterministic/reproducible
 sudo ./place-dependencies.sh
 ```
 
-Dependencies will be placed in `~/.gradle/caches`, so `./gradlew --offline jar` could be ran from the project root
+Dependencies will be placed in `~/.gradle/caches`, so `./gradlew --offline assemble` could be ran from the project root

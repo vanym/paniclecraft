@@ -349,39 +349,36 @@ def getManifestAttributes() {
 }
 
 task sourcesJar(type: Jar) {
+    classifier = 'sources'
     from(sourceSets.main.allSource)
+    from(sourceSets.main.output) {
+        include 'assets/' + modId + '/lang/*.lang'
+    }
     from(file("$projectDir/LICENSE"))
-    getArchiveClassifier().set('sources')
 }
 
-task devJar(type: Jar) {
+task deobfJar(type: Jar) {
+    classifier = 'deobf'
     from sourceSets.main.output
-    getArchiveClassifier().set("dev")
-
     manifest {
         attributes(getManifestAttributes())
     }
 }
 
 task apiJar(type: Jar) {
+    classifier = 'api'
     from(sourceSets.main.allSource) {
         include modGroupPath + "/" + apiPackagePath + '/**'
     }
-
     from(sourceSets.main.output) {
         include modGroupPath + "/" + apiPackagePath + '/**'
     }
-
-    from(sourceSets.main.resources.srcDirs) {
-        include("LICENSE")
-    }
-
-    getArchiveClassifier().set('api')
+    from(file("$projectDir/LICENSE"))
 }
 
 artifacts {
     archives sourcesJar
-    archives devJar
+    archives deobfJar
     if (apiPackage) {
         archives apiJar
     }
