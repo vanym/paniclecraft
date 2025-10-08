@@ -54,6 +54,11 @@ checkPropertyExists("gradle_token_version")
 checkPropertyExists("gradle_token_group_name")
 checkPropertyExists("development_environment_username")
 
+propertyDefaultIfUnset("api_package", "")
+
+def mod_group_path = mod_group.toString().replaceAll("\\.", "/")
+def api_package_path = api_package.toString().replaceAll("\\.", "/")
+
 String identified_version
 String version_override = System.getenv("VERSION") ?: null
 boolean explicit_version
@@ -131,7 +136,7 @@ runServer {
 
 jar {
     manifest {
-        attributes 'FMLAT': mod_id + '_at.cfg'
+        attributes(getManifestAttributes())
     }
 }
 
@@ -219,6 +224,53 @@ processResources {
         fileTree(dir: destinationDir, include: 'assets/' + mod_id + '/lang/*.json').each { file ->
             file.delete()
         }
+    }
+}
+
+def getManifestAttributes() {
+    def manifestAttributes = [:]
+    manifestAttributes += ["FMLAT": "${mod_id}_at.cfg"]
+    return manifestAttributes
+}
+
+sourceJar {
+    enabled = false
+    dependsOn.clear()
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from(sourceSets.main.allSource)
+    from(sourceSets.main.output) {
+        include 'assets/' + mod_id + '/lang/*.lang'
+    }
+    from(file("$projectDir/LICENSE"))
+}
+
+task deobfJar(type: Jar) {
+    classifier = 'deobf'
+    from sourceSets.main.output
+    manifest {
+        attributes(getManifestAttributes())
+    }
+}
+
+task apiJar(type: Jar) {
+    classifier = 'api'
+    from(sourceSets.main.allSource) {
+        include mod_group_path + "/" + api_package_path + '/**'
+    }
+    from(sourceSets.main.output) {
+        include mod_group_path + "/" + api_package_path + '/**'
+    }
+    from(file("$projectDir/LICENSE"))
+}
+
+artifacts {
+    archives sourcesJar
+    archives deobfJar
+    if (api_package) {
+        archives apiJar
     }
 }
 
