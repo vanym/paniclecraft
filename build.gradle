@@ -44,8 +44,13 @@ checkPropertyExists("forge_version")
 checkPropertyExists("forge_version_range")
 checkPropertyExists("development_environment_username")
 
+propertyDefaultIfUnset("api_package", "")
+
 propertyDefaultIfUnset("mcp_mappings_channel", "official")
 propertyDefaultIfUnset("mcp_mappings_version", "${minecraft_version}")
+
+def mod_group_path = mod_group.toString().replaceAll("\\.", "/")
+def api_package_path = api_package.toString().replaceAll("\\.", "/")
 
 String identified_version
 String version_override = System.getenv("VERSION") ?: null
@@ -120,6 +125,39 @@ processResources {
     }
     filesMatching("pack.mcmeta") {
         expand 'mod_id': mod_id
+    }
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from(sourceSets.main.allSource)
+    from(sourceSets.main.output) {
+        include 'assets/' + mod_id + '/lang/*.lang'
+    }
+    from(file("$projectDir/LICENSE"))
+}
+
+task deobfJar(type: Jar) {
+    archiveClassifier = 'deobf'
+    from sourceSets.main.output
+}
+
+task apiJar(type: Jar) {
+    archiveClassifier = 'api'
+    from(sourceSets.main.allSource) {
+        include mod_group_path + "/" + api_package_path + '/**'
+    }
+    from(sourceSets.main.output) {
+        include mod_group_path + "/" + api_package_path + '/**'
+    }
+    from(file("$projectDir/LICENSE"))
+}
+
+artifacts {
+    archives sourcesJar
+    archives deobfJar
+    if (api_package) {
+        archives apiJar
     }
 }
 
