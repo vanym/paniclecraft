@@ -23,6 +23,7 @@ public class ClientProxy extends CommonProxy {
     
     @Override
     public void preInit(ModConfig config) {
+        super.preInit(config);
         this.command = new ClientCommandMod3();
         this.command.addSubCommand(new CommandVersion());
         if (Core.instance.devCommand.isPresent()) {
@@ -37,16 +38,20 @@ public class ClientProxy extends CommonProxy {
     
     @Override
     public void init(ModConfig config) {
+        super.init(config);
         for (IModComponent component : Core.instance.getComponents()) {
             component.initClient(config);
         }
     }
     
     @Override
-    public void postInit(ModConfig config) {}
+    public void postInit(ModConfig config) {
+        super.postInit(config);
+    }
     
     @Override
     public void configChanged(ModConfig config) {
+        super.configChanged(config);
         for (IModComponent component : Core.instance.getComponents()) {
             component.configChangedClient(config);
         }
