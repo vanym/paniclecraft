@@ -1,5 +1,8 @@
 // minecraftforge 1.12.2 mod dev
 
+import net.minecraftforge.gradle.delayed.*
+import net.minecraftforge.gradle.tasks.user.reobf.*
+
 buildscript {
     repositories {
         maven {
@@ -117,6 +120,21 @@ minecraft {
 
 apply from: 'dependencies.gradle'
 
+sourceSets {
+    devmode {
+        compileClasspath += sourceSets.main.compileClasspath
+        compileClasspath += sourceSets.main.output
+        java { setSrcDirs(['src/dev/java']) }
+        resources { setSrcDirs(['src/dev/resources']) }
+    }
+}
+
+sourceSets.devmode.resources.matching {
+    include 'META-INF/*_at.cfg'
+}.each { at->
+    minecraft.atSource at
+}
+
 runClient {
     if (development_environment_username) {
         arguments += [
@@ -132,6 +150,30 @@ runClient {
 runServer {
     args(arguments)
     jvmArgs(jvmArguments)
+}
+
+task runClientDev {
+    dependsOn 'devmodeJar'
+    doFirst {
+        tasks.named('runClient').configure {
+            dependsOn -= tasks.jar
+            classpath = classpath.filter { it != tasks.jar.archivePath }
+            classpath file(tasks.devmodeJar.archivePath)
+        }
+    }
+    finalizedBy 'runClient'
+}
+
+task runServerDev {
+    dependsOn 'devmodeJar'
+    doFirst {
+        tasks.named('runServer').configure {
+            dependsOn -= tasks.jar
+            classpath = classpath.filter { it != tasks.jar.archivePath }
+            classpath file(tasks.devmodeJar.archivePath)
+        }
+    }
+    finalizedBy 'runServer'
 }
 
 jar {
@@ -181,22 +223,8 @@ processResources {
         include 'assets/' + mod_id + '/lang/*.json'
 
         eachFile { fileInfo ->
-            def matcher = fileInfo.name =~ /^([a-zA-Z0-9]+)_([a-zA-Z0-9]+).json$/
-            matcher.find()
-            def language = matcher.group(1)
-            def region = matcher.group(2)
-            def fileName = language + '_' + region.toUpperCase() + '.lang'
-            def filePath = fileInfo.relativePath.parent.append(true, fileName)
-            def langFile = new File(destinationDir, filePath.pathString)
-            def translation = new groovy.json.JsonSlurper().parse(file)
-            langFile.withWriter { wr ->
-                translation.each { e ->
-                    wr.println e.key + '=' + e.value
-                }
-            }
-            fileInfo.exclude()
-            def jsonFile = new File(destinationDir, fileInfo.path)
-            jsonFile.text = '{}\n'
+            def outDir = fileInfo.relativePath.parent.getFile(destinationDir)
+            convertJsonLangFile(file, outDir)
         }
     }
 
@@ -227,6 +255,69 @@ processResources {
     }
 }
 
+task combineDevmodeResourceSources(type: Copy) {
+    destinationDir = new File(project.buildDir, "combinedResources/devmode")
+    doFirst {
+        delete destinationDir
+    }
+    from(sourceSets.devmode.resources.srcDirs) {
+        include 'assets/' + mod_id + '/lang/*.json'
+
+        eachFile { fileInfo ->
+            def outDir = fileInfo.relativePath.parent.getFile(destinationDir)
+            def mainFile = sourceSets.main.resources.find{file->file.path.endsWith(fileInfo.sourcePath)}
+            if (mainFile != null) {
+                def outJsonFile = new File(destinationDir, fileInfo.path)
+                outJsonFile.getParentFile().mkdirs()
+                combineJsonLangFiles(mainFile, file, outJsonFile)
+                fileInfo.exclude()
+            }
+        }
+    }
+    from(sourceSets.devmode.resources.srcDirs) {
+        include 'META-INF/*_at.cfg'
+
+        eachFile { fileInfo ->
+            def mainFile = sourceSets.main.resources.find{file->file.path.endsWith(fileInfo.sourcePath)}
+            if (mainFile != null) {
+                def outJsonFile = new File(destinationDir, fileInfo.path)
+                outJsonFile.getParentFile().mkdirs()
+                outJsonFile.text = mainFile.text + '\n' + file.text
+                fileInfo.exclude()
+            }
+        }
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        include 'assets/' + mod_id + '/lang/*.json'
+        include 'META-INF/*_at.cfg'
+        eachFile { fileInfo -> fileInfo.exclude() }
+    }
+}
+
+processDevmodeResources {
+    dependsOn 'processResources'
+    dependsOn 'combineDevmodeResourceSources'
+
+    from(tasks.combineDevmodeResourceSources.destinationDir) {
+        include 'assets/' + mod_id + '/lang/*.json'
+
+        eachFile { fileInfo ->
+            def outDir = fileInfo.relativePath.parent.getFile(destinationDir)
+            convertJsonLangFile(file, outDir)
+        }
+    }
+
+    from(tasks.combineDevmodeResourceSources.destinationDir) {
+        include 'META-INF/*_at.cfg'
+    }
+
+    doLast {
+        fileTree(dir: destinationDir, include: 'assets/' + mod_id + '/lang/*.json').each { file ->
+            file.delete()
+        }
+    }
+}
+
 def getManifestAttributes() {
     def manifestAttributes = [:]
     manifestAttributes += ["FMLAT": "${mod_id}_at.cfg"]
@@ -240,15 +331,17 @@ sourceJar {
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
-    from(sourceSets.main.allSource)
+    from sourceSets.main.allSource
+    dependsOn 'processResources'
     from(sourceSets.main.output) {
         include 'assets/' + mod_id + '/lang/*.lang'
     }
-    from(file("$projectDir/LICENSE"))
+    from file("$projectDir/LICENSE")
 }
 
 task deobfJar(type: Jar) {
     classifier = 'deobf'
+    dependsOn 'processResources'
     from sourceSets.main.output
     manifest {
         attributes(getManifestAttributes())
@@ -263,7 +356,70 @@ task apiJar(type: Jar) {
     from(sourceSets.main.output) {
         include mod_group_path + "/" + api_package_path + '/**'
     }
-    from(file("$projectDir/LICENSE"))
+    from file("$projectDir/LICENSE")
+}
+
+task devmodeDeobfJar(type: Jar) {
+    classifier = 'devmode-deobf'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'processDevmodeResources'
+    from(sourceSets.devmode.output) {}
+    dependsOn 'processResources'
+    from(sourceSets.main.output) {}
+    manifest {
+        attributes(getManifestAttributes())
+    }
+}
+
+task devmodeJar(type: Jar) {
+    classifier = 'devmode'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'processDevmodeResources'
+    from(sourceSets.devmode.output) {}
+    dependsOn 'processResources'
+    from(sourceSets.main.output) {}
+    manifest {
+        attributes(getManifestAttributes())
+    }
+    finalizedBy 'reobfDevmodeJar'
+}
+
+reobf.create('devmodeJar')
+reobfDevmodeJar {
+    finalizedBy 'determinizeDevmodeJar'
+}
+
+task determinizeDevmodeJar(type: Zip) {
+    dependsOn reobfDevmodeJar
+    def jarPath = reobfDevmodeJar.jar
+    from zipTree(jarPath)
+    archiveName = jarPath.name
+    destinationDir = temporaryDir
+    doLast {
+        copy {
+            from archivePath
+            into jarPath.parent
+        }
+        archivePath.delete()
+    }
+}
+
+task devmodeSourcesJar(type: Jar) {
+    classifier = 'devmode-sources'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'combineDevmodeResourceSources'
+    from(tasks.combineDevmodeResourceSources.destinationDir) {}
+    from(sourceSets.devmode.allSource) {}
+    from(sourceSets.main.allSource) {}
+    dependsOn 'processDevmodeResources'
+    from(sourceSets.devmode.output) {
+        include 'assets/' + mod_id + '/lang/*.lang'
+    }
+    dependsOn 'processResources'
+    from(sourceSets.main.output) {
+        include 'assets/' + mod_id + '/lang/*.lang'
+    }
+    from file("$projectDir/LICENSE")
 }
 
 artifacts {
@@ -272,6 +428,33 @@ artifacts {
     if (api_package) {
         archives apiJar
     }
+    archives devmodeJar
+    archives devmodeDeobfJar
+    archives devmodeSourcesJar
+}
+
+// Helper methods
+
+def convertJsonLangFile(File jsonFile, File outDir) {
+    def matcher = jsonFile.name =~ /^([a-zA-Z0-9]+)_([a-zA-Z0-9]+).json$/
+    matcher.find()
+    def language = matcher.group(1)
+    def region = matcher.group(2)
+    def fileName = language + '_' + region.toUpperCase() + '.lang'
+    def langFile = new File(outDir, fileName)
+    def translation = new groovy.json.JsonSlurper().parse(jsonFile)
+    langFile.withWriter { wr ->
+        translation.each { e ->
+            wr.println e.key + '=' + e.value
+        }
+    }
+}
+
+def combineJsonLangFiles(File firstFile, File secondFile, File outFile) {
+    outFile.text = (
+        firstFile.text.replaceAll('\\s*}$', ',') +
+        secondFile.text.replaceAll('^\\{', '')
+    ).replaceAll(',(\\s*)}$', '$1}')
 }
 
 def checkPropertyExists(String propertyName) {
