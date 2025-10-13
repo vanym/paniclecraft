@@ -51,6 +51,7 @@ public class ClientProxy extends CommonProxy {
     
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
+        super.init(configBuilders);
         ForgeConfigSpec.Builder builder = configBuilders.get(ModConfig.Type.CLIENT);
         builder.push("general");
         this.enableSuggester =

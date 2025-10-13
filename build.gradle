@@ -99,6 +99,47 @@ dependencies {
 
 apply from: 'dependencies.gradle'
 
+sourceSets {
+    devmode {
+        compileClasspath += sourceSets.main.compileClasspath
+        compileClasspath += sourceSets.main.output
+        java { setSrcDirs(['src/dev/java']) }
+        resources { setSrcDirs(['src/dev/resources']) }
+    }
+    devmodeCombined {
+        compileClasspath = sourceSets.main.compileClasspath
+        runtimeClasspath = sourceSets.main.runtimeClasspath
+        java { setSrcDirs([]) }
+        resources { setSrcDirs([]) }
+    }
+}
+
+sourceSets.devmode.resources.matching {
+    include 'META-INF/accesstransformer.cfg'
+}.each { at->
+    minecraft.accessTransformers at
+}
+
+task runClientDev {
+    dependsOn 'devmodeCombinedClasses'
+    doFirst {
+        minecraft.runs.client {
+            setSources([sourceSets.devmodeCombined])
+        }
+    }
+    finalizedBy 'runClient'
+}
+
+task runServerDev {
+    dependsOn 'devmodeCombinedClasses'
+    doFirst {
+        minecraft.runs.client {
+            setSources([sourceSets.devmodeCombined])
+        }
+    }
+    finalizedBy 'runServer'
+}
+
 jar.finalizedBy('reobfJar')
 
 tasks.withType(AbstractArchiveTask) {
@@ -128,17 +169,74 @@ processResources {
     }
 }
 
+processDevmodeResources {
+    dependsOn 'processResources'
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    from(sourceSets.devmode.resources.srcDirs) {
+        include 'assets/' + mod_id + '/lang/*.json'
+
+        eachFile { fileInfo ->
+            def outDir = fileInfo.relativePath.parent.getFile(destinationDir)
+            def mainFile = sourceSets.main.resources.find{file->file.path.endsWith(fileInfo.sourcePath)}
+            if (mainFile != null) {
+                def outJsonFile = new File(destinationDir, fileInfo.path)
+                outJsonFile.getParentFile().mkdirs()
+                combineJsonLangFiles(mainFile, file, outJsonFile)
+                fileInfo.exclude()
+            }
+        }
+    }
+    from(sourceSets.devmode.resources.srcDirs) {
+        include 'META-INF/accesstransformer.cfg'
+
+        eachFile { fileInfo ->
+            def mainFile = sourceSets.main.resources.find{file->file.path.endsWith(fileInfo.sourcePath)}
+            if (mainFile != null) {
+                def outJsonFile = new File(destinationDir, fileInfo.path)
+                outJsonFile.getParentFile().mkdirs()
+                outJsonFile.text = mainFile.text + '\n' + file.text
+                fileInfo.exclude()
+            }
+        }
+    }
+}
+
+tasks.devmodeCombinedClasses.finalizedBy 'devmodeCombinedClassesCopy'
+task devmodeCombinedClassesCopy(type: Copy) {
+    destinationDir = sourceSets.devmodeCombined.output.classesDirs.singleFile
+    doFirst {
+        delete destinationDir
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'devmodeClasses'
+    from(sourceSets.devmode.output.classesDirs) {}
+    dependsOn 'classes'
+    from(sourceSets.main.output.classesDirs) {}
+}
+
+processDevmodeCombinedResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'processDevmodeResources'
+    from(sourceSets.devmode.output.resourcesDir) {}
+    dependsOn 'processResources'
+    from(sourceSets.main.output.resourcesDir) {}
+}
+
 task sourcesJar(type: Jar) {
     archiveClassifier = 'sources'
-    from(sourceSets.main.allSource)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'processResources'
     from(sourceSets.main.output) {
-        include 'assets/' + mod_id + '/lang/*.lang'
+        include 'META-INF/mods.toml'
     }
-    from(file("$projectDir/LICENSE"))
+    from(sourceSets.main.allSource) {}
+    from file("$projectDir/LICENSE")
 }
 
 task deobfJar(type: Jar) {
     archiveClassifier = 'deobf'
+    dependsOn 'processResources'
     from sourceSets.main.output
 }
 
@@ -150,7 +248,45 @@ task apiJar(type: Jar) {
     from(sourceSets.main.output) {
         include mod_group_path + "/" + api_package_path + '/**'
     }
-    from(file("$projectDir/LICENSE"))
+    from file("$projectDir/LICENSE")
+}
+
+task devmodeDeobfJar(type: Jar) {
+    archiveClassifier = 'devmode-deobf'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'processDevmodeResources'
+    from(sourceSets.devmode.output) {}
+    dependsOn 'processResources'
+    from(sourceSets.main.output) {}
+}
+
+task devmodeJar(type: Jar) {
+    archiveClassifier = 'devmode'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'processDevmodeResources'
+    from(sourceSets.devmode.output) {}
+    dependsOn 'processResources'
+    from(sourceSets.main.output) {}
+    finalizedBy 'reobfDevmodeJar'
+}
+
+reobf.create('devmodeJar')
+
+task devmodeSourcesJar(type: Jar) {
+    archiveClassifier = 'devmode-sources'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn 'processDevmodeResources'
+    from(sourceSets.devmode.output) {
+        include 'assets/' + mod_id + '/lang/*.json'
+        include 'META-INF/accesstransformer.cfg'
+    }
+    dependsOn 'processResources'
+    from(sourceSets.main.output) {
+        include 'META-INF/mods.toml'
+    }
+    from(sourceSets.devmode.allSource) {}
+    from(sourceSets.main.allSource) {}
+    from file("$projectDir/LICENSE")
 }
 
 artifacts {
@@ -159,6 +295,18 @@ artifacts {
     if (api_package) {
         archives apiJar
     }
+    archives devmodeJar
+    archives devmodeDeobfJar
+    archives devmodeSourcesJar
+}
+
+// Helper methods
+
+def combineJsonLangFiles(File firstFile, File secondFile, File outFile) {
+    outFile.text = (
+        firstFile.text.replaceAll('\\s*}$', ',') +
+        secondFile.text.replaceAll('^\\{', '')
+    ).replaceAll(',(\\s*)}$', '$1}')
 }
 
 def checkPropertyExists(String propertyName) {
