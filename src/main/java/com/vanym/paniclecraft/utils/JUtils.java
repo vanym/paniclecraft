@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class JUtils {
@@ -57,13 +58,17 @@ public class JUtils {
         }
     }
     
+    public static <T> T call(Callable<T> action) {
+        try {
+            return action.call();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public static <T> T callIf(boolean doCall, Callable<T> action) {
         if (doCall) {
-            try {
-                return action.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return call(action);
         }
         return null;
     }
@@ -96,6 +101,10 @@ public class JUtils {
             }
         }
         return Optional.empty();
+    }
+    
+    public static <T> Predicate<T> predicate(Supplier<Boolean> sup) {
+        return o->sup.get();
     }
     
     @FunctionalInterface
