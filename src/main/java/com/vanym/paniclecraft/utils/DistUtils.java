@@ -35,4 +35,12 @@ public class DistUtils {
     public static <T> T scall(Supplier<Callable<T>> toCall) {
         return call(Dist.DEDICATED_SERVER, toCall);
     }
+    
+    public static <T> T call(Supplier<Callable<T>> clientCall, Supplier<Callable<T>> serverCall) {
+        if (get() == Dist.CLIENT) {
+            return JUtils.call(()->clientCall.get().call());
+        } else {
+            return JUtils.call(()->serverCall.get().call());
+        }
+    }
 }
