@@ -15,5 +15,5 @@ docker run --rm -it \
     --tmpfs /root/src/build \
     -v "$ROOT/out:/root/src/build/libs:rw" \
     --tmpfs /root/src/.gradle \
-    ghcr.io/vanym/paniclecraft/builder:"$TAG" ./gradlew --offline jar --no-daemon
+    ghcr.io/vanym/paniclecraft/builder:"$TAG" ./gradlew --offline assemble --no-daemon
 chown --reference=. -R "$ROOT/out"

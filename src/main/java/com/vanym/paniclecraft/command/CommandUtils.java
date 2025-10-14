@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.vanym.paniclecraft.DEF;
@@ -31,6 +32,10 @@ public class CommandUtils {
             new SimpleCommandExceptionType(
                     new TranslationTextComponent(
                             String.format("commands.%s.exception.nopainting", DEF.MOD_ID)));
+    
+    public static CommandExceptionType unknownCommandType() {
+        return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand();
+    }
     
     public static String makeGiveCommand(String player, ItemStack stack) {
         return String.format("/give %s %s%s %d",
