@@ -1,10 +1,7 @@
 package com.vanym.paniclecraft.client;
 
-import java.util.Optional;
-
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.command.ClientCommandMod3;
-import com.vanym.paniclecraft.command.CommandDev;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CommonProxy;
@@ -19,17 +16,12 @@ import net.minecraftforge.client.ClientCommandHandler;
 public class ClientProxy extends CommonProxy {
     
     public ClientCommandMod3 command;
-    public Optional<CommandDev> devCommand = Optional.empty();
     
     @Override
     public void preInit(ModConfig config) {
         super.preInit(config);
         this.command = new ClientCommandMod3();
         this.command.addSubCommand(new CommandVersion());
-        if (Core.instance.devCommand.isPresent()) {
-            this.devCommand = Optional.of(new CommandDev());
-            this.command.addSubCommand(this.devCommand.get());
-        }
         ClientCommandHandler.instance.registerCommand(this.command);
         for (IModComponent component : Core.instance.getComponents()) {
             component.preInitClient(config);
@@ -60,10 +52,5 @@ public class ClientProxy extends CommonProxy {
     @Override
     public CommandMod3 getCommand() {
         return this.command;
-    }
-    
-    @Override
-    public Optional<CommandDev> getDevCommand() {
-        return this.devCommand;
     }
 }

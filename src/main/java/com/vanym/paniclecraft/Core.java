@@ -5,11 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.vanym.paniclecraft.block.IMod3Block;
-import com.vanym.paniclecraft.command.CommandDev;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CreativeTabMod3;
@@ -94,7 +92,6 @@ public class Core implements IGuiHandler {
     public CreativeTabMod3 tab;
     
     public CommandMod3 command;
-    public Optional<CommandDev> devCommand = Optional.empty();
     
     public ModConfig config;
     
@@ -143,15 +140,6 @@ public class Core implements IGuiHandler {
         
         // Loading protocol versions key/value map by checking self version
         ProtocolVersion.getSupposedVersion(Version.getVersion());
-        
-        if (Optional.of(this.config)
-                    .map(c->c.getCategory("general"))
-                    .map(c->c.get("devMode"))
-                    .map(p->p.getBoolean(false))
-                    .orElse(false)) {
-            this.devCommand = Optional.of(new CommandDev());
-            this.command.addSubCommand(this.devCommand.get());
-        }
         
         if (this.config.getBoolean("versionCheck", "general", true, "")) {
             Version.startVersionCheck();
