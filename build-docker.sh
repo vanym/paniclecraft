@@ -14,5 +14,5 @@ docker run --rm -it \
     --tmpfs /root/src/.gradle \
     -v "$DEPS_VOLUME":/root/.gradle/caches \
     -v "$DEPS_VOLUME":/root/.gradle/wrapper \
-    openjdk:8u342-jdk-bullseye ./gradlew jar --no-daemon
+    openjdk:8u342-jdk-bullseye ./gradlew assemble --no-daemon
 chown --reference=. -R "$PWD/out"

@@ -2,7 +2,7 @@ FROM openjdk:8u342-jdk-bullseye AS depser
 COPY . /root/src
 WORKDIR /root/src
 SHELL ["/bin/bash", "-c"]
-RUN ./gradlew jar --no-daemon && \
+RUN ./gradlew assemble --no-daemon && \
     ./gradlew eclipse --no-daemon && \
     ./gradlew idea --no-daemon && \
     shopt -s extglob && \

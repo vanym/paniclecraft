@@ -9,13 +9,14 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.command.ClientCommandMod3;
 import com.vanym.paniclecraft.client.utils.ChatScreenUtils;
 import com.vanym.paniclecraft.client.utils.ClientChatSuggester;
-import com.vanym.paniclecraft.command.CommandDev;
 import com.vanym.paniclecraft.command.CommandMod3;
+import com.vanym.paniclecraft.command.CommandUtils;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CommonProxy;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandSource;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientChatEvent;
@@ -32,7 +33,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class ClientProxy extends CommonProxy {
     
     public final ClientCommandMod3 command = new ClientCommandMod3();
-    public final CommandDev devCommand = new CommandDev();
     
     protected final CommandDispatcher<CommandSource> commandDispatcher = new CommandDispatcher<>();
     
@@ -42,7 +42,6 @@ public class ClientProxy extends CommonProxy {
     
     public ClientProxy() {
         this.command.addSubCommand(new CommandVersion());
-        this.command.addSubCommand(this.devCommand);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::setup);
         bus.addListener(EventPriority.HIGH, this::configChanged);
@@ -51,6 +50,7 @@ public class ClientProxy extends CommonProxy {
     
     @Override
     public void init(Map<ModConfig.Type, ForgeConfigSpec.Builder> configBuilders) {
+        super.init(configBuilders);
         ForgeConfigSpec.Builder builder = configBuilders.get(ModConfig.Type.CLIENT);
         builder.push("general");
         this.enableSuggester =
@@ -86,20 +86,19 @@ public class ClientProxy extends CommonProxy {
         if (!event.getOriginalMessage().startsWith("/")) {
             return;
         }
+        Minecraft mc = Minecraft.getInstance();
+        CommandSource source = mc.player.createCommandSourceStack();
         try {
-            Minecraft mc = Minecraft.getInstance();
-            CommandSource source = mc.player.createCommandSourceStack();
             this.commandDispatcher.execute(event.getOriginalMessage().substring(1), source);
-            event.setCanceled(true);
-            if (ChatScreenUtils.needToLogMessage()) {
-                mc.gui.getChat().addRecentChat(event.getOriginalMessage());
-            }
         } catch (CommandSyntaxException e) {
+            if (e.getCursor() <= 0 && e.getType() == CommandUtils.unknownCommandType()) {
+                return;
+            }
+            source.sendFailure(new StringTextComponent(e.getMessage()));
         }
-    }
-    
-    @Override
-    public CommandDev getDevCommand() {
-        return this.devCommand;
+        event.setCanceled(true);
+        if (ChatScreenUtils.needToLogMessage()) {
+            mc.gui.getChat().addRecentChat(event.getOriginalMessage());
+        }
     }
 }

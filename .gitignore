@@ -30,4 +30,5 @@ whitelist.json
 src/main/resources/mixins.*.json
 *.bat
 *.DS_Store
+*.launch
 !gradlew.bat
