@@ -153,13 +153,16 @@ tasks.withType(AbstractArchiveTask) {
     reproducibleFileOrder = true
 }
 
-processResources {
-    doFirst {
-        delete(
-            files("${buildDir}/resources/main/META-INF/mods.toml",
-                  "${buildDir}/resources/main/pack.mcmeta")
-        )
+task cleanModsToml(type: Delete) {
+    onlyIf {
+        targetFiles.singleFile.exists() &&
+          !targetFiles.singleFile.text.contains("version=\"${mod_version}\"")
     }
+    delete "${buildDir}/resources/main/META-INF/mods.toml"
+}
+
+processResources {
+    dependsOn 'cleanModsToml'
 
     exclude '.cache'
 
