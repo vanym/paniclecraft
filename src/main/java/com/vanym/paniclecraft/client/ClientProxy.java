@@ -9,7 +9,6 @@ import com.vanym.paniclecraft.DEF;
 import com.vanym.paniclecraft.client.command.ClientCommandMod3;
 import com.vanym.paniclecraft.client.utils.ChatScreenUtils;
 import com.vanym.paniclecraft.client.utils.ClientChatSuggester;
-import com.vanym.paniclecraft.command.CommandDev;
 import com.vanym.paniclecraft.command.CommandMod3;
 import com.vanym.paniclecraft.command.CommandVersion;
 import com.vanym.paniclecraft.core.CommonProxy;
@@ -32,7 +31,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class ClientProxy extends CommonProxy {
     
     public final ClientCommandMod3 command = new ClientCommandMod3();
-    public final CommandDev devCommand = new CommandDev();
     
     protected final CommandDispatcher<CommandSource> commandDispatcher = new CommandDispatcher<>();
     
@@ -42,7 +40,6 @@ public class ClientProxy extends CommonProxy {
     
     public ClientProxy() {
         this.command.addSubCommand(new CommandVersion());
-        this.command.addSubCommand(this.devCommand);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::setup);
         bus.addListener(EventPriority.HIGH, this::configChanged);
@@ -97,10 +94,5 @@ public class ClientProxy extends CommonProxy {
             }
         } catch (CommandSyntaxException e) {
         }
-    }
-    
-    @Override
-    public CommandDev getDevCommand() {
-        return this.devCommand;
     }
 }
