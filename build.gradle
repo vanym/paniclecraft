@@ -139,7 +139,7 @@ task runClientDev {
 task runServerDev {
     dependsOn 'devmodeCombinedClasses'
     doFirst {
-        minecraft.runs.client {
+        minecraft.runs.server {
             setSources([sourceSets.devmodeCombined])
         }
     }
