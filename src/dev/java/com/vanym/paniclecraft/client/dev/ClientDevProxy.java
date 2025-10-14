@@ -1,6 +1,7 @@
 package com.vanym.paniclecraft.client.dev;
 
 import com.vanym.paniclecraft.Core;
+import com.vanym.paniclecraft.client.command.dev.ClientCommandBlockDamage;
 import com.vanym.paniclecraft.command.dev.CommandDev;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.dev.CommonDevProxy;
@@ -24,6 +25,7 @@ public class ClientDevProxy extends CommonDevProxy {
         if (config.getBoolean("clientDevCommand", "devmode", true, "")) {
             Core.proxy.getCommand().addSubCommand(this.clientDevCommand);
         }
+        this.clientDevCommand.addSubCommand(new ClientCommandBlockDamage());
     }
     
     @Override

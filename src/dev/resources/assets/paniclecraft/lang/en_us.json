@@ -1,0 +1,10 @@
+{
+  "commands.paniclecraftclient.dev.blockdamage.add.usage": "/paniclecraftclient dev blockdamage add [<damage>] [<pos>]",
+  "commands.paniclecraftclient.dev.blockdamage.add.added": "Damage %d added at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.add.updated": "Damage updated to %d at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.remove.usage": "/paniclecraftclient dev blockdamage remove [<pos>]",
+  "commands.paniclecraftclient.dev.blockdamage.remove.removed": "Damage removed at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.remove.none": "Nothing to remove at %d %d %d",
+  "commands.paniclecraftclient.dev.blockdamage.clear.usage": "/paniclecraftclient dev blockdamage clear",
+  "commands.paniclecraftclient.dev.blockdamage.clear.cleared": "Clear damage from %d blocks"
+}
