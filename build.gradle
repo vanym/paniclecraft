@@ -1,8 +1,5 @@
 // minecraftforge 1.12.2 mod dev
 
-import net.minecraftforge.gradle.delayed.*
-import net.minecraftforge.gradle.tasks.user.reobf.*
-
 buildscript {
     repositories {
         maven {
@@ -39,6 +36,15 @@ if (project.file('.git/HEAD').isFile()) {
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+eclipse {
+    project {
+        buildCommands = []
+    }
+}
+
+tasks.eclipse.dependsOn setupDecompWorkspace
+tasks.idea.dependsOn setupDecompWorkspace
 
 if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
     throw new GradleException("This project requires Java 8, but it's running on " + JavaVersion.current())
