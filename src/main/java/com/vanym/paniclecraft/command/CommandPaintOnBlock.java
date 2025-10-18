@@ -1,5 +1,6 @@
 package com.vanym.paniclecraft.command;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import com.vanym.paniclecraft.Core;
@@ -10,11 +11,9 @@ import com.vanym.paniclecraft.utils.GeometryUtils;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
@@ -93,16 +92,7 @@ public class CommandPaintOnBlock extends TreeCommandBase {
         @Override
         public void execute(MinecraftServer server, ICommandSender sender, String[] args)
                 throws CommandException {
-            BlockPos pos;
-            if (args.length == 0) {
-                EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
-                RayTraceResult target = CommandUtils.rayTraceBlocks(player);
-                pos = target.getBlockPos();
-            } else if (args.length == 3) {
-                pos = parseBlockPos(sender, args, 0, true);
-            } else {
-                throw new WrongUsageException(this.getUsage(sender));
-            }
+            BlockPos pos = this.getBlockTarget(sender, Arrays.asList(args));
             EntityPaintOnBlock entityPOB =
                     EntityPaintOnBlock.getEntity(sender.getEntityWorld(), pos);
             if (entityPOB == null) {

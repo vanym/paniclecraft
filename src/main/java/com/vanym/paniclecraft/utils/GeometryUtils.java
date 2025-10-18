@@ -2,7 +2,6 @@ package com.vanym.paniclecraft.utils;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -152,7 +151,7 @@ public class GeometryUtils {
         return EnumFacing.getFacingFromVector((float)lookVec.x, (float)lookVec.y, (float)lookVec.z);
     }
     
-    public static RayTraceResult rayTraceBlocks(EntityPlayer player, double distance) {
+    public static RayTraceResult rayTraceBlocks(Entity player, double distance) {
         Vec3d pos = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
         Vec3d look = player.getLookVec();
         Vec3d posTo = pos.add(look.scale(distance));

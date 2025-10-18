@@ -12,7 +12,7 @@ import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -46,11 +46,20 @@ public class CommandUtils {
         }
     }
     
-    public static RayTraceResult rayTraceBlocks(EntityPlayer player) throws CommandException {
+    public static Entity getSenderAsEntity(ICommandSender sender) throws CommandException {
+        if (sender instanceof Entity) {
+            return (Entity)sender;
+        } else {
+            throw new CommandException(
+                    String.format("commands.%s.exception.playerless", DEF.MOD_ID));
+        }
+    }
+    
+    public static RayTraceResult rayTraceBlocks(Entity player) throws CommandException {
         return rayTraceBlocks(player, 6.0D);
     }
     
-    public static RayTraceResult rayTraceBlocks(EntityPlayer player, double distance)
+    public static RayTraceResult rayTraceBlocks(Entity player, double distance)
             throws CommandException {
         RayTraceResult target = GeometryUtils.rayTraceBlocks(player, distance);
         if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
@@ -60,7 +69,7 @@ public class CommandUtils {
     }
     
     public static Function<WorldPictureProvider, WorldPicturePoint> makeProviderRayTraceMapper(
-            EntityPlayer player) throws CommandException {
+            Entity player) throws CommandException {
         RayTraceResult target = rayTraceBlocks(player);
         return (provider)->new WorldPicturePoint(
                 provider,
@@ -70,7 +79,7 @@ public class CommandUtils {
     }
     
     public static Picture rayTracePicture(
-            EntityPlayer player,
+            Entity player,
             Stream<WorldPictureProvider> providers) throws CommandException {
         try {
             return providers.map(makeProviderRayTraceMapper(player))

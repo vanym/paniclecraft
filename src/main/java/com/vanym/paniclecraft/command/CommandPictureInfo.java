@@ -9,7 +9,7 @@ import com.vanym.paniclecraft.utils.SideUtils;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 
@@ -37,7 +37,7 @@ public class CommandPictureInfo extends CommandBase {
         if (args.length > 0) {
             throw new WrongUsageException(this.getUsage(sender));
         }
-        EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
+        Entity player = CommandUtils.getSenderAsEntity(sender);
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
         sender.sendMessage(new TextComponentString(
                 SideUtils.callSync(picture.syncObject(), picture::toString)));
