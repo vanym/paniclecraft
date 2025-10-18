@@ -12,7 +12,7 @@ import com.vanym.paniclecraft.utils.GeometryUtils;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.item.Item;
@@ -48,11 +48,20 @@ public class CommandUtils {
         }
     }
     
-    public static MovingObjectPosition rayTraceBlocks(EntityPlayer player) {
+    public static Entity getSenderAsEntity(ICommandSender sender) {
+        if (sender instanceof Entity) {
+            return (Entity)sender;
+        } else {
+            throw new CommandException(
+                    String.format("commands.%s.exception.playerless", DEF.MOD_ID));
+        }
+    }
+    
+    public static MovingObjectPosition rayTraceBlocks(Entity player) {
         return rayTraceBlocks(player, 6.0D);
     }
     
-    public static MovingObjectPosition rayTraceBlocks(EntityPlayer player, double distance) {
+    public static MovingObjectPosition rayTraceBlocks(Entity player, double distance) {
         MovingObjectPosition target = GeometryUtils.rayTraceBlocks(player, distance);
         if (target == null || target.typeOfHit != MovingObjectType.BLOCK) {
             throw new CommandException(String.format("commands.%s.exception.noblock", DEF.MOD_ID));
@@ -61,11 +70,11 @@ public class CommandUtils {
     }
     
     public static Function<WorldPictureProvider, WorldPicturePoint> makeProviderRayTraceMapper(
-            EntityPlayer player) {
+            Entity player) {
         MovingObjectPosition target = rayTraceBlocks(player);
         return (provider)->new WorldPicturePoint(
                 provider,
-                player.getEntityWorld(),
+                player.worldObj,
                 target.blockX,
                 target.blockY,
                 target.blockZ,
@@ -73,7 +82,7 @@ public class CommandUtils {
     }
     
     public static Picture rayTracePicture(
-            EntityPlayer player,
+            Entity player,
             Stream<WorldPictureProvider> providers) {
         try {
             return providers.map(makeProviderRayTraceMapper(player))

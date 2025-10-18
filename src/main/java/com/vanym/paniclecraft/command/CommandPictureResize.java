@@ -10,7 +10,7 @@ import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ChatComponentTranslation;
 
 public class CommandPictureResize extends CommandBase {
@@ -44,7 +44,7 @@ public class CommandPictureResize extends CommandBase {
         } else {
             throw new WrongUsageException(this.getCommandUsage(sender));
         }
-        EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
+        Entity player = CommandUtils.getSenderAsEntity(sender);
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
         ChatComponentTranslation success = new ChatComponentTranslation(
                 String.format("commands.%s.%s.success", DEF.MOD_ID, "pictureresize"),

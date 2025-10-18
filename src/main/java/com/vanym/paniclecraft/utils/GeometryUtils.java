@@ -1,6 +1,6 @@
 package com.vanym.paniclecraft.utils;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -110,7 +110,7 @@ public class GeometryUtils {
         return getDirectionRoration(yaw, pitch);
     }
     
-    public static MovingObjectPosition rayTraceBlocks(EntityPlayer player, double distance) {
+    public static MovingObjectPosition rayTraceBlocks(Entity player, double distance) {
         Vec3 pos = Vec3.createVectorHelper(player.posX,
                                            player.posY + player.getEyeHeight(),
                                            player.posZ);

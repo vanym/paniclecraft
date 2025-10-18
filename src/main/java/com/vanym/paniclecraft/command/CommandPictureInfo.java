@@ -8,7 +8,7 @@ import com.vanym.paniclecraft.utils.SideUtils;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ChatComponentText;
 
 public class CommandPictureInfo extends CommandBase {
@@ -34,7 +34,7 @@ public class CommandPictureInfo extends CommandBase {
         if (args.length > 0) {
             throw new WrongUsageException(this.getCommandUsage(sender));
         }
-        EntityPlayerMP player = CommandUtils.getSenderAsPlayer(sender);
+        Entity player = CommandUtils.getSenderAsEntity(sender);
         Picture picture = CommandUtils.rayTracePicture(player, Arrays.stream(this.providers));
         sender.addChatMessage(new ChatComponentText(
                 SideUtils.callSync(picture.syncObject(), picture::toString)));

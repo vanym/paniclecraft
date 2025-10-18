@@ -6,12 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import com.vanym.paniclecraft.DEF;
-
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -60,11 +57,7 @@ public abstract class CommandBase extends net.minecraft.command.CommandBase {
             ICommandSender sender,
             List<String> args) {
         if (args.isEmpty()) {
-            if (!(sender instanceof EntityPlayer)) {
-                throw new CommandException(
-                        String.format("commands.%s.exception.playerless", DEF.MOD_ID));
-            }
-            EntityPlayer player = (EntityPlayer)sender;
+            Entity player = CommandUtils.getSenderAsEntity(sender);
             MovingObjectPosition target = CommandUtils.rayTraceBlocks(player);
             return new ChunkCoordinates(target.blockX, target.blockY, target.blockZ);
         } else {
