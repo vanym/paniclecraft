@@ -2,6 +2,7 @@ package com.vanym.paniclecraft.client.dev;
 
 import com.vanym.paniclecraft.Core;
 import com.vanym.paniclecraft.client.command.dev.ClientCommandBlockDamage;
+import com.vanym.paniclecraft.client.command.dev.ClientCommandFile2Chat;
 import com.vanym.paniclecraft.command.dev.CommandDev;
 import com.vanym.paniclecraft.core.ModConfig;
 import com.vanym.paniclecraft.core.dev.CommonDevProxy;
@@ -26,6 +27,7 @@ public class ClientDevProxy extends CommonDevProxy {
             Core.proxy.getCommand().addSubCommand(this.clientDevCommand);
         }
         this.clientDevCommand.addSubCommand(new ClientCommandBlockDamage());
+        this.clientDevCommand.addSubCommand(new ClientCommandFile2Chat());
     }
     
     @Override

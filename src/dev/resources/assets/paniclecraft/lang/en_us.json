@@ -6,5 +6,26 @@
   "commands.paniclecraftclient.dev.blockdamage.remove.removed": "Damage removed at %d %d %d",
   "commands.paniclecraftclient.dev.blockdamage.remove.none": "Nothing to remove at %d %d %d",
   "commands.paniclecraftclient.dev.blockdamage.clear.usage": "/paniclecraftclient dev blockdamage clear",
-  "commands.paniclecraftclient.dev.blockdamage.clear.cleared": "Clear damage from %d blocks"
+  "commands.paniclecraftclient.dev.blockdamage.clear.cleared": "Clear damage from %d blocks",
+
+  "commands.paniclecraftclient.dev.file2chat.open.usage": "/paniclecraftclient dev file2chat open <path>",
+  "commands.paniclecraftclient.dev.file2chat.open.opened": "Opening file: %s",
+  "commands.paniclecraftclient.dev.file2chat.open.previous_closed": "Previous file closed: %s",
+  "commands.paniclecraftclient.dev.file2chat.open.notfound": "File not fould: %s",
+  "commands.paniclecraftclient.dev.file2chat.status.usage": "/paniclecraftclient dev file2chat status",
+  "commands.paniclecraftclient.dev.file2chat.status.none": "File wasn't opened",
+  "commands.paniclecraftclient.dev.file2chat.status.file": "File: %s",
+  "commands.paniclecraftclient.dev.file2chat.status.state.initialized": "State: initialized",
+  "commands.paniclecraftclient.dev.file2chat.status.state.starting": "State: starting",
+  "commands.paniclecraftclient.dev.file2chat.status.state.opening": "State: opening",
+  "commands.paniclecraftclient.dev.file2chat.status.state.reading": "State: reading",
+  "commands.paniclecraftclient.dev.file2chat.status.state.done": "State: finished",
+  "commands.paniclecraftclient.dev.file2chat.status.state.error": "State: error",
+  "commands.paniclecraftclient.dev.file2chat.status.state.interrupted": "State: interrupted",
+  "commands.paniclecraftclient.dev.file2chat.status.count": "Lines sent: %d",
+  "commands.paniclecraftclient.dev.file2chat.status.error": "Error: %s",
+  "commands.paniclecraftclient.dev.file2chat.close.usage": "/paniclecraftclient dev file2chat close",
+  "commands.paniclecraftclient.dev.file2chat.close.none": "Nothing to close",
+  "commands.paniclecraftclient.dev.file2chat.close.closed": "File closed: %s",
+  "commands.paniclecraftclient.dev.file2chat.close.already_closed": "File already closed: %s"
 }
